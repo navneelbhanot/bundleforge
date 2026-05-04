@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-015 — Sentry integration**
+**M-016 — Shopify CLI app config validation**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-015-sentry.md`. Install
-`@sentry/node`. Add `src/config/sentry.ts` that no-ops when
-`env.SENTRY_DSN` is unset (keeps tests/dev quiet) and initializes the
-SDK otherwise. Wire `captureError` (M-007 seam) to `Sentry.captureException`.
-Add tests that the seam fires for 5xx and not 4xx, using a mock capture.
+Boot phase, then write `docs/specs/M-016-shopify-app-config.md`. Review
+`shopify.app.toml` against the latest Shopify CLI requirements; align
+scopes with `.env.example`. Note: real OAuth keys (M-017+) require a
+Shopify Partner App from the user. The spec lists what they must
+provide.
 
 ## Blockers
 
@@ -34,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-015 — Sentry integration. `docs/sessions/0015-sentry.md`.
 - M-014 — docker-compose. `docs/sessions/0014-docker-compose.md`.
 - M-013 — CI test job verified. `docs/sessions/0013-ci-test.md`.
 - M-012 — ESLint + CI lint. `docs/sessions/0012-eslint.md`.

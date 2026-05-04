@@ -26,6 +26,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^5.20.0",
     "@prisma/client": "^5.20.0",
+    "@sentry/node": "^10.51.0",
     "@shopify/app-bridge-react": "^4.1.0",
     "@shopify/polaris": "^12.27.0",
     "@shopify/shopify-api": "^11.0.0",

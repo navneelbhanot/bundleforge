@@ -17,6 +17,7 @@ import { type Request, type Response, type NextFunction } from "express";
 import { ZodError } from "zod";
 
 import { logger } from "../config/logger";
+import { captureException } from "../config/sentry";
 import {
   AppError,
   ConflictError,
@@ -50,9 +51,9 @@ export function requestId(
   next();
 }
 
-/** Sentry capture seam. Wired in M-015. */
-export function captureError(_err: unknown, _req: Request): void {
-  // no-op
+/** Forwards 5xx and unknown errors to Sentry. No-op if Sentry not initialized. */
+export function captureError(err: unknown, req: Request): void {
+  captureException(err, { reqId: req.id, path: req.path, method: req.method });
 }
 
 interface ErrorBody {

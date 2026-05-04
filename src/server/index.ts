@@ -22,6 +22,7 @@ import pinoHttp from "pino-http";
 
 import { env } from "../config/env";
 import { logger } from "../config/logger";
+import { initSentry } from "../config/sentry";
 import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
@@ -133,6 +134,7 @@ export function createApp(): Express {
 }
 
 export async function startServer(): Promise<void> {
+  initSentry();
   const app = createApp();
   app.listen(env.PORT, () => {
     logger.info({ port: env.PORT, nodeEnv: env.NODE_ENV }, "Server listening");
