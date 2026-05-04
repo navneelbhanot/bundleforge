@@ -6,14 +6,13 @@
 
 ## Current milestone
 
-**M-036 — plan caps middleware**
+**M-037 — billing routes**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-036-plan-caps.md`.
-`requirePlanFeature(name)` and `enforceCap(capName)` middleware that
-read req.shopId, look up BillingSubscription + PlanCaps, and respond
-ForbiddenError on violation. (M-035 was rolled into M-031.)
+Boot phase, then write `docs/specs/M-037-billing-routes.md`. Expose
+GET `/api/v1/billing`, POST `/subscribe`, POST `/cancel`, GET `/plans`.
+Wire to M-031..M-034 services with DI for tests.
 
 ## Blockers
 
@@ -33,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-036 — plan caps middleware. `docs/sessions/0036-plan-caps.md`.
 - M-035 — annual billing (rolled into M-031).
 - M-034 — cancel + plan change. `docs/sessions/0034-cancel-and-change.md`.
 - M-033 — subscription sync webhook. `docs/sessions/0033-subscription-sync.md`.
