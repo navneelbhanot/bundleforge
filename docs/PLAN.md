@@ -40,7 +40,7 @@
 | M-018 | OAuth callback + token persistence | done (2026-05-04) | `docs/specs/M-018-oauth-callback.md` | persistShop pure fn; encrypted token via M-002 |
 | M-019 | Session middleware (`requireShopSession`) | done (2026-05-04) | `docs/specs/M-019-session-middleware.md` | Session/header/query precedence; 401 on uninstall |
 | M-020 | Prisma-backed session storage adapter | done (2026-05-04) | `docs/specs/M-020-prisma-session.md` | PrismaSessionStorage in prod, memory in tests |
-| M-021 | App Bridge token verification | pending | — | Embedded admin |
+| M-021 | App Bridge token verification | done (2026-05-04) | `docs/specs/M-021-app-bridge.md` | validateAuthenticatedSession + requireShopSession on /api/v1 |
 | M-022 | GraphQL Admin API client wrapper | pending | — | Typed, retry-aware |
 | M-023 | REST Admin API client wrapper | pending | — | Limited fallback |
 | M-024 | Webhook HMAC verifier middleware | pending | — | Required by Shopify |
@@ -275,6 +275,7 @@
 | M-018 | OAuth callback + persist | 2026-05-04 | `docs/sessions/0018-oauth-callback.md` |
 | M-019 | Session middleware | 2026-05-04 | `docs/sessions/0019-session-middleware.md` |
 | M-020 | Prisma session storage | 2026-05-04 | `docs/sessions/0020-prisma-session.md` |
+| M-021 | App Bridge session validation | 2026-05-04 | `docs/sessions/0021-app-bridge.md` |
 
 ---
 

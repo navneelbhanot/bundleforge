@@ -6,14 +6,14 @@
 
 ## Current milestone
 
-**M-021 — App Bridge token verification**
+**M-022 — GraphQL Admin API client wrapper**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-021-app-bridge.md`. Wrap
-`shopify.validateAuthenticatedSession()` so embedded admin routes
-populate `res.locals.shopify.session` for M-019 to consume. Mount on
-`/api/v1/*` ahead of `requireShopSession`.
+Boot phase, then write `docs/specs/M-022-graphql-client.md`. Build
+`src/shopify/graphql.ts` with a typed wrapper around the SDK's GraphQL
+client. Accepts a session, exposes `query<T>(doc, vars)`, retries once
+on `THROTTLED`. Tests use a fake fetcher to avoid live calls.
 
 ## Blockers
 
@@ -33,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-021 — App Bridge session validation. `docs/sessions/0021-app-bridge.md`.
 - M-020 — Prisma session storage. `docs/sessions/0020-prisma-session.md`.
 - M-019 — Session middleware. `docs/sessions/0019-session-middleware.md`.
 - M-018 — OAuth callback + persist. `docs/sessions/0018-oauth-callback.md`.

@@ -27,6 +27,7 @@ import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
 import { rateLimiter } from "../middleware/rateLimiter";
+import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
 import { afterAuth } from "../shopify/install";
 import { aiRoutes } from "../routes/ai";
@@ -119,6 +120,13 @@ export function createApp(): Express {
 
   // Per-shop rate limit (M-008 will tighten + tie to shop session).
   app.use("/api", rateLimiter);
+
+  // App Bridge token verification (M-021) + shop session loader (M-019).
+  // Both run before any /api/v1 route. The SDK populates
+  // res.locals.shopify.session; requireShopSession reads it and attaches
+  // req.shopId/req.shopDomain for the route handlers.
+  app.use("/api/v1", shopify.validateAuthenticatedSession());
+  app.use("/api/v1", requireShopSession());
 
   // Mount routers. Stubs return 501 until their respective milestones.
   app.use("/api/v1/orders", ordersRoutes);
