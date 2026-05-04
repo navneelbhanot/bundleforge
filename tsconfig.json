@@ -33,7 +33,6 @@
     "tests",
     "extensions",
     "src/generated",
-    "src/server/index.ts",
     "src/services/bundles/index.ts",
     "src/routes/bundles.ts"
   ]

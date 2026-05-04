@@ -20,7 +20,7 @@
 | M-003 | Logger config (pino) + structured logging | done (2026-05-04) | `docs/specs/M-003-logger.md` | Pino w/ pretty in dev; child() pattern; 5 tests |
 | M-004 | Prisma client init + connection pooling | done (2026-05-04) | `docs/specs/M-004-prisma-client.md` | Pino-logged events, slow-query warn, lifecycle helpers |
 | M-005 | Redis + BullMQ client init | done (2026-05-04) | `docs/specs/M-005-redis-bullmq.md` | ioredis singleton, queues module, backoffMs |
-| M-006 | Express server scaffold + `/health` + tests | pending | — | Harden `src/server/index.ts` |
+| M-006 | Express server scaffold + `/health` + tests | done (2026-05-04) | `docs/specs/M-006-server-scaffold.md` | createApp factory, /health pings DB+Redis with timeout, supertest |
 | M-007 | Error handler middleware + tests | pending | — | `src/middleware/errorHandler.ts` |
 | M-008 | Rate limiter middleware + tests | pending | — | Redis-backed, 100 req/min/shop |
 | M-009 | Initial Prisma migration applied | pending | — | `prisma migrate dev --name init` |
@@ -260,6 +260,7 @@
 | M-003 | Logger (pino) | 2026-05-04 | `docs/sessions/0003-logger.md` |
 | M-004 | Prisma client | 2026-05-04 | `docs/sessions/0004-prisma-client.md` |
 | M-005 | Redis + BullMQ | 2026-05-04 | `docs/sessions/0005-redis-bullmq.md` |
+| M-006 | Server scaffold + /health | 2026-05-04 | `docs/sessions/0006-server-scaffold.md` |
 
 ---
 

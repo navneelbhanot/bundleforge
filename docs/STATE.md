@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-006 — Express server scaffold + /health + tests**
+**M-007 — Error handler middleware + tests**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-006-server-scaffold.md`, harden
-`src/server/index.ts` (currently in tsconfig exclude). Wire env, helmet,
-compression, morgan->Pino bridge, /health (DB + Redis ping), error handler.
-Re-include the file in tsconfig once it compiles. Add supertest-based
-tests for /health.
+Boot phase, then write `docs/specs/M-007-error-handler.md`. Formalize error
+taxonomy (AppError, NotFoundError, ValidationError, UnauthorizedError,
+ForbiddenError, ConflictError), map Zod errors to 400, attach request-id
+correlation header, leave a Sentry capture seam (M-015 wires actual SDK).
+Add comprehensive supertest-based tests.
 
 ## Blockers
 
@@ -22,13 +22,19 @@ None.
 
 ## Carry-overs (still active)
 
-Same as M-002 close: pre-existing stubs in tsconfig exclude (M-006, M-049,
-M-053), lint deferred to M-012, broader Shopify SDK upgrade flagged for
-ADR before M-016, npm audit findings to M-140, prisma seed.ts excluded
-from main tsc build (M-010 verifies).
+- Pre-existing stubs in tsconfig exclude: `src/services/bundles/index.ts`
+  (M-049 will rewrite + re-include), `src/routes/bundles.ts` (M-053).
+  M-006 cleared `src/server/index.ts`.
+- Lint deferred to M-012.
+- Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6, etc.)
+  flagged for ADR before M-016.
+- npm audit findings (~13 moderate after pino-http + supertest) → M-140.
+- `prisma/seed.ts` excluded from main tsc build; M-010 verifies it
+  compiles under ts-node.
 
 ## Recently completed
 
+- M-006 — Server scaffold + /health. `docs/sessions/0006-server-scaffold.md`.
 - M-005 — Redis + BullMQ. `docs/sessions/0005-redis-bullmq.md`.
 - M-004 — Prisma client. `docs/sessions/0004-prisma-client.md`.
 - M-003 — Pino logger. `docs/sessions/0003-logger.md`.

@@ -1,83 +1,146 @@
-import "dotenv/config";
-import express from "express";
+/**
+ * Express server scaffold + /health.
+ *
+ * Public exports:
+ *   createApp() — pure factory; tests call this.
+ *   startServer() — calls createApp() and listens on env.PORT.
+ *
+ * Auto-listens only when this file is run directly (require.main === module)
+ * AND not under NODE_ENV=test.
+ *
+ * See docs/specs/M-006-server-scaffold.md.
+ */
+import express, {
+  type Express,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import compression from "compression";
 import helmet from "helmet";
-import morgan from "morgan";
-import cors from "cors";
-import { shopifyApp } from "@shopify/shopify-app-express";
+import pinoHttp from "pino-http";
 
 import { env } from "../config/env";
 import { logger } from "../config/logger";
 import { prisma } from "../config/database";
 import { redis } from "../config/redis";
-import { registerWebhooks } from "../webhooks";
-import { bundleRoutes } from "../routes/bundles";
-import { orderRoutes } from "../routes/orders";
-import { inventoryRoutes } from "../routes/inventory";
-import { analyticsRoutes } from "../routes/analytics";
-import { settingsRoutes } from "../routes/settings";
-import { billingRoutes } from "../routes/billing";
-import { aiRoutes } from "../routes/ai";
 import { errorHandler } from "../middleware/errorHandler";
 import { rateLimiter } from "../middleware/rateLimiter";
+import { aiRoutes } from "../routes/ai";
+import { analyticsRoutes } from "../routes/analytics";
+import { billingRoutes } from "../routes/billing";
+import { inventoryRoutes } from "../routes/inventory";
+import { ordersRoutes } from "../routes/orders";
+import { settingsRoutes } from "../routes/settings";
 
-async function start() {
+const HEALTH_TIMEOUT_MS = 1000;
+
+async function withTimeout<T>(
+  p: Promise<T>,
+  ms: number,
+  label: string,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      },
+    );
+  });
+}
+
+async function pingDb(): Promise<boolean> {
+  try {
+    await withTimeout(prisma.$queryRaw`SELECT 1`, HEALTH_TIMEOUT_MS, "db ping");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function pingRedis(): Promise<boolean> {
+  try {
+    await withTimeout(redis.ping(), HEALTH_TIMEOUT_MS, "redis ping");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function notImplemented(_req: Request, res: Response): void {
+  res.status(501).json({
+    error: { message: "Not implemented", statusCode: 501 },
+  });
+}
+
+export function createApp(): Express {
   const app = express();
 
-  // ── Middleware ──
+  app.use(
+    pinoHttp({
+      logger: logger.child({ module: "http" }),
+      // /health is high-frequency; quiet it in normal mode.
+      autoLogging: { ignore: (req) => req.url === "/health" },
+    }),
+  );
+  app.use(helmet({ contentSecurityPolicy: false })); // CSP managed by Shopify
   app.use(compression());
-  app.use(helmet({ contentSecurityPolicy: false })); // CSP handled by Shopify
-  app.use(morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } }));
   app.use(express.json({ limit: "10mb" }));
 
-  // ── Shopify Auth & Session ──
-  // const shopify = shopifyApp({ ... });
-  // app.get(shopify.config.auth.path, shopify.auth.begin());
-  // app.get(shopify.config.auth.callbackPath, shopify.auth.callback(), ...);
+  app.get("/health", async (_req: Request, res: Response): Promise<void> => {
+    const [db, redisOk] = await Promise.all([pingDb(), pingRedis()]);
+    res.json({
+      status: "ok",
+      version: env.APP_VERSION,
+      checks: { db, redis: redisOk },
+      timestamp: new Date().toISOString(),
+    });
+  });
 
-  // ── Rate Limiting ──
+  // Per-shop rate limit (M-008 will tighten + tie to shop session).
   app.use("/api", rateLimiter);
 
-  // ── API Routes ──
-  app.use("/api/v1/bundles", bundleRoutes);
-  app.use("/api/v1/orders", orderRoutes);
+  // Mount routers. Stubs return 501 until their respective milestones.
+  app.use("/api/v1/orders", ordersRoutes);
   app.use("/api/v1/inventory", inventoryRoutes);
   app.use("/api/v1/analytics", analyticsRoutes);
   app.use("/api/v1/settings", settingsRoutes);
   app.use("/api/v1/billing", billingRoutes);
   app.use("/api/v1/ai", aiRoutes);
+  // /api/v1/bundles deferred to M-053 (routes/bundles.ts in tsconfig exclude).
 
-  // ── Webhook Routes ──
-  // registerWebhooks(app, shopify);
+  // Catch-all 501 for /api/v1/*
+  app.use("/api/v1", notImplemented);
 
-  // ── Health Check ──
-  app.get("/health", async (_req, res) => {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      const redisOk = redis.status === "ready";
-      res.json({
-        status: "ok",
-        version: env.APP_VERSION,
-        database: "connected",
-        redis: redisOk ? "connected" : "disconnected",
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      res.status(503).json({ status: "error", message: "Service unavailable" });
-    }
+  // 404 for anything else.
+  app.use((_req: Request, res: Response, _next: NextFunction): void => {
+    res.status(404).json({
+      error: { message: "Not found", statusCode: 404 },
+    });
   });
 
-  // ── Error Handler ──
   app.use(errorHandler);
 
-  // ── Start Server ──
+  return app;
+}
+
+export async function startServer(): Promise<void> {
+  const app = createApp();
   app.listen(env.PORT, () => {
-    logger.info(`BundleForge server running on port ${env.PORT}`);
-    logger.info(`Environment: ${env.NODE_ENV}`);
+    logger.info({ port: env.PORT, nodeEnv: env.NODE_ENV }, "Server listening");
   });
 }
 
-start().catch((err) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+// Auto-listen when run directly, but never under tests.
+if (require.main === module && env.NODE_ENV !== "test") {
+  startServer().catch((err) => {
+    logger.error({ err }, "Failed to start server");
+    process.exit(1);
+  });
+}
