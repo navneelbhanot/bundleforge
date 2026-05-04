@@ -6,15 +6,14 @@
 
 ## Current milestone
 
-**M-010 — Prisma seed script**
+**M-011 — CI workflow: typecheck**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-010-seed.md`. The existing
-`prisma/seed.ts` is a starting point; verify it compiles under ts-node
-and extend with minimal dev fixtures (one shop, one fixed bundle, one
-mix-and-match bundle) so M-014 can boot a dev environment with sample
-data.
+Boot phase, then write `docs/specs/M-011-ci-typecheck.md`. Add
+`.github/workflows/ci.yml` with a `typecheck` job: checkout, setup-node 20
+with cache, `npm ci --legacy-peer-deps`, `npx prisma generate`,
+`npm run typecheck`. Triggers: push to main and any branch + pull_request.
 
 ## Blockers
 
@@ -34,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-010 — Seed script. `docs/sessions/0010-seed.md`.
 - M-009 — Initial Prisma migration (offline). `docs/sessions/0009-initial-migration.md`.
 - M-008 — Rate limiter. `docs/sessions/0008-rate-limiter.md`.
 - M-007 — Error handler. `docs/sessions/0007-error-handler.md`.

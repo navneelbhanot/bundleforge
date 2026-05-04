@@ -84,6 +84,55 @@ async function main() {
   });
 
   console.log(`Created bundle: ${mixMatchBundle.title} (${mixMatchBundle.id})`);
+
+  // Volume bundle
+  const volumeBundle = await prisma.bundle.create({
+    data: {
+      shopId: shop.id,
+      title: "Bulk Stationery",
+      slug: "bulk-stationery",
+      type: "volume",
+      status: "draft",
+      description: "More you buy, more you save",
+      config: {},
+      items: {
+        create: [
+          {
+            shopifyProductGid: "gid://shopify/Product/20",
+            title: "Notebook",
+            sku: "NB-001",
+            quantity: 1,
+            position: 0,
+          },
+        ],
+      },
+      pricingRules: {
+        create: [
+          { type: "tiered", value: 5, minQuantity: 3, priority: 1 },
+          { type: "tiered", value: 10, minQuantity: 5, priority: 2 },
+          { type: "tiered", value: 20, minQuantity: 10, priority: 3 },
+        ],
+      },
+    },
+  });
+  console.log(`Created bundle: ${volumeBundle.title} (${volumeBundle.id})`);
+
+  // Billing subscription on the dev shop
+  await prisma.billingSubscription.upsert({
+    where: { shopId: shop.id },
+    update: {},
+    create: {
+      shopId: shop.id,
+      shopifyChargeId: "gid://shopify/AppSubscription/0",
+      planName: "enterprise",
+      price: 0,
+      billingInterval: "monthly",
+      status: "active",
+      activatedAt: new Date(),
+    },
+  });
+  console.log("Created billing_subscription for dev shop");
+
   console.log("Seeding complete!");
 }
 
