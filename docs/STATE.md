@@ -6,16 +6,14 @@
 
 ## Current milestone
 
-**M-017 — OAuth install route**
+**M-018 — OAuth callback + token persistence**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-017-oauth-install.md`. Build a
-small `src/shopify/index.ts` wrapper around `@shopify/shopify-app-express`
-that exposes `shopify.auth.begin()` and `shopify.auth.callback()` for
-mounting in the server. Use the package's in-memory session storage for
-now; the Prisma adapter lands in M-020. Add unit tests that verify the
-auth begin route redirects to Shopify with the right scopes.
+Boot phase, then write `docs/specs/M-018-oauth-callback.md`. Mount
+`shopify.auth.callback()`. After successful token exchange, upsert the
+`Shop` row with the encrypted (M-002) access token. Add tests that
+stub the Shopify response and assert the row is created/updated.
 
 ## Blockers
 
@@ -35,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-017 — OAuth install. `docs/sessions/0017-oauth-install.md`.
 - M-016 — Shopify app config. `docs/sessions/0016-shopify-app-config.md`.
 - M-015 — Sentry integration. `docs/sessions/0015-sentry.md`.
 - M-014 — docker-compose. `docs/sessions/0014-docker-compose.md`.

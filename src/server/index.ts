@@ -27,6 +27,7 @@ import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
 import { rateLimiter } from "../middleware/rateLimiter";
+import { shopify } from "../shopify";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -95,6 +96,9 @@ export function createApp(): Express {
   app.use(helmet({ contentSecurityPolicy: false })); // CSP managed by Shopify
   app.use(compression());
   app.use(express.json({ limit: "10mb" }));
+
+  // Shopify OAuth install begin (M-017). Callback handled in M-018.
+  app.get(shopify.config.auth.path, shopify.auth.begin());
 
   app.get("/health", async (_req: Request, res: Response): Promise<void> => {
     const [db, redisOk] = await Promise.all([pingDb(), pingRedis()]);
