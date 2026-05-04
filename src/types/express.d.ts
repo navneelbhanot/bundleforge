@@ -11,5 +11,9 @@ import "express";
 declare module "express-serve-static-core" {
   interface Request {
     id: string;
+    /** Set by requireShopSession (M-019). */
+    shopId?: string;
+    /** Set by requireShopSession (M-019). */
+    shopDomain?: string;
   }
 }

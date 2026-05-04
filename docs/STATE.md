@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-019 — Session middleware (requireShopSession)**
+**M-020 — Prisma-backed session storage adapter**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-019-session-middleware.md`. Build
-`src/middleware/shopSession.ts` that loads the `Shop` row using
-`shopify.config.sessionStorage` and the validated session, attaches it
-to `req.shop` and `req.shopDomain`, and rejects with `UnauthorizedError`
-if missing. Tests use fake prisma + fake session storage.
+Boot phase, then write `docs/specs/M-020-prisma-session.md`. Replace
+the in-memory session storage in `buildShopify()` with
+`PrismaSessionStorage` from
+`@shopify/shopify-app-session-storage-prisma`. Confirm test setup still
+works without a live DB (the storage is only invoked on real OAuth).
 
 ## Blockers
 
@@ -34,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-019 — Session middleware. `docs/sessions/0019-session-middleware.md`.
 - M-018 — OAuth callback + persist. `docs/sessions/0018-oauth-callback.md`.
 - M-017 — OAuth install. `docs/sessions/0017-oauth-install.md`.
 - M-016 — Shopify app config. `docs/sessions/0016-shopify-app-config.md`.

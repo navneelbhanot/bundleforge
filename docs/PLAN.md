@@ -38,7 +38,7 @@
 | M-016 | Shopify CLI app config validation | done (2026-05-04) | `docs/specs/M-016-shopify-app-config.md` | Scopes aligned; runbook documents user setup |
 | M-017 | OAuth install route | done (2026-05-04) | `docs/specs/M-017-oauth-install.md` | shopifyApp wrapper, `/api/auth` mounted, redirect verified |
 | M-018 | OAuth callback + token persistence | done (2026-05-04) | `docs/specs/M-018-oauth-callback.md` | persistShop pure fn; encrypted token via M-002 |
-| M-019 | Session middleware (`requireShopSession`) | pending | — | Loads `Shop` from token |
+| M-019 | Session middleware (`requireShopSession`) | done (2026-05-04) | `docs/specs/M-019-session-middleware.md` | Session/header/query precedence; 401 on uninstall |
 | M-020 | Prisma-backed session storage adapter | pending | — | Replaces in-memory store |
 | M-021 | App Bridge token verification | pending | — | Embedded admin |
 | M-022 | GraphQL Admin API client wrapper | pending | — | Typed, retry-aware |
@@ -273,6 +273,7 @@
 | M-016 | Shopify app config validation | 2026-05-04 | `docs/sessions/0016-shopify-app-config.md` |
 | M-017 | OAuth install route | 2026-05-04 | `docs/sessions/0017-oauth-install.md` |
 | M-018 | OAuth callback + persist | 2026-05-04 | `docs/sessions/0018-oauth-callback.md` |
+| M-019 | Session middleware | 2026-05-04 | `docs/sessions/0019-session-middleware.md` |
 
 ---
 
