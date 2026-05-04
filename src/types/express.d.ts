@@ -15,5 +15,15 @@ declare module "express-serve-static-core" {
     shopId?: string;
     /** Set by requireShopSession (M-019). */
     shopDomain?: string;
+    /** Set by shopifyWebhookHmac (M-024). */
+    shopifyTopic?: string;
+    /** Set by shopifyWebhookHmac (M-024). */
+    shopifyShopDomain?: string;
+    /** Set by shopifyWebhookHmac (M-024). */
+    shopifyWebhookId?: string;
+    /** Set by shopifyWebhookHmac (M-024). True only after successful verification. */
+    shopifyHmacValid?: boolean;
+    /** Raw body buffer captured by shopifyWebhookHmac (M-024). */
+    rawBody?: Buffer;
   }
 }

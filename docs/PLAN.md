@@ -43,7 +43,7 @@
 | M-021 | App Bridge token verification | done (2026-05-04) | `docs/specs/M-021-app-bridge.md` | validateAuthenticatedSession + requireShopSession on /api/v1 |
 | M-022 | GraphQL Admin API client wrapper | done (2026-05-04) | `docs/specs/M-022-graphql-client.md` | Throttle retry, Pino logging, DI for tests |
 | M-023 | REST Admin API client wrapper | done (2026-05-04) | `docs/specs/M-023-rest-client.md` | 429 retry, DI; fallback for non-GraphQL endpoints |
-| M-024 | Webhook HMAC verifier middleware | pending | — | Required by Shopify |
+| M-024 | Webhook HMAC verifier middleware | done (2026-05-04) | `docs/specs/M-024-webhook-hmac.md` | Raw-body capture + timingSafeEqual; 401 on mismatch |
 | M-025 | Webhook dispatcher → BullMQ | pending | — | Topic-routed |
 | M-026 | Webhook handler: `app/uninstalled` | pending | — | Sets `uninstalled_at`, drains jobs |
 | M-027 | Webhook handler: `shop/update` | pending | — | Currency, plan, timezone sync |
@@ -278,6 +278,7 @@
 | M-021 | App Bridge session validation | 2026-05-04 | `docs/sessions/0021-app-bridge.md` |
 | M-022 | GraphQL client wrapper | 2026-05-04 | `docs/sessions/0022-graphql-client.md` |
 | M-023 | REST client wrapper | 2026-05-04 | `docs/sessions/0023-rest-client.md` |
+| M-024 | Webhook HMAC verifier | 2026-05-04 | `docs/sessions/0024-webhook-hmac.md` |
 
 ---
 

@@ -6,13 +6,13 @@
 
 ## Current milestone
 
-**M-024 — Webhook HMAC verifier middleware**
+**M-025 — Webhook dispatcher to BullMQ**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-024-webhook-hmac.md`. Express
-middleware that verifies `X-Shopify-Hmac-Sha256` against the raw body
-using `env.SHOPIFY_API_SECRET`. Reject 401 on mismatch.
+Boot phase, then write `docs/specs/M-025-webhook-dispatcher.md`. Mount
+the verifier on `/api/webhooks`. Dispatch each verified webhook to a
+BullMQ queue keyed by topic. Always respond 200 quickly.
 
 ## Blockers
 
@@ -32,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-024 — Webhook HMAC verifier. `docs/sessions/0024-webhook-hmac.md`.
 - M-023 — REST client wrapper. `docs/sessions/0023-rest-client.md`.
 - M-022 — GraphQL client wrapper. `docs/sessions/0022-graphql-client.md`.
 - M-021 — App Bridge session validation. `docs/sessions/0021-app-bridge.md`.
