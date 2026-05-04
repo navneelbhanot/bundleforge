@@ -9,10 +9,12 @@
 import { shopifyApp, type ShopifyApp } from "@shopify/shopify-app-express";
 import { ApiVersion, LogSeverity } from "@shopify/shopify-api";
 import { MemorySessionStorage } from "@shopify/shopify-app-session-storage-memory";
+import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import type { SessionStorage } from "@shopify/shopify-app-session-storage";
 
 import { env } from "../config/env";
 import { logger } from "../config/logger";
+import { prisma } from "../config/database";
 
 const shopifyLogger = logger.child({ module: "shopify" });
 
@@ -60,7 +62,11 @@ export function buildShopify(opts: BuildShopifyOptions = {}): ShopifyApp {
     webhooks: {
       path: "/api/webhooks",
     },
-    sessionStorage: opts.sessionStorage ?? new MemorySessionStorage(),
+    sessionStorage:
+      opts.sessionStorage ??
+      (env.NODE_ENV === "test"
+        ? new MemorySessionStorage()
+        : new PrismaSessionStorage<typeof prisma>(prisma)),
   });
 }
 

@@ -6,15 +6,14 @@
 
 ## Current milestone
 
-**M-020 — Prisma-backed session storage adapter**
+**M-021 — App Bridge token verification**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-020-prisma-session.md`. Replace
-the in-memory session storage in `buildShopify()` with
-`PrismaSessionStorage` from
-`@shopify/shopify-app-session-storage-prisma`. Confirm test setup still
-works without a live DB (the storage is only invoked on real OAuth).
+Boot phase, then write `docs/specs/M-021-app-bridge.md`. Wrap
+`shopify.validateAuthenticatedSession()` so embedded admin routes
+populate `res.locals.shopify.session` for M-019 to consume. Mount on
+`/api/v1/*` ahead of `requireShopSession`.
 
 ## Blockers
 
@@ -34,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-020 — Prisma session storage. `docs/sessions/0020-prisma-session.md`.
 - M-019 — Session middleware. `docs/sessions/0019-session-middleware.md`.
 - M-018 — OAuth callback + persist. `docs/sessions/0018-oauth-callback.md`.
 - M-017 — OAuth install. `docs/sessions/0017-oauth-install.md`.
