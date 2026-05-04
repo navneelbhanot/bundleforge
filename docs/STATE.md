@@ -6,13 +6,17 @@
 
 ## Current milestone
 
-**M-037 — billing routes**
+**M-039 — pricing engine spec lock + types**
+
+(M-038 billing UI page deferred to admin frontend phase, M-094+.)
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-037-billing-routes.md`. Expose
-GET `/api/v1/billing`, POST `/subscribe`, POST `/cancel`, GET `/plans`.
-Wire to M-031..M-034 services with DI for tests.
+Boot phase, then write `docs/specs/M-039-pricing-engine.md`. Define the
+canonical PricingInput/PricingResult/PricingRule contract in
+`src/services/pricing/contract.ts`, generate the JSON schema, and set
+up a fixture-set framework so M-040+ rule types and M-083+ Cart
+Transform share the same regression set. Per ADR-0002.
 
 ## Blockers
 
@@ -32,6 +36,7 @@ None.
 
 ## Recently completed
 
+- M-037 — billing routes. `docs/sessions/0037-billing-routes.md`.
 - M-036 — plan caps middleware. `docs/sessions/0036-plan-caps.md`.
 - M-035 — annual billing (rolled into M-031).
 - M-034 — cancel + plan change. `docs/sessions/0034-cancel-and-change.md`.

@@ -61,8 +61,8 @@
 | M-034 | Billing service: cancel + plan change | done (2026-05-04) | `docs/specs/M-034-cancel-and-change.md` | cancelSubscription + changePlan |
 | M-035 | Annual billing 20% discount | done (2026-05-04) | (rolled up in M-031) | annualUsd helper + price math tests |
 | M-036 | Plan caps middleware | done (2026-05-04) | `docs/specs/M-036-plan-caps.md` | requirePlanFeature + enforceCap(maxBundles) |
-| M-037 | Billing routes | pending | — | GET/POST endpoints |
-| M-038 | Billing UI page (Polaris) | pending | — | Depends on M-096 |
+| M-037 | Billing routes | done (2026-05-04) | `docs/specs/M-037-billing-routes.md` | GET, /plans, /subscribe, /cancel; installBillingRoutes DI factory |
+| M-038 | Billing UI page (Polaris) | deferred | — | Blocked on admin frontend (M-094+) |
 
 ## Phase D — Pricing Engine (M-039 to M-047)
 
@@ -291,6 +291,7 @@
 | M-034 | cancel + plan change | 2026-05-04 | `docs/sessions/0034-cancel-and-change.md` |
 | M-035 | Annual billing 20% (rolled up M-031) | 2026-05-04 | `docs/sessions/0031-plan-registry.md` |
 | M-036 | Plan caps middleware | 2026-05-04 | `docs/sessions/0036-plan-caps.md` |
+| M-037 | Billing routes | 2026-05-04 | `docs/sessions/0037-billing-routes.md` |
 
 ---
 
