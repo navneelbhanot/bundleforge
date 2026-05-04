@@ -6,14 +6,15 @@
 
 ## Current milestone
 
-**M-005 — Redis + BullMQ client init**
+**M-006 — Express server scaffold + /health + tests**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-005-redis-bullmq.md`, replace
-`src/config/redis.ts` with typed ioredis singleton, lifecycle helpers, pure
-backoff helper. Create `src/jobs/queues.ts` with named queue definitions
-(`orderQueue`, `inventoryQueue`) for downstream milestones to import.
+Boot phase, then write `docs/specs/M-006-server-scaffold.md`, harden
+`src/server/index.ts` (currently in tsconfig exclude). Wire env, helmet,
+compression, morgan->Pino bridge, /health (DB + Redis ping), error handler.
+Re-include the file in tsconfig once it compiles. Add supertest-based
+tests for /health.
 
 ## Blockers
 
@@ -28,6 +29,7 @@ from main tsc build (M-010 verifies).
 
 ## Recently completed
 
+- M-005 — Redis + BullMQ. `docs/sessions/0005-redis-bullmq.md`.
 - M-004 — Prisma client. `docs/sessions/0004-prisma-client.md`.
 - M-003 — Pino logger. `docs/sessions/0003-logger.md`.
 - M-002 — Encryption utility (AES-256-GCM). `docs/sessions/0002-encryption.md`.
