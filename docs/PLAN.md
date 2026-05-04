@@ -28,7 +28,7 @@
 | M-011 | CI workflow: typecheck | done (2026-05-04) | `docs/specs/M-011-ci-typecheck.md` | Three parallel jobs; .npmrc legacy-peer-deps |
 | M-012 | CI workflow: lint + ESLint v9 flat config | done (2026-05-04) | `docs/specs/M-012-eslint.md` | typescript-eslint flat config, ESM, permissive |
 | M-013 | CI workflow: test | done (2026-05-04) | `docs/specs/M-013-ci-test.md` | Postgres+Redis services, migrate deploy, npm test |
-| M-014 | Dockerfile finalize + docker-compose dev | pending | — | Local Postgres + Redis |
+| M-014 | docker-compose for local dev | done (2026-05-04) | `docs/specs/M-014-docker-compose.md` | postgres:16 + redis:7; runbook updated; Dockerfile fix |
 | M-015 | Sentry integration + tested error capture | pending | — | Account creation may block |
 
 ## Phase B — Shopify Integration (M-016 to M-030)
@@ -268,6 +268,7 @@
 | M-011 | CI typecheck | 2026-05-04 | `docs/sessions/0011-ci-typecheck.md` |
 | M-012 | ESLint flat config + CI lint | 2026-05-04 | `docs/sessions/0012-eslint.md` |
 | M-013 | CI test job verified | 2026-05-04 | `docs/sessions/0013-ci-test.md` |
+| M-014 | docker-compose for local dev | 2026-05-04 | `docs/sessions/0014-docker-compose.md` |
 
 ---
 

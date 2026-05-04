@@ -60,16 +60,30 @@ npx prisma migrate deploy                # Apply migrations in CI/prod
 npx prisma migrate reset                 # Wipe + reseed (destructive)
 ```
 
+### Local dev environment
+
+Bring up Postgres 16 + Redis 7 with the bundled compose file:
+
+```bash
+docker compose up -d
+# Wait a couple of seconds for the healthchecks
+npx prisma migrate deploy
+npm run db:seed
+```
+
+Default credentials in `docker-compose.yml`:
+
+- Postgres: `postgres://bundleforge:bundleforge_dev@localhost:5432/bundleforge`
+- Redis: `redis://localhost:6379`
+
+Update your `.env` to match if you changed defaults.
+
 ### First-time apply
 
 The initial schema migration was generated offline (M-009) and lives at
-`prisma/migrations/20260504_init/`. To apply it once you have a running
-Postgres (M-014 brings up `docker-compose`):
-
-```bash
-docker compose up -d postgres
-npx prisma migrate deploy
-```
+`prisma/migrations/20260504_init/`. The follow-up migration
+`20260504_audit_log_immutable` installs Postgres triggers that enforce
+ADR-0003.
 
 The follow-up migration `20260504_audit_log_immutable` installs Postgres
 triggers that enforce ADR-0003 (no UPDATE/DELETE on `inventory_audit_log`).

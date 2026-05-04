@@ -6,13 +6,15 @@
 
 ## Current milestone
 
-**M-014 — Dockerfile + docker-compose for local dev**
+**M-015 — Sentry integration**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-014-docker-compose.md`. Review the
-existing `Dockerfile`; add `docker-compose.yml` with postgres:16 and
-redis:7 services. Update runbook with `docker compose up -d` workflow.
+Boot phase, then write `docs/specs/M-015-sentry.md`. Install
+`@sentry/node`. Add `src/config/sentry.ts` that no-ops when
+`env.SENTRY_DSN` is unset (keeps tests/dev quiet) and initializes the
+SDK otherwise. Wire `captureError` (M-007 seam) to `Sentry.captureException`.
+Add tests that the seam fires for 5xx and not 4xx, using a mock capture.
 
 ## Blockers
 
@@ -32,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-014 — docker-compose. `docs/sessions/0014-docker-compose.md`.
 - M-013 — CI test job verified. `docs/sessions/0013-ci-test.md`.
 - M-012 — ESLint + CI lint. `docs/sessions/0012-eslint.md`.
 - M-011 — CI typecheck. `docs/sessions/0011-ci-typecheck.md`.
