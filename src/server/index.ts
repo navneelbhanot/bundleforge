@@ -6,20 +6,20 @@ import morgan from "morgan";
 import cors from "cors";
 import { shopifyApp } from "@shopify/shopify-app-express";
 
-import { env } from "./config/env";
-import { logger } from "./config/logger";
-import { prisma } from "./config/database";
-import { redis } from "./config/redis";
-import { registerWebhooks } from "./webhooks";
-import { bundleRoutes } from "./routes/bundles";
-import { orderRoutes } from "./routes/orders";
-import { inventoryRoutes } from "./routes/inventory";
-import { analyticsRoutes } from "./routes/analytics";
-import { settingsRoutes } from "./routes/settings";
-import { billingRoutes } from "./routes/billing";
-import { aiRoutes } from "./routes/ai";
-import { errorHandler } from "./middleware/errorHandler";
-import { rateLimiter } from "./middleware/rateLimiter";
+import { env } from "../config/env";
+import { logger } from "../config/logger";
+import { prisma } from "../config/database";
+import { redis } from "../config/redis";
+import { registerWebhooks } from "../webhooks";
+import { bundleRoutes } from "../routes/bundles";
+import { orderRoutes } from "../routes/orders";
+import { inventoryRoutes } from "../routes/inventory";
+import { analyticsRoutes } from "../routes/analytics";
+import { settingsRoutes } from "../routes/settings";
+import { billingRoutes } from "../routes/billing";
+import { aiRoutes } from "../routes/ai";
+import { errorHandler } from "../middleware/errorHandler";
+import { rateLimiter } from "../middleware/rateLimiter";
 
 async function start() {
   const app = express();

@@ -1,3 +1,4 @@
+import type { Prisma } from "../../generated/prisma";
 import { prisma } from "../../config/database";
 import { CreateBundleInput, PaginationParams, PaginatedResponse } from "../../types";
 import { NotFoundError, ValidationError } from "../../middleware/errorHandler";
@@ -22,7 +23,7 @@ export class BundleService {
     if (!input.title || !input.type) throw new ValidationError("Title and type are required");
     const slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       return tx.bundle.create({
         data: {
           shopId, title: input.title, slug, type: input.type, description: input.description,

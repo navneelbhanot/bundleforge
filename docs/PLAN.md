@@ -15,7 +15,7 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-001 | Env validation + secrets bootstrap | pending | — | Zod schema, `.env.example` refresh, `src/config/env.ts` |
+| M-001 | Env validation + secrets bootstrap | done (2026-05-04) | `docs/specs/M-001-env-bootstrap.md` | Zod schema, `.env.example` refresh, `src/config/env.ts`, vitest config, 19 tests |
 | M-002 | Encryption utility (AES-256-GCM) + tests | pending | — | Used for `Shop.accessToken`, `Integration.credentials` |
 | M-003 | Logger config (pino) + structured logging | pending | — | Replace stub `src/config/logger.ts` |
 | M-004 | Prisma client init + connection pooling | pending | — | Replace stub `src/config/database.ts` |
@@ -255,6 +255,7 @@
 | ID | Title | Completed | Session log |
 |----|-------|-----------|-------------|
 | M-000 | Bootstrap planning system | 2026-05-04 | `docs/sessions/0000-bootstrap-planning-system.md` |
+| M-001 | Env validation + secrets bootstrap | 2026-05-04 | `docs/sessions/0001-env-bootstrap.md` |
 
 ---
 

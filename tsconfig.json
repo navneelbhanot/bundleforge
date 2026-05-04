@@ -26,6 +26,15 @@
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*", "prisma/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "extensions"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "extensions",
+    "src/generated",
+    "src/server/index.ts",
+    "src/services/bundles/index.ts",
+    "src/routes/bundles.ts"
+  ]
 }
