@@ -24,7 +24,7 @@ import { env } from "../config/env";
 import { logger } from "../config/logger";
 import { prisma } from "../config/database";
 import { redis } from "../config/redis";
-import { errorHandler } from "../middleware/errorHandler";
+import { errorHandler, requestId } from "../middleware/errorHandler";
 import { rateLimiter } from "../middleware/rateLimiter";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
@@ -82,11 +82,13 @@ function notImplemented(_req: Request, res: Response): void {
 export function createApp(): Express {
   const app = express();
 
+  app.use(requestId);
   app.use(
     pinoHttp({
       logger: logger.child({ module: "http" }),
       // /health is high-frequency; quiet it in normal mode.
       autoLogging: { ignore: (req) => req.url === "/health" },
+      genReqId: (req) => (req as Request).id,
     }),
   );
   app.use(helmet({ contentSecurityPolicy: false })); // CSP managed by Shopify

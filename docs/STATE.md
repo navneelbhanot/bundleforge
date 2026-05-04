@@ -6,15 +6,14 @@
 
 ## Current milestone
 
-**M-007 — Error handler middleware + tests**
+**M-008 — Rate limiter middleware + tests**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-007-error-handler.md`. Formalize error
-taxonomy (AppError, NotFoundError, ValidationError, UnauthorizedError,
-ForbiddenError, ConflictError), map Zod errors to 400, attach request-id
-correlation header, leave a Sentry capture seam (M-015 wires actual SDK).
-Add comprehensive supertest-based tests.
+Boot phase, then write `docs/specs/M-008-rate-limiter.md`. Replace
+`src/middleware/rateLimiter.ts`: configurable per-shop key derivation,
+in-memory limiter for tests (avoid Redis dependency), plan-aware caps
+(plan registry stub if M-031 not yet done), `RateLimitError` integration.
 
 ## Blockers
 
@@ -34,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-007 — Error handler. `docs/sessions/0007-error-handler.md`.
 - M-006 — Server scaffold + /health. `docs/sessions/0006-server-scaffold.md`.
 - M-005 — Redis + BullMQ. `docs/sessions/0005-redis-bullmq.md`.
 - M-004 — Prisma client. `docs/sessions/0004-prisma-client.md`.
