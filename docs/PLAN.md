@@ -58,8 +58,8 @@
 | M-031 | Plan registry (full) | done (2026-05-04) | `docs/specs/M-031-plan-registry.md` | Annual prices, trial days, PLAN_FEATURES per tier |
 | M-032 | Billing: `appSubscriptionCreate` | done (2026-05-04) | `docs/specs/M-032-app-subscription-create.md` | mutation + BillingSubscription upsert |
 | M-033 | Billing webhook: subscription status sync | done (2026-05-04) | `docs/specs/M-033-subscription-sync.md` | app_subscriptions/update -> BillingSubscription |
-| M-034 | Billing service: cancel + plan change | pending | — | |
-| M-035 | Annual billing 20% discount | pending | — | Per PRODUCT_PLAN §7 |
+| M-034 | Billing service: cancel + plan change | done (2026-05-04) | `docs/specs/M-034-cancel-and-change.md` | cancelSubscription + changePlan |
+| M-035 | Annual billing 20% discount | done (2026-05-04) | (rolled up in M-031) | annualUsd helper + price math tests |
 | M-036 | Plan caps middleware | pending | — | Enforces bundle/order limits |
 | M-037 | Billing routes | pending | — | GET/POST endpoints |
 | M-038 | Billing UI page (Polaris) | pending | — | Depends on M-096 |
@@ -288,6 +288,8 @@
 | M-031 | Plan registry (full) | 2026-05-04 | `docs/sessions/0031-plan-registry.md` |
 | M-032 | appSubscriptionCreate | 2026-05-04 | `docs/sessions/0032-app-subscription-create.md` |
 | M-033 | subscription sync webhook | 2026-05-04 | `docs/sessions/0033-subscription-sync.md` |
+| M-034 | cancel + plan change | 2026-05-04 | `docs/sessions/0034-cancel-and-change.md` |
+| M-035 | Annual billing 20% (rolled up M-031) | 2026-05-04 | `docs/sessions/0031-plan-registry.md` |
 
 ---
 

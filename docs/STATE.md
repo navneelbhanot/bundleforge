@@ -6,14 +6,14 @@
 
 ## Current milestone
 
-**M-034 — cancel subscription + plan change**
+**M-036 — plan caps middleware**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-034-cancel-and-change.md`.
-`cancelSubscription({session, chargeId, ...})` invokes
-`appSubscriptionCancel`. Plan change is just createSubscription for the
-new plan (Shopify replaces existing). DI tests.
+Boot phase, then write `docs/specs/M-036-plan-caps.md`.
+`requirePlanFeature(name)` and `enforceCap(capName)` middleware that
+read req.shopId, look up BillingSubscription + PlanCaps, and respond
+ForbiddenError on violation. (M-035 was rolled into M-031.)
 
 ## Blockers
 
@@ -33,6 +33,8 @@ None.
 
 ## Recently completed
 
+- M-035 — annual billing (rolled into M-031).
+- M-034 — cancel + plan change. `docs/sessions/0034-cancel-and-change.md`.
 - M-033 — subscription sync webhook. `docs/sessions/0033-subscription-sync.md`.
 - M-032 — appSubscriptionCreate. `docs/sessions/0032-app-subscription-create.md`.
 - M-031 — Plan registry (full). `docs/sessions/0031-plan-registry.md`.
