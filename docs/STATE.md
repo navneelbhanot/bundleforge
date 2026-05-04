@@ -6,14 +6,13 @@
 
 ## Current milestone
 
-**M-011 — CI workflow: typecheck**
+**M-012 — ESLint v9 flat config + CI lint**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-011-ci-typecheck.md`. Add
-`.github/workflows/ci.yml` with a `typecheck` job: checkout, setup-node 20
-with cache, `npm ci --legacy-peer-deps`, `npx prisma generate`,
-`npm run typecheck`. Triggers: push to main and any branch + pull_request.
+Boot phase, then write `docs/specs/M-012-eslint.md`. Add
+`eslint.config.js` (flat config) using `@typescript-eslint` plugin,
+restore `lint` script to real ESLint, fix any errors that surface.
 
 ## Blockers
 
@@ -33,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-011 — CI typecheck. `docs/sessions/0011-ci-typecheck.md`.
 - M-010 — Seed script. `docs/sessions/0010-seed.md`.
 - M-009 — Initial Prisma migration (offline). `docs/sessions/0009-initial-migration.md`.
 - M-008 — Rate limiter. `docs/sessions/0008-rate-limiter.md`.

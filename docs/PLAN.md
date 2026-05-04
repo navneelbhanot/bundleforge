@@ -25,7 +25,7 @@
 | M-008 | Rate limiter middleware + tests | done (2026-05-04) | `docs/specs/M-008-rate-limiter.md` | Redis or memory adapter, plan-aware, RateLimitError integration |
 | M-009 | Initial Prisma migration generated (offline) | done (2026-05-04) | `docs/specs/M-009-initial-migration.md` | init.sql + audit-log immutability triggers; apply at M-014 |
 | M-010 | Prisma seed script | done (2026-05-04) | `docs/specs/M-010-seed.md` | 1 shop + 3 bundles (fixed/build_box/volume) + billing sub |
-| M-011 | CI workflow: typecheck | pending | — | GitHub Actions |
+| M-011 | CI workflow: typecheck | done (2026-05-04) | `docs/specs/M-011-ci-typecheck.md` | Three parallel jobs; .npmrc legacy-peer-deps |
 | M-012 | CI workflow: lint | pending | — | ESLint + Prettier |
 | M-013 | CI workflow: test | pending | — | Vitest + Postgres service |
 | M-014 | Dockerfile finalize + docker-compose dev | pending | — | Local Postgres + Redis |
@@ -265,6 +265,7 @@
 | M-008 | Rate limiter | 2026-05-04 | `docs/sessions/0008-rate-limiter.md` |
 | M-009 | Initial Prisma migration | 2026-05-04 | `docs/sessions/0009-initial-migration.md` |
 | M-010 | Seed script | 2026-05-04 | `docs/sessions/0010-seed.md` |
+| M-011 | CI typecheck | 2026-05-04 | `docs/sessions/0011-ci-typecheck.md` |
 
 ---
 
