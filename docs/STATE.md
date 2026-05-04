@@ -6,14 +6,13 @@
 
 ## Current milestone
 
-**M-026 — Webhook handler: app/uninstalled**
+**M-027 — Webhook handler: shop/update**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-026-app-uninstalled.md`. Build a
-small handler registry in `src/webhooks/handlers.ts` (so M-027–M-030
-plug in uniformly), implement the `app/uninstalled` handler that sets
-`Shop.uninstalledAt = now()`, wire the worker. DI-friendly tests.
+Boot phase, then write `docs/specs/M-027-shop-update.md`. Add
+`shopUpdateHandler` mapping payload (name/email/currency/timezone/plan/
+locale) onto the Shop row. Register in webhooksWorker. DI-friendly tests.
 
 ## Blockers
 
@@ -33,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-026 — app/uninstalled + handler registry. `docs/sessions/0026-app-uninstalled.md`.
 - M-025 — Webhook dispatcher. `docs/sessions/0025-webhook-dispatcher.md`.
 - M-024 — Webhook HMAC verifier. `docs/sessions/0024-webhook-hmac.md`.
 - M-023 — REST client wrapper. `docs/sessions/0023-rest-client.md`.

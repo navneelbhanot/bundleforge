@@ -45,7 +45,7 @@
 | M-023 | REST Admin API client wrapper | done (2026-05-04) | `docs/specs/M-023-rest-client.md` | 429 retry, DI; fallback for non-GraphQL endpoints |
 | M-024 | Webhook HMAC verifier middleware | done (2026-05-04) | `docs/specs/M-024-webhook-hmac.md` | Raw-body capture + timingSafeEqual; 401 on mismatch |
 | M-025 | Webhook dispatcher → BullMQ | done (2026-05-04) | `docs/specs/M-025-webhook-dispatcher.md` | webhooksQueue + topic-as-name + dedup via webhookId |
-| M-026 | Webhook handler: `app/uninstalled` | pending | — | Sets `uninstalled_at`, drains jobs |
+| M-026 | Webhook handler: `app/uninstalled` + handler registry | done (2026-05-04) | `docs/specs/M-026-app-uninstalled.md` | webhooksWorker + dispatch + appUninstalled handler |
 | M-027 | Webhook handler: `shop/update` | pending | — | Currency, plan, timezone sync |
 | M-028 | Mandatory webhook: `customers/data_request` | pending | — | GDPR |
 | M-029 | Mandatory webhook: `customers/redact` | pending | — | GDPR |
@@ -280,6 +280,7 @@
 | M-023 | REST client wrapper | 2026-05-04 | `docs/sessions/0023-rest-client.md` |
 | M-024 | Webhook HMAC verifier | 2026-05-04 | `docs/sessions/0024-webhook-hmac.md` |
 | M-025 | Webhook dispatcher | 2026-05-04 | `docs/sessions/0025-webhook-dispatcher.md` |
+| M-026 | app/uninstalled + registry | 2026-05-04 | `docs/sessions/0026-app-uninstalled.md` |
 
 ---
 
