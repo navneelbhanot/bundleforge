@@ -13,13 +13,13 @@ export const redis = new Redis(REDIS_URL, {
 });
 
 redis.on("connect", () => logger.info("Redis connected"));
-redis.on("error", (err) => logger.error("Redis error:", err));
+redis.on("error", (err) => logger.error({ err }, "Redis error"));
 redis.on("close", () => logger.warn("Redis connection closed"));
 
 export async function connectRedis() {
   try {
     await redis.connect();
   } catch (error) {
-    logger.error("Failed to connect to Redis:", error);
+    logger.error({ err: error }, "Failed to connect to Redis");
   }
 }

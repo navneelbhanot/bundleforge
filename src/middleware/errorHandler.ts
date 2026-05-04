@@ -33,7 +33,7 @@ export class UnauthorizedError extends AppError {
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof AppError) {
-    logger.warn(`AppError: ${err.message}`, { statusCode: err.statusCode });
+    logger.warn({ statusCode: err.statusCode }, `AppError: ${err.message}`);
     return res.status(err.statusCode).json({
       error: {
         message: err.message,
@@ -43,7 +43,7 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
   }
 
   // Unexpected errors
-  logger.error("Unhandled error:", err);
+  logger.error({ err }, "Unhandled error");
   return res.status(500).json({
     error: {
       message: "Internal server error",

@@ -29,6 +29,6 @@ const inventoryWorker = new Worker("inventory-sync", async (job) => {
   }
 }, { connection: redis as any, concurrency: 3 });
 
-orderWorker.on("failed", (job, err) => logger.error(`Order job ${job?.id} failed:`, err));
-inventoryWorker.on("failed", (job, err) => logger.error(`Inventory job ${job?.id} failed:`, err));
+orderWorker.on("failed", (job, err) => logger.error({ err, jobId: job?.id }, "Order job failed"));
+inventoryWorker.on("failed", (job, err) => logger.error({ err, jobId: job?.id }, "Inventory job failed"));
 logger.info("BullMQ workers started");

@@ -6,13 +6,14 @@
 
 ## Current milestone
 
-**M-003 — Logger config (pino) + structured logging**
+**M-004 — Prisma client init + connection pooling**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-003-logger.md`, replace
-`src/config/logger.ts` (currently Winston-based) with a Pino logger that
-honors `env.LOG_LEVEL`, JSON in production, pretty in dev. Add tests.
+Boot phase, then write `docs/specs/M-004-prisma-client.md`, replace
+`src/config/database.ts` with a typed PrismaClient singleton with slow-query
+logging via Pino, graceful disconnect, and `connectDatabase()` helper.
+Tests use Prisma's mock-extended client; no live DB required.
 
 ## Blockers
 
@@ -27,6 +28,7 @@ from main tsc build (M-010 verifies).
 
 ## Recently completed
 
+- M-003 — Pino logger. `docs/sessions/0003-logger.md`.
 - M-002 — Encryption utility (AES-256-GCM). `docs/sessions/0002-encryption.md`.
 - M-001 — Env validation. `docs/sessions/0001-env-bootstrap.md`.
 - M-000 — Bootstrap planning system. `docs/sessions/0000-bootstrap-planning-system.md`.
