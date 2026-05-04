@@ -6,14 +6,15 @@
 
 ## Current milestone
 
-**M-018 — OAuth callback + token persistence**
+**M-019 — Session middleware (requireShopSession)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-018-oauth-callback.md`. Mount
-`shopify.auth.callback()`. After successful token exchange, upsert the
-`Shop` row with the encrypted (M-002) access token. Add tests that
-stub the Shopify response and assert the row is created/updated.
+Boot phase, then write `docs/specs/M-019-session-middleware.md`. Build
+`src/middleware/shopSession.ts` that loads the `Shop` row using
+`shopify.config.sessionStorage` and the validated session, attaches it
+to `req.shop` and `req.shopDomain`, and rejects with `UnauthorizedError`
+if missing. Tests use fake prisma + fake session storage.
 
 ## Blockers
 
@@ -33,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-018 — OAuth callback + persist. `docs/sessions/0018-oauth-callback.md`.
 - M-017 — OAuth install. `docs/sessions/0017-oauth-install.md`.
 - M-016 — Shopify app config. `docs/sessions/0016-shopify-app-config.md`.
 - M-015 — Sentry integration. `docs/sessions/0015-sentry.md`.
