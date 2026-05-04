@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bundleforge.io/schemas/pricing-contract-v1.json",
+  "title": "BundleForge Pricing Contract v1",
+  "type": "object",
+  "definitions": {
+    "MoneyAmount": {
+      "type": "object",
+      "required": ["amount", "currencyCode"],
+      "properties": {
+        "amount": { "type": "string", "pattern": "^-?\\d+(\\.\\d+)?$" },
+        "currencyCode": { "type": "string", "minLength": 3, "maxLength": 3 }
+      },
+      "additionalProperties": false
+    },
+    "PricingLineItem": {
+      "type": "object",
+      "required": ["id", "unitPrice", "quantity"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "unitPrice": { "$ref": "#/definitions/MoneyAmount" },
+        "quantity": { "type": "integer", "minimum": 0 },
+        "bundleItemId": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "PricingRule": {
+      "type": "object",
+      "required": ["id", "type", "value", "priority", "stackable"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "percentage",
+            "flat_discount",
+            "tiered",
+            "volume",
+            "bogo",
+            "custom"
+          ]
+        },
+        "value": { "type": "string", "pattern": "^-?\\d+(\\.\\d+)?$" },
+        "minQuantity": { "type": "integer", "minimum": 0 },
+        "maxQuantity": { "type": "integer", "minimum": 0 },
+        "minCartValue": { "type": "string", "pattern": "^-?\\d+(\\.\\d+)?$" },
+        "conditions": {
+          "type": "object",
+          "properties": {
+            "customerTags": { "type": "array", "items": { "type": "string" } },
+            "countries": { "type": "array", "items": { "type": "string" } },
+            "startsAt": { "type": "string" },
+            "endsAt": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "priority": { "type": "integer" },
+        "stackable": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "PricingInput": {
+      "type": "object",
+      "required": ["bundleId", "currencyCode", "lineItems", "rules", "context"],
+      "properties": {
+        "bundleId": { "type": "string" },
+        "currencyCode": { "type": "string", "minLength": 3, "maxLength": 3 },
+        "lineItems": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PricingLineItem" }
+        },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PricingRule" }
+        },
+        "context": {
+          "type": "object",
+          "required": ["now"],
+          "properties": {
+            "customerTags": { "type": "array", "items": { "type": "string" } },
+            "country": { "type": "string" },
+            "now": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "PricingResult": {
+      "type": "object",
+      "required": ["bundleId", "currencyCode", "subtotal", "totalDiscount", "total", "applied", "skipped"],
+      "properties": {
+        "bundleId": { "type": "string" },
+        "currencyCode": { "type": "string" },
+        "subtotal": { "$ref": "#/definitions/MoneyAmount" },
+        "totalDiscount": { "$ref": "#/definitions/MoneyAmount" },
+        "total": { "$ref": "#/definitions/MoneyAmount" },
+        "applied": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "discount"],
+            "properties": {
+              "ruleId": { "type": "string" },
+              "discount": { "$ref": "#/definitions/MoneyAmount" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ruleId", "reason"],
+            "properties": {
+              "ruleId": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/definitions/PricingInput" },
+    { "$ref": "#/definitions/PricingResult" }
+  ]
+}

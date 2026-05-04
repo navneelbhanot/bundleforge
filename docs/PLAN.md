@@ -71,7 +71,7 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-039 | Pricing engine: spec lock + types + JSON schema | pending | — | Generates TS + JSON contract |
+| M-039 | Pricing engine: spec lock + types + JSON schema | done (2026-05-04) | `docs/specs/M-039-pricing-engine.md` | contract.ts + JSON schema + fixture loader |
 | M-040 | Rule type: `fixed` + property tests | pending | — | |
 | M-041 | Rule type: `percentage` + tests | pending | — | |
 | M-042 | Rule type: `flat_discount` + tests | pending | — | |
@@ -292,6 +292,8 @@
 | M-035 | Annual billing 20% (rolled up M-031) | 2026-05-04 | `docs/sessions/0031-plan-registry.md` |
 | M-036 | Plan caps middleware | 2026-05-04 | `docs/sessions/0036-plan-caps.md` |
 | M-037 | Billing routes | 2026-05-04 | `docs/sessions/0037-billing-routes.md` |
+| M-038 | (Deferred) Billing UI | — | — |
+| M-039 | Pricing engine spec lock | 2026-05-04 | `docs/sessions/0039-pricing-engine.md` |
 
 ---
 

@@ -6,17 +6,15 @@
 
 ## Current milestone
 
-**M-039 — pricing engine spec lock + types**
-
-(M-038 billing UI page deferred to admin frontend phase, M-094+.)
+**M-040 — Pricing rule type `fixed` + property tests**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-039-pricing-engine.md`. Define the
-canonical PricingInput/PricingResult/PricingRule contract in
-`src/services/pricing/contract.ts`, generate the JSON schema, and set
-up a fixture-set framework so M-040+ rule types and M-083+ Cart
-Transform share the same regression set. Per ADR-0002.
+Boot phase, then write `docs/specs/M-040-fixed-rule.md`. Implement
+`computeBundlePrice(input)` shell + the `fixed` rule. Add 3+ JSON
+fixtures consumed by both Node tests now and the Function tests later
+(M-083+). Add property tests for non-negativity, determinism, gate
+short-circuit.
 
 ## Blockers
 
@@ -36,6 +34,8 @@ None.
 
 ## Recently completed
 
+- M-039 — pricing engine spec lock. `docs/sessions/0039-pricing-engine.md`.
+- M-038 — billing UI deferred (admin frontend phase).
 - M-037 — billing routes. `docs/sessions/0037-billing-routes.md`.
 - M-036 — plan caps middleware. `docs/sessions/0036-plan-caps.md`.
 - M-035 — annual billing (rolled into M-031).
