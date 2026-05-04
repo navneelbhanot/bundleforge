@@ -6,14 +6,14 @@
 
 ## Current milestone
 
-**M-004 — Prisma client init + connection pooling**
+**M-005 — Redis + BullMQ client init**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-004-prisma-client.md`, replace
-`src/config/database.ts` with a typed PrismaClient singleton with slow-query
-logging via Pino, graceful disconnect, and `connectDatabase()` helper.
-Tests use Prisma's mock-extended client; no live DB required.
+Boot phase, then write `docs/specs/M-005-redis-bullmq.md`, replace
+`src/config/redis.ts` with typed ioredis singleton, lifecycle helpers, pure
+backoff helper. Create `src/jobs/queues.ts` with named queue definitions
+(`orderQueue`, `inventoryQueue`) for downstream milestones to import.
 
 ## Blockers
 
@@ -28,6 +28,7 @@ from main tsc build (M-010 verifies).
 
 ## Recently completed
 
+- M-004 — Prisma client. `docs/sessions/0004-prisma-client.md`.
 - M-003 — Pino logger. `docs/sessions/0003-logger.md`.
 - M-002 — Encryption utility (AES-256-GCM). `docs/sessions/0002-encryption.md`.
 - M-001 — Env validation. `docs/sessions/0001-env-bootstrap.md`.
