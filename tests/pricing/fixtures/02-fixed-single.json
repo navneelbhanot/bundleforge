@@ -1,0 +1,31 @@
+{
+  "name": "single fixed rule applies",
+  "input": {
+    "bundleId": "b-fixed-1",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "12.50", "currencyCode": "USD" }, "quantity": 4 }
+    ],
+    "rules": [
+      {
+        "id": "r-1",
+        "type": "fixed",
+        "value": "10.00",
+        "priority": 0,
+        "stackable": false
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-fixed-1",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "50.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "10.00", "currencyCode": "USD" },
+    "total": { "amount": "40.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "r-1", "discount": { "amount": "10.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}

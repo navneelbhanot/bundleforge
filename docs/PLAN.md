@@ -72,7 +72,7 @@
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
 | M-039 | Pricing engine: spec lock + types + JSON schema | done (2026-05-04) | `docs/specs/M-039-pricing-engine.md` | contract.ts + JSON schema + fixture loader |
-| M-040 | Rule type: `fixed` + property tests | pending | — | |
+| M-040 | Rule type: `fixed` + property tests | done (2026-05-04) | `docs/specs/M-040-fixed-rule.md` | engine.ts + fixed; 3 fixtures; gate/stack/property tests |
 | M-041 | Rule type: `percentage` + tests | pending | — | |
 | M-042 | Rule type: `flat_discount` + tests | pending | — | |
 | M-043 | Rule type: `tiered` + tests | pending | — | |
@@ -294,6 +294,7 @@
 | M-037 | Billing routes | 2026-05-04 | `docs/sessions/0037-billing-routes.md` |
 | M-038 | (Deferred) Billing UI | — | — |
 | M-039 | Pricing engine spec lock | 2026-05-04 | `docs/sessions/0039-pricing-engine.md` |
+| M-040 | Fixed rule + property tests | 2026-05-04 | `docs/sessions/0040-fixed-rule.md` |
 
 ---
 

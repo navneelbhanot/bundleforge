@@ -6,15 +6,18 @@
 
 ## Current milestone
 
-**M-040 — Pricing rule type `fixed` + property tests**
+**M-041 — Pricing rule type `percentage`**
+
+(M-040 closes the user's "push to M-040" goal. Phase D continues with
+M-041..M-047 — each new rule type is small additive work on the engine
+landed in M-040.)
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-040-fixed-rule.md`. Implement
-`computeBundlePrice(input)` shell + the `fixed` rule. Add 3+ JSON
-fixtures consumed by both Node tests now and the Function tests later
-(M-083+). Add property tests for non-negativity, determinism, gate
-short-circuit.
+Boot phase, then write `docs/specs/M-041-percentage-rule.md`. Add
+`percentage` to the switch in `discountForRule`: discount =
+floor(subtotal × value/100), clamped to subtotal. Add 2 fixtures and
+3+ tests.
 
 ## Blockers
 
@@ -34,6 +37,7 @@ None.
 
 ## Recently completed
 
+- M-040 — fixed rule + property tests. `docs/sessions/0040-fixed-rule.md`.
 - M-039 — pricing engine spec lock. `docs/sessions/0039-pricing-engine.md`.
 - M-038 — billing UI deferred (admin frontend phase).
 - M-037 — billing routes. `docs/sessions/0037-billing-routes.md`.
