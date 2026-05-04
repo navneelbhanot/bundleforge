@@ -49,7 +49,7 @@
 | M-027 | Webhook handler: `shop/update` | done (2026-05-04) | `docs/specs/M-027-shop-update.md` | Reconciles M-018 placeholder fields |
 | M-028 | Mandatory webhook: `customers/data_request` | done (2026-05-04) | `docs/specs/M-028-customers-data-request.md` | Ack-only; no PII stored |
 | M-029 | Mandatory webhook: `customers/redact` | done (2026-05-04) | `docs/specs/M-029-customers-redact.md` | Ack-only; no PII stored |
-| M-030 | Mandatory webhook: `shop/redact` | pending | — | GDPR |
+| M-030 | Mandatory webhook: `shop/redact` | done (2026-05-04) | `docs/specs/M-030-shop-redact.md` | Cascade delete; ADR-0003a relaxes audit-log DELETE trigger |
 
 ## Phase C — Billing (M-031 to M-038)
 
@@ -284,6 +284,7 @@
 | M-027 | shop/update | 2026-05-04 | `docs/sessions/0027-shop-update.md` |
 | M-028 | customers/data_request | 2026-05-04 | `docs/sessions/0028-customers-data-request.md` |
 | M-029 | customers/redact | 2026-05-04 | `docs/sessions/0029-customers-redact.md` |
+| M-030 | shop/redact | 2026-05-04 | `docs/sessions/0030-shop-redact.md` |
 
 ---
 

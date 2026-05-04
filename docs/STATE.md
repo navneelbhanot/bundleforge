@@ -6,19 +6,16 @@
 
 ## Current milestone
 
-**M-030 — GDPR webhook: shop/redact**
+**M-031 — Billing plan registry (full)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-030-shop-redact.md`. Hard-delete
-Shop row by shopifyDomain (FK CASCADE removes bundles, items, orders,
-sync state, etc.). The audit-log trigger blocks per-row DELETE, so
-cascade against `inventory_audit_log` will fail — handle by purging
-audit rows for that shop in a separate transaction (the trigger only
-fires on application DELETE statements; superuser delete bypasses, but
-prisma uses the app role). Decision: drop the trigger only for
-shop_id = X within the txn, then re-enable. Or: detach FK to allow
-orphan rows. Pick the simpler one in the spec.
+Boot phase, then write `docs/specs/M-031-plan-registry.md`. Expand the
+M-008 stub at `src/services/billing/plans.ts`: add annual prices (20%
+discount), trial-day defaults per plan, and `planFeatures(name)` that
+returns feature flags downstream services consume (aiSuggestions,
+abTesting, headless, customMetafields). Tests assert price math + feature
+presence per ADR-aligned tier.
 
 ## Blockers
 
@@ -38,6 +35,7 @@ None.
 
 ## Recently completed
 
+- M-030 — shop/redact + ADR-0003a. `docs/sessions/0030-shop-redact.md`.
 - M-029 — customers/redact. `docs/sessions/0029-customers-redact.md`.
 - M-028 — customers/data_request. `docs/sessions/0028-customers-data-request.md`.
 - M-027 — shop/update. `docs/sessions/0027-shop-update.md`.
