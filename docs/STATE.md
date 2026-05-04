@@ -6,13 +6,14 @@
 
 ## Current milestone
 
-**M-012 — ESLint v9 flat config + CI lint**
+**M-013 — CI test workflow**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-012-eslint.md`. Add
-`eslint.config.js` (flat config) using `@typescript-eslint` plugin,
-restore `lint` script to real ESLint, fix any errors that surface.
+Boot phase, then write `docs/specs/M-013-ci-test.md`. Verify the `test`
+job in `.github/workflows/ci.yml` works end-to-end: postgres + redis
+services start, env vars match `tests/setup.ts`, `prisma migrate deploy`
+applies the init + audit-immutable migrations, `npm test` passes.
 
 ## Blockers
 
@@ -32,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-012 — ESLint + CI lint. `docs/sessions/0012-eslint.md`.
 - M-011 — CI typecheck. `docs/sessions/0011-ci-typecheck.md`.
 - M-010 — Seed script. `docs/sessions/0010-seed.md`.
 - M-009 — Initial Prisma migration (offline). `docs/sessions/0009-initial-migration.md`.
