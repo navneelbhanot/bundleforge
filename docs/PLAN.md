@@ -55,7 +55,7 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-031 | Plan registry: Starter/Growth/Pro/Enterprise | pending | — | Single source of truth for caps + price |
+| M-031 | Plan registry (full) | done (2026-05-04) | `docs/specs/M-031-plan-registry.md` | Annual prices, trial days, PLAN_FEATURES per tier |
 | M-032 | Billing service: `appSubscriptionCreate` | pending | — | GraphQL mutation |
 | M-033 | Billing webhook: subscription status sync | pending | — | `app_subscriptions/update` |
 | M-034 | Billing service: cancel + plan change | pending | — | |
@@ -285,6 +285,7 @@
 | M-028 | customers/data_request | 2026-05-04 | `docs/sessions/0028-customers-data-request.md` |
 | M-029 | customers/redact | 2026-05-04 | `docs/sessions/0029-customers-redact.md` |
 | M-030 | shop/redact | 2026-05-04 | `docs/sessions/0030-shop-redact.md` |
+| M-031 | Plan registry (full) | 2026-05-04 | `docs/sessions/0031-plan-registry.md` |
 
 ---
 

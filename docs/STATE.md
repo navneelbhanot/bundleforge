@@ -6,16 +6,15 @@
 
 ## Current milestone
 
-**M-031 — Billing plan registry (full)**
+**M-032 — appSubscriptionCreate (Shopify Billing)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-031-plan-registry.md`. Expand the
-M-008 stub at `src/services/billing/plans.ts`: add annual prices (20%
-discount), trial-day defaults per plan, and `planFeatures(name)` that
-returns feature flags downstream services consume (aiSuggestions,
-abTesting, headless, customMetafields). Tests assert price math + feature
-presence per ADR-aligned tier.
+Boot phase, then write `docs/specs/M-032-app-subscription-create.md`.
+`src/services/billing/createSubscription.ts`: issues the Shopify
+GraphQL `appSubscriptionCreate`, persists the result (charge id, trial
+dates, status) into `BillingSubscription`, returns the confirmation
+URL. Tests inject fake `shopifyGraphql` + fake prisma.
 
 ## Blockers
 
@@ -35,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-031 — Plan registry (full). `docs/sessions/0031-plan-registry.md`.
 - M-030 — shop/redact + ADR-0003a. `docs/sessions/0030-shop-redact.md`.
 - M-029 — customers/redact. `docs/sessions/0029-customers-redact.md`.
 - M-028 — customers/data_request. `docs/sessions/0028-customers-data-request.md`.
