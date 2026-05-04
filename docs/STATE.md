@@ -6,14 +6,13 @@
 
 ## Current milestone
 
-**M-013 — CI test workflow**
+**M-014 — Dockerfile + docker-compose for local dev**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-013-ci-test.md`. Verify the `test`
-job in `.github/workflows/ci.yml` works end-to-end: postgres + redis
-services start, env vars match `tests/setup.ts`, `prisma migrate deploy`
-applies the init + audit-immutable migrations, `npm test` passes.
+Boot phase, then write `docs/specs/M-014-docker-compose.md`. Review the
+existing `Dockerfile`; add `docker-compose.yml` with postgres:16 and
+redis:7 services. Update runbook with `docker compose up -d` workflow.
 
 ## Blockers
 
@@ -33,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-013 — CI test job verified. `docs/sessions/0013-ci-test.md`.
 - M-012 — ESLint + CI lint. `docs/sessions/0012-eslint.md`.
 - M-011 — CI typecheck. `docs/sessions/0011-ci-typecheck.md`.
 - M-010 — Seed script. `docs/sessions/0010-seed.md`.
