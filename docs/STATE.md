@@ -6,13 +6,14 @@
 
 ## Current milestone
 
-**M-033 — subscription status sync webhook**
+**M-034 — cancel subscription + plan change**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-033-subscription-sync.md`. Handler
-for Shopify `app_subscriptions/update`: maps payload status onto
-BillingSubscription.status. Register in webhooksWorker. DI tests.
+Boot phase, then write `docs/specs/M-034-cancel-and-change.md`.
+`cancelSubscription({session, chargeId, ...})` invokes
+`appSubscriptionCancel`. Plan change is just createSubscription for the
+new plan (Shopify replaces existing). DI tests.
 
 ## Blockers
 
@@ -32,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-033 — subscription sync webhook. `docs/sessions/0033-subscription-sync.md`.
 - M-032 — appSubscriptionCreate. `docs/sessions/0032-app-subscription-create.md`.
 - M-031 — Plan registry (full). `docs/sessions/0031-plan-registry.md`.
 - M-030 — shop/redact + ADR-0003a. `docs/sessions/0030-shop-redact.md`.

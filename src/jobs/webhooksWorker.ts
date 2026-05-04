@@ -15,6 +15,7 @@ import { customersDataRequestHandler } from "../webhooks/handlers/customersDataR
 import { customersRedactHandler } from "../webhooks/handlers/customersRedact";
 import { shopRedactHandler } from "../webhooks/handlers/shopRedact";
 import { shopUpdateHandler } from "../webhooks/handlers/shopUpdate";
+import { subscriptionUpdateHandler } from "../webhooks/handlers/subscriptionUpdate";
 import type { WebhookJobData } from "../webhooks";
 import { WEBHOOKS_QUEUE } from "./queues";
 
@@ -26,6 +27,7 @@ registerHandler("shop/update", shopUpdateHandler());
 registerHandler("customers/data_request", customersDataRequestHandler);
 registerHandler("customers/redact", customersRedactHandler);
 registerHandler("shop/redact", shopRedactHandler());
+registerHandler("app_subscriptions/update", subscriptionUpdateHandler());
 
 export const webhooksWorker = new Worker<WebhookJobData>(
   WEBHOOKS_QUEUE,
