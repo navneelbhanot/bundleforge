@@ -1,0 +1,270 @@
+# PLAN.md — Milestone Roster
+
+> The complete sequence of milestones from foundations through public launch.
+> Each row is intended to fit in a single Claude Code session per the sizing
+> rules in `CLAUDE.md` §4. Status flips happen in the same commit as the work.
+>
+> **Status legend:** `pending` · `in_progress` · `done` · `blocked` · `deferred`
+>
+> Specs live in `docs/specs/M-NNN-<slug>.md`. They are written **before**
+> implementation begins.
+
+---
+
+## Phase A — Foundations (M-001 to M-015)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-001 | Env validation + secrets bootstrap | pending | — | Zod schema, `.env.example` refresh, `src/config/env.ts` |
+| M-002 | Encryption utility (AES-256-GCM) + tests | pending | — | Used for `Shop.accessToken`, `Integration.credentials` |
+| M-003 | Logger config (pino) + structured logging | pending | — | Replace stub `src/config/logger.ts` |
+| M-004 | Prisma client init + connection pooling | pending | — | Replace stub `src/config/database.ts` |
+| M-005 | Redis + BullMQ client init | pending | — | Replace stub `src/config/redis.ts` |
+| M-006 | Express server scaffold + `/health` + tests | pending | — | Harden `src/server/index.ts` |
+| M-007 | Error handler middleware + tests | pending | — | `src/middleware/errorHandler.ts` |
+| M-008 | Rate limiter middleware + tests | pending | — | Redis-backed, 100 req/min/shop |
+| M-009 | Initial Prisma migration applied | pending | — | `prisma migrate dev --name init` |
+| M-010 | Prisma seed script | pending | — | Dev-store fixture |
+| M-011 | CI workflow: typecheck | pending | — | GitHub Actions |
+| M-012 | CI workflow: lint | pending | — | ESLint + Prettier |
+| M-013 | CI workflow: test | pending | — | Vitest + Postgres service |
+| M-014 | Dockerfile finalize + docker-compose dev | pending | — | Local Postgres + Redis |
+| M-015 | Sentry integration + tested error capture | pending | — | Account creation may block |
+
+## Phase B — Shopify Integration (M-016 to M-030)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-016 | Shopify CLI app config validation | pending | — | `shopify.app.toml` review |
+| M-017 | OAuth install route | pending | — | `/auth` |
+| M-018 | OAuth callback + token persistence | pending | — | Encrypts `Shop.accessToken` |
+| M-019 | Session middleware (`requireShopSession`) | pending | — | Loads `Shop` from token |
+| M-020 | Prisma-backed session storage adapter | pending | — | Replaces in-memory store |
+| M-021 | App Bridge token verification | pending | — | Embedded admin |
+| M-022 | GraphQL Admin API client wrapper | pending | — | Typed, retry-aware |
+| M-023 | REST Admin API client wrapper | pending | — | Limited fallback |
+| M-024 | Webhook HMAC verifier middleware | pending | — | Required by Shopify |
+| M-025 | Webhook dispatcher → BullMQ | pending | — | Topic-routed |
+| M-026 | Webhook handler: `app/uninstalled` | pending | — | Sets `uninstalled_at`, drains jobs |
+| M-027 | Webhook handler: `shop/update` | pending | — | Currency, plan, timezone sync |
+| M-028 | Mandatory webhook: `customers/data_request` | pending | — | GDPR |
+| M-029 | Mandatory webhook: `customers/redact` | pending | — | GDPR |
+| M-030 | Mandatory webhook: `shop/redact` | pending | — | GDPR |
+
+## Phase C — Billing (M-031 to M-038)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-031 | Plan registry: Starter/Growth/Pro/Enterprise | pending | — | Single source of truth for caps + price |
+| M-032 | Billing service: `appSubscriptionCreate` | pending | — | GraphQL mutation |
+| M-033 | Billing webhook: subscription status sync | pending | — | `app_subscriptions/update` |
+| M-034 | Billing service: cancel + plan change | pending | — | |
+| M-035 | Annual billing 20% discount | pending | — | Per PRODUCT_PLAN §7 |
+| M-036 | Plan caps middleware | pending | — | Enforces bundle/order limits |
+| M-037 | Billing routes | pending | — | GET/POST endpoints |
+| M-038 | Billing UI page (Polaris) | pending | — | Depends on M-096 |
+
+## Phase D — Pricing Engine (M-039 to M-047)
+
+> Locked first because the contract is shared between the Node service and the
+> Cart Transform Function. See ADR 0002.
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-039 | Pricing engine: spec lock + types + JSON schema | pending | — | Generates TS + JSON contract |
+| M-040 | Rule type: `fixed` + property tests | pending | — | |
+| M-041 | Rule type: `percentage` + tests | pending | — | |
+| M-042 | Rule type: `flat_discount` + tests | pending | — | |
+| M-043 | Rule type: `tiered` + tests | pending | — | |
+| M-044 | Rule type: `volume` + tests | pending | — | |
+| M-045 | Rule type: `bogo` + tests | pending | — | |
+| M-046 | Stackability + priority resolution | pending | — | |
+| M-047 | Condition evaluator: tags, geo, dates | pending | — | |
+
+## Phase E — Bundle Engine (M-048 to M-055)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-048 | Per-type config validators (zod, discriminated union) | pending | — | One validator per bundle type |
+| M-049 | Bundle service: CRUD | pending | — | Replace stub |
+| M-050 | Bundle service: duplicate | pending | — | |
+| M-051 | Bundle service: publish (Shopify product + metafields) | pending | — | Writes contract for Cart Transform |
+| M-052 | Bundle service: archive + soft delete | pending | — | |
+| M-053 | Bundle routes (9 endpoints) | pending | — | Per ARCHITECTURE §5.1 |
+| M-054 | BundleItem service | pending | — | |
+| M-055 | PricingRule service | pending | — | Persists rules from §D |
+
+## Phase F — Vertical Slices (M-056 to M-068)
+
+> One bundle type, end-to-end, per milestone: admin → cart → checkout → order
+> processing → SKU breakdown → analytics. Earlier slices set the pattern;
+> later ones reuse infra.
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-056 | Vertical slice: fixed bundle E2E | pending | — | Sets the pattern for all slices |
+| M-057 | Vertical slice: multipack E2E | pending | — | |
+| M-058 | Vertical slice: volume bundle E2E | pending | — | |
+| M-059 | Vertical slice: mix-and-match E2E | pending | — | |
+| M-060 | Vertical slice: BOGO E2E | pending | — | |
+| M-061 | Vertical slice: BXGY E2E | pending | — | |
+| M-062 | Vertical slice: build-a-box E2E | pending | — | |
+| M-063 | Vertical slice: subscription bundle E2E | pending | — | Recharge integration may defer |
+| M-064 | Vertical slice: gift bundle E2E | pending | — | |
+| M-065 | Vertical slice: mystery bundle E2E | pending | — | |
+| M-066 | Vertical slice: sample bundle E2E | pending | — | |
+| M-067 | Vertical slice: wholesale bundle E2E | pending | — | |
+| M-068 | Vertical slice: custom bundle E2E | pending | — | |
+
+## Phase G — Inventory + Orders (M-069 to M-080)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-069 | Bundle import: CSV format + dry-run | pending | — | |
+| M-070 | Inventory service: `applyAdjustment` (transactional) | pending | — | `SELECT … FOR UPDATE` |
+| M-071 | Inventory service: audit log writer | pending | — | Insert-only |
+| M-072 | DB grants: `REVOKE UPDATE, DELETE` on `inventory_audit_log` | pending | — | See ADR 0003 |
+| M-073 | Inventory service: `recomputeBundleStock` | pending | — | |
+| M-074 | Inventory service: safety lock workflow | pending | — | Per `Shop.settings` |
+| M-075 | Inventory routes (audit, sync, health) | pending | — | |
+| M-076 | Order processor: parse + extract bundle line items | pending | — | |
+| M-077 | Order processor: SKU breakdown | pending | — | |
+| M-078 | Webhook handler: `orders/create` | pending | — | Dispatches to BullMQ |
+| M-079 | Webhook handler: `orders/cancelled` | pending | — | Reverses inventory |
+| M-080 | Webhook handler: `orders/updated` | pending | — | Refunds, partial fulfillment |
+
+## Phase H — Storefront (M-081 to M-093)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-081 | Cart Transform Function: scaffold (JS) | pending | — | |
+| M-082 | Cart Transform: read bundle metafields | pending | — | |
+| M-083 | Cart Transform: apply pricing engine | pending | — | Reuses contract from M-039 |
+| M-084 | Cart Transform: tests with Function test runner | pending | — | |
+| M-085 | App Proxy: signed bundle config endpoint | pending | — | |
+| M-086 | Checkout Guardian: cart-level validator | pending | — | App Proxy route |
+| M-087 | Checkout Guardian: Validation Function (Plus only) | pending | — | Honest gating in UI |
+| M-088 | Theme extension: bundle-display block (full) | pending | — | Replaces stub `bundle-display.liquid` |
+| M-089 | Theme extension: variant selector | pending | — | |
+| M-090 | Theme extension: build-a-box stepper | pending | — | |
+| M-091 | Theme extension: mix-match grid | pending | — | |
+| M-092 | Theme extension: BOGO display | pending | — | |
+| M-093 | Theme extension: i18n strings + locale loader | pending | — | |
+
+## Phase I — Admin Frontend (M-094 to M-108)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-094 | Frontend scaffold: React 18 + Polaris 12 + Vite | pending | — | Or commit to Remix template here |
+| M-095 | App Bridge integration (frontend) | pending | — | |
+| M-096 | Admin routing | pending | — | |
+| M-097 | Bundle list page | pending | — | Filter, sort, pagination |
+| M-098 | Bundle detail page | pending | — | |
+| M-099 | Visual builder: product picker | pending | — | |
+| M-100 | Visual builder: type-specific config panels | pending | — | |
+| M-101 | Visual builder: pricing rules editor | pending | — | |
+| M-102 | Orders list page | pending | — | |
+| M-103 | Order detail with SKU breakdown | pending | — | |
+| M-104 | Inventory audit page | pending | — | |
+| M-105 | Inventory health dashboard | pending | — | |
+| M-106 | Settings page | pending | — | |
+| M-107 | Billing/Plans page | pending | — | |
+| M-108 | Onboarding wizard | pending | — | |
+
+## Phase J — Analytics + A/B (M-109 to M-115)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-109 | Analytics ingestion endpoint | pending | — | From storefront events |
+| M-110 | Analytics rollup tables / materialized views | pending | — | |
+| M-111 | Analytics overview endpoint + dashboard | pending | — | |
+| M-112 | Per-bundle analytics endpoint | pending | — | |
+| M-113 | A/B test service: assignment + tracking | pending | — | |
+| M-114 | A/B test routes + UI | pending | — | |
+| M-115 | A/B test significance calculator | pending | — | |
+
+## Phase K — Integrations + AI (M-116 to M-126)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-116 | Integration adapter framework | pending | — | Abstract interface |
+| M-117 | ShipStation adapter | pending | — | |
+| M-118 | Amazon adapter (basic) | pending | — | |
+| M-119 | Recharge adapter | pending | — | Subscription bundles |
+| M-120 | Bold adapter | pending | — | |
+| M-121 | Klaviyo adapter | pending | — | |
+| M-122 | Google Merchant feed | pending | — | |
+| M-123 | Shopify Flow triggers + actions | pending | — | |
+| M-124 | AI microservice: scaffold (Python/Flask) | pending | — | |
+| M-125 | AI: FBT recommender (sklearn) | pending | — | |
+| M-126 | AI: `/ai/recommendations` integration + retraining job | pending | — | |
+
+## Phase L — Migration Tools (M-127 to M-130)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-127 | Migration: Shopify Bundles importer | pending | — | |
+| M-128 | Migration: Simple Bundles importer | pending | — | |
+| M-129 | Migration: Bundler importer | pending | — | |
+| M-130 | Migration: Kaching importer | pending | — | |
+
+## Phase M — i18n (M-131 to M-136)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-131 | i18n framework (i18next) | pending | — | Admin + storefront |
+| M-132 | English baseline strings | pending | — | |
+| M-133 | Spanish translation | pending | — | Pro translation budget |
+| M-134 | French translation | pending | — | |
+| M-135 | German translation | pending | — | |
+| M-136 | Italian + Portuguese translation | pending | — | |
+
+## Phase N — Hardening (M-137 to M-150)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-137 | Load test: inventory engine concurrency | pending | — | |
+| M-138 | Load test: webhook throughput | pending | — | |
+| M-139 | Property tests: pricing engine (extended) | pending | — | |
+| M-140 | Security review pass | pending | — | OWASP top 10 |
+| M-141 | Accessibility audit (WCAG AA) | pending | — | |
+| M-142 | Sentry coverage audit | pending | — | Every error path |
+| M-143 | Datadog dashboards: queue, webhooks, sync | pending | — | |
+| M-144 | Runbook: incident response | pending | — | |
+| M-145 | Backup + restore drill | pending | — | |
+| M-146 | GDPR data export endpoint | pending | — | |
+| M-147 | GDPR data deletion endpoint | pending | — | |
+| M-148 | Rate limit hardening + abuse tests | pending | — | |
+| M-149 | OpenAPI documentation generated | pending | — | |
+| M-150 | Privacy policy + ToS templates committed | pending | — | Legal review by user |
+
+## Phase O — Beta + Launch (M-151 to M-155)
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-151 | Demo store seed data + demo bundle showcase | pending | — | |
+| M-152 | Beta merchant onboarding flow | pending | — | |
+| M-153 | App Store screenshots + video script | pending | — | User produces video |
+| M-154 | App Store submission package | pending | — | |
+| M-155 | Public launch checklist | pending | — | |
+
+---
+
+## Completed milestones
+
+| ID | Title | Completed | Session log |
+|----|-------|-----------|-------------|
+| M-000 | Bootstrap planning system | 2026-05-04 | `docs/sessions/0000-bootstrap-planning-system.md` |
+
+---
+
+## Notes on this roster
+
+- Total: **156 milestones** (M-000 through M-155).
+- This is a planning estimate. Milestones may be split or merged as they're
+  worked. Any change is logged in the session that makes it.
+- Spec files are written **just-in-time**, at the start of the session that
+  implements the milestone, not all up front. That keeps specs honest with
+  current understanding.
+- ADRs in `docs/decisions/` capture cross-cutting decisions that span many
+  milestones (architecture, contracts, conventions).
