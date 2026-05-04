@@ -6,14 +6,13 @@
 
 ## Current milestone
 
-**M-023 — REST Admin API client wrapper**
+**M-024 — Webhook HMAC verifier middleware**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-023-rest-client.md`. Mirror the
-M-022 GraphQL client design for the SDK's REST client. Session-scoped,
-DI for tests. We rarely use REST; this is a fallback for endpoints
-without GraphQL parity.
+Boot phase, then write `docs/specs/M-024-webhook-hmac.md`. Express
+middleware that verifies `X-Shopify-Hmac-Sha256` against the raw body
+using `env.SHOPIFY_API_SECRET`. Reject 401 on mismatch.
 
 ## Blockers
 
@@ -33,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-023 — REST client wrapper. `docs/sessions/0023-rest-client.md`.
 - M-022 — GraphQL client wrapper. `docs/sessions/0022-graphql-client.md`.
 - M-021 — App Bridge session validation. `docs/sessions/0021-app-bridge.md`.
 - M-020 — Prisma session storage. `docs/sessions/0020-prisma-session.md`.

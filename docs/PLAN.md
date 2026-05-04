@@ -42,7 +42,7 @@
 | M-020 | Prisma-backed session storage adapter | done (2026-05-04) | `docs/specs/M-020-prisma-session.md` | PrismaSessionStorage in prod, memory in tests |
 | M-021 | App Bridge token verification | done (2026-05-04) | `docs/specs/M-021-app-bridge.md` | validateAuthenticatedSession + requireShopSession on /api/v1 |
 | M-022 | GraphQL Admin API client wrapper | done (2026-05-04) | `docs/specs/M-022-graphql-client.md` | Throttle retry, Pino logging, DI for tests |
-| M-023 | REST Admin API client wrapper | pending | — | Limited fallback |
+| M-023 | REST Admin API client wrapper | done (2026-05-04) | `docs/specs/M-023-rest-client.md` | 429 retry, DI; fallback for non-GraphQL endpoints |
 | M-024 | Webhook HMAC verifier middleware | pending | — | Required by Shopify |
 | M-025 | Webhook dispatcher → BullMQ | pending | — | Topic-routed |
 | M-026 | Webhook handler: `app/uninstalled` | pending | — | Sets `uninstalled_at`, drains jobs |
@@ -277,6 +277,7 @@
 | M-020 | Prisma session storage | 2026-05-04 | `docs/sessions/0020-prisma-session.md` |
 | M-021 | App Bridge session validation | 2026-05-04 | `docs/sessions/0021-app-bridge.md` |
 | M-022 | GraphQL client wrapper | 2026-05-04 | `docs/sessions/0022-graphql-client.md` |
+| M-023 | REST client wrapper | 2026-05-04 | `docs/sessions/0023-rest-client.md` |
 
 ---
 
