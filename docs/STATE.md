@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-009 — Initial Prisma migration**
+**M-010 — Prisma seed script**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-009-initial-migration.md`. Use
-`prisma migrate dev --create-only --name init` to generate the SQL
-without requiring a live DB. Commit the migration file. Document that
-applying it (`prisma migrate deploy`) requires the dev DB which lands
-in M-014 (docker-compose).
+Boot phase, then write `docs/specs/M-010-seed.md`. The existing
+`prisma/seed.ts` is a starting point; verify it compiles under ts-node
+and extend with minimal dev fixtures (one shop, one fixed bundle, one
+mix-and-match bundle) so M-014 can boot a dev environment with sample
+data.
 
 ## Blockers
 
@@ -34,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-009 — Initial Prisma migration (offline). `docs/sessions/0009-initial-migration.md`.
 - M-008 — Rate limiter. `docs/sessions/0008-rate-limiter.md`.
 - M-007 — Error handler. `docs/sessions/0007-error-handler.md`.
 - M-006 — Server scaffold + /health. `docs/sessions/0006-server-scaffold.md`.

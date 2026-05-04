@@ -60,6 +60,20 @@ npx prisma migrate deploy                # Apply migrations in CI/prod
 npx prisma migrate reset                 # Wipe + reseed (destructive)
 ```
 
+### First-time apply
+
+The initial schema migration was generated offline (M-009) and lives at
+`prisma/migrations/20260504_init/`. To apply it once you have a running
+Postgres (M-014 brings up `docker-compose`):
+
+```bash
+docker compose up -d postgres
+npx prisma migrate deploy
+```
+
+The follow-up migration `20260504_audit_log_immutable` installs Postgres
+triggers that enforce ADR-0003 (no UPDATE/DELETE on `inventory_audit_log`).
+
 ## Shopify commands (added M-016+)
 
 ```bash

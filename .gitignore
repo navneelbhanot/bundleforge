@@ -40,7 +40,6 @@ coverage/
 
 # Prisma
 prisma/*.db
-prisma/migrations/**/migration_lock.toml
 src/generated/
 
 # Shopify
