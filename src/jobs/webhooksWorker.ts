@@ -12,6 +12,7 @@ import { redis } from "../config/redis";
 import { dispatch, registerHandler } from "../webhooks/handlers";
 import { appUninstalledHandler } from "../webhooks/handlers/appUninstalled";
 import { customersDataRequestHandler } from "../webhooks/handlers/customersDataRequest";
+import { customersRedactHandler } from "../webhooks/handlers/customersRedact";
 import { shopUpdateHandler } from "../webhooks/handlers/shopUpdate";
 import type { WebhookJobData } from "../webhooks";
 import { WEBHOOKS_QUEUE } from "./queues";
@@ -22,6 +23,7 @@ const workerLogger = logger.child({ module: "webhooks-worker" });
 registerHandler("app/uninstalled", appUninstalledHandler());
 registerHandler("shop/update", shopUpdateHandler());
 registerHandler("customers/data_request", customersDataRequestHandler);
+registerHandler("customers/redact", customersRedactHandler);
 
 export const webhooksWorker = new Worker<WebhookJobData>(
   WEBHOOKS_QUEUE,

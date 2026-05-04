@@ -6,12 +6,19 @@
 
 ## Current milestone
 
-**M-029 — GDPR webhook: customers/redact**
+**M-030 — GDPR webhook: shop/redact**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-029-customers-redact.md`. Same
-shape as M-028; we don't store customer PII, log + ack.
+Boot phase, then write `docs/specs/M-030-shop-redact.md`. Hard-delete
+Shop row by shopifyDomain (FK CASCADE removes bundles, items, orders,
+sync state, etc.). The audit-log trigger blocks per-row DELETE, so
+cascade against `inventory_audit_log` will fail — handle by purging
+audit rows for that shop in a separate transaction (the trigger only
+fires on application DELETE statements; superuser delete bypasses, but
+prisma uses the app role). Decision: drop the trigger only for
+shop_id = X within the txn, then re-enable. Or: detach FK to allow
+orphan rows. Pick the simpler one in the spec.
 
 ## Blockers
 
@@ -31,6 +38,7 @@ None.
 
 ## Recently completed
 
+- M-029 — customers/redact. `docs/sessions/0029-customers-redact.md`.
 - M-028 — customers/data_request. `docs/sessions/0028-customers-data-request.md`.
 - M-027 — shop/update. `docs/sessions/0027-shop-update.md`.
 - M-026 — app/uninstalled + handler registry. `docs/sessions/0026-app-uninstalled.md`.
