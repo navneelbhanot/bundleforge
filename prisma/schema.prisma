@@ -1,0 +1,347 @@
+// =============================================================================
+// BundleForge — Database Schema (Prisma)
+// =============================================================================
+// PostgreSQL 16 | Prisma 5.x | All times in UTC
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// 1. SHOPS — Multi-tenant root table
+// =============================================================================
+model Shop {
+  id              String    @id @default(uuid()) @db.Uuid
+  shopifyDomain   String    @unique @map("shopify_domain")
+  shopifyGid      String    @unique @map("shopify_gid")
+  accessToken     String    @map("access_token")        // AES-256 encrypted
+  name            String
+  email           String
+  planName        String    @default("starter") @map("plan_name")
+  shopifyPlan     String?   @map("shopify_plan")
+  currency        String    @default("USD")
+  timezone        String    @default("UTC")
+  locale          String    @default("en")
+  settings        Json      @default("{}")               // safety_lock, notifications, etc.
+  installedAt     DateTime  @default(now()) @map("installed_at")
+  uninstalledAt   DateTime? @map("uninstalled_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  bundles              Bundle[]
+  bundleOrders         BundleOrder[]
+  inventorySyncStates  InventorySyncState[]
+  inventoryAuditLogs   InventoryAuditLog[]
+  analyticsEvents      AnalyticsEvent[]
+  abTests              AbTest[]
+  integrations         Integration[]
+  subscription         BillingSubscription?
+
+  @@map("shops")
+}
+
+// =============================================================================
+// 2. BUNDLES — Core bundle configuration
+// =============================================================================
+model Bundle {
+  id                 String    @id @default(uuid()) @db.Uuid
+  shopId             String    @map("shop_id") @db.Uuid
+  shopifyProductGid  String?   @unique @map("shopify_product_gid")
+  shopifyProductId   BigInt?   @map("shopify_product_id")
+  title              String
+  slug               String
+  description        String?   @db.Text
+  type               String    // fixed|mix_match|bogo|bxgy|volume|build_box|multipack|gift|mystery|sample|subscription|wholesale|custom
+  status             String    @default("draft") // draft|active|archived|deleted
+  imageUrl           String?   @map("image_url")
+  config             Json      @default("{}") // min/max items, step rules, constraints
+  displaySettings    Json      @default("{}") @map("display_settings") // widget styling
+  seoTitle           String?   @map("seo_title")
+  seoDescription     String?   @map("seo_description") @db.Text
+  priority           Int       @default(0)
+  startsAt           DateTime? @map("starts_at")
+  endsAt             DateTime? @map("ends_at")
+  deletedAt          DateTime? @map("deleted_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  shop               Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  items              BundleItem[]
+  pricingRules       PricingRule[]
+  orders             BundleOrder[]
+  inventorySyncStates InventorySyncState[]
+  inventoryAuditLogs InventoryAuditLog[]
+  analyticsEvents    AnalyticsEvent[]
+  abTests            AbTest[]
+
+  @@index([shopId, status, createdAt(sort: Desc)])
+  @@index([shopId, type])
+  @@index([status, startsAt, endsAt])
+  @@map("bundles")
+}
+
+// =============================================================================
+// 3. BUNDLE_ITEMS — Products/variants within a bundle
+// =============================================================================
+model BundleItem {
+  id                 String    @id @default(uuid()) @db.Uuid
+  bundleId           String    @map("bundle_id") @db.Uuid
+  shopifyProductGid  String    @map("shopify_product_gid")
+  shopifyVariantGid  String?   @map("shopify_variant_gid")
+  title              String
+  sku                String?
+  quantity           Int       @default(1)
+  isRequired         Boolean   @default(true) @map("is_required")
+  isDefault          Boolean   @default(false) @map("is_default")
+  position           Int       @default(0)
+  groupName          String?   @map("group_name") // Step/group for build-a-box
+  minQuantity        Int       @default(0) @map("min_quantity")
+  maxQuantity        Int?      @map("max_quantity")
+  priceOverride      Decimal?  @map("price_override") @db.Decimal(12, 2)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  bundle             Bundle    @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@index([bundleId, position])
+  @@index([shopifyProductGid])
+  @@map("bundle_items")
+}
+
+// =============================================================================
+// 4. PRICING_RULES — Discount and pricing configurations
+// =============================================================================
+model PricingRule {
+  id            String    @id @default(uuid()) @db.Uuid
+  bundleId      String    @map("bundle_id") @db.Uuid
+  type          String    // fixed|percentage|flat_discount|tiered|volume|bogo|custom
+  value         Decimal   @db.Decimal(12, 2) // Discount value
+  minQuantity   Int       @default(1) @map("min_quantity")
+  maxQuantity   Int?      @map("max_quantity")
+  minCartValue  Decimal?  @map("min_cart_value") @db.Decimal(12, 2)
+  conditions    Json      @default("{}") // customer_tags, geo, dates
+  priority      Int       @default(0)
+  isStackable   Boolean   @default(false) @map("is_stackable")
+  startsAt      DateTime? @map("starts_at")
+  endsAt        DateTime? @map("ends_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  bundle        Bundle    @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@index([bundleId, priority(sort: Desc)])
+  @@map("pricing_rules")
+}
+
+// =============================================================================
+// 5. BUNDLE_ORDERS — Orders containing bundles
+// =============================================================================
+model BundleOrder {
+  id                   String    @id @default(uuid()) @db.Uuid
+  shopId               String    @map("shop_id") @db.Uuid
+  bundleId             String    @map("bundle_id") @db.Uuid
+  shopifyOrderGid      String    @unique @map("shopify_order_gid")
+  shopifyOrderId       BigInt    @map("shopify_order_id")
+  shopifyOrderNumber   String    @map("shopify_order_number")
+  customerId           String?   @map("customer_id")
+  status               String    @default("pending") // pending|processed|fulfilled|cancelled|error
+  bundlePrice          Decimal   @map("bundle_price") @db.Decimal(12, 2)
+  originalPrice        Decimal   @map("original_price") @db.Decimal(12, 2)
+  discountAmount       Decimal   @map("discount_amount") @db.Decimal(12, 2)
+  currency             String
+  lineItems            Json      @map("line_items") // Snapshot of bundle items at purchase
+  skuBreakdown         Json      @map("sku_breakdown") // Broken-down SKUs for fulfillment
+  fulfillmentStatus    String    @default("unfulfilled") @map("fulfillment_status")
+  metadata             Json      @default("{}")
+  processedAt          DateTime? @map("processed_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  shop                 Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle               Bundle    @relation(fields: [bundleId], references: [id])
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([bundleId, status])
+  @@map("bundle_orders")
+}
+
+// =============================================================================
+// 6. INVENTORY_SYNC_STATE — Per-bundle-per-location inventory tracking
+// =============================================================================
+model InventorySyncState {
+  id                       String    @id @default(uuid()) @db.Uuid
+  shopId                   String    @map("shop_id") @db.Uuid
+  bundleId                 String    @map("bundle_id") @db.Uuid
+  shopifyInventoryItemGid  String    @map("shopify_inventory_item_gid")
+  locationGid              String    @map("location_gid")
+  availableQuantity        Int       @default(0) @map("available_quantity")
+  committedQuantity        Int       @default(0) @map("committed_quantity")
+  lastSyncedAt             DateTime  @map("last_synced_at")
+  syncStatus               String    @default("synced") @map("sync_status") // synced|pending|error|locked
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  shop                     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle                   Bundle    @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, bundleId, locationGid])
+  @@map("inventory_sync_state")
+}
+
+// =============================================================================
+// 7. INVENTORY_AUDIT_LOG — Immutable inventory change trail (INSERT ONLY)
+// =============================================================================
+model InventoryAuditLog {
+  id                       String    @id @default(uuid()) @db.Uuid
+  shopId                   String    @map("shop_id") @db.Uuid
+  bundleId                 String?   @map("bundle_id") @db.Uuid
+  shopifyInventoryItemGid  String    @map("shopify_inventory_item_gid")
+  locationGid              String    @map("location_gid")
+  action                   String    // adjust|set|reserve|release|sync|rollback
+  quantityBefore           Int       @map("quantity_before")
+  quantityAfter            Int       @map("quantity_after")
+  quantityDelta            Int       @map("quantity_delta")
+  reason                   String    // order_placed|order_cancelled|manual_adjust|sync|bundle_created|safety_lock
+  source                   String    // webhook|admin|api|system|migration
+  referenceId              String?   @map("reference_id")
+  metadata                 Json      @default("{}")
+  createdAt                DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  shop                     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle                   Bundle?   @relation(fields: [bundleId], references: [id])
+
+  @@index([shopId, createdAt(sort: Desc)])
+  @@index([shopifyInventoryItemGid, createdAt])
+  @@map("inventory_audit_log")
+}
+
+// =============================================================================
+// 8. ANALYTICS_EVENTS — High-volume event stream
+// =============================================================================
+model AnalyticsEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  bundleId    String    @map("bundle_id") @db.Uuid
+  eventType   String    @map("event_type") // view|add_to_cart|checkout_start|purchase|remove
+  sessionId   String?   @map("session_id")
+  customerId  String?   @map("customer_id")
+  revenue     Decimal   @default(0) @db.Decimal(12, 2)
+  currency    String?
+  deviceType  String?   @map("device_type") // desktop|mobile|tablet
+  sourcePage  String?   @map("source_page") // product|collection|cart|custom
+  abVariant   String?   @map("ab_variant") // A|B|control
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle      Bundle    @relation(fields: [bundleId], references: [id])
+
+  @@index([shopId, bundleId, eventType, createdAt])
+  @@index([shopId, createdAt])
+  @@map("analytics_events")
+}
+
+// =============================================================================
+// 9. AB_TESTS — Experiment configurations
+// =============================================================================
+model AbTest {
+  id              String    @id @default(uuid()) @db.Uuid
+  shopId          String    @map("shop_id") @db.Uuid
+  bundleId        String    @map("bundle_id") @db.Uuid
+  name            String
+  status          String    @default("draft") // draft|running|completed|cancelled
+  variantAConfig  Json      @map("variant_a_config")
+  variantBConfig  Json      @map("variant_b_config")
+  trafficSplit    Decimal   @default(0.50) @map("traffic_split") @db.Decimal(3, 2)
+  metric          String    @default("conversion_rate")
+  startedAt       DateTime? @map("started_at")
+  endedAt         DateTime? @map("ended_at")
+  winner          String?   // A|B|inconclusive
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle          Bundle    @relation(fields: [bundleId], references: [id])
+
+  @@index([shopId, status])
+  @@map("ab_tests")
+}
+
+// =============================================================================
+// 10. INTEGRATIONS — Third-party service configs (3PL, subscriptions, etc.)
+// =============================================================================
+model Integration {
+  id           String    @id @default(uuid()) @db.Uuid
+  shopId       String    @map("shop_id") @db.Uuid
+  type         String    // shipstation|amazon|recharge|bold|klaviyo|google_merchant|custom_3pl
+  status       String    @default("inactive") // active|inactive|error
+  credentials  Json      // AES-256 encrypted API keys/tokens
+  settings     Json      @default("{}")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  errorMessage String?   @map("error_message") @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  shop         Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, type])
+  @@map("integrations")
+}
+
+// =============================================================================
+// 11. BILLING_SUBSCRIPTIONS — Shopify Billing API state
+// =============================================================================
+model BillingSubscription {
+  id               String    @id @default(uuid()) @db.Uuid
+  shopId           String    @unique @map("shop_id") @db.Uuid
+  shopifyChargeId  String    @map("shopify_charge_id")
+  planName         String    @map("plan_name") // starter|growth|pro|enterprise
+  price            Decimal   @db.Decimal(8, 2)
+  billingInterval  String    @default("monthly") @map("billing_interval") // monthly|annual
+  status           String    // active|pending|cancelled|frozen|expired
+  trialDays        Int       @default(0) @map("trial_days")
+  trialEndsAt      DateTime? @map("trial_ends_at")
+  activatedAt      DateTime? @map("activated_at")
+  cancelledAt      DateTime? @map("cancelled_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  shop             Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@map("billing_subscriptions")
+}
+
+// =============================================================================
+// 12. SESSION — Shopify OAuth session storage
+// =============================================================================
+model Session {
+  id           String    @id
+  shop         String
+  state        String
+  isOnline     Boolean   @default(false) @map("is_online")
+  scope        String?
+  accessToken  String?   @map("access_token")
+  expires      DateTime?
+  accountOwner Boolean   @default(false) @map("account_owner")
+  collaborator Boolean   @default(false)
+
+  @@index([shop])
+  @@map("sessions")
+}
