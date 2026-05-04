@@ -6,13 +6,13 @@
 
 ## Current milestone
 
-**M-027 — Webhook handler: shop/update**
+**M-028 — GDPR webhook: customers/data_request**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-027-shop-update.md`. Add
-`shopUpdateHandler` mapping payload (name/email/currency/timezone/plan/
-locale) onto the Shop row. Register in webhooksWorker. DI-friendly tests.
+Boot phase, then write `docs/specs/M-028-customers-data-request.md`.
+Mandatory by Shopify. We do not store customer PII, so the handler
+logs receipt and returns. Register in webhooksWorker.
 
 ## Blockers
 
@@ -32,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-027 — shop/update. `docs/sessions/0027-shop-update.md`.
 - M-026 — app/uninstalled + handler registry. `docs/sessions/0026-app-uninstalled.md`.
 - M-025 — Webhook dispatcher. `docs/sessions/0025-webhook-dispatcher.md`.
 - M-024 — Webhook HMAC verifier. `docs/sessions/0024-webhook-hmac.md`.

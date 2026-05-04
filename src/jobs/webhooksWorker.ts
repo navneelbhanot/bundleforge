@@ -11,13 +11,15 @@ import { logger } from "../config/logger";
 import { redis } from "../config/redis";
 import { dispatch, registerHandler } from "../webhooks/handlers";
 import { appUninstalledHandler } from "../webhooks/handlers/appUninstalled";
+import { shopUpdateHandler } from "../webhooks/handlers/shopUpdate";
 import type { WebhookJobData } from "../webhooks";
 import { WEBHOOKS_QUEUE } from "./queues";
 
 const workerLogger = logger.child({ module: "webhooks-worker" });
 
-// Register handlers as they land. M-026 first; M-027/M-028/M-029/M-030 add more.
+// Register handlers as they land. M-026, M-027 so far.
 registerHandler("app/uninstalled", appUninstalledHandler());
+registerHandler("shop/update", shopUpdateHandler());
 
 export const webhooksWorker = new Worker<WebhookJobData>(
   WEBHOOKS_QUEUE,
