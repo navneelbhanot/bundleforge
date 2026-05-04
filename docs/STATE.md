@@ -6,15 +6,16 @@
 
 ## Current milestone
 
-**M-016 — Shopify CLI app config validation**
+**M-017 — OAuth install route**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-016-shopify-app-config.md`. Review
-`shopify.app.toml` against the latest Shopify CLI requirements; align
-scopes with `.env.example`. Note: real OAuth keys (M-017+) require a
-Shopify Partner App from the user. The spec lists what they must
-provide.
+Boot phase, then write `docs/specs/M-017-oauth-install.md`. Build a
+small `src/shopify/index.ts` wrapper around `@shopify/shopify-app-express`
+that exposes `shopify.auth.begin()` and `shopify.auth.callback()` for
+mounting in the server. Use the package's in-memory session storage for
+now; the Prisma adapter lands in M-020. Add unit tests that verify the
+auth begin route redirects to Shopify with the right scopes.
 
 ## Blockers
 
@@ -34,6 +35,7 @@ None.
 
 ## Recently completed
 
+- M-016 — Shopify app config. `docs/sessions/0016-shopify-app-config.md`.
 - M-015 — Sentry integration. `docs/sessions/0015-sentry.md`.
 - M-014 — docker-compose. `docs/sessions/0014-docker-compose.md`.
 - M-013 — CI test job verified. `docs/sessions/0013-ci-test.md`.

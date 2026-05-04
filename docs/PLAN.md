@@ -35,7 +35,7 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-016 | Shopify CLI app config validation | pending | — | `shopify.app.toml` review |
+| M-016 | Shopify CLI app config validation | done (2026-05-04) | `docs/specs/M-016-shopify-app-config.md` | Scopes aligned; runbook documents user setup |
 | M-017 | OAuth install route | pending | — | `/auth` |
 | M-018 | OAuth callback + token persistence | pending | — | Encrypts `Shop.accessToken` |
 | M-019 | Session middleware (`requireShopSession`) | pending | — | Loads `Shop` from token |
@@ -270,6 +270,7 @@
 | M-013 | CI test job verified | 2026-05-04 | `docs/sessions/0013-ci-test.md` |
 | M-014 | docker-compose for local dev | 2026-05-04 | `docs/sessions/0014-docker-compose.md` |
 | M-015 | Sentry integration | 2026-05-04 | `docs/sessions/0015-sentry.md` |
+| M-016 | Shopify app config validation | 2026-05-04 | `docs/sessions/0016-shopify-app-config.md` |
 
 ---
 

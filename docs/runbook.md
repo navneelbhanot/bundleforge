@@ -88,6 +88,26 @@ ADR-0003.
 The follow-up migration `20260504_audit_log_immutable` installs Postgres
 triggers that enforce ADR-0003 (no UPDATE/DELETE on `inventory_audit_log`).
 
+## Shopify Partner App setup
+
+Required before OAuth flows (M-017) can run end-to-end:
+
+1. Create a Shopify Partner account: https://partners.shopify.com
+2. Create a new app. Choose "Custom distribution" or "Public app" as
+   appropriate.
+3. Generate API credentials and add them to your local `.env`:
+   - `SHOPIFY_API_KEY`
+   - `SHOPIFY_API_SECRET`
+4. Edit `shopify.app.toml`:
+   - Set `client_id` to your app's ID (visible in the partner dashboard).
+   - Update `[auth].redirect_urls` and `[app_proxy].url` to your tunnel
+     URL (`shopify app dev` prints one) or your production domain.
+5. Create at least one development store and link it via
+   `shopify app config link`.
+
+The scopes in `shopify.app.toml [access_scopes]` must match
+`SHOPIFY_SCOPES` in `.env`. M-016 keeps these in sync.
+
 ## Shopify commands (added M-016+)
 
 ```bash
