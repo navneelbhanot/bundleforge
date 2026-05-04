@@ -8,8 +8,10 @@ import { redis } from "../config/redis";
 
 export const ORDER_QUEUE = "order-processing";
 export const INVENTORY_QUEUE = "inventory-sync";
+export const WEBHOOKS_QUEUE = "shopify-webhooks";
 
 export const orderQueue = new Queue(ORDER_QUEUE, { connection: redis });
 export const inventoryQueue = new Queue(INVENTORY_QUEUE, {
   connection: redis,
 });
+export const webhooksQueue = new Queue(WEBHOOKS_QUEUE, { connection: redis });

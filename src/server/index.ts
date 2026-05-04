@@ -30,6 +30,7 @@ import { rateLimiter } from "../middleware/rateLimiter";
 import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
 import { afterAuth } from "../shopify/install";
+import { mountWebhooks } from "../webhooks";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -107,6 +108,9 @@ export function createApp(): Express {
     afterAuth(),
     shopify.redirectToShopifyOrAppRoot(),
   );
+
+  // Shopify webhooks (M-024 verify + M-025 dispatch). Workers in M-026+.
+  mountWebhooks(app);
 
   app.get("/health", async (_req: Request, res: Response): Promise<void> => {
     const [db, redisOk] = await Promise.all([pingDb(), pingRedis()]);

@@ -6,13 +6,14 @@
 
 ## Current milestone
 
-**M-025 — Webhook dispatcher to BullMQ**
+**M-026 — Webhook handler: app/uninstalled**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-025-webhook-dispatcher.md`. Mount
-the verifier on `/api/webhooks`. Dispatch each verified webhook to a
-BullMQ queue keyed by topic. Always respond 200 quickly.
+Boot phase, then write `docs/specs/M-026-app-uninstalled.md`. Build a
+small handler registry in `src/webhooks/handlers.ts` (so M-027–M-030
+plug in uniformly), implement the `app/uninstalled` handler that sets
+`Shop.uninstalledAt = now()`, wire the worker. DI-friendly tests.
 
 ## Blockers
 
@@ -32,6 +33,7 @@ None.
 
 ## Recently completed
 
+- M-025 — Webhook dispatcher. `docs/sessions/0025-webhook-dispatcher.md`.
 - M-024 — Webhook HMAC verifier. `docs/sessions/0024-webhook-hmac.md`.
 - M-023 — REST client wrapper. `docs/sessions/0023-rest-client.md`.
 - M-022 — GraphQL client wrapper. `docs/sessions/0022-graphql-client.md`.
