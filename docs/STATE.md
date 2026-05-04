@@ -6,15 +6,13 @@
 
 ## Current milestone
 
-**M-032 — appSubscriptionCreate (Shopify Billing)**
+**M-033 — subscription status sync webhook**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-032-app-subscription-create.md`.
-`src/services/billing/createSubscription.ts`: issues the Shopify
-GraphQL `appSubscriptionCreate`, persists the result (charge id, trial
-dates, status) into `BillingSubscription`, returns the confirmation
-URL. Tests inject fake `shopifyGraphql` + fake prisma.
+Boot phase, then write `docs/specs/M-033-subscription-sync.md`. Handler
+for Shopify `app_subscriptions/update`: maps payload status onto
+BillingSubscription.status. Register in webhooksWorker. DI tests.
 
 ## Blockers
 
@@ -34,6 +32,7 @@ None.
 
 ## Recently completed
 
+- M-032 — appSubscriptionCreate. `docs/sessions/0032-app-subscription-create.md`.
 - M-031 — Plan registry (full). `docs/sessions/0031-plan-registry.md`.
 - M-030 — shop/redact + ADR-0003a. `docs/sessions/0030-shop-redact.md`.
 - M-029 — customers/redact. `docs/sessions/0029-customers-redact.md`.
