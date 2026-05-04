@@ -6,13 +6,12 @@
 
 ## Current milestone
 
-**M-028 — GDPR webhook: customers/data_request**
+**M-029 — GDPR webhook: customers/redact**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-028-customers-data-request.md`.
-Mandatory by Shopify. We do not store customer PII, so the handler
-logs receipt and returns. Register in webhooksWorker.
+Boot phase, then write `docs/specs/M-029-customers-redact.md`. Same
+shape as M-028; we don't store customer PII, log + ack.
 
 ## Blockers
 
@@ -32,6 +31,7 @@ None.
 
 ## Recently completed
 
+- M-028 — customers/data_request. `docs/sessions/0028-customers-data-request.md`.
 - M-027 — shop/update. `docs/sessions/0027-shop-update.md`.
 - M-026 — app/uninstalled + handler registry. `docs/sessions/0026-app-uninstalled.md`.
 - M-025 — Webhook dispatcher. `docs/sessions/0025-webhook-dispatcher.md`.
