@@ -6,14 +6,15 @@
 
 ## Current milestone
 
-**M-008 — Rate limiter middleware + tests**
+**M-009 — Initial Prisma migration**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-008-rate-limiter.md`. Replace
-`src/middleware/rateLimiter.ts`: configurable per-shop key derivation,
-in-memory limiter for tests (avoid Redis dependency), plan-aware caps
-(plan registry stub if M-031 not yet done), `RateLimitError` integration.
+Boot phase, then write `docs/specs/M-009-initial-migration.md`. Use
+`prisma migrate dev --create-only --name init` to generate the SQL
+without requiring a live DB. Commit the migration file. Document that
+applying it (`prisma migrate deploy`) requires the dev DB which lands
+in M-014 (docker-compose).
 
 ## Blockers
 
@@ -33,6 +34,7 @@ None.
 
 ## Recently completed
 
+- M-008 — Rate limiter. `docs/sessions/0008-rate-limiter.md`.
 - M-007 — Error handler. `docs/sessions/0007-error-handler.md`.
 - M-006 — Server scaffold + /health. `docs/sessions/0006-server-scaffold.md`.
 - M-005 — Redis + BullMQ. `docs/sessions/0005-redis-bullmq.md`.

@@ -22,7 +22,7 @@
 | M-005 | Redis + BullMQ client init | done (2026-05-04) | `docs/specs/M-005-redis-bullmq.md` | ioredis singleton, queues module, backoffMs |
 | M-006 | Express server scaffold + `/health` + tests | done (2026-05-04) | `docs/specs/M-006-server-scaffold.md` | createApp factory, /health pings DB+Redis with timeout, supertest |
 | M-007 | Error handler middleware + tests | done (2026-05-04) | `docs/specs/M-007-error-handler.md` | Typed taxonomy, requestId, ZodError mapping, Sentry seam |
-| M-008 | Rate limiter middleware + tests | pending | — | Redis-backed, 100 req/min/shop |
+| M-008 | Rate limiter middleware + tests | done (2026-05-04) | `docs/specs/M-008-rate-limiter.md` | Redis or memory adapter, plan-aware, RateLimitError integration |
 | M-009 | Initial Prisma migration applied | pending | — | `prisma migrate dev --name init` |
 | M-010 | Prisma seed script | pending | — | Dev-store fixture |
 | M-011 | CI workflow: typecheck | pending | — | GitHub Actions |
@@ -262,6 +262,7 @@
 | M-005 | Redis + BullMQ | 2026-05-04 | `docs/sessions/0005-redis-bullmq.md` |
 | M-006 | Server scaffold + /health | 2026-05-04 | `docs/sessions/0006-server-scaffold.md` |
 | M-007 | Error handler middleware | 2026-05-04 | `docs/sessions/0007-error-handler.md` |
+| M-008 | Rate limiter | 2026-05-04 | `docs/sessions/0008-rate-limiter.md` |
 
 ---
 
