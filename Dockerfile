@@ -1,38 +1,36 @@
-FROM node:20-alpine AS base
+# BundleForge web + worker Dockerfile.
+#
+# Single-stage Node 20 alpine. We keep devDependencies in the runtime
+# image because production runs `tsx src/...` (not pre-compiled JS) and
+# also needs the Prisma CLI for `migrate deploy` on boot. Image lands at
+# ~280 MB which is fine for Railway. A multi-stage build can come later
+# once tsx-based runtime is replaced with a tsc-compiled emit.
+#
+# Override CMD per service:
+#   web:    (default — npm run start:web)
+#   worker: npm run start:worker
+
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev && npm cache clean --force
+# Build dependencies for native modules + openssl for Prisma.
+RUN apk add --no-cache libc6-compat openssl
 
-# Build
-FROM base AS build
-COPY package.json package-lock.json* ./
-RUN npm ci
+# Copy manifests first so the install layer caches across code changes.
+COPY package.json package-lock.json .npmrc ./
+
+# Install everything: vite, tsx, prisma CLI, etc. all needed at runtime.
+RUN npm ci --include=dev
+
+# Copy the rest of the source and build.
 COPY . .
-RUN npx prisma generate
 RUN npm run build
 
-# Production
-FROM base AS production
 ENV NODE_ENV=production
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 bundleforge
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/src/generated ./src/generated
-COPY --from=build /app/package.json ./package.json
-
-USER bundleforge
-
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:${PORT:-3000}/health || exit 1
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server/index.js"]
+CMD ["npm", "run", "start:web"]
