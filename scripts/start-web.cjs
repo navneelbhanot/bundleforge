@@ -43,7 +43,11 @@ if (migrate.status !== 0) {
 }
 process.stdout.write("[start-web] migrations OK\n");
 
-// 2) Locate tsx and load the server entrypoint in-process.
+// 2) Locate tsx and exec the server entrypoint as a child. Loading tsx
+//    in-process via `require("tsx/cli")` does NOT register a TS hook —
+//    that path is the CLI's argv parser, not a loader installer — so the
+//    subsequent `require(".ts")` was falling through to Node's plain-JS
+//    parser and exploding on type annotations.
 let tsxPath;
 try {
   tsxPath = require.resolve("tsx/cli");
@@ -55,5 +59,18 @@ try {
 }
 
 process.stdout.write("[start-web] handing off to tsx → src/server/index.ts\n");
-require(tsxPath);
-require("../src/server/index.ts");
+const { spawn } = require("node:child_process");
+const child = spawn(process.execPath, [tsxPath, "src/server/index.ts"], {
+  stdio: "inherit",
+  env: process.env,
+});
+const forward = (sig) => () => child.kill(sig);
+process.on("SIGTERM", forward("SIGTERM"));
+process.on("SIGINT", forward("SIGINT"));
+child.on("exit", (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+  } else {
+    process.exit(code ?? 1);
+  }
+});

@@ -1,9 +1,25 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 process.stdout.write("[start-worker] script entered\n");
+
+let tsxPath;
 try {
-  require(require.resolve("tsx/cli"));
-  require("../src/jobs/worker.ts");
+  tsxPath = require.resolve("tsx/cli");
 } catch (err) {
-  process.stderr.write("[start-worker] FATAL: " + (err && err.stack ? err.stack : err) + "\n");
+  process.stderr.write("[start-worker] FATAL: tsx is not installed.\n");
+  process.stderr.write(String(err) + "\n");
   process.exit(1);
 }
+
+const { spawn } = require("node:child_process");
+const child = spawn(process.execPath, [tsxPath, "src/jobs/worker.ts"], {
+  stdio: "inherit",
+  env: process.env,
+});
+const forward = (sig) => () => child.kill(sig);
+process.on("SIGTERM", forward("SIGTERM"));
+process.on("SIGINT", forward("SIGINT"));
+child.on("exit", (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  else process.exit(code ?? 1);
+});
