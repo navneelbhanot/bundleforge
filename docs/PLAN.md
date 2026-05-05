@@ -102,11 +102,11 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-056 | Vertical slice: fixed bundle E2E | pending | — | Sets the pattern for all slices |
-| M-057 | Vertical slice: multipack E2E | pending | — | |
-| M-058 | Vertical slice: volume bundle E2E | pending | — | |
-| M-059 | Vertical slice: mix-and-match E2E | pending | — | |
-| M-060 | Vertical slice: BOGO E2E | pending | — | |
+| M-056 | Vertical slice: fixed bundle | done (2026-05-05) | `docs/specs/M-056-fixed-slice.md` | service+pricing slice; cart/checkout layer deferred to M-082+ |
+| M-057 | Vertical slice: multipack | done (2026-05-05) | `docs/sessions/0057-multipack-slice.md` | |
+| M-058 | Vertical slice: volume bundle | done (2026-05-05) | `docs/sessions/0058-volume-slice.md` | |
+| M-059 | Vertical slice: mix-and-match | done (2026-05-05) | `docs/sessions/0059-mix-match-slice.md` | |
+| M-060 | Vertical slice: BOGO | done (2026-05-05) | `docs/sessions/0060-bogo-slice.md` | |
 | M-061 | Vertical slice: BXGY E2E | pending | — | |
 | M-062 | Vertical slice: build-a-box E2E | pending | — | |
 | M-063 | Vertical slice: subscription bundle E2E | pending | — | Recharge integration may defer |
@@ -310,6 +310,11 @@
 | M-053 | bundle routes | 2026-05-05 | `docs/sessions/0053-bundle-routes.md` |
 | M-054 | BundleItem service | 2026-05-05 | `docs/sessions/0054-bundle-item-service.md` |
 | M-055 | PricingRule service | 2026-05-05 | `docs/sessions/0055-pricing-rule-service.md` |
+| M-056 | Fixed bundle slice | 2026-05-05 | `docs/sessions/0056-fixed-slice.md` |
+| M-057 | Multipack slice | 2026-05-05 | `docs/sessions/0057-multipack-slice.md` |
+| M-058 | Volume slice | 2026-05-05 | `docs/sessions/0058-volume-slice.md` |
+| M-059 | Mix-and-match slice | 2026-05-05 | `docs/sessions/0059-mix-match-slice.md` |
+| M-060 | BOGO slice | 2026-05-05 | `docs/sessions/0060-bogo-slice.md` |
 
 ---
 

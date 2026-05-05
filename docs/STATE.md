@@ -6,18 +6,15 @@
 
 ## Current milestone
 
-**M-041 — Pricing rule type `percentage`**
-
-(M-040 closes the user's "push to M-040" goal. Phase D continues with
-M-041..M-047 — each new rule type is small additive work on the engine
-landed in M-040.)
+**M-061 — Vertical slice: BXGY (buy X, get Y)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-041-percentage-rule.md`. Add
-`percentage` to the switch in `discountForRule`: discount =
-floor(subtotal × value/100), clamped to subtotal. Add 2 fixtures and
-3+ tests.
+Boot phase, then write `docs/specs/M-061-bxgy-slice.md`. BXGY differs
+from BOGO in that the "Y" can be from a different SKU set than the
+"X". For now BXGY uses the same `bogo` rule type with explicit
+itemBundleId tags; the slice test asserts the price calculation. Pattern
+mirrors M-056..M-060 (vi.mocked repo, buildPricingInput helper).
 
 ## Blockers
 
@@ -25,59 +22,37 @@ None.
 
 ## Carry-overs (still active)
 
-- Pre-existing stubs in tsconfig exclude: `src/services/bundles/index.ts`
-  (M-049 will rewrite + re-include), `src/routes/bundles.ts` (M-053).
-  M-006 cleared `src/server/index.ts`.
-- Lint deferred to M-012.
+- Lint deferred behavior absent (lint is wired since M-012).
 - Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6, etc.)
-  flagged for ADR before M-016.
-- npm audit findings (~13 moderate after pino-http + supertest) → M-140.
+  flagged for ADR before going live.
+- npm audit findings → M-140.
 - `prisma/seed.ts` excluded from main tsc build; M-010 verifies it
-  compiles under ts-node.
+  compiles under ts-node. **Both M-001 stub-exclusion carry-overs
+  cleared as of M-053.**
 
 ## Recently completed
 
-- M-040 — fixed rule + property tests. `docs/sessions/0040-fixed-rule.md`.
-- M-039 — pricing engine spec lock. `docs/sessions/0039-pricing-engine.md`.
-- M-038 — billing UI deferred (admin frontend phase).
-- M-037 — billing routes. `docs/sessions/0037-billing-routes.md`.
-- M-036 — plan caps middleware. `docs/sessions/0036-plan-caps.md`.
-- M-035 — annual billing (rolled into M-031).
-- M-034 — cancel + plan change. `docs/sessions/0034-cancel-and-change.md`.
-- M-033 — subscription sync webhook. `docs/sessions/0033-subscription-sync.md`.
-- M-032 — appSubscriptionCreate. `docs/sessions/0032-app-subscription-create.md`.
-- M-031 — Plan registry (full). `docs/sessions/0031-plan-registry.md`.
-- M-030 — shop/redact + ADR-0003a. `docs/sessions/0030-shop-redact.md`.
-- M-029 — customers/redact. `docs/sessions/0029-customers-redact.md`.
-- M-028 — customers/data_request. `docs/sessions/0028-customers-data-request.md`.
-- M-027 — shop/update. `docs/sessions/0027-shop-update.md`.
-- M-026 — app/uninstalled + handler registry. `docs/sessions/0026-app-uninstalled.md`.
-- M-025 — Webhook dispatcher. `docs/sessions/0025-webhook-dispatcher.md`.
-- M-024 — Webhook HMAC verifier. `docs/sessions/0024-webhook-hmac.md`.
-- M-023 — REST client wrapper. `docs/sessions/0023-rest-client.md`.
-- M-022 — GraphQL client wrapper. `docs/sessions/0022-graphql-client.md`.
-- M-021 — App Bridge session validation. `docs/sessions/0021-app-bridge.md`.
-- M-020 — Prisma session storage. `docs/sessions/0020-prisma-session.md`.
-- M-019 — Session middleware. `docs/sessions/0019-session-middleware.md`.
-- M-018 — OAuth callback + persist. `docs/sessions/0018-oauth-callback.md`.
-- M-017 — OAuth install. `docs/sessions/0017-oauth-install.md`.
-- M-016 — Shopify app config. `docs/sessions/0016-shopify-app-config.md`.
-- M-015 — Sentry integration. `docs/sessions/0015-sentry.md`.
-- M-014 — docker-compose. `docs/sessions/0014-docker-compose.md`.
-- M-013 — CI test job verified. `docs/sessions/0013-ci-test.md`.
-- M-012 — ESLint + CI lint. `docs/sessions/0012-eslint.md`.
-- M-011 — CI typecheck. `docs/sessions/0011-ci-typecheck.md`.
-- M-010 — Seed script. `docs/sessions/0010-seed.md`.
-- M-009 — Initial Prisma migration (offline). `docs/sessions/0009-initial-migration.md`.
-- M-008 — Rate limiter. `docs/sessions/0008-rate-limiter.md`.
-- M-007 — Error handler. `docs/sessions/0007-error-handler.md`.
-- M-006 — Server scaffold + /health. `docs/sessions/0006-server-scaffold.md`.
-- M-005 — Redis + BullMQ. `docs/sessions/0005-redis-bullmq.md`.
-- M-004 — Prisma client. `docs/sessions/0004-prisma-client.md`.
-- M-003 — Pino logger. `docs/sessions/0003-logger.md`.
-- M-002 — Encryption utility (AES-256-GCM). `docs/sessions/0002-encryption.md`.
-- M-001 — Env validation. `docs/sessions/0001-env-bootstrap.md`.
-- M-000 — Bootstrap planning system. `docs/sessions/0000-bootstrap-planning-system.md`.
+- M-060 — BOGO vertical slice. `docs/sessions/0060-bogo-slice.md`.
+- M-059 — mix-and-match slice. `docs/sessions/0059-mix-match-slice.md`.
+- M-058 — volume slice. `docs/sessions/0058-volume-slice.md`.
+- M-057 — multipack slice. `docs/sessions/0057-multipack-slice.md`.
+- M-056 — fixed bundle slice. `docs/sessions/0056-fixed-slice.md`.
+- M-055 — PricingRule service. `docs/sessions/0055-pricing-rule-service.md`.
+- M-054 — BundleItem service. `docs/sessions/0054-bundle-item-service.md`.
+- M-053 — bundle routes. `docs/sessions/0053-bundle-routes.md`.
+- M-052 — bundle archive. `docs/sessions/0052-bundle-archive.md`.
+- M-051 — bundle publish. `docs/sessions/0051-bundle-publish.md`.
+- M-050 — bundle duplicate. `docs/sessions/0050-bundle-duplicate.md`.
+- M-049 — bundle service CRUD rewrite. `docs/sessions/0049-bundle-service.md`.
+- M-048 — bundle config validators. `docs/sessions/0048-bundle-validators.md`.
+- M-047 — condition evaluator verified. `docs/sessions/0047-conditions.md`.
+- M-046 — stackability + priority verified. `docs/sessions/0046-stackability.md`.
+- M-045 — bogo rule. `docs/sessions/0045-bogo-rule.md`.
+- M-044 — volume rule. `docs/sessions/0044-volume-rule.md`.
+- M-043 — tiered rule. `docs/sessions/0043-tiered-rule.md`.
+- M-042 — flat_discount rule. `docs/sessions/0042-flat-discount-rule.md`.
+- M-041 — percentage rule. `docs/sessions/0041-percentage-rule.md`.
+- (Earlier history in PLAN.md.)
 
 ## Working branch
 
