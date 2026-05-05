@@ -332,15 +332,23 @@ model BillingSubscription {
 // 12. SESSION — Shopify OAuth session storage
 // =============================================================================
 model Session {
-  id           String    @id
-  shop         String
-  state        String
-  isOnline     Boolean   @default(false) @map("is_online")
-  scope        String?
-  accessToken  String?   @map("access_token")
-  expires      DateTime?
-  accountOwner Boolean   @default(false) @map("account_owner")
-  collaborator Boolean   @default(false)
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false) @map("is_online")
+  scope               String?
+  accessToken         String?   @map("access_token")
+  expires             DateTime?
+  accountOwner        Boolean   @default(false) @map("account_owner")
+  collaborator        Boolean   @default(false)
+  userId              BigInt?   @map("user_id")
+  firstName           String?   @map("first_name")
+  lastName            String?   @map("last_name")
+  email               String?
+  locale              String?
+  emailVerified       Boolean?  @map("email_verified")
+  refreshToken        String?   @map("refresh_token")
+  refreshTokenExpires DateTime? @map("refresh_token_expires")
 
   @@index([shop])
   @@map("sessions")
