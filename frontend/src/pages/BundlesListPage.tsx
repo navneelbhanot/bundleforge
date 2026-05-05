@@ -2,9 +2,11 @@
  * Bundles list page (M-097).
  *
  * Fetches /api/v1/bundles, renders Polaris IndexTable. Supports
- * filtering by status and type via the existing service.
+ * filtering by status and type via the existing service. Surfaces the
+ * OnboardingWizard for fresh shops (zero bundles) until dismissed.
  */
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   IndexTable,
@@ -14,6 +16,8 @@ import {
   Badge,
 } from "@shopify/polaris";
 
+import { OnboardingWizard } from "../components/OnboardingWizard";
+
 interface BundleRow {
   id: string;
   title: string;
@@ -22,9 +26,32 @@ interface BundleRow {
   slug: string;
 }
 
+const ONBOARDING_DISMISSED_KEY = "bundleforge:onboarding-dismissed";
+
+function readDismissed(): boolean {
+  // localStorage is per-origin and persists across reloads; the wizard
+  // re-appears across browsers (intentional for now).
+  try {
+    return window.localStorage.getItem(ONBOARDING_DISMISSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeDismissed(): void {
+  try {
+    window.localStorage.setItem(ONBOARDING_DISMISSED_KEY, "1");
+  } catch {
+    // private mode / disabled — silently fall through; the wizard will
+    // re-appear on next load, which is acceptable.
+  }
+}
+
 export function BundlesListPage(): JSX.Element {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<BundleRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [wizardDismissed, setWizardDismissed] = useState(readDismissed);
 
   useEffect(() => {
     fetch("/api/v1/bundles")
@@ -32,6 +59,16 @@ export function BundlesListPage(): JSX.Element {
       .then((body: { data: BundleRow[] }) => setRows(body.data))
       .catch((e: Error) => setError(e.message));
   }, []);
+
+  function handleDismiss(): void {
+    writeDismissed();
+    setWizardDismissed(true);
+  }
+
+  function handleComplete(): void {
+    handleDismiss();
+    navigate("/bundles/new");
+  }
 
   if (error) {
     return (
@@ -50,6 +87,19 @@ export function BundlesListPage(): JSX.Element {
         <Card>
           <Spinner accessibilityLabel="Loading bundles" />
         </Card>
+      </Page>
+    );
+  }
+
+  // Fresh shop: no bundles yet AND wizard hasn't been dismissed. Show
+  // the three-step orientation flow instead of the empty IndexTable.
+  if (rows.length === 0 && !wizardDismissed) {
+    return (
+      <Page title="Bundles">
+        <OnboardingWizard
+          onComplete={handleComplete}
+          onDismiss={handleDismiss}
+        />
       </Page>
     );
   }

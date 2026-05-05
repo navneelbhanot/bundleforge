@@ -23,7 +23,23 @@ const SHOP = "demo.myshopify.com";
 
 // --- helpers ---------------------------------------------------------
 
-async function stubShopifyAndApi(page: import("@playwright/test").Page) {
+interface StubOpts {
+  /**
+   * When true, /api/v1/bundles GET returns an empty list — used to
+   * exercise the OnboardingWizard fresh-shop branch.
+   */
+  emptyBundles?: boolean;
+  /**
+   * When true, also wipes the wizard-dismissed localStorage flag
+   * before the page loads, so a previous test doesn't poison state.
+   */
+  clearWizardDismissed?: boolean;
+}
+
+async function stubShopifyAndApi(
+  page: import("@playwright/test").Page,
+  opts: StubOpts = {},
+) {
   // Block the App Bridge CDN script. Loading it triggers a top-level
   // redirect to accounts.shopify.com when the API key isn't a real one
   // and the shop param doesn't resolve — which is exactly the test
@@ -41,23 +57,37 @@ async function stubShopifyAndApi(page: import("@playwright/test").Page) {
       };
   });
 
+  if (opts.clearWizardDismissed) {
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.removeItem("bundleforge:onboarding-dismissed");
+      } catch {
+        // localStorage unavailable — fine, wizard appears by default
+      }
+    });
+  }
+
   const observed: { url: string; auth: string | null }[] = [];
+
+  const bundlesPayload = opts.emptyBundles
+    ? { data: [], pagination: { total: 0, page: 1, pageSize: 25 } }
+    : {
+        data: [
+          {
+            id: "00000000-0000-0000-0000-000000000001",
+            title: "Demo Bundle",
+            type: "fixed",
+            status: "active",
+            slug: "demo",
+          },
+        ],
+        pagination: { total: 1, page: 1, pageSize: 25 },
+      };
 
   // Match canned responses by URL prefix; default to {data: []} so
   // pages that aren't explicitly mocked still resolve their fetch.
   const handlers: Record<string, () => unknown> = {
-    "/api/v1/bundles": () => ({
-      data: [
-        {
-          id: "00000000-0000-0000-0000-000000000001",
-          title: "Demo Bundle",
-          type: "fixed",
-          status: "active",
-          slug: "demo",
-        },
-      ],
-      pagination: { total: 1, page: 1, pageSize: 25 },
-    }),
+    "/api/v1/bundles": () => bundlesPayload,
     "/api/v1/orders": () => ({
       data: [],
       pagination: { total: 0, page: 1, pageSize: 25 },
@@ -148,6 +178,29 @@ test("authFetch attaches the App Bridge JWT to /api/v1/* calls", async ({ page }
       `${call.url} should carry an Authorization header`,
     ).toMatch(/^Bearer test\.jwt\.token$/);
   }
+});
+
+test("OnboardingWizard appears for fresh shops and routes to /bundles/new", async ({
+  page,
+}) => {
+  await stubShopifyAndApi(page, { emptyBundles: true, clearWizardDismissed: true });
+
+  await page.goto(`/?shop=${SHOP}`);
+
+  // Step 1: welcome.
+  await expect(page.getByRole("heading", { name: /Welcome to BundleForge/i })).toBeVisible();
+  await page.getByRole("button", { name: /Get started/i }).click();
+
+  // Step 2: pick a bundle type.
+  await expect(page.getByRole("heading", { name: /Create your first bundle/i })).toBeVisible();
+  await page.getByRole("button", { name: /^Create bundle$/i }).click();
+
+  // Step 3: install the theme block.
+  await expect(page.getByRole("heading", { name: /Install the theme block/i })).toBeVisible();
+  await page.getByRole("button", { name: /^Done$/i }).click();
+
+  // Completion routes the merchant to the create page.
+  await expect(page).toHaveURL(/\/bundles\/new/);
 });
 
 test("/bundles/new mounts the create form (no 500, no detail-page fetch)", async ({
