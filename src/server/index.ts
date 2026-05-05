@@ -198,13 +198,17 @@ export function createApp(): Express {
 export async function startServer(): Promise<void> {
   initSentry();
   const app = createApp();
-  app.listen(env.PORT, () => {
+  // Bind explicitly to 0.0.0.0 so Railway / Docker / k8s health probes
+  // can reach us. Express 5 defaults vary across loopback adapters.
+  app.listen(env.PORT, "0.0.0.0", () => {
     logger.info({ port: env.PORT, nodeEnv: env.NODE_ENV }, "Server listening");
   });
 }
 
-// Auto-listen when run directly, but never under tests.
-if (require.main === module && env.NODE_ENV !== "test") {
+// Auto-listen unless under tests. We avoid `require.main === module` because
+// it doesn't reliably evaluate true under `tsx` / ESM-shim runtimes; instead
+// we rely on the entrypoint contract (this file is the start:web target).
+if (env.NODE_ENV !== "test") {
   startServer().catch((err) => {
     logger.error({ err }, "Failed to start server");
     process.exit(1);
