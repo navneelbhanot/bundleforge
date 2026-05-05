@@ -338,6 +338,7 @@
 | M-150..M-155 | Launch (legal templates, demo data, beta onboarding, App Store) | 2026-05-05 | `docs/sessions/0150-launch.md` |
 | post-M-155 | First real Shopify install: deploy + auth + iframe + create-bundle fixes; new SPA-headers, auth-flow, Playwright test layers; CI e2e job | 2026-05-05 | `docs/sessions/0157-first-install-deploy-fixes.md` |
 | post-M-155 | Crisp live chat + Storefront API for Hydrogen + Bundle CRUD e2e + Railway runbook + audit-driven UI polish | 2026-05-06 | `docs/sessions/0158-crisp-storefront-crud-e2e.md` |
+| post-M-155 | Visual UI revamp: card-grid bundle type picker + differentiator-led fresh-shop dashboard + App Bridge sidebar `<a>` fix | 2026-05-06 | `docs/sessions/0159-ui-revamp-navmenu-typecards.md` |
 
 ---
 

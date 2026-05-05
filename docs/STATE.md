@@ -86,6 +86,16 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Visual UI revamp + sidebar nav fix** (2026-05-06 evening).
+  Card-grid bundle type picker with gradient banners (distinct from
+  competitor product-photo aesthetic); fresh-shop dashboard centered
+  on three differentiator cards (atomic inventory / pricing parity /
+  immutable audit log) instead of a generic onboarding checklist;
+  stat cards above the bundles table when populated. NavMenu
+  switched from React Router `<Link>` to plain `<a>` so App Bridge
+  click interception works and the outer admin URL stays in sync.
+  6/6 Playwright now (split the wizard test).
+  `docs/sessions/0159-ui-revamp-navmenu-typecards.md`.
 - **Crisp live chat + Storefront API endpoint + Bundle CRUD e2e test
   + Railway runbook** (2026-05-06 PM). Wired Crisp via env-driven
   meta-tag substitution + lazy loader; added `/api/storefront/v1/`
