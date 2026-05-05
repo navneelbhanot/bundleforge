@@ -127,6 +127,14 @@ export function createApp(): Express {
       contentSecurityPolicy: false,
       frameguard: false,
       crossOriginEmbedderPolicy: false,
+      // COOP=same-origin breaks the embedded iframe ↔ admin.shopify.com
+      // window.opener channel that App Bridge / Shopify's "app loaded"
+      // detector relies on. Without this disabled, Shopify renders the
+      // "This app can't load due to an issue with browser cookies" stub.
+      crossOriginOpenerPolicy: false,
+      // CORP=same-origin would also block admin.shopify.com from
+      // including this document as a subresource (the iframe).
+      crossOriginResourcePolicy: false,
     }),
   );
   app.use((req: Request, res: Response, next: NextFunction): void => {
