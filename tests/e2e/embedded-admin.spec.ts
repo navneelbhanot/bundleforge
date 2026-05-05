@@ -180,23 +180,58 @@ test("authFetch attaches the App Bridge JWT to /api/v1/* calls", async ({ page }
   }
 });
 
-test("OnboardingWizard appears for fresh shops and routes to /bundles/new", async ({
+test("Fresh-shop dashboard renders differentiator cards + tour entry", async ({
   page,
 }) => {
   await stubShopifyAndApi(page, { emptyBundles: true, clearWizardDismissed: true });
 
   await page.goto(`/?shop=${SHOP}`);
 
+  // Hero copy.
+  await expect(
+    page.getByRole("heading", { name: /No bundles yet/i }),
+  ).toBeVisible();
+
+  // Three differentiator cards — these encode the codebase's actual
+  // technical claims; if any of them disappear the dashboard regresses
+  // to "generic onboarding checklist" territory we deliberately avoided.
+  await expect(
+    page.getByRole("heading", { name: /Atomic inventory/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Pricing parity/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Immutable audit log/i }),
+  ).toBeVisible();
+});
+
+test("OnboardingWizard tour walks through 3 steps and routes to /bundles/new", async ({
+  page,
+}) => {
+  await stubShopifyAndApi(page, { emptyBundles: true, clearWizardDismissed: true });
+
+  await page.goto(`/?shop=${SHOP}`);
+
+  // Enter the tour from the fresh-shop dashboard.
+  await page.getByRole("button", { name: /Take the 30-second tour/i }).click();
+
   // Step 1: welcome.
-  await expect(page.getByRole("heading", { name: /Welcome to BundleForge/i })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Welcome to BundleForge/i }),
+  ).toBeVisible();
   await page.getByRole("button", { name: /Get started/i }).click();
 
   // Step 2: pick a bundle type.
-  await expect(page.getByRole("heading", { name: /Create your first bundle/i })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Create your first bundle/i }),
+  ).toBeVisible();
   await page.getByRole("button", { name: /^Create bundle$/i }).click();
 
   // Step 3: install the theme block.
-  await expect(page.getByRole("heading", { name: /Install the theme block/i })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Install the theme block/i }),
+  ).toBeVisible();
   await page.getByRole("button", { name: /^Done$/i }).click();
 
   // Completion routes the merchant to the create page.
@@ -209,9 +244,11 @@ test("/bundles/new mounts the create form (no 500, no detail-page fetch)", async
   const { observed } = await stubShopifyAndApi(page);
   await page.goto(`/bundles/new?shop=${SHOP}`);
 
-  // The create page exposes a Title input + a Save action.
+  // The create page exposes a Title input + a Save action. Use exact
+  // match on Save because the type-card descriptions contain "save"
+  // (e.g. "the more they buy, the more they save").
   await expect(page.getByLabel(/Title/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /Save/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save", exact: true })).toBeVisible();
 
   // A request to /api/v1/bundles/new (the misroute that produced 500
   // before the fix) must not have happened.

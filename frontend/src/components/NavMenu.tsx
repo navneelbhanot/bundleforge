@@ -1,20 +1,21 @@
 /**
  * App Bridge v4 navigation menu.
  *
- * Renders Shopify's native left-sidebar nav inside `admin.shopify.com`
- * via the <ui-nav-menu> web component. The component is registered
- * by the App Bridge CDN script loaded from `index.html`.
+ * Renders the merchant's Shopify-native left-sidebar nav (the items
+ * that appear nested under "BundleForge" in admin.shopify.com) via
+ * the <ui-nav-menu> web component. The component is registered by
+ * the App Bridge CDN script loaded from `index.html`.
  *
- * Side benefit: App Bridge keeps the embedded iframe's inner URL in
- * sync with the outer `admin.shopify.com/store/.../apps/...` URL, so
- * a refresh or breadcrumb click no longer 404s when the merchant has
- * navigated past the entry route.
+ * App Bridge expects plain <a href="...">: it intercepts clicks,
+ * prevents default, syncs the outer admin URL, and pushes onto the
+ * inner history so React Router re-renders. We deliberately do NOT
+ * use react-router's <Link> here because Link intercepts clicks
+ * itself, which would prevent App Bridge from seeing them.
+ *
+ * One link must carry rel="home" — that's the app's default route.
  */
-import { Link } from "react-router-dom";
 
-// Register the App Bridge web component as a JSX element so TS lets
-// us nest <Link> children inside it. The component itself comes
-// from the CDN script — no JS import needed.
+// Register the App Bridge web component as a JSX intrinsic element.
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -29,17 +30,16 @@ declare global {
 export function NavMenu(): JSX.Element {
   return (
     <ui-nav-menu>
-      {/* `rel="home"` flags the Bundles list as the app's home. */}
-      <Link to="/" rel="home">
+      <a href="/" rel="home">
         Bundles
-      </Link>
-      <Link to="/orders">Orders</Link>
-      <Link to="/inventory">Inventory</Link>
-      <Link to="/inventory/audit">Audit</Link>
-      <Link to="/analytics">Analytics</Link>
-      <Link to="/ab-tests">A/B tests</Link>
-      <Link to="/settings">Settings</Link>
-      <Link to="/billing">Billing</Link>
+      </a>
+      <a href="/orders">Orders</a>
+      <a href="/inventory">Inventory</a>
+      <a href="/inventory/audit">Audit</a>
+      <a href="/analytics">Analytics</a>
+      <a href="/ab-tests">A/B tests</a>
+      <a href="/settings">Settings</a>
+      <a href="/billing">Billing</a>
     </ui-nav-menu>
   );
 }
