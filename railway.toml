@@ -15,7 +15,7 @@ builder = "NIXPACKS"
 buildCommand = "npm ci --include=dev && npm run build"
 
 [deploy]
-startCommand = "npm run release && npm run start:web"
+startCommand = "npm run start:web"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
@@ -27,9 +27,10 @@ restartPolicyMaxRetries = 5
 #
 # Web:
 #   buildCommand: (default — installs deps + builds frontend SPA)
-#   startCommand: npm run release && npm run start:web
-#   (release runs `prisma migrate deploy` then web boots; tsx loads the TS
-#    server directly)
+#   startCommand: npm run start:web
+#   (start-web.cjs runs `prisma migrate deploy` inline before booting the
+#    server. Avoid `npm run release && npm run start:web` — the `&&` chain
+#    swallowed the second half on Railway and masked the actual boot path.)
 #
 # Worker:
 #   buildCommand: npm ci --include=dev && npm run build:server
