@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-061 — Vertical slice: BXGY (buy X, get Y)**
+**M-081 — Cart Transform Function: scaffold (JS)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-061-bxgy-slice.md`. BXGY differs
-from BOGO in that the "Y" can be from a different SKU set than the
-"X". For now BXGY uses the same `bogo` rule type with explicit
-itemBundleId tags; the slice test asserts the price calculation. Pattern
-mirrors M-056..M-060 (vi.mocked repo, buildPricingInput helper).
+Boot phase, then write `docs/specs/M-081-cart-transform-scaffold.md`.
+Add a Shopify Function under `extensions/cart-transform/` (JS, not
+Wasm to start). Skeleton: `run(input)` reading the Shopify Function
+input shape and returning an empty `operations: []` plus the function
+config TOML. Tests use the Function test runner.
 
 ## Blockers
 
@@ -22,36 +22,29 @@ None.
 
 ## Carry-overs (still active)
 
-- Lint deferred behavior absent (lint is wired since M-012).
-- Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6, etc.)
+- Lint warnings only (no errors). All in stub-files-no-longer-stubs;
+  clean up opportunistically.
+- Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6)
   flagged for ADR before going live.
 - npm audit findings → M-140.
-- `prisma/seed.ts` excluded from main tsc build; M-010 verifies it
-  compiles under ts-node. **Both M-001 stub-exclusion carry-overs
-  cleared as of M-053.**
+- `prisma/seed.ts` excluded from main tsc build; seed compiles under
+  ts-node which is what `npm run db:seed` uses.
 
 ## Recently completed
 
-- M-060 — BOGO vertical slice. `docs/sessions/0060-bogo-slice.md`.
-- M-059 — mix-and-match slice. `docs/sessions/0059-mix-match-slice.md`.
-- M-058 — volume slice. `docs/sessions/0058-volume-slice.md`.
-- M-057 — multipack slice. `docs/sessions/0057-multipack-slice.md`.
-- M-056 — fixed bundle slice. `docs/sessions/0056-fixed-slice.md`.
-- M-055 — PricingRule service. `docs/sessions/0055-pricing-rule-service.md`.
-- M-054 — BundleItem service. `docs/sessions/0054-bundle-item-service.md`.
-- M-053 — bundle routes. `docs/sessions/0053-bundle-routes.md`.
-- M-052 — bundle archive. `docs/sessions/0052-bundle-archive.md`.
-- M-051 — bundle publish. `docs/sessions/0051-bundle-publish.md`.
-- M-050 — bundle duplicate. `docs/sessions/0050-bundle-duplicate.md`.
-- M-049 — bundle service CRUD rewrite. `docs/sessions/0049-bundle-service.md`.
-- M-048 — bundle config validators. `docs/sessions/0048-bundle-validators.md`.
-- M-047 — condition evaluator verified. `docs/sessions/0047-conditions.md`.
-- M-046 — stackability + priority verified. `docs/sessions/0046-stackability.md`.
-- M-045 — bogo rule. `docs/sessions/0045-bogo-rule.md`.
-- M-044 — volume rule. `docs/sessions/0044-volume-rule.md`.
-- M-043 — tiered rule. `docs/sessions/0043-tiered-rule.md`.
-- M-042 — flat_discount rule. `docs/sessions/0042-flat-discount-rule.md`.
-- M-041 — percentage rule. `docs/sessions/0041-percentage-rule.md`.
+- M-080 — orders/updated webhook. `docs/sessions/0078-order-webhooks.md`.
+- M-079 — orders/cancelled webhook. `docs/sessions/0078-order-webhooks.md`.
+- M-078 — orders/create webhook. `docs/sessions/0078-order-webhooks.md`.
+- M-077 — SKU breakdown helper. `docs/sessions/0076-order-processor.md`.
+- M-076 — order extract helper. `docs/sessions/0076-order-processor.md`.
+- M-075 — inventory routes. `docs/sessions/0075-inventory-routes.md`.
+- M-074 — safety lock (in M-070). `docs/sessions/0070-inventory-engine.md`.
+- M-073 — recomputeBundleStock (in M-070). `docs/sessions/0070-inventory-engine.md`.
+- M-072 — DB triggers (delivered M-009).
+- M-071 — audit log writer. `docs/sessions/0070-inventory-engine.md`.
+- M-070 — applyAdjustment transactional. `docs/sessions/0070-inventory-engine.md`.
+- M-069 — bundle CSV import. `docs/sessions/0069-bundle-import.md`.
+- M-061..M-068 — remaining vertical slices. `docs/sessions/0061-068-remaining-slices.md`.
 - (Earlier history in PLAN.md.)
 
 ## Working branch

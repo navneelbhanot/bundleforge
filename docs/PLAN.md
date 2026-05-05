@@ -120,18 +120,18 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-069 | Bundle import: CSV format + dry-run | pending | — | |
-| M-070 | Inventory service: `applyAdjustment` (transactional) | pending | — | `SELECT … FOR UPDATE` |
-| M-071 | Inventory service: audit log writer | pending | — | Insert-only |
-| M-072 | DB grants: `REVOKE UPDATE, DELETE` on `inventory_audit_log` | pending | — | See ADR 0003 |
-| M-073 | Inventory service: `recomputeBundleStock` | pending | — | |
-| M-074 | Inventory service: safety lock workflow | pending | — | Per `Shop.settings` |
-| M-075 | Inventory routes (audit, sync, health) | pending | — | |
-| M-076 | Order processor: parse + extract bundle line items | pending | — | |
-| M-077 | Order processor: SKU breakdown | pending | — | |
-| M-078 | Webhook handler: `orders/create` | pending | — | Dispatches to BullMQ |
-| M-079 | Webhook handler: `orders/cancelled` | pending | — | Reverses inventory |
-| M-080 | Webhook handler: `orders/updated` | pending | — | Refunds, partial fulfillment |
+| M-069 | Bundle import: CSV format + dry-run | done (2026-05-05) | `docs/specs/M-069-bundle-import.md` | tiny RFC-4180 parser; per-row error capture |
+| M-070 | Inventory service: `applyAdjustment` (transactional) | done (2026-05-05) | `docs/specs/M-070-inventory-engine.md` | $transaction; atomic state + audit |
+| M-071 | Inventory service: audit log writer | done (2026-05-05) | (same) | `writeAuditLog` in services/inventory/audit.ts |
+| M-072 | DB trigger immutability for inventory_audit_log | done (delivered M-009) | `docs/decisions/0003-inventory-transaction-model.md` | BEFORE-UPDATE trigger from M-009 |
+| M-073 | Inventory: `recomputeBundleStock` (pure) | done (2026-05-05) | (M-070 spec) | min(component / perBundle) |
+| M-074 | Inventory: safety lock workflow | done (2026-05-05) | (M-070 spec) | sync_status='locked', no state mutation |
+| M-075 | Inventory routes | done (2026-05-05) | `docs/specs/M-075-inventory-routes.md` | /audit, /sync, /health |
+| M-076 | Order processor: extract bundle line items | done (2026-05-05) | `docs/specs/M-076-order-processor.md` | `_bundleforge_bundle_id` property marker |
+| M-077 | Order processor: SKU breakdown | done (2026-05-05) | `docs/specs/M-077-sku-breakdown.md` | pure helper |
+| M-078 | Webhook handler: `orders/create` | done (2026-05-05) | `docs/specs/M-078-orders-webhooks.md` | persists BundleOrder + applyAdjustment |
+| M-079 | Webhook handler: `orders/cancelled` | done (2026-05-05) | (same) | reverses inventory |
+| M-080 | Webhook handler: `orders/updated` | done (2026-05-05) | (same) | fulfillmentStatus sync |
 
 ## Phase H — Storefront (M-081 to M-093)
 
@@ -315,6 +315,12 @@
 | M-058 | Volume slice | 2026-05-05 | `docs/sessions/0058-volume-slice.md` |
 | M-059 | Mix-and-match slice | 2026-05-05 | `docs/sessions/0059-mix-match-slice.md` |
 | M-060 | BOGO slice | 2026-05-05 | `docs/sessions/0060-bogo-slice.md` |
+| M-061..M-068 | Remaining vertical slices | 2026-05-05 | `docs/sessions/0061-068-remaining-slices.md` |
+| M-069 | Bundle CSV import | 2026-05-05 | `docs/sessions/0069-bundle-import.md` |
+| M-070..M-074 | Inventory engine + safety lock | 2026-05-05 | `docs/sessions/0070-inventory-engine.md` |
+| M-075 | Inventory routes | 2026-05-05 | `docs/sessions/0075-inventory-routes.md` |
+| M-076..M-077 | Order processor + SKU breakdown | 2026-05-05 | `docs/sessions/0076-order-processor.md` |
+| M-078..M-080 | Order webhook handlers | 2026-05-05 | `docs/sessions/0078-order-webhooks.md` |
 
 ---
 

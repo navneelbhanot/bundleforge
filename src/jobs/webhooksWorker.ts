@@ -13,6 +13,9 @@ import { dispatch, registerHandler } from "../webhooks/handlers";
 import { appUninstalledHandler } from "../webhooks/handlers/appUninstalled";
 import { customersDataRequestHandler } from "../webhooks/handlers/customersDataRequest";
 import { customersRedactHandler } from "../webhooks/handlers/customersRedact";
+import { ordersCancelledHandler } from "../webhooks/handlers/ordersCancelled";
+import { ordersCreateHandler } from "../webhooks/handlers/ordersCreate";
+import { ordersUpdatedHandler } from "../webhooks/handlers/ordersUpdated";
 import { shopRedactHandler } from "../webhooks/handlers/shopRedact";
 import { shopUpdateHandler } from "../webhooks/handlers/shopUpdate";
 import { subscriptionUpdateHandler } from "../webhooks/handlers/subscriptionUpdate";
@@ -28,6 +31,9 @@ registerHandler("customers/data_request", customersDataRequestHandler);
 registerHandler("customers/redact", customersRedactHandler);
 registerHandler("shop/redact", shopRedactHandler());
 registerHandler("app_subscriptions/update", subscriptionUpdateHandler());
+registerHandler("orders/create", ordersCreateHandler());
+registerHandler("orders/cancelled", ordersCancelledHandler());
+registerHandler("orders/updated", ordersUpdatedHandler());
 
 export const webhooksWorker = new Worker<WebhookJobData>(
   WEBHOOKS_QUEUE,
