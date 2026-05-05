@@ -227,26 +227,26 @@
 | M-138 | Webhook throughput synthetic | done (2026-05-05) | (same) | 100 webhooks acked under 5s |
 | M-139 | Pricing engine property tests (extended) | done (2026-05-05) | (same) | 4 invariants × 200 random inputs |
 | M-140 | Security review pass | done (2026-05-05) | `docs/decisions/0004-security-review.md` | OWASP top 10 + npm audit triage |
-| M-141 | Accessibility audit (WCAG AA) | pending | — | |
-| M-142 | Sentry coverage audit | pending | — | Every error path |
-| M-143 | Datadog dashboards: queue, webhooks, sync | pending | — | |
-| M-144 | Runbook: incident response | pending | — | |
-| M-145 | Backup + restore drill | pending | — | |
-| M-146 | GDPR data export endpoint | pending | — | |
-| M-147 | GDPR data deletion endpoint | pending | — | |
-| M-148 | Rate limit hardening + abuse tests | pending | — | |
-| M-149 | OpenAPI documentation generated | pending | — | |
-| M-150 | Privacy policy + ToS templates committed | pending | — | Legal review by user |
+| M-141 | Accessibility audit (WCAG AA) | done (2026-05-05) | `docs/specs/M-141-149-hardening.md` | jsx-a11y plugin + axe-core smoke tests |
+| M-142 | Sentry coverage audit | done (2026-05-05) | (same) | Workers now captureException on `failed`; audit appended to `docs/runbook.md` |
+| M-143 | Datadog dashboards: queue, webhooks, sync | done (2026-05-05) | (same) | 4 dashboards under `monitoring/datadog/dashboards/` + README |
+| M-144 | Runbook: incident response | done (2026-05-05) | (same) | `docs/runbook-incidents.md` |
+| M-145 | Backup + restore drill | done (2026-05-05) | (same) | `scripts/backup.sh` + `scripts/restore.sh`; drill in runbook |
+| M-146 | GDPR data export endpoint | done (2026-05-05) | (same) | `POST /api/v1/gdpr/export`; creds redacted |
+| M-147 | GDPR data deletion endpoint | done (2026-05-05) | (same) | `POST /api/v1/gdpr/delete-shop`; cascade |
+| M-148 | Rate limit hardening + abuse tests | done (2026-05-05) | (same) | per-IP secondary limiter on auth/webhooks/health |
+| M-149 | OpenAPI documentation generated | done (2026-05-05) | (same) | `docs/openapi.yaml` + `npm run docs:openapi` |
+| M-150 | Privacy policy + ToS templates committed | done (2026-05-05) | `docs/specs/M-150-155-launch.md` | `legal/privacy-policy.md` + `legal/terms-of-service.md` (templates) |
 
 ## Phase O — Beta + Launch (M-151 to M-155)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-151 | Demo store seed data + demo bundle showcase | pending | — | |
-| M-152 | Beta merchant onboarding flow | pending | — | |
-| M-153 | App Store screenshots + video script | pending | — | User produces video |
-| M-154 | App Store submission package | pending | — | |
-| M-155 | Public launch checklist | pending | — | |
+| M-151 | Demo store seed data + demo bundle showcase | done (2026-05-05) | `docs/specs/M-150-155-launch.md` | `prisma/seed.ts` extended; `scripts/demo-reset.sh` |
+| M-152 | Beta merchant onboarding flow | done (2026-05-05) | (same) | `docs/onboarding-beta.md` |
+| M-153 | App Store screenshots + video script | done (2026-05-05) | (same) | `docs/launch/screenshots-spec.md` + `video-script.md` |
+| M-154 | App Store submission package | done (2026-05-05) | (same) | `docs/launch/app-listing.md` + `submission-checklist.md` |
+| M-155 | Public launch checklist | done (2026-05-05) | (same) | `docs/launch/launch-checklist.md` |
 
 ---
 
@@ -334,6 +334,8 @@
 | M-131..M-136 | Server-side i18n + 6 locales | 2026-05-05 | `docs/sessions/0131-i18n.md` |
 | M-137..M-139 | Concurrency + throughput + pricing invariants | 2026-05-05 | `docs/sessions/0137-property-tests.md` |
 | M-140 | Security review pass + ADR-0004 | 2026-05-05 | `docs/sessions/0140-security-review.md` |
+| M-141..M-149 | Hardening (a11y, observability, GDPR, rate limit, OpenAPI) | 2026-05-05 | `docs/sessions/0141-hardening.md` |
+| M-150..M-155 | Launch (legal templates, demo data, beta onboarding, App Store) | 2026-05-05 | `docs/sessions/0150-launch.md` |
 
 ---
 

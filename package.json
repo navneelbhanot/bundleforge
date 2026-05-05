@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "start": "node dist/server/index.js",
     "audit:prod": "npm audit --omit=dev",
+    "docs:openapi": "node scripts/check-openapi.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit && tsc --noEmit -p frontend/tsconfig.json",
@@ -76,14 +77,17 @@
     "@typescript-eslint/eslint-plugin": "^8.3.0",
     "@typescript-eslint/parser": "^8.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "axe-core": "^4.11.4",
     "eslint": "^9.9.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "jsdom": "^29.1.1",
     "prisma": "^5.20.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.59.1",
     "vite": "^5.4.2",
-    "vitest": "^2.0.5"
+    "vitest": "^2.0.5",
+    "vitest-axe": "^0.1.0"
   },
   "engines": {
     "node": ">=20.0.0",

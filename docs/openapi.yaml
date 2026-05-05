@@ -1,0 +1,358 @@
+openapi: 3.0.3
+info:
+  title: BundleForge Admin API
+  version: "1.0.0"
+  description: |
+    Public surface of the BundleForge Shopify app. All `/api/v1/*` endpoints
+    require an authenticated Shopify Admin session — the embedded admin
+    obtains an App Bridge ID-token and the SDK exchanges it for a session
+    token via `validateAuthenticatedSession`. `requireShopSession` then
+    attaches `req.shopId`/`req.shopDomain` for downstream handlers.
+
+    `/api/proxy/*` endpoints are reached via Shopify's App Proxy and are
+    HMAC-verified rather than session-authenticated.
+
+    `/api/webhooks/*` and `/api/auth/*` are HMAC- or OAuth-protected and
+    are not described here.
+
+servers:
+  - url: https://{tenant}.bundleforge.app
+    variables:
+      tenant:
+        default: app
+        description: BundleForge environment
+
+components:
+  securitySchemes:
+    sessionToken:
+      type: http
+      scheme: bearer
+      description: Shopify session token (App Bridge / id-token exchange).
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message, statusCode, requestId]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            statusCode: { type: integer }
+            requestId: { type: string, format: uuid }
+            details: { type: object }
+    Bundle:
+      type: object
+      required: [id, shopId, title, slug, type, status]
+      properties:
+        id: { type: string, format: uuid }
+        shopId: { type: string, format: uuid }
+        title: { type: string }
+        slug: { type: string }
+        type:
+          type: string
+          enum:
+            - fixed
+            - mix_match
+            - bogo
+            - bxgy
+            - volume
+            - build_box
+            - multipack
+            - gift
+            - mystery
+            - sample
+            - subscription
+            - wholesale
+            - custom
+        status:
+          type: string
+          enum: [draft, active, archived, deleted]
+        config: { type: object }
+        priority: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    BundleOrder:
+      type: object
+      required: [id, shopId, shopifyOrderId, totalCents]
+      properties:
+        id: { type: string, format: uuid }
+        shopId: { type: string, format: uuid }
+        shopifyOrderId: { type: string }
+        totalCents: { type: integer }
+        currency: { type: string }
+        createdAt: { type: string, format: date-time }
+    PricingInput:
+      type: object
+      required: [items, rules]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [sku, quantity, unitPriceCents]
+            properties:
+              sku: { type: string }
+              quantity: { type: integer, minimum: 1 }
+              unitPriceCents: { type: integer, minimum: 0 }
+        rules: { type: array, items: { type: object } }
+    PricingResult:
+      type: object
+      required: [subtotalCents, totalDiscountCents, totalCents]
+      properties:
+        subtotalCents: { type: integer }
+        totalDiscountCents: { type: integer }
+        totalCents: { type: integer }
+        appliedRuleIds: { type: array, items: { type: string } }
+  responses:
+    Error:
+      description: Application error envelope
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+security:
+  - sessionToken: []
+
+paths:
+  /health:
+    get:
+      summary: Liveness/readiness probe
+      security: []
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  version: { type: string }
+                  checks:
+                    type: object
+                    properties:
+                      db: { type: boolean }
+                      redis: { type: boolean }
+
+  /api/v1/bundles:
+    get:
+      summary: List bundles for the authenticated shop
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [createdAt, updatedAt, title, priority] }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        "200":
+          description: paginated list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Bundle" }
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  total: { type: integer }
+    post:
+      summary: Create a bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Bundle" }
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Bundle" }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /api/v1/bundles/{id}:
+    get:
+      summary: Get a bundle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Bundle" }
+        "404": { $ref: "#/components/responses/Error" }
+    patch:
+      summary: Update a bundle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Bundle" }
+      responses:
+        "200":
+          description: updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Bundle" }
+    delete:
+      summary: Soft-delete a bundle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: deleted }
+
+  /api/v1/orders:
+    get:
+      summary: List bundle orders for the authenticated shop
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/BundleOrder" }
+
+  /api/v1/inventory/audit:
+    get:
+      summary: Inventory audit log (append-only)
+      responses:
+        "200":
+          description: ok
+
+  /api/v1/inventory/health:
+    get:
+      summary: Inventory health summary (oversold, drift, etc.)
+      responses:
+        "200": { description: ok }
+
+  /api/v1/analytics/overview:
+    get:
+      summary: Aggregated KPIs (revenue, orders, top bundles)
+      responses:
+        "200": { description: ok }
+
+  /api/v1/analytics/abtests:
+    get:
+      summary: A/B test variants + significance
+      responses:
+        "200": { description: ok }
+
+  /api/v1/settings:
+    get:
+      summary: Read shop settings JSON
+      responses:
+        "200": { description: ok }
+    put:
+      summary: Patch shop settings (whitelisted keys only)
+      responses:
+        "200": { description: ok }
+
+  /api/v1/billing/subscribe:
+    post:
+      summary: Begin a Shopify recurring charge for the chosen plan
+      responses:
+        "200": { description: ok }
+
+  /api/v1/billing/cancel:
+    post:
+      summary: Cancel the current subscription
+      responses:
+        "200": { description: ok }
+
+  /api/v1/ai/recommend:
+    post:
+      summary: AI bundle recommendations (delegates to Python service)
+      responses:
+        "200": { description: ok }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /api/v1/gdpr/export:
+    post:
+      summary: Export the shop's data (GDPR Article 20). Creds redacted.
+      responses:
+        "200":
+          description: JSON dump of the shop dataset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generatedAt: { type: string, format: date-time }
+                  shop: { type: object }
+                  bundles: { type: array, items: { $ref: "#/components/schemas/Bundle" } }
+                  orders: { type: array, items: { $ref: "#/components/schemas/BundleOrder" } }
+                  inventoryAuditLog: { type: array, items: { type: object } }
+                  integrations: { type: array, items: { type: object } }
+
+  /api/v1/gdpr/delete-shop:
+    post:
+      summary: Hard-delete the shop and cascade. (GDPR Article 17.)
+      responses:
+        "200":
+          description: deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted: { type: boolean }
+                  shopId: { type: string, format: uuid }
+
+  /api/proxy/bundles/{slug}/price:
+    post:
+      summary: Storefront pricing preview (App Proxy, HMAC-verified)
+      security: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PricingInput" }
+      responses:
+        "200":
+          description: priced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PricingResult" }
+
+  /api/feeds/google.xml:
+    get:
+      summary: Google Merchant feed (public)
+      security: []
+      responses:
+        "200":
+          description: ok
+          content:
+            application/xml:
+              schema: { type: string }
+

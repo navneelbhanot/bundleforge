@@ -26,7 +26,7 @@ import { initSentry } from "../config/sentry";
 import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
-import { rateLimiter } from "../middleware/rateLimiter";
+import { rateLimiter, ipRateLimiter } from "../middleware/rateLimiter";
 import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
 import { afterAuth } from "../shopify/install";
@@ -34,6 +34,7 @@ import { mountWebhooks } from "../webhooks";
 import { appProxyAuth } from "../middleware/appProxy";
 import { proxyRoutes } from "../routes/proxy";
 import { feedRoutes } from "../routes/feeds";
+import { gdprRoutes } from "../routes/gdpr";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -104,6 +105,14 @@ export function createApp(): Express {
   app.use(compression());
   app.use(express.json({ limit: "10mb" }));
 
+  // M-148: per-IP secondary limiter on the unauthenticated surface
+  // (OAuth, webhook ingest, /health). The shop-scoped limiter still runs
+  // on /api below; this layer protects pre-session traffic.
+  app.use(shopify.config.auth.path, ipRateLimiter);
+  app.use(shopify.config.auth.callbackPath, ipRateLimiter);
+  app.use("/api/webhooks", ipRateLimiter);
+  app.use("/health", ipRateLimiter);
+
   // Shopify OAuth (M-017 install, M-018 callback + persist).
   app.get(shopify.config.auth.path, shopify.auth.begin());
   app.get(
@@ -151,6 +160,7 @@ export function createApp(): Express {
   app.use("/api/v1/settings", settingsRoutes);
   app.use("/api/v1/billing", billingRoutes);
   app.use("/api/v1/ai", aiRoutes);
+  app.use("/api/v1/gdpr", gdprRoutes);
 
   // Catch-all 501 for /api/v1/*
   app.use("/api/v1", notImplemented);

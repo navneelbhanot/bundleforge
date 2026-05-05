@@ -8,6 +8,7 @@ import { Worker, type Job } from "bullmq";
 
 import { logger } from "../config/logger";
 import { redis } from "../config/redis";
+import { captureException } from "../config/sentry";
 import { INVENTORY_QUEUE, ORDER_QUEUE } from "./queues";
 
 const workerLogger = logger.child({ module: "worker" });
@@ -44,11 +45,15 @@ const inventoryWorker = new Worker(
   { connection: redis, concurrency: 3 },
 );
 
-orderWorker.on("failed", (job, err) =>
-  workerLogger.error({ err, jobId: job?.id }, "Order job failed"),
-);
-inventoryWorker.on("failed", (job, err) =>
-  workerLogger.error({ err, jobId: job?.id }, "Inventory job failed"),
-);
+// M-142: every worker logs `{ err }` AND captures to Sentry; HTTP-only
+// capture in errorHandler doesn't see queue failures.
+orderWorker.on("failed", (job, err) => {
+  workerLogger.error({ err, jobId: job?.id }, "Order job failed");
+  captureException(err, { queue: ORDER_QUEUE, jobId: job?.id });
+});
+inventoryWorker.on("failed", (job, err) => {
+  workerLogger.error({ err, jobId: job?.id }, "Inventory job failed");
+  captureException(err, { queue: INVENTORY_QUEUE, jobId: job?.id });
+});
 
 workerLogger.info("BullMQ workers started");

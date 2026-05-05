@@ -97,6 +97,71 @@ export function buildMemoryAdapter(plan: PlanName = "starter"): RateLimiterAdapt
   });
 }
 
+// ---------------------------------------------------------------------------
+// M-148 per-IP secondary limiter — guards routes that don't yet have a shop
+// session attached (`/api/auth/*`, `/api/webhooks/*`, `/health`). Keyed on
+// req.ip rather than shop, so a flooder hammering OAuth or anonymous endpoints
+// can't burn a real merchant's budget.
+
+const IP_LIMIT_POINTS = 60;
+const IP_LIMIT_DURATION_SEC = 60;
+
+export function buildIpRateLimiter(
+  adapter?: RateLimiterAdapter,
+): RequestHandler {
+  const a =
+    adapter ??
+    new RateLimiterMemory({
+      keyPrefix: "rl:ip",
+      points: IP_LIMIT_POINTS,
+      duration: IP_LIMIT_DURATION_SEC,
+      blockDuration: IP_LIMIT_DURATION_SEC,
+    });
+  return async (req, res, next) => {
+    const key = `ip:${req.ip ?? "anonymous"}`;
+    try {
+      await a.consume(key);
+      next();
+    } catch (err) {
+      if (err instanceof RateLimiterRes) {
+        const retryAfter = Math.ceil(err.msBeforeNext / 1000);
+        res.setHeader("Retry-After", String(retryAfter));
+        res.status(429).json({
+          error: {
+            code: "rate_limited",
+            message: "Too many requests",
+            statusCode: 429,
+            requestId: req.id,
+            details: { retryAfterSeconds: retryAfter, scope: "ip" },
+          },
+        });
+        return;
+      }
+      next(err);
+    }
+  };
+}
+
+/** Production singleton for the per-IP secondary limiter. */
+function buildIpRedisAdapter(): RateLimiterAdapter {
+  return new RateLimiterRedis({
+    storeClient: redis,
+    keyPrefix: "rl:ip",
+    points: IP_LIMIT_POINTS,
+    duration: IP_LIMIT_DURATION_SEC,
+    blockDuration: IP_LIMIT_DURATION_SEC,
+  });
+}
+
+// In tests we cannot reach Redis; the production limiter would otherwise
+// stall every request for 5s waiting on the lazy connection. Tests that
+// need to exercise the per-IP limiter use `buildIpRateLimiter()` directly
+// with a memory adapter (see rateLimiter.test.ts).
+export const ipRateLimiter: RequestHandler =
+  process.env.NODE_ENV === "test"
+    ? buildIpRateLimiter()
+    : buildIpRateLimiter(buildIpRedisAdapter());
+
 export const rateLimiter: RequestHandler = buildRateLimiter(
   buildRedisAdapter(planFor(undefined)),
 );

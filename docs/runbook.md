@@ -158,3 +158,25 @@ npx prisma migrate reset
 - `docs/sessions/` — what the previous sessions actually did.
 - `docs/decisions/` — why something is the way it is.
 - `docs/specs/M-NNN-*.md` — the contract for the milestone you're on.
+
+## M-142 — Sentry coverage audit (2026-05-05)
+
+Audit pass to confirm every error path is captured to Sentry, not just
+logged. Findings + fixes:
+
+- `src/middleware/errorHandler.ts` — captures all 5xx + unknown errors
+  via `captureError(err, req)`. Verified by reading the handler:
+  AppError ≥ 500 and the unknown-error fallthrough both call it. ✅
+- `src/jobs/webhooksWorker.ts` `worker.failed` — was logging only.
+  **Fix**: now also calls `captureException(err, { jobId, topic })`. ✅
+- `src/jobs/worker.ts` `orderWorker.failed` / `inventoryWorker.failed` —
+  was logging only. **Fix**: same pattern, includes queue tag. ✅
+- `src/webhooks/index.ts` HMAC verifier — failures already log + return
+  401; not captured (intentional: HMAC failures are mostly attack
+  noise, surfaced via the `bundleforge.webhook.hmac_failed` Datadog
+  metric instead). ✅
+- Storefront/App-Proxy 401s — same rationale as HMAC. ✅
+
+All async handlers in `src/webhooks/handlers/` propagate via `await`
+into the worker, so a thrown handler error is caught by the worker
+`failed` listener and now flows to Sentry through the new path above.

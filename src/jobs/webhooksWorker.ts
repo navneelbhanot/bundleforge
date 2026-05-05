@@ -9,6 +9,7 @@ import { Worker, type Job } from "bullmq";
 
 import { logger } from "../config/logger";
 import { redis } from "../config/redis";
+import { captureException } from "../config/sentry";
 import { dispatch, registerHandler } from "../webhooks/handlers";
 import { appUninstalledHandler } from "../webhooks/handlers/appUninstalled";
 import { customersDataRequestHandler } from "../webhooks/handlers/customersDataRequest";
@@ -45,8 +46,11 @@ export const webhooksWorker = new Worker<WebhookJobData>(
   { connection: redis, concurrency: 10 },
 );
 
-webhooksWorker.on("failed", (job, err) =>
-  workerLogger.error({ err, jobId: job?.id, topic: job?.name }, "Webhook job failed"),
-);
+webhooksWorker.on("failed", (job, err) => {
+  workerLogger.error({ err, jobId: job?.id, topic: job?.name }, "Webhook job failed");
+  // M-142: surface unhandled worker errors to Sentry. The errorHandler
+  // only covers HTTP-side; without this, queue exceptions are invisible.
+  captureException(err, { jobId: job?.id, topic: job?.name });
+});
 
 workerLogger.info("Webhooks worker started");

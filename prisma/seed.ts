@@ -117,6 +117,141 @@ async function main() {
   });
   console.log(`Created bundle: ${volumeBundle.title} (${volumeBundle.id})`);
 
+  // M-151 — additional demo bundles spanning the remaining bundle types,
+  // plus a few demo orders + audit-log rows so the analytics dashboard
+  // and inventory-audit page have something to render.
+  const bogoBundle = await prisma.bundle.create({
+    data: {
+      shopId: shop.id,
+      title: "Buy 2 Get 1 Tee",
+      slug: "buy-2-get-1-tee",
+      type: "bogo",
+      status: "active",
+      description: "Buy any 2 tees, get the 3rd free.",
+      config: { buyQuantity: 2, getQuantity: 1 },
+      items: {
+        create: [
+          { shopifyProductGid: "gid://shopify/Product/30", title: "Crew Tee", sku: "TEE-001", quantity: 1, position: 0 },
+        ],
+      },
+      pricingRules: {
+        create: [{ type: "bogo", value: 100, minQuantity: 3, priority: 1 }],
+      },
+    },
+  });
+  console.log(`Created bundle: ${bogoBundle.title}`);
+
+  const bxgyBundle = await prisma.bundle.create({
+    data: {
+      shopId: shop.id,
+      title: "Buy 3 Save 25%",
+      slug: "buy-3-save-25",
+      type: "bxgy",
+      status: "active",
+      description: "Mix-and-match: buy any 3 items in this collection.",
+      config: { buyQuantity: 3 },
+      items: {
+        create: [
+          { shopifyProductGid: "gid://shopify/Product/40", title: "Soap", sku: "SOAP-1", quantity: 1, position: 0 },
+          { shopifyProductGid: "gid://shopify/Product/41", title: "Lotion", sku: "LOT-1", quantity: 1, position: 1 },
+          { shopifyProductGid: "gid://shopify/Product/42", title: "Shampoo", sku: "SHM-1", quantity: 1, position: 2 },
+        ],
+      },
+      pricingRules: {
+        create: [{ type: "percentage", value: 25, minQuantity: 3 }],
+      },
+    },
+  });
+  console.log(`Created bundle: ${bxgyBundle.title}`);
+
+  const multipack = await prisma.bundle.create({
+    data: {
+      shopId: shop.id,
+      title: "Coffee Beans 6-pack",
+      slug: "coffee-6pack",
+      type: "multipack",
+      status: "active",
+      description: "Six bags of single-origin beans, 10% off.",
+      config: { packQuantity: 6 },
+      items: {
+        create: [
+          { shopifyProductGid: "gid://shopify/Product/50", title: "Coffee Beans 250g", sku: "COF-250", quantity: 6, position: 0 },
+        ],
+      },
+      pricingRules: {
+        create: [{ type: "percentage", value: 10, minQuantity: 6 }],
+      },
+    },
+  });
+  console.log(`Created bundle: ${multipack.title}`);
+
+  const subBundle = await prisma.bundle.create({
+    data: {
+      shopId: shop.id,
+      title: "Coffee Subscription — Monthly",
+      slug: "coffee-sub-monthly",
+      type: "subscription",
+      status: "active",
+      description: "Auto-ship 2 bags every 30 days, 15% off.",
+      config: { intervalDays: 30, sellingPlanGid: "gid://shopify/SellingPlan/1" },
+      items: {
+        create: [
+          { shopifyProductGid: "gid://shopify/Product/50", title: "Coffee Beans 250g", sku: "COF-250", quantity: 2, position: 0 },
+        ],
+      },
+      pricingRules: {
+        create: [{ type: "percentage", value: 15, minQuantity: 1 }],
+      },
+    },
+  });
+  console.log(`Created bundle: ${subBundle.title}`);
+
+  // A few demo orders so analytics has data to render.
+  const now = Date.now();
+  for (let i = 0; i < 6; i++) {
+    await prisma.bundleOrder.create({
+      data: {
+        shopId: shop.id,
+        bundleId: i % 2 === 0 ? sampleBundle.id : mixMatchBundle.id,
+        shopifyOrderGid: `gid://shopify/Order/demo-${i}`,
+        shopifyOrderId: BigInt(1000 + i),
+        shopifyOrderNumber: `#${1001 + i}`,
+        status: "processed",
+        bundlePrice: 42.0,
+        originalPrice: 49.0,
+        discountAmount: 7.0,
+        currency: "USD",
+        lineItems: [
+          { sku: "SUN-001", title: "Sunscreen SPF 50", quantity: 1, unitPriceCents: 1500 },
+        ],
+        skuBreakdown: [{ sku: "SUN-001", quantity: 1 }],
+        metadata: { variant: i % 2 === 0 ? "A" : "B" },
+        createdAt: new Date(now - i * 86_400_000),
+      },
+    });
+  }
+  console.log("Created 6 demo BundleOrders");
+
+  // Audit-log rows for the inventory page.
+  for (let i = 0; i < 4; i++) {
+    await prisma.inventoryAuditLog.create({
+      data: {
+        shopId: shop.id,
+        bundleId: sampleBundle.id,
+        shopifyInventoryItemGid: "gid://shopify/InventoryItem/1",
+        locationGid: "gid://shopify/Location/1",
+        action: "adjust",
+        quantityBefore: 100 - i,
+        quantityAfter: 99 - i,
+        quantityDelta: -1,
+        reason: "order_placed",
+        source: "webhook",
+        referenceId: `demo-${i}`,
+      },
+    });
+  }
+  console.log("Created 4 demo audit-log rows");
+
   // Billing subscription on the dev shop
   await prisma.billingSubscription.upsert({
     where: { shopId: shop.id },

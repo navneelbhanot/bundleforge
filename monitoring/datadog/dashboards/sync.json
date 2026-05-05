@@ -1,0 +1,41 @@
+{
+  "title": "BundleForge — Inventory sync",
+  "description": "Inventory adjustment throughput, recompute duration, and Shopify-side write retries.",
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "title": "applyAdjustment / sec by shop",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:bundleforge.inventory.applied{*}.as_rate() by {shop}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "recomputeBundleStock duration P95 (ms)",
+        "type": "timeseries",
+        "requests": [{ "q": "p95:bundleforge.inventory.recompute_ms{*}", "display_type": "line" }]
+      }
+    },
+    {
+      "definition": {
+        "title": "Shopify Inventory API retries / hour",
+        "type": "query_value",
+        "requests": [{ "q": "sum:bundleforge.shopify.retry{api:inventory}.as_count()" }]
+      }
+    },
+    {
+      "definition": {
+        "title": "Audit-log write rate / sec",
+        "type": "timeseries",
+        "requests": [{ "q": "sum:bundleforge.inventory.audit_write{*}.as_rate()" }]
+      }
+    }
+  ],
+  "template_variables": [{ "name": "env", "prefix": "env", "default": "prod" }]
+}

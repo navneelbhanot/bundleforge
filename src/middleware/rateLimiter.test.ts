@@ -5,6 +5,7 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 
 import { errorHandler, requestId } from "./errorHandler";
 import {
+  buildIpRateLimiter,
   buildMemoryAdapter,
   buildRateLimiter,
   deriveKey,
@@ -134,6 +135,37 @@ describe("rate limiter middleware", () => {
     const b = await request(app).get("/x").set("x-shop", "shop-b");
     expect(a.status).toBe(200);
     expect(b.status).toBe(200);
+  });
+
+  // M-148 abuse property test — hammers a route guarded by the per-IP
+  // limiter and asserts 429 kicks in well before unbounded requests get
+  // through. Uses a small-budget memory adapter so the test is fast.
+  it("per-IP limiter blocks abuse with 429", async () => {
+    const adapter = new RateLimiterMemory({
+      keyPrefix: "rl:ip:test",
+      points: 5,
+      duration: 60,
+      blockDuration: 60,
+    });
+    const handler = buildIpRateLimiter(adapter);
+    const app = express();
+    app.use(requestId);
+    app.use(handler);
+    app.get("/health", (_req, res) => res.json({ ok: true }));
+    app.use(errorHandler);
+
+    let lastStatus = 200;
+    for (let i = 0; i < 50; i++) {
+      const res = await request(app).get("/health");
+      lastStatus = res.status;
+      if (res.status === 429) {
+        expect(res.body.error.code).toBe("rate_limited");
+        expect(res.body.error.details.scope).toBe("ip");
+        expect(res.headers["retry-after"]).toBeDefined();
+        break;
+      }
+    }
+    expect(lastStatus).toBe(429);
   });
 
   it("propagates non-rate-limit errors to next()", async () => {

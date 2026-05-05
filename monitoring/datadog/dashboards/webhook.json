@@ -1,0 +1,46 @@
+{
+  "title": "BundleForge — Webhooks",
+  "description": "Webhook ingest rate, ack-to-handle lag, and HMAC failure rate. The dispatcher returns 200 immediately and enqueues; this dashboard surfaces the gap between Shopify-delivery and worker-completion.",
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "title": "Webhooks accepted / sec by topic",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:bundleforge.webhook.accepted{*}.as_rate() by {topic}",
+            "display_type": "bars"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Ack→handle lag P95 (ms) by topic",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p95:bundleforge.webhook.lag_ms{*} by {topic}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "HMAC failures / hour",
+        "type": "query_value",
+        "requests": [{ "q": "sum:bundleforge.webhook.hmac_failed{*}.as_count()" }]
+      }
+    },
+    {
+      "definition": {
+        "title": "Worker handler errors by topic",
+        "type": "toplist",
+        "requests": [{ "q": "top(sum:bundleforge.webhook.handler_error{*} by {topic}, 10, 'sum', 'desc')" }]
+      }
+    }
+  ],
+  "template_variables": [{ "name": "env", "prefix": "env", "default": "prod" }]
+}
