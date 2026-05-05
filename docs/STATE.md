@@ -17,20 +17,23 @@ scheduling — all owned by the user.
 
 User-owned (not code):
 
-1. Send `legal/privacy-policy.md` and `legal/terms-of-service.md` to
+1. Provision Railway following `docs/deploy-railway.md`: create the
+   project, add Postgres + Redis plugins, deploy web + worker + AI
+   services. Update `SHOPIFY_APP_URL` after the first deploy.
+2. Send `legal/privacy-policy.md` and `legal/terms-of-service.md` to
    counsel for review. Fill in the `{{placeholder}}` fields.
-2. Capture the 6 screenshots per `docs/launch/screenshots-spec.md`
+3. Capture the 6 screenshots per `docs/launch/screenshots-spec.md`
    and shoot the 60-second video per `docs/launch/video-script.md`,
    against the demo store seeded by `scripts/demo-reset.sh`.
-3. Walk `docs/launch/submission-checklist.md` end-to-end on staging,
+4. Walk `docs/launch/submission-checklist.md` end-to-end on staging,
    then submit the App Store listing.
 4. Schedule beta merchants per `docs/onboarding-beta.md`.
 5. On D-day follow `docs/launch/launch-checklist.md`.
 
 Future code work (post-launch backlog):
 
-- Shopify SDK upgrade (api v13, app-express v7, prisma v6,
-  session-storage-prisma v9) — ADR before merge.
+- **Prisma v6 → v7** — requires `prisma.config.ts` + adapter rewiring.
+  Not blocking launch.
 - ResourcePicker integration on `ProductPicker`.
 - Theme-extension Playwright tests.
 - Amazon SP-API SigV4 (current adapter is a basic stub).
@@ -46,15 +49,14 @@ None. Engineering scope closed.
 
 ## Carry-overs (still active)
 
-- npm audit: 3 production findings rooted in `uuid <14` via Shopify
-  SDK (vulnerable code path not called). Resolved by the SDK upgrade
-  above. See ADR-0004.
 - Cloudflare WAF rule for HMAC abuse — referenced in
   `docs/runbook-incidents.md`; ops provisions when the domain goes
   behind Cloudflare.
 
 ## Recently completed
 
+- Railway deploy config + Shopify SDK / Prisma 6 major upgrade +
+  `tsx` runtime (ADR-0005). `docs/sessions/0156-railway-and-sdk-upgrade.md`.
 - M-150..M-155 — Launch batch (legal templates, demo seed, beta
   onboarding, App Store assets, launch checklist).
   `docs/sessions/0150-launch.md`.

@@ -10,6 +10,9 @@
  *
  * See docs/specs/M-006-server-scaffold.md.
  */
+import path from "node:path";
+import fs from "node:fs";
+
 import express, {
   type Express,
   type Request,
@@ -164,6 +167,21 @@ export function createApp(): Express {
 
   // Catch-all 501 for /api/v1/*
   app.use("/api/v1", notImplemented);
+
+  // Serve the admin SPA (built by `vite build -c frontend/vite.config.ts`
+  // into dist/frontend). Shopify embedded apps require the admin assets
+  // and the API to share an origin; otherwise App Bridge token flow breaks.
+  // Skipped under tests so the 404 catch-all still fires there.
+  if (env.NODE_ENV !== "test") {
+    const spaDir = path.resolve(process.cwd(), "dist", "frontend");
+    const spaIndex = path.join(spaDir, "index.html");
+    if (fs.existsSync(spaIndex)) {
+      app.use(express.static(spaDir, { index: false, maxAge: "1h" }));
+      app.get(/^\/(?!api\/|health$).*/, (_req: Request, res: Response): void => {
+        res.sendFile(spaIndex);
+      });
+    }
+  }
 
   // 404 for anything else.
   app.use((_req: Request, res: Response, _next: NextFunction): void => {

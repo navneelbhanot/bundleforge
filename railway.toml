@@ -1,0 +1,42 @@
+# BundleForge Railway config.
+#
+# Two services share this repo: web (Express) and worker (BullMQ).
+# The AI service deploys separately from `ai-service/` (Dockerfile-based).
+# Provision Postgres + Redis as plugins in the same project — Railway
+# injects DATABASE_URL and REDIS_URL automatically.
+#
+# We run TypeScript directly via `tsx` rather than compiling to JS — the
+# Shopify SDK v13 + Prisma v6 packaging is a poor fit for a separate
+# CJS emit step (see tsconfig comments). `tsx` is a single dependency,
+# starts in <100 ms, and avoids dual-tsconfig complexity.
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci --include=dev && npm run build"
+
+[deploy]
+startCommand = "npm run release && npm run start:web"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Per-service overrides. Use these by creating two Railway services pointed at
+# this repo and selecting the appropriate config in the dashboard.
+#
+# Web:
+#   buildCommand: (default — installs deps + builds frontend SPA)
+#   startCommand: npm run release && npm run start:web
+#   (release runs `prisma migrate deploy` then web boots; tsx loads the TS
+#    server directly)
+#
+# Worker:
+#   buildCommand: npm ci --include=dev && npm run build:server
+#   startCommand: npm run start:worker
+#   (no healthcheck — workers don't expose HTTP)
+#
+# Webhooks worker (optional, can run inline with start:worker):
+#   buildCommand: npm ci --include=dev && npm run build:server
+#   startCommand: npm run start:webhooks-worker
+# ─────────────────────────────────────────────────────────────────────────────
