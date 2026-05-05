@@ -38,9 +38,13 @@ describe("GET /health", () => {
 });
 
 describe("404", () => {
-  it("returns 404 with a JSON error for unknown paths", async () => {
+  it("returns 404 JSON for unknown /api/* paths (the SPA catch-all skips /api/)", async () => {
+    // Use an /api/ path: the SPA fallback regex `/^\/(?!api\/|health$).*/`
+    // explicitly excludes /api/, so unknown /api/ paths fall through to
+    // the 404 catch-all. Non-/api/ paths would match the SPA fallback
+    // when dist/frontend exists.
     const app = createApp();
-    const res = await request(app).get("/no-such-path");
+    const res = await request(app).get("/api/no-such-path");
     expect(res.status).toBe(404);
     expect(res.body.error.message).toBe("Not found");
   });
