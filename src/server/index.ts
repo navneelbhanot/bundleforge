@@ -118,7 +118,28 @@ export function createApp(): Express {
       genReqId: (req) => (req as Request).id,
     }),
   );
-  app.use(helmet({ contentSecurityPolicy: false })); // CSP managed by Shopify
+  // Disable Helmet's CSP and frameguard — embedded Shopify apps must be
+  // iframable from admin.shopify.com + the merchant's myshopify.com, which
+  // Helmet's default `X-Frame-Options: SAMEORIGIN` blocks. We set a
+  // per-request CSP `frame-ancestors` directive below instead.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      frameguard: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+  app.use((req: Request, res: Response, next: NextFunction): void => {
+    const shopParam = typeof req.query.shop === "string" ? req.query.shop : "";
+    const sessionShop = (res.locals as { shopify?: { session?: { shop?: string } } } | undefined)
+      ?.shopify?.session?.shop;
+    const shop = shopParam || sessionShop || "";
+    const ancestors = shop
+      ? `https://${shop} https://admin.shopify.com`
+      : "https://*.myshopify.com https://admin.shopify.com";
+    res.setHeader("Content-Security-Policy", `frame-ancestors ${ancestors};`);
+    next();
+  });
   app.use(compression());
   app.use(express.json({ limit: "10mb" }));
 
