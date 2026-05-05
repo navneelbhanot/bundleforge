@@ -211,9 +211,17 @@ export function createApp(): Express {
     const spaDir = path.resolve(process.cwd(), "dist", "frontend");
     const spaIndex = path.join(spaDir, "index.html");
     if (fs.existsSync(spaIndex)) {
+      // Read the built index.html once and substitute the
+      // `%VITE_SHOPIFY_API_KEY%` placeholder with the runtime value of
+      // SHOPIFY_API_KEY. Vite would normally substitute this at build
+      // time, but the Docker build doesn't pass build-args, so the token
+      // ships literal and App Bridge fails to initialize otherwise.
+      const indexHtml = fs
+        .readFileSync(spaIndex, "utf8")
+        .replace(/%VITE_SHOPIFY_API_KEY%/g, env.SHOPIFY_API_KEY);
       app.use(express.static(spaDir, { index: false, maxAge: "1h" }));
       app.get(/^\/(?!api\/|health$).*/, (_req: Request, res: Response): void => {
-        res.sendFile(spaIndex);
+        res.type("html").send(indexHtml);
       });
     }
   }
