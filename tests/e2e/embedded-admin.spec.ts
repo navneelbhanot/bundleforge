@@ -244,11 +244,15 @@ test("/bundles/new mounts the create form (no 500, no detail-page fetch)", async
   const { observed } = await stubShopifyAndApi(page);
   await page.goto(`/bundles/new?shop=${SHOP}`);
 
-  // The create page exposes a Title input + a Save action. Use exact
-  // match on Save because the type-card descriptions contain "save"
-  // (e.g. "the more they buy, the more they save").
-  await expect(page.getByLabel(/Title/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save", exact: true })).toBeVisible();
+  // The create page exposes a Title input + a Save action.
+  await expect(page.getByLabel(/^Title$/i)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Save & continue/i }),
+  ).toBeVisible();
+  // Live preview panel always visible.
+  await expect(
+    page.getByRole("heading", { name: /Storefront preview/i }),
+  ).toBeVisible();
 
   // A request to /api/v1/bundles/new (the misroute that produced 500
   // before the fix) must not have happened.
