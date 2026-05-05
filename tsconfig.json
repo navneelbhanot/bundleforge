@@ -32,8 +32,6 @@
     "dist",
     "tests",
     "extensions",
-    "src/generated",
-    "src/services/bundles/index.ts",
-    "src/routes/bundles.ts"
+    "src/generated"
   ]
 }

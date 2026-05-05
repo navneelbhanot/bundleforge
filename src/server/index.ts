@@ -34,6 +34,7 @@ import { mountWebhooks } from "../webhooks";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
+import { bundleRoutes } from "../routes/bundles";
 import { inventoryRoutes } from "../routes/inventory";
 import { ordersRoutes } from "../routes/orders";
 import { settingsRoutes } from "../routes/settings";
@@ -133,13 +134,13 @@ export function createApp(): Express {
   app.use("/api/v1", requireShopSession());
 
   // Mount routers. Stubs return 501 until their respective milestones.
+  app.use("/api/v1/bundles", bundleRoutes);
   app.use("/api/v1/orders", ordersRoutes);
   app.use("/api/v1/inventory", inventoryRoutes);
   app.use("/api/v1/analytics", analyticsRoutes);
   app.use("/api/v1/settings", settingsRoutes);
   app.use("/api/v1/billing", billingRoutes);
   app.use("/api/v1/ai", aiRoutes);
-  // /api/v1/bundles deferred to M-053 (routes/bundles.ts in tsconfig exclude).
 
   // Catch-all 501 for /api/v1/*
   app.use("/api/v1", notImplemented);

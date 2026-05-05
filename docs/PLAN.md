@@ -85,14 +85,14 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-048 | Per-type config validators (zod, discriminated union) | pending | — | One validator per bundle type |
-| M-049 | Bundle service: CRUD | pending | — | Replace stub |
-| M-050 | Bundle service: duplicate | pending | — | |
-| M-051 | Bundle service: publish (Shopify product + metafields) | pending | — | Writes contract for Cart Transform |
-| M-052 | Bundle service: archive + soft delete | pending | — | |
-| M-053 | Bundle routes (9 endpoints) | pending | — | Per ARCHITECTURE §5.1 |
-| M-054 | BundleItem service | pending | — | |
-| M-055 | PricingRule service | pending | — | Persists rules from §D |
+| M-048 | Per-type config validators (zod, discriminated union) | done (2026-05-05) | `docs/specs/M-048-bundle-validators.md` | 13-type discriminated union; M-049 consumes |
+| M-049 | Bundle service: CRUD | done (2026-05-05) | `docs/specs/M-049-bundle-service.md` | repository layer; un-excluded from tsconfig |
+| M-050 | Bundle service: duplicate | done (2026-05-05) | `docs/sessions/0050-bundle-duplicate.md` | Copies items + pricing rules |
+| M-051 | Bundle service: publish | done (2026-05-05) | `docs/sessions/0051-bundle-publish.md` | status=active; Shopify product sync deferred to slices |
+| M-052 | Bundle service: archive + soft delete | done (2026-05-05) | `docs/sessions/0052-bundle-archive.md` | status=archived |
+| M-053 | Bundle routes (8 endpoints) | done (2026-05-05) | `docs/specs/M-053-bundle-routes.md` | un-excluded from tsconfig; mounted at /api/v1/bundles |
+| M-054 | BundleItem service | done (2026-05-05) | `docs/specs/M-054-bundle-item-service.md` | tenant-safe; reorder uses $transaction |
+| M-055 | PricingRule service | done (2026-05-05) | `docs/specs/M-055-pricing-rule-service.md` | tenant-safe add/update/remove |
 
 ## Phase F — Vertical Slices (M-056 to M-068)
 
@@ -302,6 +302,14 @@
 | M-045 | bogo rule | 2026-05-05 | `docs/sessions/0045-bogo-rule.md` |
 | M-046 | stackability + priority verified | 2026-05-05 | `docs/sessions/0046-stackability.md` |
 | M-047 | condition evaluator verified | 2026-05-05 | `docs/sessions/0047-conditions.md` |
+| M-048 | bundle config validators | 2026-05-05 | `docs/sessions/0048-bundle-validators.md` |
+| M-049 | bundle service CRUD rewrite | 2026-05-05 | `docs/sessions/0049-bundle-service.md` |
+| M-050 | bundle duplicate | 2026-05-05 | `docs/sessions/0050-bundle-duplicate.md` |
+| M-051 | bundle publish | 2026-05-05 | `docs/sessions/0051-bundle-publish.md` |
+| M-052 | bundle archive | 2026-05-05 | `docs/sessions/0052-bundle-archive.md` |
+| M-053 | bundle routes | 2026-05-05 | `docs/sessions/0053-bundle-routes.md` |
+| M-054 | BundleItem service | 2026-05-05 | `docs/sessions/0054-bundle-item-service.md` |
+| M-055 | PricingRule service | 2026-05-05 | `docs/sessions/0055-pricing-rule-service.md` |
 
 ---
 
