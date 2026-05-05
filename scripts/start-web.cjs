@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// Verbose entrypoint shim. Prints exactly which step we reach so a silent
-// container exit on Railway / Fly / etc. is impossible.
+/* eslint-disable no-console */
+// Single-process entrypoint: migrations + server. Inlining both eliminates
+// shell-chain ambiguity that was hiding boot failures on Railway.
 process.stdout.write("[start-web] script entered\n");
 process.stdout.write("[start-web] node " + process.version + " on " + process.platform + "\n");
+process.stdout.write("[start-web] cwd=" + process.cwd() + "\n");
 process.stdout.write("[start-web] PORT=" + (process.env.PORT || "(unset)") + "\n");
 process.stdout.write("[start-web] NODE_ENV=" + (process.env.NODE_ENV || "(unset)") + "\n");
 
-// Required env vars whose absence causes a synchronous module-load throw.
-// Print presence (not values) so a missing var is visible without leaking secrets.
+// Print presence (not values) of each required env var.
 const REQUIRED = [
   "DATABASE_URL",
   "REDIS_URL",
@@ -22,7 +23,27 @@ for (const k of REQUIRED) {
   );
 }
 
-// Locate tsx. If it's not installed we want to know loudly.
+// Catch anything that escapes downstream code.
+process.on("uncaughtException", (err) => {
+  process.stderr.write("[start-web] uncaughtException: " + (err && err.stack ? err.stack : err) + "\n");
+});
+process.on("unhandledRejection", (err) => {
+  process.stderr.write("[start-web] unhandledRejection: " + err + "\n");
+});
+
+const { spawnSync } = require("node:child_process");
+
+// 1) Run prisma migrate deploy synchronously. inheritStdio so we see output
+//    in real time. Bail with a non-zero exit if it fails.
+process.stdout.write("[start-web] running prisma migrate deploy…\n");
+const migrate = spawnSync("npx", ["prisma", "migrate", "deploy"], { stdio: "inherit" });
+if (migrate.status !== 0) {
+  process.stderr.write("[start-web] FATAL: prisma migrate deploy exited " + migrate.status + "\n");
+  process.exit(migrate.status || 1);
+}
+process.stdout.write("[start-web] migrations OK\n");
+
+// 2) Locate tsx and load the server entrypoint in-process.
 let tsxPath;
 try {
   tsxPath = require.resolve("tsx/cli");
@@ -33,16 +54,6 @@ try {
   process.exit(1);
 }
 
-// Catch anything that escapes the entrypoint.
-process.on("uncaughtException", (err) => {
-  process.stderr.write("[start-web] uncaughtException: " + (err && err.stack ? err.stack : err) + "\n");
-});
-process.on("unhandledRejection", (err) => {
-  process.stderr.write("[start-web] unhandledRejection: " + err + "\n");
-});
-
-// Hand off to tsx in the same process so signal handling (SIGTERM on
-// container shutdown) reaches the server cleanly.
 process.stdout.write("[start-web] handing off to tsx → src/server/index.ts\n");
 require(tsxPath);
 require("../src/server/index.ts");
