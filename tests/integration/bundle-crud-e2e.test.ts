@@ -239,6 +239,75 @@ describe.skipIf(!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("
       expect(archiveRes.body).toMatchObject({ id: bundleId, status: "archived" });
     });
 
+    it("creates a mix_match bundle with required config fields", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+
+      // mix_match's Zod validator requires minItems + maxItems. The
+      // BundleCreatePage sends them as part of `config`. This test
+      // pins the contract so a frontend regression that omits config
+      // (which produced HTTP 400 "Expected number, received nan" on a
+      // real merchant's first attempt) trips the test, not the merchant.
+      const res = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", `Bearer ${jwt}`)
+        .send({
+          title: "E2E mix-match",
+          type: "mix_match",
+          config: { minItems: 2, maxItems: 5, allowDuplicates: false },
+          items: [],
+          pricingRules: [],
+        });
+      expect(res.status, res.text).toBe(201);
+      expect(res.body).toMatchObject({
+        type: "mix_match",
+        status: "draft",
+      });
+      expect(res.body.config).toMatchObject({
+        minItems: 2,
+        maxItems: 5,
+      });
+    });
+
+    it("rejects mix_match bundle without config fields (regression for HTTP 400)", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+
+      const res = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", `Bearer ${jwt}`)
+        .send({
+          title: "E2E mix-match no config",
+          type: "mix_match",
+          // intentionally omitting config — server should 400
+          items: [],
+          pricingRules: [],
+        });
+      expect(res.status).toBe(400);
+      expect(res.body.error?.code).toBe("validation_error");
+    });
+
+    it("creates a multipack bundle with packQuantity config", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+
+      const res = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", `Bearer ${jwt}`)
+        .send({
+          title: "E2E multipack",
+          type: "multipack",
+          config: { packQuantity: 12 },
+          items: [],
+          pricingRules: [],
+        });
+      expect(res.status, res.text).toBe(201);
+      expect(res.body.config).toMatchObject({ packQuantity: 12 });
+    });
+
     it("rejects bundle access from a different shop (cross-tenant safety)", async () => {
       if (!dbAvailable) return;
       const app = createApp();

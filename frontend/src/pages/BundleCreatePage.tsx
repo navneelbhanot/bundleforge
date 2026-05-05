@@ -435,11 +435,127 @@ function StorefrontPreview({ type, title, description }: PreviewProps): JSX.Elem
   );
 }
 
+/**
+ * Some types' Zod validators require numeric config fields up front
+ * (`mix_match` needs minItems + maxItems, `build_box` same, `multipack`
+ * needs packQuantity). We expose those inline below the Details card
+ * so the merchant doesn't get a 400 from the server, and we send the
+ * canonical defaults for any type that doesn't need explicit input.
+ */
+function buildConfig(
+  typeId: string,
+  raw: { minItems: string; maxItems: string; packQuantity: string },
+): Record<string, unknown> {
+  const minItems = Number.parseInt(raw.minItems, 10);
+  const maxItems = Number.parseInt(raw.maxItems, 10);
+  const packQuantity = Number.parseInt(raw.packQuantity, 10);
+  switch (typeId) {
+    case "mix_match":
+      return {
+        minItems: Number.isFinite(minItems) ? minItems : 1,
+        maxItems: Number.isFinite(maxItems) ? maxItems : 3,
+        allowDuplicates: false,
+      };
+    case "build_box":
+      return {
+        minItems: Number.isFinite(minItems) ? minItems : 1,
+        maxItems: Number.isFinite(maxItems) ? maxItems : 3,
+        allowDuplicates: false,
+        steps: [],
+      };
+    case "multipack":
+      return {
+        packQuantity: Number.isFinite(packQuantity) ? packQuantity : 6,
+      };
+    case "wholesale":
+      return {};
+    default:
+      // fixed, bogo, bxgy, volume, gift, mystery, sample, subscription,
+      // custom — server validators accept passthrough {} for these.
+      return {};
+  }
+}
+
+interface ConfigFieldsProps {
+  typeId: string;
+  values: { minItems: string; maxItems: string; packQuantity: string };
+  onChange: (next: ConfigFieldsProps["values"]) => void;
+}
+
+function ConfigFields({ typeId, values, onChange }: ConfigFieldsProps): JSX.Element | null {
+  if (typeId === "mix_match" || typeId === "build_box") {
+    return (
+      <Card>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingMd">
+            Type configuration
+          </Text>
+          <Text as="p" tone="subdued">
+            How many items can the customer pick?
+          </Text>
+          <InlineStack gap="400" wrap={false}>
+            <Box minWidth="160px">
+              <TextField
+                label="Min items"
+                type="number"
+                min={0}
+                value={values.minItems}
+                onChange={(v) => onChange({ ...values, minItems: v })}
+                autoComplete="off"
+              />
+            </Box>
+            <Box minWidth="160px">
+              <TextField
+                label="Max items"
+                type="number"
+                min={1}
+                value={values.maxItems}
+                onChange={(v) => onChange({ ...values, maxItems: v })}
+                autoComplete="off"
+              />
+            </Box>
+          </InlineStack>
+        </BlockStack>
+      </Card>
+    );
+  }
+  if (typeId === "multipack") {
+    return (
+      <Card>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingMd">
+            Type configuration
+          </Text>
+          <Text as="p" tone="subdued">
+            How many units in a pack?
+          </Text>
+          <Box minWidth="200px">
+            <TextField
+              label="Pack quantity"
+              type="number"
+              min={1}
+              value={values.packQuantity}
+              onChange={(v) => onChange({ ...values, packQuantity: v })}
+              autoComplete="off"
+            />
+          </Box>
+        </BlockStack>
+      </Card>
+    );
+  }
+  return null;
+}
+
 export function BundleCreatePage(): JSX.Element {
   const navigate = useNavigate();
   const [type, setType] = useState<string>("fixed");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [config, setConfig] = useState({
+    minItems: "1",
+    maxItems: "3",
+    packQuantity: "6",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -455,6 +571,31 @@ export function BundleCreatePage(): JSX.Element {
       setError("Title is required.");
       return;
     }
+    // Quick client-side validation for the config-requiring types so
+    // the merchant gets a clear inline message instead of a server 400.
+    if (type === "mix_match" || type === "build_box") {
+      const min = Number.parseInt(config.minItems, 10);
+      const max = Number.parseInt(config.maxItems, 10);
+      if (!Number.isFinite(min) || min < 0) {
+        setError("Min items must be a non-negative whole number.");
+        return;
+      }
+      if (!Number.isFinite(max) || max < 1) {
+        setError("Max items must be a whole number 1 or greater.");
+        return;
+      }
+      if (max < min) {
+        setError("Max items must be greater than or equal to min items.");
+        return;
+      }
+    }
+    if (type === "multipack") {
+      const pack = Number.parseInt(config.packQuantity, 10);
+      if (!Number.isFinite(pack) || pack < 1) {
+        setError("Pack quantity must be a whole number 1 or greater.");
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/v1/bundles", {
@@ -464,6 +605,7 @@ export function BundleCreatePage(): JSX.Element {
           title,
           type,
           description: description || undefined,
+          config: buildConfig(type, config),
           items: [],
           pricingRules: [],
         }),
@@ -544,6 +686,14 @@ export function BundleCreatePage(): JSX.Element {
                     </div>
                   </BlockStack>
                 </Card>
+
+                {/* Type-specific config (only for the 3 types whose
+                    Zod validators require numeric fields up front). */}
+                <ConfigFields
+                  typeId={type}
+                  values={config}
+                  onChange={setConfig}
+                />
 
                 {/* Title + description. */}
                 <Card>
