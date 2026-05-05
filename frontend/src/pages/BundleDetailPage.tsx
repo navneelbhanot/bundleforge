@@ -17,12 +17,9 @@ import {
   Card,
   EmptyState,
   Frame,
-  IndexTable,
   InlineStack,
   Layout,
   Page,
-  ResourceItem,
-  ResourceList,
   Text,
   TextField,
   Toast,
@@ -36,10 +33,34 @@ import {
 import { TypeConfigPanel } from "../components/TypeConfigPanel";
 
 interface BundleItem {
-  id: string;
+  id?: string;
   title: string;
   shopifyProductGid: string;
+  shopifyVariantGid?: string;
+  sku?: string;
   quantity: number;
+}
+
+/**
+ * App Bridge v4 exposes a native ResourcePicker via `shopify.resourcePicker`.
+ * Loose typing: the global comes from a CDN script and isn't packaged with
+ * a TypeScript type, so we describe just the shape we use.
+ */
+interface AppBridgeResourcePickerResult {
+  id: string;
+  title: string;
+  variants?: Array<{ id: string; title?: string; sku?: string | null }>;
+}
+interface AppBridgeShopify {
+  idToken?: () => Promise<string>;
+  resourcePicker?: (opts: {
+    type: "product" | "variant" | "collection";
+    multiple?: boolean;
+    selectionIds?: Array<{ id: string }>;
+  }) => Promise<AppBridgeResourcePickerResult[] | undefined>;
+}
+function getShopify(): AppBridgeShopify | null {
+  return (window as unknown as { shopify?: AppBridgeShopify }).shopify ?? null;
 }
 
 interface BundleDetail {
@@ -71,7 +92,9 @@ export function BundleDetailPage(): JSX.Element {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState<PricingRuleRow[]>([]);
+  const [items, setItems] = useState<BundleItem[]>([]);
   const [busy, setBusy] = useState(false);
+  const [pickerBusy, setPickerBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   function hydrate(b: BundleDetail): void {
@@ -79,6 +102,61 @@ export function BundleDetailPage(): JSX.Element {
     setTitle(b.title);
     setDescription(b.description ?? "");
     setRules(b.pricingRules ?? []);
+    setItems(b.items);
+  }
+
+  async function pickProducts(): Promise<void> {
+    const shopify = getShopify();
+    if (!shopify?.resourcePicker) {
+      setToast(
+        "Product picker only works inside the Shopify admin. Use the dev store install link.",
+      );
+      return;
+    }
+    setPickerBusy(true);
+    try {
+      const selectionIds = items
+        .filter((it) => it.shopifyProductGid)
+        .map((it) => ({ id: it.shopifyProductGid }));
+      const picked = await shopify.resourcePicker({
+        type: "product",
+        multiple: true,
+        selectionIds,
+      });
+      if (!picked) return; // merchant cancelled
+      // Merge: keep existing items whose gid is still selected (preserve
+      // their quantity), and add new ones with quantity 1.
+      const stillSelected = new Set(picked.map((p) => p.id));
+      const kept = items.filter((it) => stillSelected.has(it.shopifyProductGid));
+      const keptGids = new Set(kept.map((it) => it.shopifyProductGid));
+      const added: BundleItem[] = picked
+        .filter((p) => !keptGids.has(p.id))
+        .map((p) => ({
+          title: p.title,
+          shopifyProductGid: p.id,
+          shopifyVariantGid: p.variants?.[0]?.id,
+          sku: p.variants?.[0]?.sku ?? undefined,
+          quantity: 1,
+        }));
+      setItems([...kept, ...added]);
+    } catch (e) {
+      setToast(`Picker error: ${(e as Error).message}`);
+    } finally {
+      setPickerBusy(false);
+    }
+  }
+
+  function removeItem(idx: number): void {
+    setItems(items.filter((_, i) => i !== idx));
+  }
+
+  function setItemQuantity(idx: number, qty: string): void {
+    const n = Number.parseInt(qty, 10);
+    setItems(
+      items.map((it, i) =>
+        i === idx ? { ...it, quantity: Number.isFinite(n) && n > 0 ? n : 1 } : it,
+      ),
+    );
   }
 
   useEffect(() => {
@@ -232,47 +310,97 @@ export function BundleDetailPage(): JSX.Element {
                   </BlockStack>
                 </Card>
 
-                {/* Items. Empty state shows a clear add CTA. */}
+                {/* Items. Native Shopify ResourcePicker via App Bridge
+                    + per-row quantity + remove. Save Items button
+                    persists via PUT. */}
                 <Card>
                   <BlockStack gap="300">
                     <InlineStack align="space-between" blockAlign="center">
                       <Text as="h2" variant="headingMd">
                         Items
                       </Text>
-                      <Button disabled>
-                        Add items (coming soon)
+                      <Button
+                        onClick={pickProducts}
+                        loading={pickerBusy}
+                        disabled={pickerBusy || busy}
+                        variant="primary"
+                      >
+                        {items.length === 0 ? "Add products" : "Edit products"}
                       </Button>
                     </InlineStack>
-                    {bundle.items.length === 0 ? (
+                    {items.length === 0 ? (
                       <EmptyState
                         heading="No items yet"
                         image=""
-                        action={undefined}
+                        action={{
+                          content: "Add products",
+                          onAction: pickProducts,
+                          loading: pickerBusy,
+                        }}
                       >
                         <p>
-                          Items are the products in this bundle. The Shopify
-                          ResourcePicker integration that lets you pick
-                          products visually is the next milestone (see
-                          M-099). Until then, add items via the bundle
-                          import CSV at <code>POST /api/v1/bundles/import</code>.
+                          A bundle is a set of products. Click{" "}
+                          <strong>Add products</strong> to choose what's in
+                          this bundle from your Shopify catalog.
                         </p>
                       </EmptyState>
                     ) : (
-                      <ResourceList
-                        items={bundle.items}
-                        renderItem={(item: BundleItem) => (
-                          <ResourceItem
-                            id={item.id}
-                            url={item.shopifyProductGid}
-                            accessibilityLabel={`Edit ${item.title}`}
+                      <BlockStack gap="200">
+                        {items.map((item, idx) => (
+                          <Box
+                            key={item.shopifyProductGid + idx}
+                            background="bg-surface-secondary"
+                            padding="300"
+                            borderRadius="200"
                           >
-                            <Text as="span" fontWeight="semibold">
-                              {item.title}
-                            </Text>
-                            <div>Qty: {item.quantity}</div>
-                          </ResourceItem>
-                        )}
-                      />
+                            <InlineStack
+                              align="space-between"
+                              blockAlign="center"
+                              gap="300"
+                            >
+                              <BlockStack gap="050">
+                                <Text as="p" fontWeight="semibold">
+                                  {item.title}
+                                </Text>
+                                {item.sku && (
+                                  <Text as="p" variant="bodySm" tone="subdued">
+                                    SKU: {item.sku}
+                                  </Text>
+                                )}
+                              </BlockStack>
+                              <InlineStack gap="200" blockAlign="center">
+                                <Box minWidth="80px">
+                                  <TextField
+                                    label="Qty"
+                                    labelHidden
+                                    type="number"
+                                    min={1}
+                                    value={String(item.quantity)}
+                                    onChange={(v) => setItemQuantity(idx, v)}
+                                    autoComplete="off"
+                                  />
+                                </Box>
+                                <Button
+                                  onClick={() => removeItem(idx)}
+                                  variant="tertiary"
+                                  tone="critical"
+                                >
+                                  Remove
+                                </Button>
+                              </InlineStack>
+                            </InlineStack>
+                          </Box>
+                        ))}
+                        <InlineStack align="end">
+                          <Button
+                            onClick={() => save({ items } as Partial<BundleDetail>)}
+                            loading={busy}
+                            disabled={busy}
+                          >
+                            Save items
+                          </Button>
+                        </InlineStack>
+                      </BlockStack>
                     )}
                   </BlockStack>
                 </Card>

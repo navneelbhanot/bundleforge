@@ -337,6 +337,60 @@ describe.skipIf(!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("
       ).toBe("percentage");
     });
 
+    it("PUT replaces items array (BundleDetailPage Save items button)", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+      const auth = `Bearer ${jwt}`;
+
+      const createRes = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", auth)
+        .send({
+          title: "E2E items edit",
+          type: "fixed",
+          items: [],
+          pricingRules: [],
+        });
+      const bundleId = (createRes.body as { id: string }).id;
+
+      // Add two items via PUT — what the ResourcePicker → Save items
+      // flow sends.
+      const putRes = await request(app)
+        .put(`/api/v1/bundles/${bundleId}`)
+        .set("Authorization", auth)
+        .send({
+          items: [
+            {
+              shopifyProductGid: "gid://shopify/Product/1",
+              title: "Test Product A",
+              sku: "TEST-A",
+              quantity: 1,
+            },
+            {
+              shopifyProductGid: "gid://shopify/Product/2",
+              title: "Test Product B",
+              sku: "TEST-B",
+              quantity: 2,
+            },
+          ],
+        });
+      expect(putRes.status, putRes.text).toBe(200);
+      const itemsBack = (putRes.body as { items: Array<{ title: string; quantity: number }> })
+        .items;
+      expect(itemsBack).toHaveLength(2);
+      expect(itemsBack.find((i) => i.title === "Test Product A")?.quantity).toBe(1);
+      expect(itemsBack.find((i) => i.title === "Test Product B")?.quantity).toBe(2);
+
+      // Now PUT with [] should clear items.
+      const clearRes = await request(app)
+        .put(`/api/v1/bundles/${bundleId}`)
+        .set("Authorization", auth)
+        .send({ items: [] });
+      expect(clearRes.status).toBe(200);
+      expect((clearRes.body as { items: Array<unknown> }).items).toHaveLength(0);
+    });
+
     it("creates a multipack bundle with packQuantity config", async () => {
       if (!dbAvailable) return;
       const app = createApp();
