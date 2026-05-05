@@ -214,8 +214,9 @@ export function createApp(): Express {
   // Serve the admin SPA (built by `vite build -c frontend/vite.config.ts`
   // into dist/frontend). Shopify embedded apps require the admin assets
   // and the API to share an origin; otherwise App Bridge token flow breaks.
-  // Skipped under tests so the 404 catch-all still fires there.
-  if (env.NODE_ENV !== "test") {
+  // Gated on the built index.html existing — tests that don't pre-build
+  // get the 404 catch-all; tests that do can exercise the SPA path.
+  {
     const spaDir = path.resolve(process.cwd(), "dist", "frontend");
     const spaIndex = path.join(spaDir, "index.html");
     if (fs.existsSync(spaIndex)) {
