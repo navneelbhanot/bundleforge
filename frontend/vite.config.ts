@@ -11,5 +11,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "..", "dist", "frontend"),
     emptyOutDir: true,
+    // Sourcemaps enabled while we're debugging the embedded admin so
+    // production stack traces map back to source files. Re-evaluate
+    // before public launch — exposes source structure under /assets/.
+    sourcemap: true,
   },
 });
