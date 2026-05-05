@@ -289,6 +289,54 @@ describe.skipIf(!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("
       expect(res.body.error?.code).toBe("validation_error");
     });
 
+    it("updates a bundle's description + pricing rules via PUT", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+      const auth = `Bearer ${jwt}`;
+
+      // Create.
+      const createRes = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", auth)
+        .send({
+          title: "E2E detail edit",
+          type: "fixed",
+          items: [],
+          pricingRules: [],
+        });
+      expect(createRes.status, createRes.text).toBe(201);
+      const bundleId = (createRes.body as { id: string }).id;
+
+      // Update description + add a percentage pricing rule. The
+      // BundleDetailPage save buttons send these patches to PUT.
+      const putRes = await request(app)
+        .put(`/api/v1/bundles/${bundleId}`)
+        .set("Authorization", auth)
+        .send({
+          description: "Updated marketing copy",
+          pricingRules: [
+            {
+              type: "percentage",
+              value: 15,
+              priority: 1,
+              isStackable: false,
+            },
+          ],
+        });
+      expect(putRes.status, putRes.text).toBe(200);
+      expect(putRes.body).toMatchObject({
+        id: bundleId,
+        description: "Updated marketing copy",
+      });
+      expect((putRes.body as { pricingRules: Array<{ type: string }> }).pricingRules)
+        .toHaveLength(1);
+      expect(
+        (putRes.body as { pricingRules: Array<{ type: string }> }).pricingRules[0]
+          .type,
+      ).toBe("percentage");
+    });
+
     it("creates a multipack bundle with packQuantity config", async () => {
       if (!dbAvailable) return;
       const app = createApp();

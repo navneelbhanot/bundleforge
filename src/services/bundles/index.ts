@@ -161,6 +161,22 @@ export class BundleService {
     if (input.endsAt !== undefined) {
       data.endsAt = input.endsAt ? new Date(input.endsAt) : null;
     }
+    // Replace pricing rules atomically when an array is supplied.
+    // Sending [] clears all rules. Omitting the field leaves the
+    // existing rules untouched.
+    if (input.pricingRules !== undefined) {
+      data.pricingRules = {
+        deleteMany: {},
+        create: input.pricingRules.map(mapRule),
+      };
+    }
+    // Same model for items: replace-all when an array is supplied.
+    if (input.items !== undefined) {
+      data.items = {
+        deleteMany: {},
+        create: input.items.map((it, i) => mapItem(it, i)),
+      };
+    }
     return bundleRepo.update({
       where: { id },
       data,
