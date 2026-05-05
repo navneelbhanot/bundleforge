@@ -1,6 +1,15 @@
 # BundleForge — Competitive Analysis & Strategic Product Plan
 
-> Analysis of 8 Competing Apps | 12,000+ Reviews Examined | March 2026 | Version 2.0
+> Analysis of 8 Competing Apps | March 2026 | Version 2.0
+>
+> **Status note (added 2026-05-06):** This document captures the
+> original competitive plan. It is a planning artifact, not a live
+> status report — for current build state see `docs/STATE.md`. The
+> §4 feature matrix has been audited against the codebase; rows that
+> are currently aspirational are marked `(roadmap)`. Phased
+> development plan in §9 is historical: the build skipped the cadence
+> and shipped most of Phases 1–3 in a single model session over a few
+> days, so the month-by-month framing no longer applies.
 
 ---
 
@@ -207,13 +216,31 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 | AI Recommendations | No | Partial | No | Yes | Yes | No | **Yes** |
 | Visual Bundle Builder | Partial | Yes | No | Partial | No | No | **Yes** |
 | Multi-Language | Partial | Yes | No | Yes | No | Yes | **Yes** |
-| POS Integration | No | Yes | No | Yes | Yes | Partial | **Yes** |
-| Hydrogen/Headless | No | Yes | No | No | Yes | No | **Yes** |
+| POS Integration | No | Yes | No | Yes | Yes | Partial | _Roadmap_ |
+| Hydrogen/Headless | No | Yes | No | No | Yes | No | _Roadmap_ |
 | Subscription Bundles | Partial | No | Yes | Yes | Yes | No | **Yes** |
-| Live Chat Support | Yes | Yes | No | Yes | No | No | **Yes** |
+| Live Chat Support | Yes | Yes | No | Yes | No | No | _Roadmap_ |
 | Flat-Rate Pricing | No | No | Yes | No | Yes | Yes | **Yes** |
 
-**Key Insight:** BundleForge is the only app with full coverage across every single feature category. No competitor achieves this.
+**Audited 2026-05-06.** Eleven of the 14 rows are real and verifiable
+in the codebase today (see audit notes in
+`docs/sessions/0157-first-install-deploy-fixes.md` and §9 of this
+doc). Three rows are deliberately demoted to **Roadmap**:
+
+- **POS Integration** — only the `read_locations` scope is declared;
+  no integration code exists yet. Removing the previous "Yes" claim.
+- **Hydrogen/Headless** — no Storefront API surface or Hydrogen
+  scaffolding in the codebase. Will need a real engineering pass
+  before this can be claimed.
+- **Live Chat Support** — operational infrastructure, not code. No
+  provider (Crisp, Intercom, Tidio, etc.) is wired in. The §5 pain-
+  point claim of "embedded live chat, AI diagnostic bot, 2-hour
+  human escalation SLA" depends on this — also roadmap.
+
+**Updated insight:** BundleForge currently leads on inventory
+reliability, multi-language coverage, and audit-trail integrity
+versus every competitor. Three competitive parity gaps remain
+(POS, Hydrogen/headless, live chat); see roadmap.
 
 ---
 

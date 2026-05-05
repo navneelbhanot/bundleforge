@@ -46,8 +46,20 @@ Operational, still user-owned (unchanged from before today):
 - Schedule beta merchants per `docs/onboarding-beta.md`.
 - On D-day follow `docs/launch/launch-checklist.md`.
 
-Future code work (post-launch backlog, unchanged):
+Future code work (post-launch backlog):
 
+- **Live chat integration** (Crisp / Intercom / Tidio) — needed to
+  back the §5 "Support quality" pain-point claim. Pick a provider
+  and ship the embed; staffing is operational. New roadmap item per
+  the 2026-05-06 audit.
+- **Hydrogen / Storefront API surface** — currently marked
+  `(roadmap)` in `PRODUCT_PLAN.md` §4. Needs a real engineering
+  pass; pricing engine is already runtime-agnostic so the work is
+  plumbing.
+- **POS integration** — only `read_locations` scope declared; needs
+  an actual POS adapter to back the §4 claim.
+- **Trial-warning emails** — needed to back the §5 "Billing
+  transparency" claim. Needs SMTP wiring + a cron worker job.
 - **Prisma v6 → v7** — requires `prisma.config.ts` + adapter rewiring.
   Not blocking launch.
 - ResourcePicker integration on `ProductPicker`.
@@ -72,8 +84,15 @@ Future code work (post-launch backlog, unchanged):
 
 ## Recently completed
 
+- **PRODUCT_PLAN audit + UI polish + null-safe pages + OnboardingWizard
+  wiring + merchant help docs** (2026-05-06). Replaced the bare
+  `<Link>` nav with Polaris Tabs; added EmptyState renders to all
+  list pages with shape-tolerance against API drift; wired the
+  built-but-unused OnboardingWizard into BundlesListPage; demoted
+  three vapor claims (POS, Hydrogen, live chat) in PRODUCT_PLAN §4
+  to `(roadmap)`; published `docs/help/` (7 files) for merchants.
 - **First real Shopify dev-store install + 14 deploy/auth/UI fixes +
-  3 new test layers + CI e2e job**. 17 commits.
+  3 new test layers + CI e2e job** (2026-05-05). 17 commits.
   `docs/sessions/0157-first-install-deploy-fixes.md`.
 - Railway deploy config + Shopify SDK / Prisma 6 major upgrade +
   `tsx` runtime (ADR-0005). `docs/sessions/0156-railway-and-sdk-upgrade.md`.
@@ -90,8 +109,9 @@ Future code work (post-launch backlog, unchanged):
 
 - **454 / 454 vitest tests passing** (442 prior + 9 SPA-headers
   integration + 3 auth-flow integration).
-- **4 / 4 Playwright e2e tests passing** (Polaris CSS, authFetch JWT,
-  /bundles/new mount, route registration).
+- **5 / 5 Playwright e2e tests passing** (Polaris CSS, authFetch JWT,
+  OnboardingWizard fresh-shop walkthrough, /bundles/new mount, route
+  registration).
 - CI runs both layers on every push and PR (`.github/workflows/ci.yml`,
   jobs `test` + `e2e`).
 - Typecheck clean (server + frontend).
