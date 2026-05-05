@@ -1,10 +1,32 @@
 import { useEffect, useState } from "react";
-import { Card, Page, Spinner, Text, Badge, InlineStack } from "@shopify/polaris";
+import {
+  Card,
+  EmptyState,
+  Page,
+  Spinner,
+  Text,
+  Badge,
+  InlineStack,
+} from "@shopify/polaris";
+
+interface InventoryCounts {
+  synced: number;
+  pending: number;
+  error: number;
+  locked: number;
+}
 
 interface Health {
   shopId: string;
-  counts: { synced: number; pending: number; error: number; locked: number };
+  counts: InventoryCounts;
 }
+
+const ZERO_COUNTS: InventoryCounts = {
+  synced: 0,
+  pending: 0,
+  error: 0,
+  locked: 0,
+};
 
 export function InventoryHealthPage(): JSX.Element {
   const [health, setHealth] = useState<Health | null>(null);
@@ -39,7 +61,28 @@ export function InventoryHealthPage(): JSX.Element {
       </Page>
     );
   }
-  const { counts } = health;
+  const counts = { ...ZERO_COUNTS, ...(health.counts ?? {}) };
+  const total = counts.synced + counts.pending + counts.error + counts.locked;
+
+  if (total === 0) {
+    return (
+      <Page title="Inventory health">
+        <Card>
+          <EmptyState
+            heading="No inventory tracked yet"
+            image=""
+            action={{ content: "Create a bundle", url: "/bundles/new" }}
+          >
+            <p>
+              Inventory state appears here once you publish a bundle and the
+              first order is processed. Each component SKU gets a row.
+            </p>
+          </EmptyState>
+        </Card>
+      </Page>
+    );
+  }
+
   return (
     <Page title="Inventory health">
       <Card>

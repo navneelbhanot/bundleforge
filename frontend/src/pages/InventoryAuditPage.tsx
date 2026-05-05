@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Card,
+  EmptyState,
   IndexTable,
   Page,
   Spinner,
@@ -28,7 +29,7 @@ export function InventoryAuditPage(): JSX.Element {
       .then((r) =>
         r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
       )
-      .then((body: { data: AuditRow[] }) => setRows(body.data))
+      .then((body: { data?: AuditRow[] }) => setRows(Array.isArray(body?.data) ? body.data : []))
       .catch((e: Error) => setError(e.message));
   }, []);
 
@@ -52,6 +53,26 @@ export function InventoryAuditPage(): JSX.Element {
       </Page>
     );
   }
+  if (rows.length === 0) {
+    return (
+      <Page title="Inventory audit">
+        <Card>
+          <EmptyState
+            heading="No inventory events yet"
+            image=""
+            action={{ content: "Create a bundle", url: "/bundles/new" }}
+          >
+            <p>
+              Every inventory adjustment writes an immutable row here, one per
+              component SKU. This page populates after the first bundle order
+              is processed.
+            </p>
+          </EmptyState>
+        </Card>
+      </Page>
+    );
+  }
+
   return (
     <Page title="Inventory audit">
       <Card>

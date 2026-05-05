@@ -37,11 +37,19 @@ export function BillingPage(): JSX.Element {
   useEffect(() => {
     Promise.all([
       fetch("/api/v1/billing").then((r) => r.json() as Promise<BillingState>),
-      fetch("/api/v1/billing/plans").then((r) => r.json() as Promise<PlanRow[]>),
+      fetch("/api/v1/billing/plans").then((r) => r.json() as Promise<PlanRow[] | { data?: PlanRow[] }>),
     ])
       .then(([s, p]) => {
         setState(s);
-        setPlans(p);
+        // Tolerate both `[...]` (current API) and `{data: [...]}` (the
+        // generic envelope used by other endpoints) so a future API
+        // change doesn't crash the page with .filter undefined.
+        const planList = Array.isArray(p)
+          ? p
+          : Array.isArray((p as { data?: PlanRow[] })?.data)
+            ? ((p as { data?: PlanRow[] }).data as PlanRow[])
+            : [];
+        setPlans(planList);
       })
       .catch((e: Error) => setError(e.message));
   }, []);

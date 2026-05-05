@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Card,
+  EmptyState,
   IndexTable,
   Page,
   Spinner,
@@ -26,7 +27,7 @@ export function OrdersListPage(): JSX.Element {
       .then((r) =>
         r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
       )
-      .then((body: { data: OrderRow[] }) => setRows(body.data))
+      .then((body: { data?: OrderRow[] }) => setRows(Array.isArray(body?.data) ? body.data : []))
       .catch((e: Error) => setError(e.message));
   }, []);
 
@@ -50,6 +51,25 @@ export function OrdersListPage(): JSX.Element {
       </Page>
     );
   }
+  if (rows.length === 0) {
+    return (
+      <Page title="Orders">
+        <Card>
+          <EmptyState
+            heading="No bundle orders yet"
+            image=""
+            action={{ content: "Create a bundle", url: "/bundles/new" }}
+          >
+            <p>
+              Orders containing a bundle appear here after checkout. Each row
+              maps to a Shopify order with its bundle line items.
+            </p>
+          </EmptyState>
+        </Card>
+      </Page>
+    );
+  }
+
   return (
     <Page title="Orders">
       <Card>

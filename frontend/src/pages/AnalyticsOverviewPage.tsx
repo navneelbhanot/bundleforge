@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
-import { Card, Page, Spinner, Text, Layout, IndexTable } from "@shopify/polaris";
+import {
+  Card,
+  EmptyState,
+  Page,
+  Spinner,
+  Text,
+  Layout,
+  IndexTable,
+} from "@shopify/polaris";
 
 interface Overview {
   totalRevenue: number;
   totalOrders: number;
   topBundles: Array<{ bundleId: string; revenue: number; orders: number }>;
+}
+
+function fmtMoney(n: unknown): string {
+  return typeof n === "number" && Number.isFinite(n) ? n.toFixed(2) : "0.00";
 }
 
 export function AnalyticsOverviewPage(): JSX.Element {
@@ -40,6 +52,29 @@ export function AnalyticsOverviewPage(): JSX.Element {
       </Page>
     );
   }
+  const totalRevenue = typeof data.totalRevenue === "number" ? data.totalRevenue : 0;
+  const totalOrders = typeof data.totalOrders === "number" ? data.totalOrders : 0;
+  const topBundles = Array.isArray(data.topBundles) ? data.topBundles : [];
+
+  if (totalOrders === 0 && topBundles.length === 0) {
+    return (
+      <Page title="Analytics">
+        <Card>
+          <EmptyState
+            heading="No bundle orders yet"
+            image=""
+            action={{ content: "Create a bundle", url: "/bundles/new" }}
+          >
+            <p>
+              Revenue and top bundles appear here after the first bundle order
+              is paid. Until then, this page is intentionally blank.
+            </p>
+          </EmptyState>
+        </Card>
+      </Page>
+    );
+  }
+
   return (
     <Page title="Analytics">
       <Layout>
@@ -49,7 +84,7 @@ export function AnalyticsOverviewPage(): JSX.Element {
               Total revenue
             </Text>
             <Text as="p" variant="heading2xl">
-              ${data.totalRevenue.toFixed(2)}
+              ${fmtMoney(totalRevenue)}
             </Text>
           </Card>
         </Layout.Section>
@@ -59,7 +94,7 @@ export function AnalyticsOverviewPage(): JSX.Element {
               Total bundle orders
             </Text>
             <Text as="p" variant="heading2xl">
-              {data.totalOrders}
+              {totalOrders}
             </Text>
           </Card>
         </Layout.Section>
@@ -69,7 +104,7 @@ export function AnalyticsOverviewPage(): JSX.Element {
               Top bundles
             </Text>
             <IndexTable
-              itemCount={data.topBundles.length}
+              itemCount={topBundles.length}
               headings={[
                 { title: "Bundle" },
                 { title: "Orders" },
@@ -77,11 +112,11 @@ export function AnalyticsOverviewPage(): JSX.Element {
               ]}
               selectable={false}
             >
-              {data.topBundles.map((b, i) => (
+              {topBundles.map((b, i) => (
                 <IndexTable.Row id={b.bundleId} key={b.bundleId} position={i}>
                   <IndexTable.Cell>{b.bundleId}</IndexTable.Cell>
                   <IndexTable.Cell>{b.orders}</IndexTable.Cell>
-                  <IndexTable.Cell>${b.revenue.toFixed(2)}</IndexTable.Cell>
+                  <IndexTable.Cell>${fmtMoney(b.revenue)}</IndexTable.Cell>
                 </IndexTable.Row>
               ))}
             </IndexTable>
