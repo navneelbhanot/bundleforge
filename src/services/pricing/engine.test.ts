@@ -185,6 +185,252 @@ describe("computeBundlePrice — percentage rule (M-041)", () => {
   });
 });
 
+describe("computeBundlePrice — flat_discount (M-042)", () => {
+  it("applies $1 off each unit", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "fd", type: "flat_discount", value: "1.00", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.totalDiscount.amount).toBe("2.00"); // 2 units × $1
+  });
+
+  it("clamps at subtotal when per-unit × qty exceeds", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "fd", type: "flat_discount", value: "1000.00", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.totalDiscount.amount).toBe("20.00");
+  });
+});
+
+describe("computeBundlePrice — tiered (M-043)", () => {
+  it("non-stackable tiers: highest priority qualifying tier wins", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        lineItems: [{ id: "li-1", unitPrice: usd("10.00"), quantity: 6 }],
+        rules: [
+          { id: "t1", type: "tiered", value: "5",  minQuantity: 3,  priority: 1, stackable: false },
+          { id: "t2", type: "tiered", value: "10", minQuantity: 5,  priority: 2, stackable: false },
+          { id: "t3", type: "tiered", value: "20", minQuantity: 10, priority: 3, stackable: false },
+        ],
+      }),
+    );
+    expect(r.applied).toHaveLength(1);
+    expect(r.applied[0].ruleId).toBe("t2");
+  });
+});
+
+describe("computeBundlePrice — volume (M-044)", () => {
+  it("applies per-unit discount only at/beyond threshold", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        lineItems: [{ id: "li-1", unitPrice: usd("10.00"), quantity: 7 }],
+        rules: [
+          {
+            id: "v1",
+            type: "volume",
+            value: "1.00",
+            minQuantity: 5,
+            priority: 0,
+            stackable: false,
+          },
+        ],
+      }),
+    );
+    // 7 - 5 + 1 = 3 qualifying units × $1 = $3
+    expect(r.totalDiscount.amount).toBe("3.00");
+  });
+
+  it("zero discount when below threshold", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        lineItems: [{ id: "li-1", unitPrice: usd("10.00"), quantity: 2 }],
+        rules: [
+          {
+            id: "v1",
+            type: "volume",
+            value: "1.00",
+            minQuantity: 5,
+            priority: 0,
+            stackable: false,
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toEqual([]);
+    expect(r.skipped[0].reason).toBe("min_quantity_not_met");
+  });
+});
+
+describe("computeBundlePrice — bogo (M-045)", () => {
+  it("buy 2 get 1 free with mixed prices uses cheapest as free", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        lineItems: [
+          { id: "li-1", unitPrice: usd("5.00"),  quantity: 3 },
+          { id: "li-2", unitPrice: usd("10.00"), quantity: 3 },
+        ],
+        rules: [
+          {
+            id: "b1",
+            type: "bogo",
+            value: "1",
+            minQuantity: 2,
+            priority: 0,
+            stackable: false,
+          },
+        ],
+      }),
+    );
+    // 6 units / set size 3 = 2 sets → 2 free units at $5 each = $10
+    expect(r.totalDiscount.amount).toBe("10.00");
+  });
+
+  it("no discount when fewer items than one set", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        lineItems: [{ id: "li-1", unitPrice: usd("10.00"), quantity: 2 }],
+        rules: [
+          {
+            id: "b1",
+            type: "bogo",
+            value: "1",
+            minQuantity: 2,
+            priority: 0,
+            stackable: false,
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toEqual([]);
+  });
+});
+
+describe("computeBundlePrice — stackability + priority (M-046)", () => {
+  it("mixes stackable + non-stackable correctly", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "s1", type: "fixed", value: "1.00", priority: 0, stackable: true },
+          { id: "ns-hi", type: "fixed", value: "5.00", priority: 5, stackable: false },
+          { id: "ns-lo", type: "fixed", value: "3.00", priority: 1, stackable: false },
+        ],
+      }),
+    );
+    // s1 stacks; ns-hi wins among non-stackable
+    expect(r.applied.map((a) => a.ruleId).sort()).toEqual(["ns-hi", "s1"]);
+    expect(r.skipped.find((s) => s.ruleId === "ns-lo")?.reason).toBe(
+      "non_stackable_lower_priority",
+    );
+  });
+});
+
+describe("computeBundlePrice — condition evaluator (M-047)", () => {
+  it("date window: within range applies", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        context: { now: "2026-05-04T12:00:00Z" },
+        rules: [
+          {
+            id: "r1",
+            type: "fixed",
+            value: "5.00",
+            priority: 0,
+            stackable: false,
+            conditions: {
+              startsAt: "2026-05-04T00:00:00Z",
+              endsAt: "2026-05-05T00:00:00Z",
+            },
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toHaveLength(1);
+  });
+
+  it("date window: after endsAt skipped", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        context: { now: "2027-01-01T00:00:00Z" },
+        rules: [
+          {
+            id: "r1",
+            type: "fixed",
+            value: "5.00",
+            priority: 0,
+            stackable: false,
+            conditions: { endsAt: "2026-05-05T00:00:00Z" },
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toEqual([]);
+    expect(r.skipped[0].reason).toBe("outside_date_window");
+  });
+
+  it("customer tag matched (case-insensitive)", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        context: { now: "2026-05-04T00:00:00Z", customerTags: ["VIP"] },
+        rules: [
+          {
+            id: "r1",
+            type: "fixed",
+            value: "5.00",
+            priority: 0,
+            stackable: false,
+            conditions: { customerTags: ["vip"] },
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toHaveLength(1);
+  });
+
+  it("country matched (uppercased)", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        context: { now: "2026-05-04T00:00:00Z", country: "us" },
+        rules: [
+          {
+            id: "r1",
+            type: "fixed",
+            value: "5.00",
+            priority: 0,
+            stackable: false,
+            conditions: { countries: ["US"] },
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toHaveLength(1);
+  });
+
+  it("missing customer tag with required → skipped", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          {
+            id: "r1",
+            type: "fixed",
+            value: "5.00",
+            priority: 0,
+            stackable: false,
+            conditions: { customerTags: ["vip"] },
+          },
+        ],
+      }),
+    );
+    expect(r.applied).toEqual([]);
+  });
+});
+
 describe("computeBundlePrice — properties", () => {
   it("total is never negative even when discount > subtotal", () => {
     const r = computeBundlePrice(

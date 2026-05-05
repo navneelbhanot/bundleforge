@@ -74,12 +74,12 @@
 | M-039 | Pricing engine: spec lock + types + JSON schema | done (2026-05-04) | `docs/specs/M-039-pricing-engine.md` | contract.ts + JSON schema + fixture loader |
 | M-040 | Rule type: `fixed` + property tests | done (2026-05-04) | `docs/specs/M-040-fixed-rule.md` | engine.ts + fixed; 3 fixtures; gate/stack/property tests |
 | M-041 | Rule type: `percentage` + tests | done (2026-05-05) | `docs/specs/M-041-percentage-rule.md` | floor(subtotal × pct/100); clamp 0–100 |
-| M-042 | Rule type: `flat_discount` + tests | pending | — | |
-| M-043 | Rule type: `tiered` + tests | pending | — | |
-| M-044 | Rule type: `volume` + tests | pending | — | |
-| M-045 | Rule type: `bogo` + tests | pending | — | |
-| M-046 | Stackability + priority resolution | pending | — | |
-| M-047 | Condition evaluator: tags, geo, dates | pending | — | |
+| M-042 | Rule type: `flat_discount` + tests | done (2026-05-05) | `docs/specs/M-042-flat-discount-rule.md` | per-unit × qty, clamped |
+| M-043 | Rule type: `tiered` + tests | done (2026-05-05) | `docs/specs/M-043-tiered-rule.md` | percentage with non-stackable priority cascade |
+| M-044 | Rule type: `volume` + tests | done (2026-05-05) | `docs/specs/M-044-volume-rule.md` | per-unit × qualifying-qty above threshold |
+| M-045 | Rule type: `bogo` + tests | done (2026-05-05) | `docs/specs/M-045-bogo-rule.md` | sets-based; cheapest units free |
+| M-046 | Stackability + priority resolution | done (2026-05-05) | `docs/specs/M-046-stackability.md` | Implemented in M-040; verified by mixed test |
+| M-047 | Condition evaluator: tags, geo, dates | done (2026-05-05) | `docs/specs/M-047-conditions.md` | Implemented in M-040; verified by 5 tests |
 
 ## Phase E — Bundle Engine (M-048 to M-055)
 
@@ -296,6 +296,12 @@
 | M-039 | Pricing engine spec lock | 2026-05-04 | `docs/sessions/0039-pricing-engine.md` |
 | M-040 | Fixed rule + property tests | 2026-05-04 | `docs/sessions/0040-fixed-rule.md` |
 | M-041 | percentage rule | 2026-05-05 | `docs/sessions/0041-percentage-rule.md` |
+| M-042 | flat_discount rule | 2026-05-05 | `docs/sessions/0042-flat-discount-rule.md` |
+| M-043 | tiered rule | 2026-05-05 | `docs/sessions/0043-tiered-rule.md` |
+| M-044 | volume rule | 2026-05-05 | `docs/sessions/0044-volume-rule.md` |
+| M-045 | bogo rule | 2026-05-05 | `docs/sessions/0045-bogo-rule.md` |
+| M-046 | stackability + priority verified | 2026-05-05 | `docs/sessions/0046-stackability.md` |
+| M-047 | condition evaluator verified | 2026-05-05 | `docs/sessions/0047-conditions.md` |
 
 ---
 

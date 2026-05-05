@@ -1,0 +1,33 @@
+{
+  "name": "BOGO: buy 2 get 1 free, qty=6 -> 2 free at cheapest",
+  "input": {
+    "bundleId": "b-bogo",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "5.00",  "currencyCode": "USD" }, "quantity": 3 },
+      { "id": "li-2", "unitPrice": { "amount": "10.00", "currencyCode": "USD" }, "quantity": 3 }
+    ],
+    "rules": [
+      {
+        "id": "b1",
+        "type": "bogo",
+        "value": "1",
+        "minQuantity": 2,
+        "priority": 0,
+        "stackable": false
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-bogo",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "45.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "10.00", "currencyCode": "USD" },
+    "total": { "amount": "35.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "b1", "discount": { "amount": "10.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "tiered: highest qty tier wins among non-stackable",
+  "input": {
+    "bundleId": "b-tier",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "10.00", "currencyCode": "USD" }, "quantity": 6 }
+    ],
+    "rules": [
+      { "id": "t1", "type": "tiered", "value": "5",  "minQuantity": 3, "priority": 1, "stackable": false },
+      { "id": "t2", "type": "tiered", "value": "10", "minQuantity": 5, "priority": 2, "stackable": false },
+      { "id": "t3", "type": "tiered", "value": "20", "minQuantity": 10,"priority": 3, "stackable": false }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-tier",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "60.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "6.00", "currencyCode": "USD" },
+    "total": { "amount": "54.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "t2", "discount": { "amount": "6.00", "currencyCode": "USD" } }
+    ],
+    "skipped": [
+      { "ruleId": "t3", "reason": "min_quantity_not_met" },
+      { "ruleId": "t1", "reason": "non_stackable_lower_priority" }
+    ]
+  }
+}

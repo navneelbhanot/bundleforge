@@ -6,10 +6,11 @@
  * must produce identical output for the shared fixture set
  * (tests/pricing/fixtures/*.json) per ADR-0002.
  *
- * M-040 implements the `fixed` rule. Other rule types land in
- * M-041..M-045 with the same contract.
+ * Rule types: fixed (M-040), percentage (M-041), flat_discount (M-042),
+ * tiered (M-043), volume (M-044), bogo (M-045).
  *
- * See docs/specs/M-040-fixed-rule.md.
+ * Stackability + priority: M-040 (verified M-046).
+ * Conditions (tags, countries, dates): M-040 (verified M-047).
  */
 import type {
   AppliedRule,
@@ -61,7 +62,14 @@ function evaluateGates(
   subtotalCents: number,
   ctx: PricingInput["context"],
 ): RuleEvaluation {
-  if (rule.minQuantity !== undefined && totalQuantity < rule.minQuantity) {
+  // BOGO uses minQuantity as part of its arithmetic, not as a gate. The
+  // engine still skips if there isn't enough quantity to form one set,
+  // but that's an arithmetic outcome, not a gate failure.
+  if (
+    rule.type !== "bogo" &&
+    rule.minQuantity !== undefined &&
+    totalQuantity < rule.minQuantity
+  ) {
     return { rule, passed: false, reason: "min_quantity_not_met" };
   }
   if (rule.maxQuantity !== undefined && totalQuantity > rule.maxQuantity) {
@@ -82,35 +90,85 @@ function evaluateGates(
   return { rule, passed: true };
 }
 
-function discountForRule(
-  rule: PricingRule,
-  subtotalCents: number,
-): number {
+interface DiscountContext {
+  subtotalCents: number;
+  totalQuantity: number;
+  /** Per-unit prices in cents, expanded by quantity (one entry per unit). */
+  expandedUnitPricesCents: number[];
+}
+
+function discountForRule(rule: PricingRule, ctx: DiscountContext): number {
+  const { subtotalCents, totalQuantity, expandedUnitPricesCents } = ctx;
   switch (rule.type) {
     case "fixed": {
       const cents = toCents(rule.value);
       return Math.max(0, Math.min(cents, subtotalCents));
     }
-    case "percentage": {
+    case "percentage":
+    case "tiered": {
+      // tiered uses the same arithmetic as percentage; tier selection
+      // happens via minQuantity gates + non-stackable + priority.
       const pct = Number.parseFloat(rule.value);
       if (Number.isNaN(pct) || pct <= 0) return 0;
-      const clampedPct = Math.min(100, pct);
-      const discount = Math.floor((subtotalCents * clampedPct) / 100);
+      const clamped = Math.min(100, pct);
+      const discount = Math.floor((subtotalCents * clamped) / 100);
       return Math.max(0, Math.min(discount, subtotalCents));
     }
-    // M-042..M-045 wire other types here.
+    case "flat_discount": {
+      const perUnit = toCents(rule.value);
+      if (perUnit <= 0) return 0;
+      return Math.max(0, Math.min(perUnit * totalQuantity, subtotalCents));
+    }
+    case "volume": {
+      // Per-unit discount applied only to qualifying units AT or beyond
+      // the threshold (minQuantity). Without minQuantity, treats all units.
+      const perUnit = toCents(rule.value);
+      if (perUnit <= 0) return 0;
+      const threshold = rule.minQuantity ?? 1;
+      const qualifyingQty = Math.max(0, totalQuantity - threshold + 1);
+      return Math.max(
+        0,
+        Math.min(perUnit * Math.min(qualifyingQty, totalQuantity), subtotalCents),
+      );
+    }
+    case "bogo": {
+      // Buy `minQuantity` items, get `value` items free per qualifying set.
+      // Free items are the cheapest units (merchant-safe).
+      const freePer = Number.parseInt(rule.value, 10);
+      if (!Number.isFinite(freePer) || freePer <= 0) return 0;
+      const buyQty = rule.minQuantity ?? 1;
+      if (buyQty <= 0) return 0;
+      const setSize = buyQty + freePer;
+      const sets = Math.floor(totalQuantity / setSize);
+      if (sets <= 0) return 0;
+      const totalFree = sets * freePer;
+      const sorted = [...expandedUnitPricesCents].sort((a, b) => a - b);
+      let discount = 0;
+      for (let i = 0; i < Math.min(totalFree, sorted.length); i++) {
+        discount += sorted[i];
+      }
+      return Math.max(0, Math.min(discount, subtotalCents));
+    }
     default:
-      // Unknown type at this stage: log via skipped path; engine returns 0.
       return 0;
   }
+}
+
+function expandUnitPrices(input: PricingInput): number[] {
+  const out: number[] = [];
+  for (const item of input.lineItems) {
+    const cents = toCents(item.unitPrice.amount);
+    for (let i = 0; i < item.quantity; i++) out.push(cents);
+  }
+  return out;
 }
 
 export function computeBundlePrice(input: PricingInput): PricingResult {
   const { cents: subtotalCents, currencyCode, totalQuantity } = sumLineItemsCents(
     input.lineItems,
   );
-  // Currency on the result follows the input's declared currency.
   const ccy = input.currencyCode || currencyCode;
+  const expandedUnitPricesCents = expandUnitPrices(input);
 
   const evaluations = input.rules.map((rule) =>
     evaluateGates(rule, totalQuantity, subtotalCents, input.context),
@@ -121,8 +179,6 @@ export function computeBundlePrice(input: PricingInput): PricingResult {
     .filter((e) => !e.passed)
     .map((e) => ({ ruleId: e.rule.id, reason: e.reason ?? "gate_failed" }));
 
-  // Non-stackable resolution: pick the highest-priority non-stackable rule
-  // and discard the rest as skipped.
   const stackable = passing.filter((e) => e.rule.stackable);
   const nonStackable = passing
     .filter((e) => !e.rule.stackable)
@@ -130,23 +186,18 @@ export function computeBundlePrice(input: PricingInput): PricingResult {
 
   const chosenNonStackable = nonStackable.length > 0 ? [nonStackable[0]] : [];
   for (const e of nonStackable.slice(1)) {
-    skipped.push({
-      ruleId: e.rule.id,
-      reason: "non_stackable_lower_priority",
-    });
+    skipped.push({ ruleId: e.rule.id, reason: "non_stackable_lower_priority" });
   }
 
   const toApply = [...stackable, ...chosenNonStackable];
+  const ctx: DiscountContext = { subtotalCents, totalQuantity, expandedUnitPricesCents };
 
   const applied: AppliedRule[] = [];
   let totalDiscountCents = 0;
   for (const e of toApply) {
-    const discount = discountForRule(e.rule, subtotalCents);
+    const discount = discountForRule(e.rule, ctx);
     if (discount === 0) continue;
-    applied.push({
-      ruleId: e.rule.id,
-      discount: fromCents(discount, ccy),
-    });
+    applied.push({ ruleId: e.rule.id, discount: fromCents(discount, ccy) });
     totalDiscountCents += discount;
   }
 

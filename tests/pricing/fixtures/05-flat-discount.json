@@ -1,0 +1,31 @@
+{
+  "name": "$1 off per unit, qty=4",
+  "input": {
+    "bundleId": "b-flat",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "10.00", "currencyCode": "USD" }, "quantity": 4 }
+    ],
+    "rules": [
+      {
+        "id": "r-flat",
+        "type": "flat_discount",
+        "value": "1.00",
+        "priority": 0,
+        "stackable": false
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-flat",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "40.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "4.00", "currencyCode": "USD" },
+    "total": { "amount": "36.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "r-flat", "discount": { "amount": "4.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}

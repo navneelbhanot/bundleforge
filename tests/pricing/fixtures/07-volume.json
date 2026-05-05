@@ -1,0 +1,32 @@
+{
+  "name": "volume: $1 off each unit at or beyond qty 5",
+  "input": {
+    "bundleId": "b-vol",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "10.00", "currencyCode": "USD" }, "quantity": 7 }
+    ],
+    "rules": [
+      {
+        "id": "v1",
+        "type": "volume",
+        "value": "1.00",
+        "minQuantity": 5,
+        "priority": 0,
+        "stackable": false
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-vol",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "70.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "3.00", "currencyCode": "USD" },
+    "total": { "amount": "67.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "v1", "discount": { "amount": "3.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}
