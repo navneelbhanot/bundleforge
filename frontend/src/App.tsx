@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 
 import { AppBridgeProvider } from "./AppBridgeProvider";
 import { BundlesListPage } from "./pages/BundlesListPage";
+import { BundleCreatePage } from "./pages/BundleCreatePage";
 import { BundleDetailPage } from "./pages/BundleDetailPage";
 import { OrdersListPage } from "./pages/OrdersListPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
@@ -35,6 +36,7 @@ export function App() {
           <main style={{ padding: "1rem" }}>
             <Routes>
               <Route path="/" element={<BundlesListPage />} />
+              <Route path="/bundles/new" element={<BundleCreatePage />} />
               <Route path="/bundles/:id" element={<BundleDetailPage />} />
               <Route path="/orders" element={<OrdersListPage />} />
               <Route path="/orders/:id" element={<OrderDetailPage />} />
