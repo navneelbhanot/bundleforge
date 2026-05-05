@@ -28,7 +28,14 @@ export function buildShopify(opts: BuildShopifyOptions = {}): ShopifyApp {
     api: {
       apiKey: env.SHOPIFY_API_KEY,
       apiSecretKey: env.SHOPIFY_API_SECRET,
-      scopes: env.SHOPIFY_SCOPES.split(",").map((s) => s.trim()).filter(Boolean),
+      // Scopes intentionally omitted from the API config. shopify-api
+      // v13 stores Sessions without a populated `scope` field (Managed
+      // Installation moves scopes to shopify.app.toml / Partners
+      // dashboard). validateAuthenticatedSession then calls
+      // session.isActive(api.config.scopes) -> isScopeChanged(scopes),
+      // which returns true for every v13-created session whose scope
+      // is empty, triggering an infinite reauth loop. shopify.app.toml
+      // (already pushed) carries the canonical scope list.
       hostName,
       apiVersion: ApiVersion.January25,
       isEmbeddedApp: true,
