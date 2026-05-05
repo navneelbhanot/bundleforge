@@ -1,0 +1,21 @@
+{% comment %}
+  BundleForge — BOGO Display (M-092).
+  Renders the buy-X-get-Y promotion banner + cart-aware progress.
+{% endcomment %}
+{% schema %}
+{
+  "name": "BundleForge BOGO",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "slug",          "label": "Bundle slug" },
+    { "type": "text", "id": "headline",      "label": "Headline", "default": "Buy X, get Y free" },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress meter", "default": true }
+  ]
+}
+{% endschema %}
+<bundleforge-bogo
+  data-slug="{{ block.settings.slug | escape }}"
+  data-show-progress="{{ block.settings.show_progress }}">
+  <p class="bundleforge-bogo-headline">{{ block.settings.headline }}</p>
+</bundleforge-bogo>
+<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>

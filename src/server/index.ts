@@ -31,6 +31,8 @@ import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
 import { afterAuth } from "../shopify/install";
 import { mountWebhooks } from "../webhooks";
+import { appProxyAuth } from "../middleware/appProxy";
+import { proxyRoutes } from "../routes/proxy";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -112,6 +114,10 @@ export function createApp(): Express {
 
   // Shopify webhooks (M-024 verify + M-025 dispatch). Workers in M-026+.
   mountWebhooks(app);
+
+  // App Proxy (M-085+). Routes are public from the storefront's
+  // perspective but require Shopify's signed-query verification.
+  app.use("/api/proxy", appProxyAuth(), proxyRoutes);
 
   app.get("/health", async (_req: Request, res: Response): Promise<void> => {
     const [db, redisOk] = await Promise.all([pingDb(), pingRedis()]);

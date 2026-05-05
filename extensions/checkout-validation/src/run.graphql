@@ -1,0 +1,17 @@
+query Input {
+  cart {
+    lines {
+      id
+      quantity
+      bundleforgeBundleId: attribute(key: "_bundleforge_bundle_id") {
+        value
+      }
+      bundleforgeMin: attribute(key: "_bundleforge_min_items") {
+        value
+      }
+      bundleforgeMax: attribute(key: "_bundleforge_max_items") {
+        value
+      }
+    }
+  }
+}

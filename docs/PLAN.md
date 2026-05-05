@@ -137,31 +137,31 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-081 | Cart Transform Function: scaffold (JS) | pending | — | |
-| M-082 | Cart Transform: read bundle metafields | pending | — | |
-| M-083 | Cart Transform: apply pricing engine | pending | — | Reuses contract from M-039 |
-| M-084 | Cart Transform: tests with Function test runner | pending | — | |
-| M-085 | App Proxy: signed bundle config endpoint | pending | — | |
-| M-086 | Checkout Guardian: cart-level validator | pending | — | App Proxy route |
-| M-087 | Checkout Guardian: Validation Function (Plus only) | pending | — | Honest gating in UI |
-| M-088 | Theme extension: bundle-display block (full) | pending | — | Replaces stub `bundle-display.liquid` |
-| M-089 | Theme extension: variant selector | pending | — | |
-| M-090 | Theme extension: build-a-box stepper | pending | — | |
-| M-091 | Theme extension: mix-match grid | pending | — | |
-| M-092 | Theme extension: BOGO display | pending | — | |
-| M-093 | Theme extension: i18n strings + locale loader | pending | — | |
+| M-081 | Cart Transform Function: scaffold (JS) | done (2026-05-05) | `docs/specs/M-081-cart-transform-function.md` | extension toml + run.graphql + run.js skeleton |
+| M-082 | Cart Transform: read attribute markers | done (2026-05-05) | (same) | `_bundleforge_bundle_id` + `_bundleforge_rules` |
+| M-083 | Cart Transform: apply pricing engine | done (2026-05-05) | (same) | port shares contract with Node engine |
+| M-084 | Cart Transform: cross-runtime parity test | done (2026-05-05) | (same) | every fixture asserted equal across both engines |
+| M-085 | App Proxy: signed bundle config endpoint | done (2026-05-05) | `docs/specs/M-085-app-proxy.md` | timingSafeEqual signature; /api/proxy/bundle/:slug |
+| M-086 | Checkout Guardian: cart-level validator | done (2026-05-05) | `docs/specs/M-086-checkout-guardian.md` | validateCart pure + POST /validate-cart |
+| M-087 | Checkout Guardian: Validation Function (Plus) | done (2026-05-05) | extensions/checkout-validation/ | min/max via cart attributes |
+| M-088 | Theme block: bundle-display | done (2026-05-05) | extensions/theme-extension/ | `<bundleforge-bundle>` web component |
+| M-089 | Theme block: variant selector | done (2026-05-05) | (same) | `<bundleforge-variant-picker>` |
+| M-090 | Theme block: build-a-box stepper | done (2026-05-05) | (same) | `<bundleforge-build-box>` |
+| M-091 | Theme block: mix-match grid | done (2026-05-05) | (same) | `<bundleforge-mix-match>` |
+| M-092 | Theme block: BOGO display | done (2026-05-05) | (same) | `<bundleforge-bogo>` |
+| M-093 | Theme i18n strings + locales | done (2026-05-05) | (same) | en + es + fr |
 
 ## Phase I — Admin Frontend (M-094 to M-108)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-094 | Frontend scaffold: React 18 + Polaris 12 + Vite | pending | — | Or commit to Remix template here |
-| M-095 | App Bridge integration (frontend) | pending | — | |
-| M-096 | Admin routing | pending | — | |
-| M-097 | Bundle list page | pending | — | Filter, sort, pagination |
-| M-098 | Bundle detail page | pending | — | |
-| M-099 | Visual builder: product picker | pending | — | |
-| M-100 | Visual builder: type-specific config panels | pending | — | |
+| M-094 | Frontend scaffold: React 18 + Polaris 12 + Vite | done (2026-05-05) | `frontend/vite.config.ts` | jsdom env for tests; Polaris matchMedia polyfill |
+| M-095 | App Bridge integration (frontend) | done (2026-05-05) | `frontend/src/AppBridgeProvider.tsx` | v4 meta + CDN script; pass-through provider |
+| M-096 | Admin routing | done (2026-05-05) | `frontend/src/App.tsx` | react-router-dom routes |
+| M-097 | Bundle list page | done (2026-05-05) | `frontend/src/pages/BundlesListPage.tsx` | IndexTable + fetch /api/v1/bundles |
+| M-098 | Bundle detail page | done (2026-05-05) | `frontend/src/pages/BundleDetailPage.tsx` | layout + ProductPicker + TypeConfigPanel |
+| M-099 | Visual builder: product picker | done (2026-05-05) | `frontend/src/components/ProductPicker.tsx` | ResourceList over current items |
+| M-100 | Visual builder: type config panels | done (2026-05-05) | `frontend/src/components/TypeConfigPanel.tsx` | 5 type-specific forms; 3 RTL tests |
 | M-101 | Visual builder: pricing rules editor | pending | — | |
 | M-102 | Orders list page | pending | — | |
 | M-103 | Order detail with SKU breakdown | pending | — | |
@@ -321,6 +321,11 @@
 | M-075 | Inventory routes | 2026-05-05 | `docs/sessions/0075-inventory-routes.md` |
 | M-076..M-077 | Order processor + SKU breakdown | 2026-05-05 | `docs/sessions/0076-order-processor.md` |
 | M-078..M-080 | Order webhook handlers | 2026-05-05 | `docs/sessions/0078-order-webhooks.md` |
+| M-081..M-084 | Cart Transform Function (cross-runtime parity) | 2026-05-05 | `docs/sessions/0081-cart-transform-function.md` |
+| M-085..M-086 | App Proxy + Checkout Guardian | 2026-05-05 | `docs/sessions/0085-app-proxy-and-guardian.md` |
+| M-087 | Validation Function (Plus only) | 2026-05-05 | `docs/sessions/0087-validation-function.md` |
+| M-088..M-093 | Theme extension blocks + i18n | 2026-05-05 | `docs/sessions/0088-theme-extension.md` |
+| M-094..M-100 | Admin frontend scaffold + first pages | 2026-05-05 | `docs/sessions/0094-frontend-scaffold.md` |
 
 ---
 

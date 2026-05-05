@@ -1,0 +1,20 @@
+{% comment %}
+  BundleForge — Mix-and-Match Grid (M-091).
+  Grid of selectable items with min/max enforcement.
+{% endcomment %}
+{% schema %}
+{
+  "name": "BundleForge Mix-and-Match",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "slug",     "label": "Bundle slug" },
+    { "type": "range", "id": "columns", "label": "Columns", "min": 2, "max": 5, "step": 1, "default": 3 }
+  ]
+}
+{% endschema %}
+<bundleforge-mix-match
+  data-slug="{{ block.settings.slug | escape }}"
+  data-columns="{{ block.settings.columns }}">
+  <p class="bundleforge-loading">Loading…</p>
+</bundleforge-mix-match>
+<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>

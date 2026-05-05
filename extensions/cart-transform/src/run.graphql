@@ -1,0 +1,21 @@
+query Input {
+  cart {
+    lines {
+      id
+      quantity
+      cost {
+        amountPerQuantity {
+          amount
+          currencyCode
+        }
+      }
+      bundleforgeBundleId: attribute(key: "_bundleforge_bundle_id") {
+        value
+      }
+      bundleforgeRules: attribute(key: "_bundleforge_rules") {
+        value
+      }
+    }
+  }
+  presentmentCurrencyRate
+}

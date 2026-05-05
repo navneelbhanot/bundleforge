@@ -1,0 +1,19 @@
+{% comment %}
+  BundleForge — Variant Selector Block (M-089).
+  Renders <bundleforge-variant-picker> for a single bundle item.
+{% endcomment %}
+{% schema %}
+{
+  "name": "BundleForge Variant Picker",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "slug",      "label": "Bundle slug" },
+    { "type": "text", "id": "item_index", "label": "Item index", "default": "0" }
+  ]
+}
+{% endschema %}
+<bundleforge-variant-picker
+  data-slug="{{ block.settings.slug | escape }}"
+  data-item-index="{{ block.settings.item_index }}">
+</bundleforge-variant-picker>
+<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>

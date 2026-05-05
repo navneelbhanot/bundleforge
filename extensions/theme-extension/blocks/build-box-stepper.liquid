@@ -1,0 +1,21 @@
+{% comment %}
+  BundleForge — Build-a-Box Stepper (M-090).
+  Multi-step picker that walks customers through the bundle's
+  config.steps[].
+{% endcomment %}
+{% schema %}
+{
+  "name": "BundleForge Build-a-Box",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "slug",  "label": "Bundle slug" },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "default": true }
+  ]
+}
+{% endschema %}
+<bundleforge-build-box
+  data-slug="{{ block.settings.slug | escape }}"
+  data-show-progress="{{ block.settings.show_progress }}">
+  <p class="bundleforge-loading">Loading box builder…</p>
+</bundleforge-build-box>
+<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>

@@ -1,6 +1,9 @@
 {% comment %}
-  BundleForge Theme Extension — Bundle Display Block
-  This App Block renders the bundle widget on product pages.
+  BundleForge — Bundle Display Block (M-088)
+
+  Renders a bundle widget on the product page. The widget is a custom
+  element (`<bundleforge-bundle>`) that fetches the bundle config from
+  the App Proxy at /apps/bundleforge/bundle/<slug>.
 {% endcomment %}
 
 {% schema %}
@@ -8,43 +11,29 @@
   "name": "BundleForge Bundle",
   "target": "section",
   "settings": [
-    {
-      "type": "select",
-      "id": "layout",
-      "label": "Bundle Layout",
+    { "type": "text",     "id": "slug",                "label": "Bundle slug" },
+    { "type": "select",   "id": "layout",              "label": "Layout",
       "options": [
-        { "value": "grid", "label": "Grid" },
-        { "value": "list", "label": "List" },
+        { "value": "grid",     "label": "Grid" },
+        { "value": "list",     "label": "List" },
         { "value": "carousel", "label": "Carousel" }
       ],
-      "default": "grid"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_compare_price",
-      "label": "Show Compare at Price",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_savings_badge",
-      "label": "Show Savings Badge",
-      "default": true
-    }
+      "default": "grid" },
+    { "type": "checkbox", "id": "show_compare_price",  "label": "Show compare price",  "default": true },
+    { "type": "checkbox", "id": "show_savings_badge",  "label": "Show savings badge",  "default": true }
   ]
 }
 {% endschema %}
 
-<div id="bundleforge-widget"
+<bundleforge-bundle
+  data-slug="{{ block.settings.slug | escape }}"
+  data-shop="{{ shop.permanent_domain }}"
   data-product-id="{{ product.id }}"
   data-layout="{{ block.settings.layout }}"
   data-show-compare="{{ block.settings.show_compare_price }}"
-  data-show-badge="{{ block.settings.show_savings_badge }}"
-  data-shop="{{ shop.permanent_domain }}">
-  <!-- BundleForge widget renders here via JS -->
-  <div class="bundleforge-loading">
-    <p>Loading bundle...</p>
-  </div>
-</div>
+  data-show-badge="{{ block.settings.show_savings_badge }}">
+  <p class="bundleforge-loading">Loading bundle…</p>
+</bundleforge-bundle>
 
-<script src="{{ 'bundleforge-widget.js' | asset_url }}" defer></script>
+<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>
+<link rel="stylesheet" href="{{ 'bundleforge.css' | asset_url }}">

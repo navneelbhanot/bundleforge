@@ -1,0 +1,9 @@
+/* BundleForge — base storefront styles. Themes can override. */
+.bundleforge-loading { color: #888; font-style: italic; }
+.bundleforge-error { color: #b00; }
+.bundleforge-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 .5rem; }
+.bundleforge-items { list-style: none; padding: 0; margin: 0; }
+.bundleforge-item { padding: .25rem 0; border-bottom: 1px solid #eee; }
+.bundleforge-mix-cell { display: block; padding: .5rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+.bundleforge-mix-cell input { margin-right: .5rem; }
+.bundleforge-bogo-headline { font-weight: 600; margin: 0; }

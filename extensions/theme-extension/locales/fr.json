@@ -1,0 +1,13 @@
+{
+  "bundleforge": {
+    "loading": "Chargement du pack…",
+    "error": "Impossible de charger le pack.",
+    "save_amount": "Économisez {{ amount }}",
+    "add_to_cart": "Ajouter le pack au panier",
+    "select_min": "Sélectionnez au moins {{ min }} articles",
+    "select_max": "Sélectionnez au maximum {{ max }} articles",
+    "step_pick_count": "Choisissez {{ count }}",
+    "next_step": "Suivant",
+    "complete": "Toutes les étapes sont terminées"
+  }
+}
