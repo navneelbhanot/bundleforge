@@ -70,4 +70,28 @@ export function buildShopify(opts: BuildShopifyOptions = {}): ShopifyApp {
   });
 }
 
-export const shopify: ShopifyApp = buildShopify();
+// Lazy singleton via Proxy. Building eagerly at module load was throwing
+// synchronously when SHOPIFY_APP_URL was missing/malformed, which killed
+// the process before any logging code ran (silent exit on Railway). With
+// the proxy, the build only runs on first property access — by which
+// time we've already booted enough to surface the error properly.
+let _shopifyInstance: ShopifyApp | null = null;
+function getShopify(): ShopifyApp {
+  if (_shopifyInstance) return _shopifyInstance;
+  try {
+    _shopifyInstance = buildShopify();
+    return _shopifyInstance;
+  } catch (err) {
+    // Print before re-throwing so Railway/console captures the cause
+    // even if the parent handler swallows it.
+    // eslint-disable-next-line no-console
+    console.error("Shopify SDK init failed:", err);
+    throw err;
+  }
+}
+
+export const shopify: ShopifyApp = new Proxy({} as ShopifyApp, {
+  get(_target, prop) {
+    return Reflect.get(getShopify(), prop);
+  },
+}) as ShopifyApp;

@@ -10,6 +10,20 @@
  *
  * See docs/specs/M-006-server-scaffold.md.
  */
+// eslint-disable-next-line no-console
+console.log("[boot] entrypoint reached, loading modules…");
+
+// Surface any unhandled error before exit. Without these handlers a
+// synchronous throw at module-load can exit silently on some runtimes.
+process.on("uncaughtException", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("[boot] uncaughtException:", err);
+});
+process.on("unhandledRejection", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("[boot] unhandledRejection:", err);
+});
+
 import path from "node:path";
 import fs from "node:fs";
 
@@ -209,7 +223,12 @@ export async function startServer(): Promise<void> {
 // it doesn't reliably evaluate true under `tsx` / ESM-shim runtimes; instead
 // we rely on the entrypoint contract (this file is the start:web target).
 if (env.NODE_ENV !== "test") {
+  // eslint-disable-next-line no-console
+  console.log("[boot] starting server…");
   startServer().catch((err) => {
+    // Use console too in case Pino's transport hasn't flushed yet on exit.
+    // eslint-disable-next-line no-console
+    console.error("[boot] startServer failed:", err);
     logger.error({ err }, "Failed to start server");
     process.exit(1);
   });
