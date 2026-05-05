@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Bundle not found.",
+    "validation_failed": "Request validation failed.",
+    "rate_limited": "Too many requests — please try again shortly.",
+    "feature_not_in_plan": "This feature is not included in your plan.",
+    "negative_inventory": "This adjustment would push stock below zero."
+  },
+  "checkout": {
+    "select_min": "Please select at least {min} items.",
+    "select_max": "Please select no more than {max} items.",
+    "exact_pack_qty": "This bundle requires exactly {qty} units.",
+    "duplicates_not_allowed": "Duplicate items are not allowed in this bundle.",
+    "step_pick_count": "Step \"{step}\" requires {count} picks."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}

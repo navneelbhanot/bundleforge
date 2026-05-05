@@ -39,6 +39,21 @@ services:
       retries: 10
     restart: unless-stopped
 
+  ai-service:
+    build: ./ai-service
+    container_name: bundleforge-ai
+    environment:
+      AI_SERVICE_API_KEY: dev-key
+      PORT: "5001"
+    ports:
+      - "5001:5001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   bundleforge-pg:
   bundleforge-redis:

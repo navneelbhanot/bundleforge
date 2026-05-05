@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "title": "Bundle published",
+  "description": "A merchant published a bundle.",
+  "properties": {
+    "bundleId":  { "type": "string" },
+    "title":     { "type": "string" },
+    "type":      { "type": "string" },
+    "slug":      { "type": "string" }
+  }
+}

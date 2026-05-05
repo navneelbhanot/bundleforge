@@ -6,15 +6,17 @@
 
 ## Current milestone
 
-**M-121 — Klaviyo adapter**
+**M-141 — Accessibility audit (WCAG AA)**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-121-klaviyo.md`. Klaviyo adapter
-follows the M-116 framework: pushes a `Bundle Purchased` event to the
-Klaviyo metric API. Credentials: `{privateKey: string}`. Register in
-`src/services/integrations/registry.ts`; 4 unit tests (ping, pushOrder
-happy + non-2xx + missing key).
+Boot phase, then write `docs/specs/M-141-accessibility.md`. Adopt
+`eslint-plugin-jsx-a11y` for the frontend, run `axe-core` against the
+Polaris pages via Playwright (or RTL + jest-axe), record findings,
+fix WCAG-AA violations. Existing pages: BundlesListPage,
+BundleDetailPage, OrdersListPage, OrderDetailPage, InventoryAuditPage,
+InventoryHealthPage, SettingsPage, BillingPage, AnalyticsOverviewPage,
+AbTestsPage.
 
 ## Blockers
 
@@ -22,27 +24,28 @@ None.
 
 ## Carry-overs (still active)
 
-- npm audit findings → M-140 (security review).
-- Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6)
-  flagged for ADR before going live.
-- ResourcePicker integration on ProductPicker (M-099) deferred until
-  App Bridge actions are wired.
+- npm audit: 3 production findings rooted in `uuid <14` via Shopify
+  SDK (we don't call the vulnerable code path). Resolved when the
+  Shopify SDK upgrade lands. See ADR-0004.
+- Shopify SDK upgrade (api v13, app-express v7, prisma v6,
+  session-storage-prisma v9) flagged for ADR before going live.
+- ResourcePicker integration on ProductPicker still deferred.
 - Theme-extension Playwright tests → M-141.
-- Analytics materialized views deferred — M-138/M-139 may revisit if
-  query times grow.
-- Amazon adapter (M-118) is a basic stub; SP-API SigV4 signing in a
-  follow-up when SP-API creds are available.
+- Analytics materialized views deferred — M-138/M-139 may revisit.
+- Amazon adapter is a basic stub; SP-API SigV4 in a follow-up.
+- M-126 retraining schedule (BullMQ nightly job): the AI client and
+  route exist; the cron-style schedule lands when production ops needs
+  it.
 
 ## Recently completed
 
-- M-120 — Bold adapter. `docs/sessions/0116-integrations.md`.
-- M-119 — Recharge adapter. `docs/sessions/0116-integrations.md`.
-- M-118 — Amazon adapter (stub). `docs/sessions/0116-integrations.md`.
-- M-117 — ShipStation adapter. `docs/sessions/0116-integrations.md`.
-- M-116 — Integration adapter framework. `docs/sessions/0116-integrations.md`.
-- M-109..M-115 — Analytics + A/B. `docs/sessions/0109-analytics-ab.md`.
-- M-101..M-108 — Admin pages (rules editor, orders, inventory, settings,
-  billing, onboarding). `docs/sessions/0101-admin-pages.md`.
+- M-140 — Security review pass + ADR-0004. `docs/sessions/0140-security-review.md`.
+- M-137..M-139 — Property tests (concurrency + throughput + pricing
+  invariants). `docs/sessions/0137-property-tests.md`.
+- M-131..M-136 — Server-side i18n + 6 locales. `docs/sessions/0131-i18n.md`.
+- M-127..M-130 — 4 competitor migration importers. `docs/sessions/0127-migrations.md`.
+- M-121..M-126 — Klaviyo + Google Merchant + Flow + AI service.
+  `docs/sessions/0121-integrations-ai.md`.
 - (Earlier history in PLAN.md.)
 
 ## Working branch

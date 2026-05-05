@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "title": "Force inventory sync",
+  "properties": {
+    "bundleId": {
+      "type": "string",
+      "description": "BundleForge bundle id (UUID) to recompute stock for. Leave blank to sync all."
+    }
+  }
+}

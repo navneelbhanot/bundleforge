@@ -31,8 +31,12 @@ describe("integration registry", () => {
     expect(getAdapter("bold")?.type).toBe("bold");
   });
 
+  it("returns the klaviyo adapter (M-121)", () => {
+    expect(getAdapter("klaviyo")?.type).toBe("klaviyo");
+  });
+
   it("returns undefined for unknown types", () => {
-    expect(getAdapter("klaviyo" as never)).toBeUndefined();
+    expect(getAdapter("custom_3pl" as never)).toBeUndefined();
   });
 });
 

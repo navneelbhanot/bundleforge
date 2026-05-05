@@ -33,6 +33,7 @@ import { afterAuth } from "../shopify/install";
 import { mountWebhooks } from "../webhooks";
 import { appProxyAuth } from "../middleware/appProxy";
 import { proxyRoutes } from "../routes/proxy";
+import { feedRoutes } from "../routes/feeds";
 import { aiRoutes } from "../routes/ai";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -118,6 +119,9 @@ export function createApp(): Express {
   // App Proxy (M-085+). Routes are public from the storefront's
   // perspective but require Shopify's signed-query verification.
   app.use("/api/proxy", appProxyAuth(), proxyRoutes);
+
+  // Public product feeds (M-122). No auth — Google ingests these.
+  app.use("/api/feeds", feedRoutes);
 
   app.get("/health", async (_req: Request, res: Response): Promise<void> => {
     const [db, redisOk] = await Promise.all([pingDb(), pingRedis()]);

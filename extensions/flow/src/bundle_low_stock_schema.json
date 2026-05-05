@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "title": "Bundle low stock",
+  "description": "A bundle's available quantity fell below threshold.",
+  "properties": {
+    "bundleId":          { "type": "string" },
+    "title":             { "type": "string" },
+    "availableQuantity": { "type": "integer" },
+    "threshold":         { "type": "integer" }
+  }
+}

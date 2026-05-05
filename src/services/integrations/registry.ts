@@ -12,6 +12,7 @@ import { decrypt } from "../../utils/encryption";
 
 import { amazonAdapter } from "./amazon";
 import { boldAdapter } from "./bold";
+import { klaviyoAdapter } from "./klaviyo";
 import { rechargeAdapter } from "./recharge";
 import { shipstationAdapter } from "./shipstation";
 import type {
@@ -37,6 +38,7 @@ registerAdapter(shipstationAdapter);
 registerAdapter(amazonAdapter);
 registerAdapter(rechargeAdapter);
 registerAdapter(boldAdapter);
+registerAdapter(klaviyoAdapter);
 
 export interface IntegrationRow {
   id: string;

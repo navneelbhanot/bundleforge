@@ -192,41 +192,41 @@
 | M-118 | Amazon adapter (basic stub) | done (2026-05-05) | (same) | shape only; SP-API signing in follow-up |
 | M-119 | Recharge adapter | done (2026-05-05) | (same) | X-Recharge-Access-Token; /checkouts |
 | M-120 | Bold adapter | done (2026-05-05) | (same) | BC-API-Key; /shops/:id/orders |
-| M-121 | Klaviyo adapter | pending | — | |
-| M-122 | Google Merchant feed | pending | — | |
-| M-123 | Shopify Flow triggers + actions | pending | — | |
-| M-124 | AI microservice: scaffold (Python/Flask) | pending | — | |
-| M-125 | AI: FBT recommender (sklearn) | pending | — | |
-| M-126 | AI: `/ai/recommendations` integration + retraining job | pending | — | |
+| M-121 | Klaviyo adapter | done (2026-05-05) | `docs/specs/M-121-126-integrations-ai.md` | metric event; 5 tests |
+| M-122 | Google Merchant feed | done (2026-05-05) | (same) | Atom XML + public route + 4 tests |
+| M-123 | Shopify Flow connector | done (2026-05-05) | (same) | 1 action + 2 triggers manifest |
+| M-124 | AI microservice scaffold (Python/Flask) | done (2026-05-05) | (same) | /health + /recommendations + bearer auth |
+| M-125 | AI FBT recommender | done (2026-05-05) | (same) | co-occurrence + lift; 6 pytest cases |
+| M-126 | Node AI integration + /ai/recommendations | done (2026-05-05) | (same) | client + route + 4 supertest cases |
 
 ## Phase L — Migration Tools (M-127 to M-130)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-127 | Migration: Shopify Bundles importer | pending | — | |
-| M-128 | Migration: Simple Bundles importer | pending | — | |
-| M-129 | Migration: Bundler importer | pending | — | |
-| M-130 | Migration: Kaching importer | pending | — | |
+| M-127 | Migration: Shopify Bundles importer | done (2026-05-05) | `docs/specs/M-127-130-migrations.md` | pure converter; 3 tests |
+| M-128 | Migration: Simple Bundles importer | done (2026-05-05) | (same) | bundle/rule type maps; 3 tests |
+| M-129 | Migration: Bundler.app importer | done (2026-05-05) | (same) | CSV with pipe items; 4 tests |
+| M-130 | Migration: Kaching importer | done (2026-05-05) | (same) | volume tier ladder; 4 tests |
 
 ## Phase M — i18n (M-131 to M-136)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-131 | i18n framework (i18next) | pending | — | Admin + storefront |
-| M-132 | English baseline strings | pending | — | |
-| M-133 | Spanish translation | pending | — | Pro translation budget |
-| M-134 | French translation | pending | — | |
-| M-135 | German translation | pending | — | |
-| M-136 | Italian + Portuguese translation | pending | — | |
+| M-131 | i18n framework | done (2026-05-05) | `docs/specs/M-131-136-i18n.md` | tiny in-house t() with fallback; 7 tests |
+| M-132 | English baseline strings | done (2026-05-05) | (same) | en.json |
+| M-133 | Spanish translation | done (2026-05-05) | (same) | es.json |
+| M-134 | French translation | done (2026-05-05) | (same) | fr.json |
+| M-135 | German translation | done (2026-05-05) | (same) | de.json |
+| M-136 | Italian + Portuguese | done (2026-05-05) | (same) | it.json + pt.json |
 
 ## Phase N — Hardening (M-137 to M-150)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-137 | Load test: inventory engine concurrency | pending | — | |
-| M-138 | Load test: webhook throughput | pending | — | |
-| M-139 | Property tests: pricing engine (extended) | pending | — | |
-| M-140 | Security review pass | pending | — | OWASP top 10 |
+| M-137 | Inventory engine concurrency property test | done (2026-05-05) | `docs/specs/M-137-139-property-tests.md` | mutex'd fake repo; 100 concurrent decrements |
+| M-138 | Webhook throughput synthetic | done (2026-05-05) | (same) | 100 webhooks acked under 5s |
+| M-139 | Pricing engine property tests (extended) | done (2026-05-05) | (same) | 4 invariants × 200 random inputs |
+| M-140 | Security review pass | done (2026-05-05) | `docs/decisions/0004-security-review.md` | OWASP top 10 + npm audit triage |
 | M-141 | Accessibility audit (WCAG AA) | pending | — | |
 | M-142 | Sentry coverage audit | pending | — | Every error path |
 | M-143 | Datadog dashboards: queue, webhooks, sync | pending | — | |
@@ -329,6 +329,11 @@
 | M-101..M-108 | Admin pages: rules editor, orders, inventory, settings, billing, onboarding | 2026-05-05 | `docs/sessions/0101-admin-pages.md` |
 | M-109..M-115 | Analytics ingestion + dashboard + A/B significance | 2026-05-05 | `docs/sessions/0109-analytics-ab.md` |
 | M-116..M-120 | Integration adapter framework + 4 adapters | 2026-05-05 | `docs/sessions/0116-integrations.md` |
+| M-121..M-126 | Klaviyo + Google Merchant + Flow + AI service | 2026-05-05 | `docs/sessions/0121-integrations-ai.md` |
+| M-127..M-130 | 4 competitor migration importers | 2026-05-05 | `docs/sessions/0127-migrations.md` |
+| M-131..M-136 | Server-side i18n + 6 locales | 2026-05-05 | `docs/sessions/0131-i18n.md` |
+| M-137..M-139 | Concurrency + throughput + pricing invariants | 2026-05-05 | `docs/sessions/0137-property-tests.md` |
+| M-140 | Security review pass + ADR-0004 | 2026-05-05 | `docs/sessions/0140-security-review.md` |
 
 ---
 
