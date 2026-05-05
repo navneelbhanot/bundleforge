@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { AppProvider, Tabs, Page, Box } from "@shopify/polaris";
 import {
   BrowserRouter,
@@ -8,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import { AppBridgeProvider } from "./AppBridgeProvider";
+import { NavMenu } from "./components/NavMenu";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
 import { BundleDetailPage } from "./pages/BundleDetailPage";
@@ -49,7 +51,10 @@ const NAV_TABS: NavTab[] = [
 function pickSelected(pathname: string): number {
   // Audit is a sub-path of /inventory; match it first so the Audit
   // tab wins over the parent Inventory tab.
-  if (pathname === "/inventory/audit" || pathname.startsWith("/inventory/audit/")) {
+  if (
+    pathname === "/inventory/audit" ||
+    pathname.startsWith("/inventory/audit/")
+  ) {
     return NAV_TABS.findIndex((t) => t.id === "audit");
   }
   for (let i = 0; i < NAV_TABS.length; i += 1) {
@@ -60,7 +65,12 @@ function pickSelected(pathname: string): number {
   return 0;
 }
 
-function NavTabs(): JSX.Element {
+/**
+ * In-app top-bar tabs. Rendered ONLY when the SPA isn't running inside
+ * Shopify's admin iframe — there the App Bridge NavMenu owns the
+ * navigation surface and showing the same items twice is just clutter.
+ */
+function InAppTabs(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const selected = pickSelected(location.pathname);
@@ -80,10 +90,31 @@ function NavTabs(): JSX.Element {
   );
 }
 
+function useIsEmbedded(): boolean {
+  const [embedded, setEmbedded] = useState(false);
+  useEffect(() => {
+    try {
+      // Heuristic: when the page is inside a Shopify admin iframe,
+      // window.top !== window. Outside the iframe (direct Railway URL,
+      // Playwright, devtools open in a separate window) they're equal.
+      if (typeof window !== "undefined" && window.top !== window) {
+        setEmbedded(true);
+      }
+    } catch {
+      // Cross-origin frame access throws on some browsers — that's
+      // also a strong signal we're embedded.
+      setEmbedded(true);
+    }
+  }, []);
+  return embedded;
+}
+
 function Shell(): JSX.Element {
+  const embedded = useIsEmbedded();
   return (
     <Page fullWidth>
-      <NavTabs />
+      <NavMenu />
+      {embedded ? null : <InAppTabs />}
       <Routes>
         <Route path="/" element={<BundlesListPage />} />
         <Route path="/bundles/new" element={<BundleCreatePage />} />
