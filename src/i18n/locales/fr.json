@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Pack introuvable.",
+    "validation_failed": "La validation de la requête a échoué.",
+    "rate_limited": "Trop de requêtes — réessayez dans un instant.",
+    "feature_not_in_plan": "Cette fonctionnalité n'est pas incluse dans votre forfait.",
+    "negative_inventory": "Cet ajustement ferait passer le stock sous zéro."
+  },
+  "checkout": {
+    "select_min": "Veuillez sélectionner au moins {min} articles.",
+    "select_max": "Veuillez sélectionner au maximum {max} articles.",
+    "exact_pack_qty": "Ce pack nécessite exactement {qty} unités.",
+    "duplicates_not_allowed": "Les articles en double ne sont pas autorisés.",
+    "step_pick_count": "L'étape « {step} » nécessite {count} sélections."
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  }
+}

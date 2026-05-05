@@ -1,0 +1,16 @@
+api_version = "2025-01"
+
+[[extensions]]
+type = "function"
+name = "BundleForge Checkout Validation"
+handle = "bundleforge-checkout-validation"
+description = "Validates bundle composition at checkout (Plus only)"
+
+  [[extensions.targeting]]
+  target = "purchase.validation.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = "echo 'no build step (plain JS)'"
+  path = "src/run.js"

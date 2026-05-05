@@ -1,0 +1,13 @@
+{
+  "bundleforge": {
+    "loading": "Cargando paquete…",
+    "error": "No se pudo cargar el paquete.",
+    "save_amount": "Ahorra {{ amount }}",
+    "add_to_cart": "Añadir paquete al carrito",
+    "select_min": "Selecciona al menos {{ min }} artículos",
+    "select_max": "Selecciona como máximo {{ max }} artículos",
+    "step_pick_count": "Elige {{ count }}",
+    "next_step": "Siguiente",
+    "complete": "Todos los pasos completados"
+  }
+}

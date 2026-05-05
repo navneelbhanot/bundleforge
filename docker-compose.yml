@@ -1,0 +1,59 @@
+# Local development services. Production uses managed Postgres + Redis.
+#
+#   docker compose up -d
+#   npx prisma migrate deploy
+#   npm run db:seed
+#
+# Versions match CI's services (.github/workflows/ci.yml).
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: bundleforge-postgres
+    environment:
+      POSTGRES_USER: bundleforge
+      POSTGRES_PASSWORD: bundleforge_dev
+      POSTGRES_DB: bundleforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - bundleforge-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bundleforge -d bundleforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: bundleforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - bundleforge-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  ai-service:
+    build: ./ai-service
+    container_name: bundleforge-ai
+    environment:
+      AI_SERVICE_API_KEY: dev-key
+      PORT: "5001"
+    ports:
+      - "5001:5001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  bundleforge-pg:
+  bundleforge-redis:

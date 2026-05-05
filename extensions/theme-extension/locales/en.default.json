@@ -1,0 +1,13 @@
+{
+  "bundleforge": {
+    "loading": "Loading bundle…",
+    "error": "Could not load bundle.",
+    "save_amount": "Save {{ amount }}",
+    "add_to_cart": "Add bundle to cart",
+    "select_min": "Select at least {{ min }} items",
+    "select_max": "Select at most {{ max }} items",
+    "step_pick_count": "Pick {{ count }}",
+    "next_step": "Next",
+    "complete": "All steps complete"
+  }
+}

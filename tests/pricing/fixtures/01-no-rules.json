@@ -1,0 +1,21 @@
+{
+  "name": "no rules: total equals subtotal",
+  "input": {
+    "bundleId": "b-noop",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "10.00", "currencyCode": "USD" }, "quantity": 3 }
+    ],
+    "rules": [],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-noop",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "30.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "0.00", "currencyCode": "USD" },
+    "total": { "amount": "30.00", "currencyCode": "USD" },
+    "applied": [],
+    "skipped": []
+  }
+}

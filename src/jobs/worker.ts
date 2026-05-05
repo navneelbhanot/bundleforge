@@ -1,34 +1,59 @@
-import { Worker, Queue } from "bullmq";
-import { redis } from "../config/redis";
+/**
+ * BullMQ worker process. Run via `npm run worker`.
+ *
+ * Job handlers remain stubs through M-077+; this file only wires Worker
+ * lifecycle and named-queue dispatch.
+ */
+import { Worker, type Job } from "bullmq";
+
 import { logger } from "../config/logger";
+import { redis } from "../config/redis";
+import { captureException } from "../config/sentry";
+import { INVENTORY_QUEUE, ORDER_QUEUE } from "./queues";
 
-export const orderQueue = new Queue("order-processing", { connection: redis as any });
-export const inventoryQueue = new Queue("inventory-sync", { connection: redis as any });
+const workerLogger = logger.child({ module: "worker" });
 
-const orderWorker = new Worker("order-processing", async (job) => {
-  logger.info(`Processing order job ${job.id}: ${job.name}`);
-  switch (job.name) {
-    case "process-bundle-order":
-      // TODO: SKU breakdown, inventory adjust, 3PL forwarding
-      break;
-    case "cancel-bundle-order":
-      // TODO: Reverse inventory adjustments
-      break;
-  }
-}, { connection: redis as any, concurrency: 5 });
+const orderWorker = new Worker(
+  ORDER_QUEUE,
+  async (job: Job) => {
+    workerLogger.info({ jobId: job.id, name: job.name }, "Processing order job");
+    switch (job.name) {
+      case "process-bundle-order":
+        // TODO(M-077): SKU breakdown, inventory adjust, 3PL forwarding
+        break;
+      case "cancel-bundle-order":
+        // TODO(M-079): Reverse inventory adjustments
+        break;
+    }
+  },
+  { connection: redis, concurrency: 5 },
+);
 
-const inventoryWorker = new Worker("inventory-sync", async (job) => {
-  logger.info(`Processing inventory job ${job.id}: ${job.name}`);
-  switch (job.name) {
-    case "sync-bundle-inventory":
-      // TODO: Atomic inventory recalculation
-      break;
-    case "safety-lock-review":
-      // TODO: Queue for merchant approval
-      break;
-  }
-}, { connection: redis as any, concurrency: 3 });
+const inventoryWorker = new Worker(
+  INVENTORY_QUEUE,
+  async (job: Job) => {
+    workerLogger.info({ jobId: job.id, name: job.name }, "Processing inventory job");
+    switch (job.name) {
+      case "sync-bundle-inventory":
+        // TODO(M-070): Atomic inventory recalculation
+        break;
+      case "safety-lock-review":
+        // TODO(M-074): Queue for merchant approval
+        break;
+    }
+  },
+  { connection: redis, concurrency: 3 },
+);
 
-orderWorker.on("failed", (job, err) => logger.error(`Order job ${job?.id} failed:`, err));
-inventoryWorker.on("failed", (job, err) => logger.error(`Inventory job ${job?.id} failed:`, err));
-logger.info("BullMQ workers started");
+// M-142: every worker logs `{ err }` AND captures to Sentry; HTTP-only
+// capture in errorHandler doesn't see queue failures.
+orderWorker.on("failed", (job, err) => {
+  workerLogger.error({ err, jobId: job?.id }, "Order job failed");
+  captureException(err, { queue: ORDER_QUEUE, jobId: job?.id });
+});
+inventoryWorker.on("failed", (job, err) => {
+  workerLogger.error({ err, jobId: job?.id }, "Inventory job failed");
+  captureException(err, { queue: INVENTORY_QUEUE, jobId: job?.id });
+});
+
+workerLogger.info("BullMQ workers started");

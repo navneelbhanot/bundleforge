@@ -1,0 +1,39 @@
+{
+  "name": "two stackable fixed rules accumulate",
+  "input": {
+    "bundleId": "b-stack",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "20.00", "currencyCode": "USD" }, "quantity": 2 }
+    ],
+    "rules": [
+      {
+        "id": "a",
+        "type": "fixed",
+        "value": "5.00",
+        "priority": 1,
+        "stackable": true
+      },
+      {
+        "id": "b",
+        "type": "fixed",
+        "value": "3.00",
+        "priority": 2,
+        "stackable": true
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-stack",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "40.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "8.00", "currencyCode": "USD" },
+    "total": { "amount": "32.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "a", "discount": { "amount": "5.00", "currencyCode": "USD" } },
+      { "ruleId": "b", "discount": { "amount": "3.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}

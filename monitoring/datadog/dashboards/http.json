@@ -1,0 +1,51 @@
+{
+  "title": "BundleForge — HTTP",
+  "description": "Express HTTP ingress: request rate, status-code distribution, and latency by route. Driven by pino-http logs forwarded through Datadog's log-to-metric pipeline.",
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "title": "Requests / sec by route",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:bundleforge.http.requests{*}.as_rate() by {route}",
+            "display_type": "bars"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "5xx rate %",
+        "type": "query_value",
+        "precision": 2,
+        "requests": [
+          {
+            "q": "100 * sum:bundleforge.http.requests{status:5xx}.as_rate() / sum:bundleforge.http.requests{*}.as_rate()",
+            "aggregator": "avg"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Latency P50/P95/P99 (ms)",
+        "type": "timeseries",
+        "requests": [
+          { "q": "p50:bundleforge.http.duration{*}", "display_type": "line" },
+          { "q": "p95:bundleforge.http.duration{*}", "display_type": "line" },
+          { "q": "p99:bundleforge.http.duration{*}", "display_type": "line" }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "429 rate-limited / hour",
+        "type": "query_value",
+        "requests": [{ "q": "sum:bundleforge.http.requests{status:429}.as_count()" }]
+      }
+    }
+  ],
+  "template_variables": [{ "name": "env", "prefix": "env", "default": "prod" }]
+}

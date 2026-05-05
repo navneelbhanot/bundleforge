@@ -1,23 +1,36 @@
-import winston from "winston";
+/**
+ * Structured logger built on Pino.
+ *
+ * - JSON in production / test, pretty in development.
+ * - Level controlled by env.LOG_LEVEL.
+ * - Always tagged with service + version.
+ *
+ * Use `logger.child({ module: "bundles" })` to scope context to a module.
+ *
+ * See docs/specs/M-003-logger.md.
+ */
+import pino, { type Logger as PinoLogger } from "pino";
 
-const LOG_LEVEL = process.env.LOG_LEVEL || "info";
-const NODE_ENV = process.env.NODE_ENV || "development";
+import { env } from "./env";
 
-export const logger = winston.createLogger({
-  level: LOG_LEVEL,
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.errors({ stack: true }),
-    NODE_ENV === "production"
-      ? winston.format.json()
-      : winston.format.combine(
-          winston.format.colorize(),
-          winston.format.printf(({ timestamp, level, message, ...rest }) => {
-            const extra = Object.keys(rest).length ? ` ${JSON.stringify(rest)}` : "";
-            return `${timestamp} [${level}]: ${message}${extra}`;
-          })
-        )
-  ),
-  transports: [new winston.transports.Console()],
-  defaultMeta: { service: "bundleforge" },
-});
+export type Logger = PinoLogger;
+
+function buildLogger(): Logger {
+  const options: pino.LoggerOptions = {
+    level: env.LOG_LEVEL,
+    base: { service: "bundleforge", version: env.APP_VERSION },
+    timestamp: pino.stdTimeFunctions.isoTime,
+  };
+  if (env.NODE_ENV === "development") {
+    return pino({
+      ...options,
+      transport: {
+        target: "pino-pretty",
+        options: { colorize: true, translateTime: "SYS:standard" },
+      },
+    });
+  }
+  return pino(options);
+}
+
+export const logger: Logger = buildLogger();

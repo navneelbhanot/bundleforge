@@ -1,0 +1,57 @@
+{
+  "title": "BundleForge — Queues (BullMQ)",
+  "description": "BullMQ queue depth, throughput, and failure rate per queue. Source metrics emitted by the worker via Datadog statsd at queue tick + job completion.",
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "title": "Queue depth (waiting + active)",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:bundleforge.queue.depth{*} by {queue}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Jobs completed / sec",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:bundleforge.queue.completed{*}.as_rate() by {queue}",
+            "display_type": "bars"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Job failure rate %",
+        "type": "query_value",
+        "precision": 2,
+        "requests": [
+          {
+            "q": "100 * sum:bundleforge.queue.failed{*}.as_rate() / (sum:bundleforge.queue.completed{*}.as_rate() + sum:bundleforge.queue.failed{*}.as_rate())",
+            "aggregator": "avg"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "P95 job duration (ms)",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p95:bundleforge.queue.duration{*} by {queue}",
+            "display_type": "line"
+          }
+        ]
+      }
+    }
+  ],
+  "template_variables": [{ "name": "env", "prefix": "env", "default": "prod" }]
+}
