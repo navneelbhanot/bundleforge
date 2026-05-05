@@ -136,6 +136,55 @@ describe("computeBundlePrice — stackability", () => {
   });
 });
 
+describe("computeBundlePrice — percentage rule (M-041)", () => {
+  it("10% off applies", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "r1", type: "percentage", value: "10", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.totalDiscount.amount).toBe("2.00");
+    expect(r.total.amount).toBe("18.00");
+  });
+
+  it("100% off equals subtotal", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "r1", type: "percentage", value: "100", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.totalDiscount.amount).toBe("20.00");
+    expect(r.total.amount).toBe("0.00");
+  });
+
+  it(">100% is clamped to 100%", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "r1", type: "percentage", value: "200", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.totalDiscount.amount).toBe("20.00");
+  });
+
+  it("0% applies no discount and is not in applied[] (zero discount filter)", () => {
+    const r = computeBundlePrice(
+      baseInput({
+        rules: [
+          { id: "r1", type: "percentage", value: "0", priority: 0, stackable: false },
+        ],
+      }),
+    );
+    expect(r.applied).toEqual([]);
+    expect(r.totalDiscount.amount).toBe("0.00");
+  });
+});
+
 describe("computeBundlePrice — properties", () => {
   it("total is never negative even when discount > subtotal", () => {
     const r = computeBundlePrice(

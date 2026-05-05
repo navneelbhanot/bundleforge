@@ -91,7 +91,14 @@ function discountForRule(
       const cents = toCents(rule.value);
       return Math.max(0, Math.min(cents, subtotalCents));
     }
-    // M-041..M-045 wire other types here.
+    case "percentage": {
+      const pct = Number.parseFloat(rule.value);
+      if (Number.isNaN(pct) || pct <= 0) return 0;
+      const clampedPct = Math.min(100, pct);
+      const discount = Math.floor((subtotalCents * clampedPct) / 100);
+      return Math.max(0, Math.min(discount, subtotalCents));
+    }
+    // M-042..M-045 wire other types here.
     default:
       // Unknown type at this stage: log via skipped path; engine returns 0.
       return 0;

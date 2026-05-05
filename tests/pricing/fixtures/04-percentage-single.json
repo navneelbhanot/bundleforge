@@ -1,0 +1,31 @@
+{
+  "name": "10% off subtotal",
+  "input": {
+    "bundleId": "b-pct",
+    "currencyCode": "USD",
+    "lineItems": [
+      { "id": "li-1", "unitPrice": { "amount": "20.00", "currencyCode": "USD" }, "quantity": 5 }
+    ],
+    "rules": [
+      {
+        "id": "r-pct",
+        "type": "percentage",
+        "value": "10",
+        "priority": 0,
+        "stackable": false
+      }
+    ],
+    "context": { "now": "2026-05-04T00:00:00Z" }
+  },
+  "expected": {
+    "bundleId": "b-pct",
+    "currencyCode": "USD",
+    "subtotal": { "amount": "100.00", "currencyCode": "USD" },
+    "totalDiscount": { "amount": "10.00", "currencyCode": "USD" },
+    "total": { "amount": "90.00", "currencyCode": "USD" },
+    "applied": [
+      { "ruleId": "r-pct", "discount": { "amount": "10.00", "currencyCode": "USD" } }
+    ],
+    "skipped": []
+  }
+}

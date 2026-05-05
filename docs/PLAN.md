@@ -73,7 +73,7 @@
 |----|-------|--------|------|-------|
 | M-039 | Pricing engine: spec lock + types + JSON schema | done (2026-05-04) | `docs/specs/M-039-pricing-engine.md` | contract.ts + JSON schema + fixture loader |
 | M-040 | Rule type: `fixed` + property tests | done (2026-05-04) | `docs/specs/M-040-fixed-rule.md` | engine.ts + fixed; 3 fixtures; gate/stack/property tests |
-| M-041 | Rule type: `percentage` + tests | pending | — | |
+| M-041 | Rule type: `percentage` + tests | done (2026-05-05) | `docs/specs/M-041-percentage-rule.md` | floor(subtotal × pct/100); clamp 0–100 |
 | M-042 | Rule type: `flat_discount` + tests | pending | — | |
 | M-043 | Rule type: `tiered` + tests | pending | — | |
 | M-044 | Rule type: `volume` + tests | pending | — | |
@@ -295,6 +295,7 @@
 | M-038 | (Deferred) Billing UI | — | — |
 | M-039 | Pricing engine spec lock | 2026-05-04 | `docs/sessions/0039-pricing-engine.md` |
 | M-040 | Fixed rule + property tests | 2026-05-04 | `docs/sessions/0040-fixed-rule.md` |
+| M-041 | percentage rule | 2026-05-05 | `docs/sessions/0041-percentage-rule.md` |
 
 ---
 
