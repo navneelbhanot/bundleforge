@@ -238,6 +238,8 @@ full design.
 
 - [`docs/PLAN.md`](docs/PLAN.md) — 156-milestone roster.
 - [`docs/STATE.md`](docs/STATE.md) — live state + next action.
+- [`docs/deploy-railway.md`](docs/deploy-railway.md) — production
+  deploy recipe (web + worker + AI + Postgres + Redis).
 - [`docs/runbook.md`](docs/runbook.md) — developer procedures.
 - [`docs/runbook-incidents.md`](docs/runbook-incidents.md) — incident
   response (sev defs, on-call, common-issue playbook).
