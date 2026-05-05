@@ -6,8 +6,9 @@
  */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Page, Spinner, Text, Layout } from "@shopify/polaris";
+import { Card, Page, Text, Layout } from "@shopify/polaris";
 
+import { PageLoading } from "../components/PageLoading";
 import { ProductPicker } from "../components/ProductPicker";
 import { TypeConfigPanel } from "../components/TypeConfigPanel";
 
@@ -46,13 +47,7 @@ export function BundleDetailPage(): JSX.Element {
     );
   }
   if (!bundle) {
-    return (
-      <Page title="Bundle">
-        <Card>
-          <Spinner accessibilityLabel="Loading bundle" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Bundle" variant="detail" />;
   }
 
   return (

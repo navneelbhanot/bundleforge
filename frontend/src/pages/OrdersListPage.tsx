@@ -4,10 +4,11 @@ import {
   EmptyState,
   IndexTable,
   Page,
-  Spinner,
   Text,
   Badge,
 } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface OrderRow {
   id: string;
@@ -43,13 +44,7 @@ export function OrdersListPage(): JSX.Element {
     );
   }
   if (rows === null) {
-    return (
-      <Page title="Orders">
-        <Card>
-          <Spinner accessibilityLabel="Loading orders" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Orders" variant="list" primaryAction={false} />;
   }
   if (rows.length === 0) {
     return (

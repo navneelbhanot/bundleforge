@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Card, Page, Spinner, Text, Checkbox, Button } from "@shopify/polaris";
+import { Card, Page, Text, Checkbox, Button } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface Settings {
   safetyLock?: boolean;
@@ -50,13 +52,7 @@ export function SettingsPage(): JSX.Element {
     );
   }
   if (!state) {
-    return (
-      <Page title="Settings">
-        <Card>
-          <Spinner accessibilityLabel="Loading" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Settings" variant="list" primaryAction={false} />;
   }
   return (
     <Page title="Settings">

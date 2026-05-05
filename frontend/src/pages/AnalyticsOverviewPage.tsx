@@ -3,11 +3,12 @@ import {
   Card,
   EmptyState,
   Page,
-  Spinner,
   Text,
   Layout,
   IndexTable,
 } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface Overview {
   totalRevenue: number;
@@ -44,13 +45,7 @@ export function AnalyticsOverviewPage(): JSX.Element {
     );
   }
   if (!data) {
-    return (
-      <Page title="Analytics">
-        <Card>
-          <Spinner accessibilityLabel="Loading" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Analytics" variant="stats" primaryAction={false} />;
   }
   const totalRevenue = typeof data.totalRevenue === "number" ? data.totalRevenue : 0;
   const totalOrders = typeof data.totalOrders === "number" ? data.totalOrders : 0;

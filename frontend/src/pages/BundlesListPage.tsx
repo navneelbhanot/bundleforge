@@ -19,12 +19,12 @@ import {
   IndexTable,
   InlineStack,
   Page,
-  Spinner,
   Text,
   Badge,
 } from "@shopify/polaris";
 
 import { OnboardingWizard } from "../components/OnboardingWizard";
+import { PageLoading } from "../components/PageLoading";
 
 interface BundleRow {
   id: string;
@@ -241,13 +241,7 @@ export function BundlesListPage(): JSX.Element {
     );
   }
   if (rows === null) {
-    return (
-      <Page title="Bundles">
-        <Card>
-          <Spinner accessibilityLabel="Loading bundles" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Bundles" variant="stats" />;
   }
 
   // Fresh shop and merchant clicked "Take the tour".

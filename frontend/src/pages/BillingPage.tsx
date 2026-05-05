@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import {
   Card,
   Page,
-  Spinner,
   Text,
   Badge,
   Button,
   Layout,
   InlineStack,
 } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface PlanCaps {
   maxBundles: number | null;
@@ -84,13 +85,7 @@ export function BillingPage(): JSX.Element {
     );
   }
   if (!state || !plans) {
-    return (
-      <Page title="Billing">
-        <Card>
-          <Spinner accessibilityLabel="Loading" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Billing" variant="detail" primaryAction={false} />;
   }
   return (
     <Page title="Billing">

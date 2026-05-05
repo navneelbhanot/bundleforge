@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Page, Spinner, Text, IndexTable, Layout } from "@shopify/polaris";
+import { Card, Page, Text, IndexTable, Layout } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface OrderDetail {
   id: string;
@@ -42,13 +44,7 @@ export function OrderDetailPage(): JSX.Element {
     );
   }
   if (!order) {
-    return (
-      <Page title="Order">
-        <Card>
-          <Spinner accessibilityLabel="Loading" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Order" variant="detail" primaryAction={false} />;
   }
 
   return (

@@ -4,10 +4,11 @@ import {
   EmptyState,
   IndexTable,
   Page,
-  Spinner,
   Text,
   Badge,
 } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface AuditRow {
   id: string;
@@ -45,13 +46,7 @@ export function InventoryAuditPage(): JSX.Element {
     );
   }
   if (!rows) {
-    return (
-      <Page title="Inventory audit">
-        <Card>
-          <Spinner accessibilityLabel="Loading audit" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Inventory audit" variant="list" primaryAction={false} />;
   }
   if (rows.length === 0) {
     return (

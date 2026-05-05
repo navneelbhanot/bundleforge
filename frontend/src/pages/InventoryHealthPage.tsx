@@ -3,11 +3,12 @@ import {
   Card,
   EmptyState,
   Page,
-  Spinner,
   Text,
   Badge,
   InlineStack,
 } from "@shopify/polaris";
+
+import { PageLoading } from "../components/PageLoading";
 
 interface InventoryCounts {
   synced: number;
@@ -53,13 +54,7 @@ export function InventoryHealthPage(): JSX.Element {
     );
   }
   if (!health) {
-    return (
-      <Page title="Inventory health">
-        <Card>
-          <Spinner accessibilityLabel="Loading health" />
-        </Card>
-      </Page>
-    );
+    return <PageLoading title="Inventory health" variant="stats" primaryAction={false} />;
   }
   const counts = { ...ZERO_COUNTS, ...(health.counts ?? {}) };
   const total = counts.synced + counts.pending + counts.error + counts.locked;
