@@ -107,14 +107,14 @@
 | M-058 | Vertical slice: volume bundle | done (2026-05-05) | `docs/sessions/0058-volume-slice.md` | |
 | M-059 | Vertical slice: mix-and-match | done (2026-05-05) | `docs/sessions/0059-mix-match-slice.md` | |
 | M-060 | Vertical slice: BOGO | done (2026-05-05) | `docs/sessions/0060-bogo-slice.md` | |
-| M-061 | Vertical slice: BXGY E2E | pending | — | |
-| M-062 | Vertical slice: build-a-box E2E | pending | — | |
-| M-063 | Vertical slice: subscription bundle E2E | pending | — | Recharge integration may defer |
-| M-064 | Vertical slice: gift bundle E2E | pending | — | |
-| M-065 | Vertical slice: mystery bundle E2E | pending | — | |
-| M-066 | Vertical slice: sample bundle E2E | pending | — | |
-| M-067 | Vertical slice: wholesale bundle E2E | pending | — | |
-| M-068 | Vertical slice: custom bundle E2E | pending | — | |
+| M-061 | Vertical slice: BXGY | done (2026-05-05) | `docs/specs/M-061-068-remaining-slices.md` | bogo rule with mixed-price lines |
+| M-062 | Vertical slice: build-a-box | done (2026-05-05) | (same) | steps config + percentage rule |
+| M-063 | Vertical slice: subscription bundle | done (2026-05-05) | (same) | Recharge/Bold/Seal at M-119+ |
+| M-064 | Vertical slice: gift bundle | done (2026-05-05) | (same) | 100% off |
+| M-065 | Vertical slice: mystery bundle | done (2026-05-05) | (same) | fixed discount |
+| M-066 | Vertical slice: sample bundle | done (2026-05-05) | (same) | tag-gated 100% off |
+| M-067 | Vertical slice: wholesale bundle | done (2026-05-05) | (same) | minWholesaleQuantity + volume rule |
+| M-068 | Vertical slice: custom bundle | done (2026-05-05) | (same) | engine returns zero for unknown rule types |
 
 ## Phase G — Inventory + Orders (M-069 to M-080)
 
