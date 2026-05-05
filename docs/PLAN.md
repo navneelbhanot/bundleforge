@@ -336,6 +336,7 @@
 | M-140 | Security review pass + ADR-0004 | 2026-05-05 | `docs/sessions/0140-security-review.md` |
 | M-141..M-149 | Hardening (a11y, observability, GDPR, rate limit, OpenAPI) | 2026-05-05 | `docs/sessions/0141-hardening.md` |
 | M-150..M-155 | Launch (legal templates, demo data, beta onboarding, App Store) | 2026-05-05 | `docs/sessions/0150-launch.md` |
+| post-M-155 | First real Shopify install: deploy + auth + iframe + create-bundle fixes; new SPA-headers, auth-flow, Playwright test layers; CI e2e job | 2026-05-05 | `docs/sessions/0157-first-install-deploy-fixes.md` |
 
 ---
 

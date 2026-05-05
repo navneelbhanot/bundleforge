@@ -7,9 +7,13 @@ types, cents-exact pricing parity between the storefront, cart, and
 checkout, atomic SKU-accurate inventory, and a complete admin with
 analytics, A/B testing, and integrations.
 
-> **Status:** all 156 milestones complete (M-000..M-155). 442 automated
-> tests passing. Ready for App Store submission. See `docs/STATE.md`
-> and `docs/PLAN.md`.
+> **Status:** all 156 milestones complete (M-000..M-155); 454 vitest +
+> 4 Playwright tests passing. The first real install on a Shopify dev
+> store happened in session 0157 and uncovered a batch of integration-
+> shaped bugs the unit tests had never exercised — fixed in the same
+> session and locked in by new test layers. **App Store submission is
+> not yet validated end-to-end** (bundle CRUD past create still needs
+> a real merchant pass). See `docs/STATE.md` and `docs/PLAN.md`.
 
 ## What's in the box
 
@@ -254,7 +258,7 @@ full design.
 
 ## Test status
 
-- **442 / 442 tests passing**, including:
+- **454 / 454 vitest tests passing** + **4 / 4 Playwright e2e tests passing**, including:
   - Cross-runtime pricing parity vs. shared fixtures
   - Inventory concurrency property test (mutex'd fake repo)
   - Webhook throughput synthetic (100 acks under 5 s)
@@ -262,6 +266,16 @@ full design.
   - GDPR endpoints (tenant scope + redaction)
   - Per-IP rate-limit abuse test
   - Frontend axe-core smoke tests
+  - **Embed-header contract** (no XFO/COOP/CORP, CSP `frame-ancestors`
+    set, `%VITE_SHOPIFY_API_KEY%` substituted, Polaris CSS linked) —
+    `tests/integration/server-spa.test.ts`
+  - **Auth-flow regressions** (v13 SDK scope-empty session must not
+    reauth-loop, invalid JWT → 401, fresh shop → /api/auth) —
+    `tests/integration/auth-flow.test.ts`
+  - **Embedded-admin smoke in headless Chrome** (Polaris token resolves,
+    authFetch attaches App Bridge JWT, `/bundles/new` mounts the create
+    form, all top-level routes serve the SPA shell) —
+    `tests/e2e/embedded-admin.spec.ts`
 
 ## License
 
