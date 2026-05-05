@@ -1,10 +1,85 @@
-import { Card, Page, Text } from "@shopify/polaris";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  IndexTable,
+  Page,
+  Spinner,
+  Text,
+  Badge,
+} from "@shopify/polaris";
+
+interface OrderRow {
+  id: string;
+  shopifyOrderNumber: string;
+  status: string;
+  bundlePrice: string;
+  currency: string;
+  createdAt: string;
+}
 
 export function OrdersListPage(): JSX.Element {
+  const [rows, setRows] = useState<OrderRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/orders")
+      .then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
+      )
+      .then((body: { data: OrderRow[] }) => setRows(body.data))
+      .catch((e: Error) => setError(e.message));
+  }, []);
+
+  if (error) {
+    return (
+      <Page title="Orders">
+        <Card>
+          <Text as="p" tone="critical">
+            {error}
+          </Text>
+        </Card>
+      </Page>
+    );
+  }
+  if (rows === null) {
+    return (
+      <Page title="Orders">
+        <Card>
+          <Spinner accessibilityLabel="Loading orders" />
+        </Card>
+      </Page>
+    );
+  }
   return (
     <Page title="Orders">
       <Card>
-        <Text as="p">Orders list lands at M-104.</Text>
+        <IndexTable
+          itemCount={rows.length}
+          headings={[
+            { title: "Order" },
+            { title: "Status" },
+            { title: "Total" },
+          ]}
+          selectable={false}
+        >
+          {rows.map((o, i) => (
+            <IndexTable.Row id={o.id} key={o.id} position={i}>
+              <IndexTable.Cell>
+                <Text as="span" fontWeight="semibold">
+                  {o.shopifyOrderNumber}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Badge tone={o.status === "fulfilled" ? "success" : "info"}>
+                  {o.status}
+                </Badge>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                {o.bundlePrice} {o.currency}
+              </IndexTable.Cell>
+            </IndexTable.Row>
+          ))}
+        </IndexTable>
       </Card>
     </Page>
   );

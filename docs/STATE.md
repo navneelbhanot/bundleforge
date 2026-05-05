@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**M-101 — Visual builder: pricing rules editor**
+**M-121 — Klaviyo adapter**
 
 ## Exact next action
 
-Boot phase, then write `docs/specs/M-101-pricing-rules-editor.md`.
-Add a Polaris-based pricing rules editor component (DataTable +
-inline editors) that consumes `/api/v1/bundles/:id` rules array and
-calls back via `onChange(rules)`. RTL tests render two rules and
-assert they show in the table. Wire into `BundleDetailPage`.
+Boot phase, then write `docs/specs/M-121-klaviyo.md`. Klaviyo adapter
+follows the M-116 framework: pushes a `Bundle Purchased` event to the
+Klaviyo metric API. Credentials: `{privateKey: string}`. Register in
+`src/services/integrations/registry.ts`; 4 unit tests (ping, pushOrder
+happy + non-2xx + missing key).
 
 ## Blockers
 
@@ -26,32 +26,23 @@ None.
 - Broader Shopify SDK upgrade (api v13, app-express v7, prisma v6)
   flagged for ADR before going live.
 - ResourcePicker integration on ProductPicker (M-099) deferred until
-  App Bridge actions are wired in a follow-up.
-- Cross-runtime fixture set will keep growing as new rule types or
-  edge cases land. ADR-0002 holds.
+  App Bridge actions are wired.
+- Theme-extension Playwright tests → M-141.
+- Analytics materialized views deferred — M-138/M-139 may revisit if
+  query times grow.
+- Amazon adapter (M-118) is a basic stub; SP-API SigV4 signing in a
+  follow-up when SP-API creds are available.
 
 ## Recently completed
 
-- M-100 — Type-specific config panels. `docs/sessions/0094-frontend-scaffold.md`.
-- M-099 — Product picker. `docs/sessions/0094-frontend-scaffold.md`.
-- M-098 — Bundle detail page. `docs/sessions/0094-frontend-scaffold.md`.
-- M-097 — Bundles list page. `docs/sessions/0094-frontend-scaffold.md`.
-- M-096 — Admin routing. `docs/sessions/0094-frontend-scaffold.md`.
-- M-095 — App Bridge integration. `docs/sessions/0094-frontend-scaffold.md`.
-- M-094 — Frontend scaffold. `docs/sessions/0094-frontend-scaffold.md`.
-- M-093 — Theme i18n strings. `docs/sessions/0088-theme-extension.md`.
-- M-092 — BOGO theme block. `docs/sessions/0088-theme-extension.md`.
-- M-091 — Mix-match theme block. `docs/sessions/0088-theme-extension.md`.
-- M-090 — Build-a-box theme block. `docs/sessions/0088-theme-extension.md`.
-- M-089 — Variant selector theme block. `docs/sessions/0088-theme-extension.md`.
-- M-088 — Bundle display theme block. `docs/sessions/0088-theme-extension.md`.
-- M-087 — Validation Function. `docs/sessions/0087-validation-function.md`.
-- M-086 — Checkout Guardian. `docs/sessions/0085-app-proxy-and-guardian.md`.
-- M-085 — App Proxy bundle config. `docs/sessions/0085-app-proxy-and-guardian.md`.
-- M-084 — Cross-runtime parity. `docs/sessions/0081-cart-transform-function.md`.
-- M-083 — Cart Transform pricing port. `docs/sessions/0081-cart-transform-function.md`.
-- M-082 — Cart Transform attribute markers. `docs/sessions/0081-cart-transform-function.md`.
-- M-081 — Cart Transform scaffold. `docs/sessions/0081-cart-transform-function.md`.
+- M-120 — Bold adapter. `docs/sessions/0116-integrations.md`.
+- M-119 — Recharge adapter. `docs/sessions/0116-integrations.md`.
+- M-118 — Amazon adapter (stub). `docs/sessions/0116-integrations.md`.
+- M-117 — ShipStation adapter. `docs/sessions/0116-integrations.md`.
+- M-116 — Integration adapter framework. `docs/sessions/0116-integrations.md`.
+- M-109..M-115 — Analytics + A/B. `docs/sessions/0109-analytics-ab.md`.
+- M-101..M-108 — Admin pages (rules editor, orders, inventory, settings,
+  billing, onboarding). `docs/sessions/0101-admin-pages.md`.
 - (Earlier history in PLAN.md.)
 
 ## Working branch

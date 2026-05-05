@@ -162,36 +162,36 @@
 | M-098 | Bundle detail page | done (2026-05-05) | `frontend/src/pages/BundleDetailPage.tsx` | layout + ProductPicker + TypeConfigPanel |
 | M-099 | Visual builder: product picker | done (2026-05-05) | `frontend/src/components/ProductPicker.tsx` | ResourceList over current items |
 | M-100 | Visual builder: type config panels | done (2026-05-05) | `frontend/src/components/TypeConfigPanel.tsx` | 5 type-specific forms; 3 RTL tests |
-| M-101 | Visual builder: pricing rules editor | pending | — | |
-| M-102 | Orders list page | pending | — | |
-| M-103 | Order detail with SKU breakdown | pending | — | |
-| M-104 | Inventory audit page | pending | — | |
-| M-105 | Inventory health dashboard | pending | — | |
-| M-106 | Settings page | pending | — | |
-| M-107 | Billing/Plans page | pending | — | |
-| M-108 | Onboarding wizard | pending | — | |
+| M-101 | Visual builder: pricing rules editor | done (2026-05-05) | `docs/specs/M-101-108-admin-pages.md` | Polaris IndexTable, RTL test |
+| M-102 | Orders list page + /api/v1/orders | done (2026-05-05) | (same) | paginated list, OrdersListPage |
+| M-103 | Order detail + SKU breakdown | done (2026-05-05) | (same) | OrderDetailPage |
+| M-104 | Inventory audit page | done (2026-05-05) | (same) | reads /inventory/audit |
+| M-105 | Inventory health dashboard | done (2026-05-05) | (same) | reads /inventory/health |
+| M-106 | Settings page + PUT /settings | done (2026-05-05) | (same) | safety lock, notifications |
+| M-107 | Billing page upgrade | done (2026-05-05) | (same) | subscribe monthly/annual buttons |
+| M-108 | Onboarding wizard | done (2026-05-05) | (same) | 3-step wizard component |
 
 ## Phase J — Analytics + A/B (M-109 to M-115)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-109 | Analytics ingestion endpoint | pending | — | From storefront events |
-| M-110 | Analytics rollup tables / materialized views | pending | — | |
-| M-111 | Analytics overview endpoint + dashboard | pending | — | |
-| M-112 | Per-bundle analytics endpoint | pending | — | |
-| M-113 | A/B test service: assignment + tracking | pending | — | |
-| M-114 | A/B test routes + UI | pending | — | |
-| M-115 | A/B test significance calculator | pending | — | |
+| M-109 | Analytics ingestion endpoint | done (2026-05-05) | `docs/specs/M-109-115-analytics-ab.md` | POST /events Zod-validated, batched |
+| M-110 | Analytics rollup queries | done (2026-05-05) | (same) | groupBy via Prisma; views deferred to M-138+ |
+| M-111 | Analytics overview endpoint + dashboard | done (2026-05-05) | (same) | totals + top bundles + AnalyticsOverviewPage |
+| M-112 | Per-bundle analytics endpoint | done (2026-05-05) | (same) | groupBy by eventType |
+| M-113 | A/B test service: assignment | done (2026-05-05) | (same) | hash-based deterministic; pure |
+| M-114 | A/B test routes + UI | done (2026-05-05) | (same) | /significance route + AbTestsPage |
+| M-115 | A/B significance calculator | done (2026-05-05) | (same) | two-proportion z-test, normalCdf |
 
 ## Phase K — Integrations + AI (M-116 to M-126)
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-116 | Integration adapter framework | pending | — | Abstract interface |
-| M-117 | ShipStation adapter | pending | — | |
-| M-118 | Amazon adapter (basic) | pending | — | |
-| M-119 | Recharge adapter | pending | — | Subscription bundles |
-| M-120 | Bold adapter | pending | — | |
+| M-116 | Integration adapter framework | done (2026-05-05) | `docs/specs/M-116-120-integrations.md` | registry + dispatchOrder; per-adapter error capture |
+| M-117 | ShipStation adapter | done (2026-05-05) | (same) | Basic auth + /orders/createorder; 5 tests |
+| M-118 | Amazon adapter (basic stub) | done (2026-05-05) | (same) | shape only; SP-API signing in follow-up |
+| M-119 | Recharge adapter | done (2026-05-05) | (same) | X-Recharge-Access-Token; /checkouts |
+| M-120 | Bold adapter | done (2026-05-05) | (same) | BC-API-Key; /shops/:id/orders |
 | M-121 | Klaviyo adapter | pending | — | |
 | M-122 | Google Merchant feed | pending | — | |
 | M-123 | Shopify Flow triggers + actions | pending | — | |
@@ -326,6 +326,9 @@
 | M-087 | Validation Function (Plus only) | 2026-05-05 | `docs/sessions/0087-validation-function.md` |
 | M-088..M-093 | Theme extension blocks + i18n | 2026-05-05 | `docs/sessions/0088-theme-extension.md` |
 | M-094..M-100 | Admin frontend scaffold + first pages | 2026-05-05 | `docs/sessions/0094-frontend-scaffold.md` |
+| M-101..M-108 | Admin pages: rules editor, orders, inventory, settings, billing, onboarding | 2026-05-05 | `docs/sessions/0101-admin-pages.md` |
+| M-109..M-115 | Analytics ingestion + dashboard + A/B significance | 2026-05-05 | `docs/sessions/0109-analytics-ab.md` |
+| M-116..M-120 | Integration adapter framework + 4 adapters | 2026-05-05 | `docs/sessions/0116-integrations.md` |
 
 ---
 
