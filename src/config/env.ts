@@ -50,6 +50,12 @@ export const envSchema = z
 
     SENTRY_DSN: z.string().min(1).optional(),
 
+    // Optional Crisp live-chat website ID. When set, the embedded admin
+    // injects the Crisp widget so merchants can talk to support without
+    // leaving the app. Provision at https://app.crisp.chat -> Settings
+    // -> Website ID. Free tier is fine for the smoke-test stage.
+    CRISP_WEBSITE_ID: z.string().min(1).optional(),
+
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),

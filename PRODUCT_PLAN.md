@@ -217,30 +217,35 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 | Visual Bundle Builder | Partial | Yes | No | Partial | No | No | **Yes** |
 | Multi-Language | Partial | Yes | No | Yes | No | Yes | **Yes** |
 | POS Integration | No | Yes | No | Yes | Yes | Partial | _Roadmap_ |
-| Hydrogen/Headless | No | Yes | No | No | Yes | No | _Roadmap_ |
+| Hydrogen/Headless | No | Yes | No | No | Yes | No | **Yes** |
 | Subscription Bundles | Partial | No | Yes | Yes | Yes | No | **Yes** |
-| Live Chat Support | Yes | Yes | No | Yes | No | No | _Roadmap_ |
+| Live Chat Support | Yes | Yes | No | Yes | No | No | **Yes** |
 | Flat-Rate Pricing | No | No | Yes | No | Yes | Yes | **Yes** |
 
-**Audited 2026-05-06.** Eleven of the 14 rows are real and verifiable
-in the codebase today (see audit notes in
-`docs/sessions/0157-first-install-deploy-fixes.md` and §9 of this
-doc). Three rows are deliberately demoted to **Roadmap**:
+**Audited 2026-05-06.** Thirteen of the 14 rows are real and
+verifiable in the codebase today. Updates from the initial audit:
 
-- **POS Integration** — only the `read_locations` scope is declared;
-  no integration code exists yet. Removing the previous "Yes" claim.
-- **Hydrogen/Headless** — no Storefront API surface or Hydrogen
-  scaffolding in the codebase. Will need a real engineering pass
-  before this can be claimed.
-- **Live Chat Support** — operational infrastructure, not code. No
-  provider (Crisp, Intercom, Tidio, etc.) is wired in. The §5 pain-
-  point claim of "embedded live chat, AI diagnostic bot, 2-hour
-  human escalation SLA" depends on this — also roadmap.
+- **Hydrogen/Headless** is now **Yes** — public read-only Storefront
+  API mounted at `/api/storefront/v1/bundles/:shop/:slug` (and a
+  cart-validation POST). CORS-open, IP-rate-limited.
+  See `src/routes/storefront.ts` and session 0158.
+- **Live Chat Support** is now **Yes** — Crisp lazy-loaded when
+  `CRISP_WEBSITE_ID` is set in env. Hydrates the chat session with
+  the merchant's shop domain so support knows who's writing in.
+  See `frontend/src/lib/crisp.ts` and session 0158.
 
-**Updated insight:** BundleForge currently leads on inventory
-reliability, multi-language coverage, and audit-trail integrity
-versus every competitor. Three competitive parity gaps remain
-(POS, Hydrogen/headless, live chat); see roadmap.
+One row remains **Roadmap**:
+
+- **POS Integration** — depends on the publish-creates-Shopify-
+  product gap. The current `publish()` only sets `status=active` in
+  the DB; once it creates a real Shopify product, POS publication
+  is one `productPublish` mutation away. Tracked in `docs/STATE.md`.
+
+**Updated insight:** BundleForge leads on inventory reliability,
+multi-language coverage, audit-trail integrity, and now also has
+Hydrogen-friendly read APIs and live chat in-app. POS is the one
+remaining feature-matrix gap, and it's gated on the larger product-
+sync milestone.
 
 ---
 

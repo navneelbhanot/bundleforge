@@ -55,6 +55,9 @@ export default defineConfig({
       REDIS_URL: "redis://localhost:6379",
       ENCRYPTION_KEY: "a".repeat(64),
       LOG_LEVEL: "warn",
+      // CRISP_WEBSITE_ID intentionally unset — the e2e suite asserts
+      // the SPA boots cleanly without the chat widget loaded. Set it
+      // in Railway / production env to enable Crisp.
     },
   },
   projects: [

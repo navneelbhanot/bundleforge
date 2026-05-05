@@ -50,6 +50,7 @@ import { afterAuth } from "../shopify/install";
 import { mountWebhooks } from "../webhooks";
 import { appProxyAuth } from "../middleware/appProxy";
 import { proxyRoutes } from "../routes/proxy";
+import { storefrontRoutes } from "../routes/storefront";
 import { feedRoutes } from "../routes/feeds";
 import { gdprRoutes } from "../routes/gdpr";
 import { aiRoutes } from "../routes/ai";
@@ -175,6 +176,11 @@ export function createApp(): Express {
   // perspective but require Shopify's signed-query verification.
   app.use("/api/proxy", appProxyAuth(), proxyRoutes);
 
+  // Public read-only Storefront API for headless storefronts
+  // (Hydrogen, custom storefronts). CORS-open, ip-rate-limited,
+  // returns published bundles only.
+  app.use("/api/storefront/v1", ipRateLimiter, storefrontRoutes);
+
   // Public product feeds (M-122). No auth — Google ingests these.
   app.use("/api/feeds", feedRoutes);
 
@@ -220,14 +226,20 @@ export function createApp(): Express {
     const spaDir = path.resolve(process.cwd(), "dist", "frontend");
     const spaIndex = path.join(spaDir, "index.html");
     if (fs.existsSync(spaIndex)) {
-      // Read the built index.html once and substitute the
-      // `%VITE_SHOPIFY_API_KEY%` placeholder with the runtime value of
-      // SHOPIFY_API_KEY. Vite would normally substitute this at build
-      // time, but the Docker build doesn't pass build-args, so the token
-      // ships literal and App Bridge fails to initialize otherwise.
+      // Read the built index.html once and substitute placeholders
+      // with their runtime values:
+      //   - %VITE_SHOPIFY_API_KEY% — App Bridge's required meta tag.
+      //     Vite would normally substitute this at build time, but the
+      //     Docker build doesn't pass build-args, so the token ships
+      //     literal and App Bridge fails to initialize otherwise.
+      //   - %CRISP_WEBSITE_ID% — optional Crisp live-chat website id.
+      //     When CRISP_WEBSITE_ID is set the SPA reads this meta tag
+      //     and lazy-loads the Crisp script. When unset we substitute
+      //     an empty string and the SPA skips the load entirely.
       const indexHtml = fs
         .readFileSync(spaIndex, "utf8")
-        .replace(/%VITE_SHOPIFY_API_KEY%/g, env.SHOPIFY_API_KEY);
+        .replace(/%VITE_SHOPIFY_API_KEY%/g, env.SHOPIFY_API_KEY)
+        .replace(/%CRISP_WEBSITE_ID%/g, env.CRISP_WEBSITE_ID ?? "");
       app.use(express.static(spaDir, { index: false, maxAge: "1h" }));
       app.get(/^\/(?!api\/|health$).*/, (_req: Request, res: Response): void => {
         res.type("html").send(indexHtml);

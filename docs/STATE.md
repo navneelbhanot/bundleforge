@@ -48,16 +48,15 @@ Operational, still user-owned (unchanged from before today):
 
 Future code work (post-launch backlog):
 
-- **Live chat integration** (Crisp / Intercom / Tidio) — needed to
-  back the §5 "Support quality" pain-point claim. Pick a provider
-  and ship the embed; staffing is operational. New roadmap item per
-  the 2026-05-06 audit.
-- **Hydrogen / Storefront API surface** — currently marked
-  `(roadmap)` in `PRODUCT_PLAN.md` §4. Needs a real engineering
-  pass; pricing engine is already runtime-agnostic so the work is
-  plumbing.
-- **POS integration** — only `read_locations` scope declared; needs
-  an actual POS adapter to back the §4 claim.
+- **Real Shopify product sync on publish()** — current `publish()`
+  in `src/services/bundles/index.ts:248` only sets `status=active` in
+  the DB; it does NOT create a Shopify product. POS visibility, theme
+  app blocks finding the bundle by product handle, and order/refund
+  webhooks resolving the bundle line — all depend on this. This is
+  the largest remaining real-engineering gap.
+- **POS integration** — depends on the publish-creates-product gap
+  above. Once a real product exists, ensure it's published to the
+  POS sales channel via `productPublish` + the POS publication ID.
 - **Trial-warning emails** — needed to back the §5 "Billing
   transparency" claim. Needs SMTP wiring + a cron worker job.
 - **Prisma v6 → v7** — requires `prisma.config.ts` + adapter rewiring.
@@ -75,6 +74,9 @@ Future code work (post-launch backlog):
 
 - Worker + AI services on Railway have wrong `startCommand`; user must
   fix in the dashboard (CLI cannot edit service-stored startCommand).
+  Step-by-step in `docs/runbook-railway.md`.
+- POS sales-channel publication blocked by the publish()-creates-
+  Shopify-product gap. Documented in Future code work below.
 
 ## Carry-overs (still active)
 
@@ -84,6 +86,16 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Crisp live chat + Storefront API endpoint + Bundle CRUD e2e test
+  + Railway runbook** (2026-05-06 PM). Wired Crisp via env-driven
+  meta-tag substitution + lazy loader; added `/api/storefront/v1/`
+  public read-only routes for Hydrogen / headless storefronts;
+  added a real Postgres-backed Bundle CRUD integration test that
+  drives create → list → detail → update → publish → archive plus
+  cross-tenant safety; documented Railway worker + AI Service start-
+  command fixes in `docs/runbook-railway.md`. Demoted POS in §4 to
+  await the publish-creates-Shopify-product gap (separate larger
+  task — see Future code work below).
 - **PRODUCT_PLAN audit + UI polish + null-safe pages + OnboardingWizard
   wiring + merchant help docs** (2026-05-06). Replaced the bare
   `<Link>` nav with Polaris Tabs; added EmptyState renders to all
@@ -107,8 +119,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **454 / 454 vitest tests passing** (442 prior + 9 SPA-headers
-  integration + 3 auth-flow integration).
+- **456 / 456 vitest tests passing** when DATABASE_URL points at a
+  real Postgres (CI + dev with `bundleforge_e2e` DB).
+- **454 / 454** when no real DB is available — the bundle CRUD
+  integration test (2 tests) auto-skips via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (Polaris CSS, authFetch JWT,
   OnboardingWizard fresh-shop walkthrough, /bundles/new mount, route
   registration).

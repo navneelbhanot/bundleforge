@@ -5,6 +5,9 @@ import "@shopify/polaris/build/esm/styles.css";
 // Side-effect import: patches window.fetch to attach the App Bridge
 // session token to /api/* calls. Must run before App renders.
 import "./lib/authFetch";
+// Side-effect import: lazy-loads Crisp live chat when CRISP_WEBSITE_ID
+// is configured server-side. No-op otherwise.
+import "./lib/crisp";
 
 import { App } from "./App";
 
