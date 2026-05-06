@@ -309,11 +309,17 @@ export function BundlesListPage(): JSX.Element {
               { title: "Title" },
               { title: "Type" },
               { title: "Status" },
+              { title: "" },
             ]}
             selectable={false}
           >
             {rows.map((b, i) => (
-              <IndexTable.Row id={b.id} key={b.id} position={i}>
+              <IndexTable.Row
+                id={b.id}
+                key={b.id}
+                position={i}
+                onClick={() => navigate(`/bundles/${b.id}`)}
+              >
                 <IndexTable.Cell>
                   <Text as="span" fontWeight="semibold">
                     {b.title}
@@ -324,6 +330,14 @@ export function BundlesListPage(): JSX.Element {
                   <Badge tone={b.status === "active" ? "success" : "info"}>
                     {b.status}
                   </Badge>
+                </IndexTable.Cell>
+                <IndexTable.Cell>
+                  <Button
+                    onClick={() => navigate(`/bundles/${b.id}`)}
+                    variant="tertiary"
+                  >
+                    Edit
+                  </Button>
                 </IndexTable.Cell>
               </IndexTable.Row>
             ))}

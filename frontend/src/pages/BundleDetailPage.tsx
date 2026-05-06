@@ -25,11 +25,13 @@ import {
   Toast,
 } from "@shopify/polaris";
 
+import { findBundleType } from "../components/bundleTypes";
 import { PageLoading } from "../components/PageLoading";
 import {
   PricingRulesEditor,
   type PricingRuleRow,
 } from "../components/PricingRulesEditor";
+import { StorefrontPreview } from "../components/StorefrontPreview";
 import { TypeConfigPanel } from "../components/TypeConfigPanel";
 
 interface BundleItem {
@@ -461,7 +463,7 @@ export function BundleDetailPage(): JSX.Element {
                           Items
                         </Text>
                         <Text as="p" variant="headingMd">
-                          {bundle.items.length}
+                          {items.length}
                         </Text>
                       </Box>
                       <Box>
@@ -475,6 +477,18 @@ export function BundleDetailPage(): JSX.Element {
                     </InlineStack>
                   </BlockStack>
                 </Card>
+              </Box>
+
+              {/* Live storefront preview — updates as the merchant
+                  edits items, title, description, or pricing rules. */}
+              <Box paddingBlockStart="400">
+                <StorefrontPreview
+                  type={findBundleType(bundle.type)}
+                  title={title || bundle.title}
+                  description={description}
+                  items={items}
+                  pricingRules={rules}
+                />
               </Box>
             </Layout.Section>
           </Layout>
