@@ -8,34 +8,37 @@
 
 **Phase R2 in progress — Bundle Detail richness.**
 
-M-169..M-171 all landed 2026-05-06. The Bundle Detail page now
-has 3 of 8 tabs fully built: Setup, Schedule, and Display.
-Display is per-bundle override layer over the M-162 shop-level
-defaults — picking "Use shop default" on any field sends `null`
-which the server's deep-merge logic deletes from the override
-blob, so the storefront falls back to the shop default at render
-time. Remaining R2 tabs (Customers, Inventory, Performance +
-Activity, Advanced) are placeholders pointing at M-172..M-175.
+M-169..M-172 all landed 2026-05-06. The Bundle Detail page now
+has 4 of 8 tabs fully built: Setup, Schedule, Display, Customers.
+Customers tab covers tag-based allow/deny gating, login required,
+Shopify Segment GIDs, market codes, and locale gating. Same
+null-removes-restriction semantics as Display: empty allow array
+saves as `null` so the server deletes the override and the
+storefront stops gating that dimension.
+
+Remaining R2 tabs (Inventory, Performance + Activity, Advanced)
+are placeholders pointing at M-173..M-175.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (still pending — two migrations queued):**
+**User action required (three migrations queued):**
 1. M-168: `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`
 2. M-170: `prisma/migrations/20260506180000_bundle_schedule_settings/`
+3. M-172: `prisma/migrations/20260506200000_bundle_eligibility/`
 
-Both safe during normal traffic — M-168 creates 2 empty tables,
-M-170 adds a single nullable JSON column to bundles. Apply via
-`prisma migrate deploy` from a CI shell.
+All three safe during normal traffic — M-168 creates 2 empty
+tables, M-170/M-172 each add a single JSON column to bundles
+defaulting to `{}`. Apply via `prisma migrate deploy` from a CI
+shell.
 
-**Code (next session):** Run M-172 — Customers tab. Spec first:
-`docs/specs/M-172-bundle-detail-customers.md`. Per-bundle
-eligibility rules: must-have / must-not-have customer tags,
-Shopify Segments dropdown, login required toggle, market /
-locale gating multi-select. Persists in a new
-`Bundle.eligibility` JSON column (one new migration). Cart
-Transform consumption deferred to M-172b.
+**Code (next session):** Run M-173 — Inventory tab (Bundle
+Detail). Spec first: `docs/specs/M-173-bundle-detail-inventory.md`.
+Per-bundle override of the shop-level Inventory settings from
+M-163 (low-stock threshold, oversell policy) plus per-bundle
+"pause when any component < N" toggle and a "component-only
+mode" toggle. Adds an `inventoryRules` JSON column on Bundle.
 
 Other open threads (mostly user-owned):
 
@@ -104,6 +107,20 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-172 — Bundle Detail · Customers tab** (2026-05-06 late).
+  Per-bundle eligibility surface: tag-based allow/deny chips,
+  Shopify Segment GID multiline input, requireLogin checkbox,
+  market multi-select (30 ISO codes), locale multi-select (15
+  supported locales). New `Bundle.eligibility` JSON column with
+  migration. Server `validateEligibility` enforces 2-letter
+  uppercase market codes, supported-locale membership, max 50
+  tags, max 20 segments. Same null-removes-restriction
+  semantics as M-171 Display: empty arrays save as `null`,
+  the deep-merge in update() deletes the key, the storefront
+  stops gating that dimension. M-172b will wire the Cart
+  Transform Function + theme blocks to read the eligibility
+  blob via a new `bundleforge.eligibility` product metafield.
+  `docs/sessions/0172-bundle-detail-customers.md`.
 - **M-171 — Bundle Detail · Display tab** (2026-05-06 late).
   Per-bundle override layer for the shop-level Display defaults
   from M-162. Three cards: Layout & visual style (layout +
@@ -319,9 +336,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **593 / 593 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 BundleService display cases + +5 DisplayTab
-  UI cases since M-170.
+- **604 / 604 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 BundleService eligibility cases + +4
+  CustomersTab UI cases + +1 BundleDetailPage hash test since
+  M-171.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

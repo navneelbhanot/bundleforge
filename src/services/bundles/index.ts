@@ -6,10 +6,12 @@
  * input to Prisma input is centralized here.
  */
 import type { Prisma } from "../../generated/prisma";
+import { SUPPORTED_LOCALES } from "../../i18n";
 import {
   CreateBundleInput,
   CreateBundleItemInput,
   CreatePricingRuleInput,
+  type EligibilityInput,
   PaginatedResponse,
   PaginationParams,
   type ScheduleSettingsInput,
@@ -139,6 +141,83 @@ function validateDisplay(input: Record<string, unknown>): void {
         // server stance for the shop-level Display tab. Bundles
         // can carry forward-compatible custom keys without 400ing.
         break;
+    }
+  }
+}
+
+const ISO_COUNTRY_RE = /^[A-Z]{2}$/;
+const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES);
+
+/**
+ * Validate a per-bundle Eligibility patch. All fields optional.
+ * `null` is allowed for any field and means "remove the
+ * restriction" — handled by the deep-merge in update().
+ */
+function validateEligibility(input: EligibilityInput): void {
+  for (const k of ["customerTagsAllow", "customerTagsDeny"] as const) {
+    const v = input[k];
+    if (v === undefined || v === null) continue;
+    if (!Array.isArray(v)) {
+      throw new ValidationError(`eligibility.${k} must be an array`);
+    }
+    if (v.length > 50) {
+      throw new ValidationError(`eligibility.${k} must have <= 50 entries`);
+    }
+    for (const tag of v) {
+      if (typeof tag !== "string" || tag.trim().length === 0) {
+        throw new ValidationError(
+          `eligibility.${k} entries must be non-empty strings`,
+        );
+      }
+    }
+  }
+  if (input.segmentIds !== undefined && input.segmentIds !== null) {
+    if (!Array.isArray(input.segmentIds)) {
+      throw new ValidationError("eligibility.segmentIds must be an array");
+    }
+    if (input.segmentIds.length > 20) {
+      throw new ValidationError("eligibility.segmentIds must have <= 20 entries");
+    }
+    for (const id of input.segmentIds) {
+      if (typeof id !== "string" || id.trim().length === 0) {
+        throw new ValidationError(
+          "eligibility.segmentIds entries must be non-empty strings",
+        );
+      }
+    }
+  }
+  if (
+    input.requireLogin !== undefined &&
+    input.requireLogin !== null &&
+    typeof input.requireLogin !== "boolean"
+  ) {
+    throw new ValidationError("eligibility.requireLogin must be boolean");
+  }
+  if (input.markets !== undefined && input.markets !== null) {
+    if (!Array.isArray(input.markets)) {
+      throw new ValidationError("eligibility.markets must be an array");
+    }
+    if (input.markets.length > 100) {
+      throw new ValidationError("eligibility.markets must have <= 100 entries");
+    }
+    for (const m of input.markets) {
+      if (typeof m !== "string" || !ISO_COUNTRY_RE.test(m)) {
+        throw new ValidationError(
+          "eligibility.markets entries must be 2-letter uppercase ISO country codes",
+        );
+      }
+    }
+  }
+  if (input.locales !== undefined && input.locales !== null) {
+    if (!Array.isArray(input.locales)) {
+      throw new ValidationError("eligibility.locales must be an array");
+    }
+    for (const loc of input.locales) {
+      if (typeof loc !== "string" || !SUPPORTED_LOCALE_SET.has(loc)) {
+        throw new ValidationError(
+          `eligibility.locales entries must be one of: ${SUPPORTED_LOCALES.join(", ")}`,
+        );
+      }
     }
   }
 }
@@ -283,6 +362,7 @@ export class BundleService {
 
     if (input.scheduleSettings) validateSchedule(input.scheduleSettings);
     if (input.displaySettings) validateDisplay(input.displaySettings);
+    if (input.eligibility) validateEligibility(input.eligibility);
     if (input.startsAt && input.endsAt) {
       if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
         throw new ValidationError("endsAt must be on/after startsAt");
@@ -301,6 +381,8 @@ export class BundleService {
           (input.displaySettings ?? {}) as Prisma.InputJsonValue,
         scheduleSettings:
           (input.scheduleSettings ?? {}) as unknown as Prisma.InputJsonValue,
+        eligibility:
+          (input.eligibility ?? {}) as unknown as Prisma.InputJsonValue,
         startsAt: input.startsAt ? new Date(input.startsAt) : undefined,
         endsAt: input.endsAt ? new Date(input.endsAt) : undefined,
         items: { create: (input.items ?? []).map((it, i) => mapItem(it, i)) },
@@ -318,6 +400,7 @@ export class BundleService {
     const existing = (await this.getById(shopId, id)) as {
       scheduleSettings?: unknown;
       displaySettings?: unknown;
+      eligibility?: unknown;
     };
     const data: Prisma.BundleUpdateInput = {};
     if (input.title !== undefined) {
@@ -364,6 +447,25 @@ export class BundleService {
         merged[k] = v;
       }
       data.scheduleSettings = merged as unknown as Prisma.InputJsonValue;
+    }
+    if (input.eligibility !== undefined) {
+      validateEligibility(input.eligibility);
+      // Deep-merge with the same null-removes-restriction semantics
+      // as displaySettings — set a key to `null` to lift that
+      // dimension's gate.
+      const prev = isObject(existing.eligibility)
+        ? existing.eligibility
+        : {};
+      const merged: Record<string, unknown> = { ...prev };
+      for (const [k, v] of Object.entries(input.eligibility)) {
+        if (v === undefined) continue;
+        if (v === null) {
+          delete merged[k];
+        } else {
+          merged[k] = v;
+        }
+      }
+      data.eligibility = merged as Prisma.InputJsonValue;
     }
     if (input.startsAt !== undefined) {
       data.startsAt = input.startsAt ? new Date(input.startsAt) : null;

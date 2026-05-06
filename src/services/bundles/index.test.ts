@@ -322,6 +322,127 @@ describe("BundleService — displaySettings (M-171)", () => {
   });
 });
 
+describe("BundleService — eligibility (M-172)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+  });
+
+  it("persists eligibility on create", async () => {
+    mockedRepo.create.mockResolvedValueOnce({ id: "b-e1" });
+    const svc = new BundleService();
+    await svc.create("shop", {
+      title: "VIP-only",
+      type: "fixed",
+      items: [],
+      pricingRules: [],
+      eligibility: {
+        customerTagsAllow: ["vip"],
+        customerTagsDeny: ["wholesale"],
+        requireLogin: true,
+        markets: ["US", "CA"],
+        locales: ["en", "fr"],
+      },
+    });
+    const args = mockedRepo.create.mock.calls[0][0];
+    expect(args.data.eligibility).toMatchObject({
+      customerTagsAllow: ["vip"],
+      customerTagsDeny: ["wholesale"],
+      requireLogin: true,
+      markets: ["US", "CA"],
+      locales: ["en", "fr"],
+    });
+  });
+
+  it("rejects unsupported locale", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        eligibility: { locales: ["klingon"] },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects market codes that aren't 2-letter uppercase ISO", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        eligibility: { markets: ["United States"] },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        eligibility: { markets: ["us"] },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects > 50 customer tags", async () => {
+    const svc = new BundleService();
+    const tooMany = Array.from({ length: 51 }, (_, i) => `t${i}`);
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        eligibility: { customerTagsAllow: tooMany },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("update deep-merges eligibility — saving customerTagsAllow keeps markets", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      eligibility: {
+        markets: ["US"],
+        requireLogin: true,
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      eligibility: { customerTagsAllow: ["vip"] },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.eligibility).toEqual({
+      markets: ["US"],
+      requireLogin: true,
+      customerTagsAllow: ["vip"],
+    });
+  });
+
+  it("update treats null as 'remove this restriction'", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      eligibility: {
+        markets: ["US", "CA"],
+        requireLogin: true,
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      eligibility: { markets: null as unknown as undefined },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.eligibility).toEqual({ requireLogin: true });
+  });
+});
+
 describe("BundleService.update — scheduleSettings (M-170)", () => {
   beforeEach(() => {
     Object.values(mockedRepo).forEach((m) => m.mockReset());

@@ -135,13 +135,25 @@ describe("BundleDetailPage tab shell", () => {
   });
 
   it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
-    // Schedule (M-170) and Display (M-171) are now wired. Use
-    // #customers which is still placeholder for M-172.
-    renderAt("#customers");
+    // Schedule (M-170), Display (M-171), and Customers (M-172) are
+    // now wired. Use #inventory which is still placeholder for M-173.
+    renderAt("#inventory");
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-172/)).toBeTruthy();
+    expect(screen.getByText(/M-173/)).toBeTruthy();
+  });
+
+  it("hash routing: deep-link to #customers renders the Customers tab content (M-172 wired)", async () => {
+    renderAt("#customers");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", {
+          name: "Tag-based eligibility",
+          level: 2,
+        }),
+      ).toBeTruthy(),
+    );
   });
 
   it("hash routing: deep-link to #display renders the Display tab content (M-171 wired)", async () => {
@@ -180,11 +192,11 @@ describe("BundleDetailPage tab shell", () => {
     expect(titleInput).toBeTruthy();
     fireEvent.change(titleInput!, { target: { value: "Edited title" } });
 
-    // Switch to a placeholder tab via the hash. We dispatch a hashchange
-    // event so the page-level listener picks it up. Use #customers
-    // because Schedule (M-170) is now wired and renders real content.
+    // Switch to a still-placeholder tab via the hash. M-170/171/172
+    // wired Schedule, Display, and Customers — use #inventory which
+    // remains a placeholder for M-173.
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/bundles/bundle-1#customers");
+      window.history.replaceState(null, "", "/bundles/bundle-1#inventory");
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     }
     await waitFor(() =>

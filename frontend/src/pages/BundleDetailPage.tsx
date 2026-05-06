@@ -28,6 +28,10 @@ import {
 
 import { findBundleType } from "../components/bundleTypes";
 import {
+  CustomersTab,
+  type Eligibility,
+} from "../components/bundleDetail/CustomersTab";
+import {
   DisplayTab,
   type DisplaySettings,
   type ShopDisplayDefaults,
@@ -89,6 +93,7 @@ interface BundleDetail {
   endsAt?: string | null;
   scheduleSettings?: ScheduleSettings;
   displaySettings?: DisplaySettings;
+  eligibility?: Eligibility;
   shopTimezone?: string;
 }
 
@@ -426,9 +431,19 @@ export function BundleDetailPage(): JSX.Element {
                   />
                 </Box>
               )}
+              {TABS[tabIndex].id === "customers" && (
+                <Box paddingBlockEnd="400">
+                  <CustomersTab
+                    eligibility={bundle.eligibility ?? {}}
+                    busy={busy}
+                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                  />
+                </Box>
+              )}
               {TABS[tabIndex].id !== "setup" &&
                 TABS[tabIndex].id !== "schedule" &&
-                TABS[tabIndex].id !== "display" && (
+                TABS[tabIndex].id !== "display" &&
+                TABS[tabIndex].id !== "customers" && (
                   <Box paddingBlockEnd="400">
                     <PlaceholderTab tab={TABS[tabIndex]} />
                   </Box>

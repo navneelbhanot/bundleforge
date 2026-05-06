@@ -101,6 +101,15 @@ export interface ScheduleSettingsInput {
   endBehavior?: ScheduleEndBehavior;
 }
 
+export interface EligibilityInput {
+  customerTagsAllow?: string[];
+  customerTagsDeny?: string[];
+  segmentIds?: string[];
+  requireLogin?: boolean;
+  markets?: string[];
+  locales?: string[];
+}
+
 export interface CreateBundleInput {
   title: string;
   type: BundleType;
@@ -110,6 +119,7 @@ export interface CreateBundleInput {
   config?: Record<string, unknown>;
   displaySettings?: Record<string, unknown>;
   scheduleSettings?: ScheduleSettingsInput;
+  eligibility?: EligibilityInput;
   startsAt?: string;
   endsAt?: string;
 }
