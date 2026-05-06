@@ -39,11 +39,30 @@ interface GeneralBlock {
   timezone: string;
 }
 
+interface DisplayBlock {
+  layout?: "grid" | "list" | "carousel";
+  colorPreset?: "brand" | "neutral" | "high-contrast" | "minimal";
+  imagePreference?: "component_photos" | "bundle_hero" | "auto";
+  addToCartCopy?: string;
+  soldOutBehavior?: "hide" | "disable" | "waitlist";
+  cssOverride?: string;
+}
+
 interface SettingsPayload {
   safetyLock?: boolean;
   notifications?: { email?: boolean; inApp?: boolean };
   general: GeneralBlock;
+  display: DisplayBlock;
 }
+
+const DISPLAY_DEFAULTS: Required<DisplayBlock> = {
+  layout: "grid",
+  colorPreset: "brand",
+  imagePreference: "auto",
+  addToCartCopy: "Add to cart",
+  soldOutBehavior: "disable",
+  cssOverride: "",
+};
 
 interface TabSpec {
   id: string;
@@ -56,7 +75,7 @@ interface TabSpec {
 
 const TABS: TabSpec[] = [
   { id: "general", hash: "general", content: "General", status: "ready" },
-  { id: "display", hash: "display", content: "Display", status: "deferred", milestone: "M-162" },
+  { id: "display", hash: "display", content: "Display", status: "ready" },
   { id: "inventory", hash: "inventory", content: "Inventory", status: "deferred", milestone: "M-163" },
   { id: "pricing", hash: "pricing", content: "Pricing", status: "deferred", milestone: "M-163" },
   { id: "cart", hash: "cart", content: "Cart & checkout", status: "deferred", milestone: "M-164" },
@@ -381,6 +400,218 @@ function DefaultsCard({ initial, busy, onSave }: DefaultsCardProps): JSX.Element
   );
 }
 
+// ---------------- Display tab cards (M-162) ----------------
+
+const LAYOUT_OPTIONS = [
+  { label: "Grid (default)", value: "grid" },
+  { label: "List", value: "list" },
+  { label: "Carousel", value: "carousel" },
+] as const;
+
+const COLOR_PRESET_OPTIONS = [
+  { label: "Brand color", value: "brand" },
+  { label: "Neutral", value: "neutral" },
+  { label: "High contrast", value: "high-contrast" },
+  { label: "Minimal", value: "minimal" },
+] as const;
+
+const IMAGE_PREF_OPTIONS = [
+  { label: "Component photos", value: "component_photos" },
+  { label: "Bundle hero image", value: "bundle_hero" },
+  { label: "Auto (component if any, else hero)", value: "auto" },
+] as const;
+
+const SOLD_OUT_OPTIONS = [
+  { label: "Hide bundle", value: "hide" },
+  { label: "Show but disable Add-to-cart", value: "disable" },
+  { label: "Show waitlist signup", value: "waitlist" },
+] as const;
+
+interface LayoutCardProps {
+  initial: Pick<DisplayBlock, "layout" | "colorPreset">;
+  busy: boolean;
+  onSave: (patch: Pick<DisplayBlock, "layout" | "colorPreset">) => Promise<void>;
+}
+
+function LayoutCard({ initial, busy, onSave }: LayoutCardProps): JSX.Element {
+  const [layout, setLayout] = useState<DisplayBlock["layout"]>(
+    initial.layout ?? DISPLAY_DEFAULTS.layout,
+  );
+  const [colorPreset, setColorPreset] = useState<DisplayBlock["colorPreset"]>(
+    initial.colorPreset ?? DISPLAY_DEFAULTS.colorPreset,
+  );
+  const dirty =
+    (layout ?? DISPLAY_DEFAULTS.layout) !==
+      (initial.layout ?? DISPLAY_DEFAULTS.layout) ||
+    (colorPreset ?? DISPLAY_DEFAULTS.colorPreset) !==
+      (initial.colorPreset ?? DISPLAY_DEFAULTS.colorPreset);
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Layout &amp; visual style
+        </Text>
+        <Text as="p" tone="subdued">
+          Default appearance for bundles rendered on the storefront.
+          Individual bundles can override these defaults from their
+          own Display tab (M-170).
+        </Text>
+        <Select
+          label="Layout"
+          options={LAYOUT_OPTIONS as unknown as { label: string; value: string }[]}
+          value={layout ?? DISPLAY_DEFAULTS.layout}
+          onChange={(v) => setLayout(v as DisplayBlock["layout"])}
+        />
+        <Select
+          label="Color preset"
+          options={
+            COLOR_PRESET_OPTIONS as unknown as { label: string; value: string }[]
+          }
+          value={colorPreset ?? DISPLAY_DEFAULTS.colorPreset}
+          onChange={(v) => setColorPreset(v as DisplayBlock["colorPreset"])}
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() => onSave({ layout, colorPreset })}
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface ImageryCardProps {
+  initial: Pick<DisplayBlock, "imagePreference" | "addToCartCopy" | "soldOutBehavior">;
+  busy: boolean;
+  onSave: (
+    patch: Pick<DisplayBlock, "imagePreference" | "addToCartCopy" | "soldOutBehavior">,
+  ) => Promise<void>;
+}
+
+function ImageryCard({ initial, busy, onSave }: ImageryCardProps): JSX.Element {
+  const [imagePreference, setImagePreference] = useState<
+    DisplayBlock["imagePreference"]
+  >(initial.imagePreference ?? DISPLAY_DEFAULTS.imagePreference);
+  const [copy, setCopy] = useState<string>(
+    initial.addToCartCopy ?? DISPLAY_DEFAULTS.addToCartCopy,
+  );
+  const [soldOut, setSoldOut] = useState<DisplayBlock["soldOutBehavior"]>(
+    initial.soldOutBehavior ?? DISPLAY_DEFAULTS.soldOutBehavior,
+  );
+  const copyTooLong = copy.length > 40;
+  const copyEmpty = copy.length === 0;
+  const dirty =
+    (imagePreference ?? DISPLAY_DEFAULTS.imagePreference) !==
+      (initial.imagePreference ?? DISPLAY_DEFAULTS.imagePreference) ||
+    copy !== (initial.addToCartCopy ?? DISPLAY_DEFAULTS.addToCartCopy) ||
+    (soldOut ?? DISPLAY_DEFAULTS.soldOutBehavior) !==
+      (initial.soldOutBehavior ?? DISPLAY_DEFAULTS.soldOutBehavior);
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Imagery &amp; copy
+        </Text>
+        <Select
+          label="Image preference"
+          options={
+            IMAGE_PREF_OPTIONS as unknown as { label: string; value: string }[]
+          }
+          value={imagePreference ?? DISPLAY_DEFAULTS.imagePreference}
+          onChange={(v) =>
+            setImagePreference(v as DisplayBlock["imagePreference"])
+          }
+        />
+        <TextField
+          label="Add-to-cart button copy"
+          value={copy}
+          onChange={setCopy}
+          autoComplete="off"
+          maxLength={40}
+          showCharacterCount
+          error={copyEmpty ? "Required" : copyTooLong ? "Max 40 chars" : undefined}
+        />
+        <Select
+          label="Sold-out behavior"
+          options={
+            SOLD_OUT_OPTIONS as unknown as { label: string; value: string }[]
+          }
+          value={soldOut ?? DISPLAY_DEFAULTS.soldOutBehavior}
+          onChange={(v) => setSoldOut(v as DisplayBlock["soldOutBehavior"])}
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty && !copyEmpty && !copyTooLong}
+          onSave={() =>
+            onSave({
+              imagePreference,
+              addToCartCopy: copy,
+              soldOutBehavior: soldOut,
+            })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface CssCardProps {
+  initial: Pick<DisplayBlock, "cssOverride">;
+  busy: boolean;
+  onSave: (patch: Pick<DisplayBlock, "cssOverride">) => Promise<void>;
+}
+
+function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
+  const [css, setCss] = useState<string>(
+    initial.cssOverride ?? DISPLAY_DEFAULTS.cssOverride,
+  );
+  const dirty =
+    css !== (initial.cssOverride ?? DISPLAY_DEFAULTS.cssOverride);
+  // Soft heads-up only — the server enforces length, not validity.
+  const open = (css.match(/{/g) ?? []).length;
+  const close = (css.match(/}/g) ?? []).length;
+  const braceWarn = open !== close;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Custom CSS
+        </Text>
+        <Text as="p" tone="subdued">
+          Scoped under <code>#bundleforge-storefront *</code>. Bad
+          rules can break theme blocks — preview on a dev store
+          before saving on production.
+        </Text>
+        <TextField
+          label="CSS override"
+          value={css}
+          onChange={setCss}
+          multiline={10}
+          autoComplete="off"
+          maxLength={8000}
+          showCharacterCount
+          monospaced
+        />
+        {braceWarn && (
+          <Banner tone="warning" title="Mismatched braces">
+            <p>
+              Found {open} opening and {close} closing braces. CSS
+              with mismatched braces won&apos;t apply.
+            </p>
+          </Banner>
+        )}
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() => onSave({ cssOverride: css })}
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Display tab cards ----------------
+
 interface PlaceholderTabProps {
   tab: TabSpec;
 }
@@ -432,20 +663,17 @@ export function SettingsPage(): JSX.Element {
     writeHashTab(idx);
   }
 
-  async function patchGeneral(patch: {
-    brandColor?: string;
-    logoUrl?: string;
-    currency?: string;
-    locale?: string;
-    timezone?: string;
-  }): Promise<void> {
+  async function patchSubobject(
+    key: "general" | "display",
+    patch: Record<string, unknown>,
+  ): Promise<void> {
     setSaving(true);
     setError(null);
     try {
       const res = await fetch("/api/v1/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ general: patch }),
+        body: JSON.stringify({ [key]: patch }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const merged = (await res.json()) as SettingsPayload;
@@ -458,6 +686,11 @@ export function SettingsPage(): JSX.Element {
       setSaving(false);
     }
   }
+
+  const patchGeneral = (patch: Record<string, unknown>) =>
+    patchSubobject("general", patch);
+  const patchDisplay = (patch: Record<string, unknown>) =>
+    patchSubobject("display", patch);
 
   const polarisTabs = useMemo(
     () =>
@@ -527,6 +760,35 @@ export function SettingsPage(): JSX.Element {
                   }}
                   busy={saving}
                   onSave={patchGeneral}
+                />
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "display" ? (
+          <Layout>
+            <Layout.Section>
+              <BlockStack gap="400">
+                <LayoutCard
+                  initial={{
+                    layout: state.display.layout,
+                    colorPreset: state.display.colorPreset,
+                  }}
+                  busy={saving}
+                  onSave={patchDisplay}
+                />
+                <ImageryCard
+                  initial={{
+                    imagePreference: state.display.imagePreference,
+                    addToCartCopy: state.display.addToCartCopy,
+                    soldOutBehavior: state.display.soldOutBehavior,
+                  }}
+                  busy={saving}
+                  onSave={patchDisplay}
+                />
+                <CssCard
+                  initial={{ cssOverride: state.display.cssOverride }}
+                  busy={saving}
+                  onSave={patchDisplay}
                 />
               </BlockStack>
             </Layout.Section>

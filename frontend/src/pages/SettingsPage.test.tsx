@@ -23,6 +23,7 @@ const BASE_PAYLOAD = {
     locale: "en",
     timezone: "America/Los_Angeles",
   },
+  display: {} as Record<string, unknown>,
 };
 
 interface FetchResponse {
@@ -213,14 +214,119 @@ describe("SettingsPage", () => {
     expect(putCall).toBeUndefined();
   });
 
-  it("non-General tabs render the placeholder", async () => {
+  it("non-built tabs render the placeholder pointing at their milestone", async () => {
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/settings#display");
+      window.history.replaceState(null, "", "/settings#inventory");
     }
     render(wrap(<SettingsPage />));
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-162/)).toBeTruthy();
+    expect(screen.getByText(/M-163/)).toBeTruthy();
+  });
+
+  it("Display tab renders three editable cards", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#display");
+    }
+    render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Layout & visual style", level: 2 }),
+      ).toBeTruthy(),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Imagery & copy", level: 2 }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Custom CSS", level: 2 }),
+    ).toBeTruthy();
+  });
+
+  it("Display PATCH sends the layout key in the display subobject", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#display");
+    }
+    const fetchSpy = vi.fn(
+      mockFetch(async (_input, init) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => BASE_PAYLOAD,
+          };
+        }
+        const body = JSON.parse((init.body as string) ?? "{}") as {
+          display?: Record<string, unknown>;
+        };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ...BASE_PAYLOAD,
+            display: { ...BASE_PAYLOAD.display, ...(body.display ?? {}) },
+          }),
+        };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Layout & visual style", level: 2 }),
+      ).toBeTruthy(),
+    );
+
+    // First Select with value "grid" is the Layout selector.
+    const layoutSelect = (
+      Array.from(container.querySelectorAll<HTMLSelectElement>("select")).find(
+        (s) => s.value === "grid",
+      ) ?? null
+    );
+    expect(layoutSelect).toBeTruthy();
+    fireEvent.change(layoutSelect!, { target: { value: "list" } });
+
+    // Click the Save button in the Layout card (the first Save button).
+    const saveBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Save");
+    expect(saveBtn).toBeTruthy();
+    saveBtn!.click();
+
+    await waitFor(() => {
+      const putCall = fetchSpy.mock.calls.find(
+        (c) => (c[1] as RequestInit | undefined)?.method === "PUT",
+      );
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(
+        ((putCall![1] as RequestInit).body as string) ?? "{}",
+      );
+      expect(body.display.layout).toBe("list");
+    });
+  });
+
+  it("Custom CSS card flags mismatched braces", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#display");
+    }
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Custom CSS", level: 2 }),
+      ).toBeTruthy(),
+    );
+    const cssTextarea = container.querySelector(
+      "textarea",
+    ) as HTMLTextAreaElement | null;
+    expect(cssTextarea).toBeTruthy();
+    fireEvent.change(cssTextarea!, {
+      target: { value: ".bf-bundle { color: red;" },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Mismatched braces" }),
+      ).toBeTruthy(),
+    );
   });
 });

@@ -8,20 +8,21 @@
 
 **Phase R1 — rich Settings page in progress.**
 
-M-161 (settings shell + General tab) landed 2026-05-06. The 107-line
-2-toggle SettingsPage was replaced with a 10-tab shell with hash
-routing; General tab ships fully built (Shop / Brand / Defaults
-cards). Remaining R1 milestones (M-162..M-167) are unstarted but
-have placeholder tabs already wired so the surface is visible.
+M-161 (shell + General) and M-162 (Display) landed 2026-05-06. The
+SettingsPage now has 2 of 10 tabs fully built. Display tab covers
+layout, color preset, image preference, Add-to-cart copy, sold-out
+behavior, and a custom-CSS textarea with a soft brace-mismatch
+warning. Remaining R1 milestones (M-163..M-167) still placeholder.
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-162 — Display defaults tab in
-SettingsPage. Spec: write `docs/specs/M-162-settings-display-tab.md`
-first per CLAUDE.md §3.2. Existing tab placeholder
-(`PlaceholderTab`) shows where to slot the new content; pattern
-mirrors M-161's General tab cards.
+**Code (next session):** Run M-163 — Inventory + Pricing tab. Spec
+first: `docs/specs/M-163-settings-inventory-pricing.md`. Roadmap
+specifies threshold, oversell policy, audit retention, snapshot
+frequency for Inventory; rounding rule, currency formatter override,
+B2B markup default for Pricing. Existing safetyLock toggle should
+re-surface on the Inventory tab as part of this milestone.
 
 Other open threads (mostly user-owned):
 
@@ -90,6 +91,16 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-162 — Settings · Display tab** (2026-05-06 late). Display
+  tab in SettingsPage now ships fully built: Layout/visual style
+  card (layout grid/list/carousel + colorPreset enum), Imagery &
+  copy card (image preference, Add-to-cart copy with 40-char limit
+  + counter, sold-out behavior), Custom CSS card (8000-char
+  textarea, monospaced, soft brace-mismatch banner). Server:
+  `settings.display` Zod-validated subobject with the same
+  deep-merge as `general`; new `mergeSubobject` helper keeps the
+  PUT path DRY. Theme blocks reading these defaults is deferred
+  to M-162b. `docs/sessions/0162-settings-display-tab.md`.
 - **M-161 — Settings shell + General tab** (2026-05-06 late). The
   107-line two-toggle SettingsPage was replaced with a 10-tab shell
   (General, Display, Inventory, Pricing, Cart & checkout,
@@ -163,9 +174,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **481 / 481 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +7 settings-route, +5 SettingsPage, +4 PricingRules
-  cases since 0160.
+- **488 / 488 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 settings-route + +3 SettingsPage Display cases
+  since 0161.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

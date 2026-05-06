@@ -42,6 +42,21 @@ const GeneralPatch = z
   })
   .strict();
 
+const DisplayPatch = z
+  .object({
+    layout: z.enum(["grid", "list", "carousel"]).optional(),
+    colorPreset: z
+      .enum(["brand", "neutral", "high-contrast", "minimal"])
+      .optional(),
+    imagePreference: z
+      .enum(["component_photos", "bundle_hero", "auto"])
+      .optional(),
+    addToCartCopy: z.string().min(1).max(40).optional(),
+    soldOutBehavior: z.enum(["hide", "disable", "waitlist"]).optional(),
+    cssOverride: z.string().max(8000).optional(),
+  })
+  .strict();
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
@@ -52,6 +67,7 @@ const PatchSchema = z
       })
       .optional(),
     general: GeneralPatch.optional(),
+    display: DisplayPatch.optional(),
   })
   .strict();
 
@@ -115,6 +131,20 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+/**
+ * Deep-merge a single named subobject so a Save on one card doesn't
+ * drop sibling fields set by another card. Used identically for
+ * `general` and `display`.
+ */
+function mergeSubobject<T extends Record<string, unknown>>(
+  prev: unknown,
+  patch: T | undefined,
+): Record<string, unknown> {
+  const previous = isObject(prev) ? prev : {};
+  if (!patch) return previous;
+  return { ...previous, ...patch };
+}
+
 function buildGeneral(shop: ShopRow): MergedGeneral {
   const settings = isObject(shop.settings) ? shop.settings : {};
   const general = isObject(settings.general) ? settings.general : {};
@@ -153,6 +183,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
       res.json({
         ...settings,
         general: buildGeneral(row),
+        display: isObject(settings.display) ? settings.display : {},
       });
     } catch (err) {
       next(err);
@@ -170,14 +201,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
       if (!existing) throw new NotFoundError("Shop");
 
       const prev = isObject(existing.settings) ? existing.settings : {};
-      const prevGeneral = isObject(prev.general) ? prev.general : {};
 
-      // Deep-merge `general` so a Save on the Brand card doesn't
-      // wipe a value set by the Defaults card (and vice versa).
-      const nextGeneral = patch.general
-        ? { ...prevGeneral, ...patch.general }
-        : prevGeneral;
-
+      // Deep-merge each subobject so a Save on one card doesn't wipe
+      // sibling fields set by another card.
       const merged: Record<string, unknown> = {
         ...prev,
         ...(patch.safetyLock !== undefined && {
@@ -189,7 +215,8 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
             ...patch.notifications,
           },
         }),
-        general: nextGeneral,
+        general: mergeSubobject(prev.general, patch.general),
+        display: mergeSubobject(prev.display, patch.display),
       };
 
       const updated = await client.shop.update({
@@ -205,6 +232,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
           ...existing,
           settings: updatedSettings,
         }),
+        display: isObject(updatedSettings.display)
+          ? updatedSettings.display
+          : {},
       });
     } catch (err) {
       next(err);

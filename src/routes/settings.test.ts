@@ -191,6 +191,102 @@ describe("PUT /settings", () => {
     });
   });
 
+  it("round-trips a display patch", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        display: {
+          layout: "carousel",
+          colorPreset: "high-contrast",
+          imagePreference: "bundle_hero",
+          addToCartCopy: "Grab the bundle",
+          soldOutBehavior: "waitlist",
+        },
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.display).toMatchObject({
+      layout: "carousel",
+      colorPreset: "high-contrast",
+      imagePreference: "bundle_hero",
+      addToCartCopy: "Grab the bundle",
+      soldOutBehavior: "waitlist",
+    });
+  });
+
+  it("rejects an unknown display.layout enum value", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ display: { layout: "weird" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects display.cssOverride longer than 8000 chars", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ display: { cssOverride: "x".repeat(8001) } });
+    expect(res.status).toBe(400);
+  });
+
+  it("deep-merges display — Layout-card save doesn't drop CSS-card values", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {
+            display: {
+              cssOverride: ".bf-bundle{ color: red; }",
+              colorPreset: "minimal",
+            },
+          },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ display: { layout: "list" } });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.display).toEqual({
+      cssOverride: ".bf-bundle{ color: red; }",
+      colorPreset: "minimal",
+      layout: "list",
+    });
+  });
+
   it("persists top-level safetyLock and general.brandColor in the same patch", async () => {
     const updateSpy = vi.fn().mockImplementation(({ data }) =>
       Promise.resolve({ id: "s", settings: data.settings }),
