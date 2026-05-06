@@ -203,6 +203,125 @@ describe("BundleService.create", () => {
   });
 });
 
+describe("BundleService — displaySettings (M-171)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+  });
+
+  it("persists displaySettings on create with all six fields", async () => {
+    mockedRepo.create.mockResolvedValueOnce({ id: "b-d1" });
+    const svc = new BundleService();
+    await svc.create("shop", {
+      title: "Visual override",
+      type: "fixed",
+      items: [],
+      pricingRules: [],
+      displaySettings: {
+        layout: "carousel",
+        colorPreset: "high-contrast",
+        imagePreference: "bundle_hero",
+        addToCartCopy: "Grab the box",
+        soldOutBehavior: "waitlist",
+        cssOverride: ".bf-bundle{font-weight:700}",
+      },
+    });
+    const args = mockedRepo.create.mock.calls[0][0];
+    expect(args.data.displaySettings).toMatchObject({
+      layout: "carousel",
+      colorPreset: "high-contrast",
+      imagePreference: "bundle_hero",
+      addToCartCopy: "Grab the box",
+      soldOutBehavior: "waitlist",
+    });
+  });
+
+  it("rejects displaySettings.layout with an unknown enum value", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        displaySettings: { layout: "tablet" },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects displaySettings.cssOverride > 8000 chars", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        displaySettings: { cssOverride: "x".repeat(8001) },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects displaySettings.addToCartCopy that is empty or > 40 chars", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        displaySettings: { addToCartCopy: "" },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        displaySettings: { addToCartCopy: "z".repeat(41) },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("update deep-merges displaySettings — saving colorPreset alone keeps layout", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      displaySettings: { layout: "carousel", colorPreset: "brand" },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      displaySettings: { colorPreset: "high-contrast" },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.displaySettings).toEqual({
+      layout: "carousel",
+      colorPreset: "high-contrast",
+    });
+  });
+
+  it("update treats null as 'remove this override' (use shop default)", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      displaySettings: {
+        layout: "carousel",
+        colorPreset: "high-contrast",
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      displaySettings: { layout: null as unknown as undefined },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.displaySettings).toEqual({
+      colorPreset: "high-contrast",
+    });
+  });
+});
+
 describe("BundleService.update — scheduleSettings (M-170)", () => {
   beforeEach(() => {
     Object.values(mockedRepo).forEach((m) => m.mockReset());

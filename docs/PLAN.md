@@ -268,7 +268,7 @@
 |----|-------|--------|
 | M-169 | Detail shell tab refactor | done (2026-05-06) — `docs/specs/M-169-bundle-detail-tab-shell.md` |
 | M-170 | Schedule tab | done (2026-05-06) — `docs/specs/M-170-bundle-detail-schedule.md` |
-| M-171 | Display tab | pending |
+| M-171 | Display tab | done (2026-05-06) — `docs/specs/M-171-bundle-detail-display.md` |
 | M-172 | Customers tab | pending |
 | M-173 | Inventory tab | pending |
 | M-174 | Performance + Activity log | pending |

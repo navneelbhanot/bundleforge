@@ -135,8 +135,8 @@ describe("BundleDetailPage tab shell", () => {
   });
 
   it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
-    // Schedule is now wired (M-170). Use #customers which is still
-    // placeholder for M-172.
+    // Schedule (M-170) and Display (M-171) are now wired. Use
+    // #customers which is still placeholder for M-172.
     renderAt("#customers");
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
@@ -144,12 +144,13 @@ describe("BundleDetailPage tab shell", () => {
     expect(screen.getByText(/M-172/)).toBeTruthy();
   });
 
-  it("hash routing: deep-link to #display selects the Display tab on mount", async () => {
+  it("hash routing: deep-link to #display renders the Display tab content (M-171 wired)", async () => {
     renderAt("#display");
     await waitFor(() =>
-      expect(screen.getByText(/being built in/i)).toBeTruthy(),
+      expect(
+        screen.getByRole("heading", { name: "Layout & visual style", level: 2 }),
+      ).toBeTruthy(),
     );
-    expect(screen.getByText(/M-171/)).toBeTruthy();
   });
 
   it("hash routing: deep-link to #schedule renders the Schedule tab content (M-170 wired)", async () => {

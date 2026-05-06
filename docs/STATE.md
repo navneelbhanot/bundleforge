@@ -8,18 +8,14 @@
 
 **Phase R2 in progress — Bundle Detail richness.**
 
-M-169 (Detail shell tab refactor) and M-170 (Schedule tab) both
-landed 2026-05-06. The Bundle Detail page now has 2 of 8 tabs
-fully built: Setup (visually identical to the previous
-scrolling form) and Schedule (Window / Recurrence / End
-behavior). Remaining R2 tabs (Display, Customers, Inventory,
-Performance + Activity, Advanced) are placeholders pointing at
-M-171..M-175.
-
-Form state survives tab switches via the display:none toggle
-established in M-169. Schedule tab persists `startsAt`,
-`endsAt`, `scheduleSettings` (timezone, recurringRule,
-endBehavior) on the Bundle row.
+M-169..M-171 all landed 2026-05-06. The Bundle Detail page now
+has 3 of 8 tabs fully built: Setup, Schedule, and Display.
+Display is per-bundle override layer over the M-162 shop-level
+defaults — picking "Use shop default" on any field sends `null`
+which the server's deep-merge logic deletes from the override
+blob, so the storefront falls back to the shop default at render
+time. Remaining R2 tabs (Customers, Inventory, Performance +
+Activity, Advanced) are placeholders pointing at M-172..M-175.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -33,13 +29,13 @@ Both safe during normal traffic — M-168 creates 2 empty tables,
 M-170 adds a single nullable JSON column to bundles. Apply via
 `prisma migrate deploy` from a CI shell.
 
-**Code (next session):** Run M-171 — Display tab content (Bundle
-Detail). Spec first: `docs/specs/M-171-bundle-detail-display.md`.
-Per-bundle override of the shop-level Display defaults from M-162
-(layout / color preset / image preference / Add-to-cart copy /
-sold-out behavior / custom CSS). Persists in
-`Bundle.displaySettings` (existing JSON column — no migration
-needed).
+**Code (next session):** Run M-172 — Customers tab. Spec first:
+`docs/specs/M-172-bundle-detail-customers.md`. Per-bundle
+eligibility rules: must-have / must-not-have customer tags,
+Shopify Segments dropdown, login required toggle, market /
+locale gating multi-select. Persists in a new
+`Bundle.eligibility` JSON column (one new migration). Cart
+Transform consumption deferred to M-172b.
 
 Other open threads (mostly user-owned):
 
@@ -108,6 +104,21 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-171 — Bundle Detail · Display tab** (2026-05-06 late).
+  Per-bundle override layer for the shop-level Display defaults
+  from M-162. Three cards: Layout & visual style (layout +
+  colorPreset Selects), Imagery & copy (imagePreference,
+  Add-to-cart copy with 40-char limit, sold-out behavior),
+  Custom CSS (8000-char monospaced textarea + brace-mismatch
+  warning). Each Select includes a "Use shop default" option
+  that sends `null` to the server. The update() merge logic
+  treats `null` as "remove this override" — `delete merged[k]` —
+  so the storefront falls back to the shop default at render
+  time. helpText on every control surfaces what the merchant
+  is currently inheriting. No new schema column (uses existing
+  `Bundle.displaySettings` JSON). Theme block consumption of
+  the override layer deferred to M-171b.
+  `docs/sessions/0171-bundle-detail-display.md`.
 - **M-170 — Bundle Detail · Schedule tab** (2026-05-06 late).
   Three cards: Window (start date+time / end date+time / IANA
   timezone Select), Recurrence (None / Daily / Weekly /
@@ -308,10 +319,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **582 / 582 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 BundleService schedule cases + +5
-  ScheduleTab UI cases + +1 BundleDetailPage hash test since
-  M-169.
+- **593 / 593 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 BundleService display cases + +5 DisplayTab
+  UI cases since M-170.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

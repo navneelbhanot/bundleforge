@@ -28,6 +28,11 @@ import {
 
 import { findBundleType } from "../components/bundleTypes";
 import {
+  DisplayTab,
+  type DisplaySettings,
+  type ShopDisplayDefaults,
+} from "../components/bundleDetail/DisplayTab";
+import {
   ScheduleTab,
   type ScheduleSettings,
 } from "../components/bundleDetail/ScheduleTab";
@@ -83,6 +88,7 @@ interface BundleDetail {
   startsAt?: string | null;
   endsAt?: string | null;
   scheduleSettings?: ScheduleSettings;
+  displaySettings?: DisplaySettings;
   shopTimezone?: string;
 }
 
@@ -166,6 +172,24 @@ export function BundleDetailPage(): JSX.Element {
   const [pickerBusy, setPickerBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState<number>(readHashTab());
+  const [shopDisplayDefaults, setShopDisplayDefaults] =
+    useState<ShopDisplayDefaults | null>(null);
+
+  // Fetch shop-level Display defaults lazily — only when the
+  // merchant lands on / switches to the Display tab. Avoids the
+  // extra GET on every Bundle Detail load.
+  useEffect(() => {
+    if (TABS[tabIndex].id !== "display") return;
+    if (shopDisplayDefaults !== null) return;
+    fetch("/api/v1/settings")
+      .then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
+      )
+      .then((body: { display?: ShopDisplayDefaults }) =>
+        setShopDisplayDefaults(body.display ?? {}),
+      )
+      .catch(() => setShopDisplayDefaults({}));
+  }, [tabIndex, shopDisplayDefaults]);
 
   useEffect(() => {
     function onHash(): void {
@@ -392,8 +416,19 @@ export function BundleDetailPage(): JSX.Element {
                   />
                 </Box>
               )}
+              {TABS[tabIndex].id === "display" && (
+                <Box paddingBlockEnd="400">
+                  <DisplayTab
+                    bundleDisplay={bundle.displaySettings ?? {}}
+                    shopDefaults={shopDisplayDefaults ?? {}}
+                    busy={busy}
+                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                  />
+                </Box>
+              )}
               {TABS[tabIndex].id !== "setup" &&
-                TABS[tabIndex].id !== "schedule" && (
+                TABS[tabIndex].id !== "schedule" &&
+                TABS[tabIndex].id !== "display" && (
                   <Box paddingBlockEnd="400">
                     <PlaceholderTab tab={TABS[tabIndex]} />
                   </Box>

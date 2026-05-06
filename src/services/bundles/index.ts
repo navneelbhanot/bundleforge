@@ -53,6 +53,96 @@ function mapItem(
   };
 }
 
+const DISPLAY_LAYOUTS = ["grid", "list", "carousel"] as const;
+const DISPLAY_COLOR_PRESETS = [
+  "brand",
+  "neutral",
+  "high-contrast",
+  "minimal",
+] as const;
+const DISPLAY_IMAGE_PREFS = [
+  "component_photos",
+  "bundle_hero",
+  "auto",
+] as const;
+const DISPLAY_SOLD_OUT = ["hide", "disable", "waitlist"] as const;
+
+/**
+ * Validate a per-bundle Display override. Same enums + lengths as
+ * M-162's shop-level `DisplayPatch`. `null` is allowed for any
+ * field and means "remove the override; fall back to the shop
+ * default at render time."
+ */
+function validateDisplay(input: Record<string, unknown>): void {
+  for (const [k, v] of Object.entries(input)) {
+    if (v === null || v === undefined) continue;
+    switch (k) {
+      case "layout":
+        if (!DISPLAY_LAYOUTS.includes(v as (typeof DISPLAY_LAYOUTS)[number])) {
+          throw new ValidationError(
+            `displaySettings.layout must be ${DISPLAY_LAYOUTS.join(" | ")}`,
+          );
+        }
+        break;
+      case "colorPreset":
+        if (
+          !DISPLAY_COLOR_PRESETS.includes(
+            v as (typeof DISPLAY_COLOR_PRESETS)[number],
+          )
+        ) {
+          throw new ValidationError(
+            `displaySettings.colorPreset must be ${DISPLAY_COLOR_PRESETS.join(" | ")}`,
+          );
+        }
+        break;
+      case "imagePreference":
+        if (
+          !DISPLAY_IMAGE_PREFS.includes(
+            v as (typeof DISPLAY_IMAGE_PREFS)[number],
+          )
+        ) {
+          throw new ValidationError(
+            `displaySettings.imagePreference must be ${DISPLAY_IMAGE_PREFS.join(" | ")}`,
+          );
+        }
+        break;
+      case "addToCartCopy":
+        if (typeof v !== "string" || v.length === 0 || v.length > 40) {
+          throw new ValidationError(
+            "displaySettings.addToCartCopy must be 1..40 chars",
+          );
+        }
+        break;
+      case "soldOutBehavior":
+        if (
+          !DISPLAY_SOLD_OUT.includes(v as (typeof DISPLAY_SOLD_OUT)[number])
+        ) {
+          throw new ValidationError(
+            `displaySettings.soldOutBehavior must be ${DISPLAY_SOLD_OUT.join(" | ")}`,
+          );
+        }
+        break;
+      case "cssOverride":
+        if (typeof v !== "string") {
+          throw new ValidationError(
+            "displaySettings.cssOverride must be a string",
+          );
+        }
+        if (v.length > 8000) {
+          throw new ValidationError(
+            "displaySettings.cssOverride must be <= 8000 chars",
+          );
+        }
+        break;
+      default:
+        // Unknown keys are tolerated — same as M-162's permissive
+        // server stance for the shop-level Display tab. Bundles
+        // can carry forward-compatible custom keys without 400ing.
+        break;
+    }
+  }
+}
+
 /**
  * Validate a ScheduleSettings patch in shape — Zod-style without
  * the dependency. Throws ValidationError on the first violation.
@@ -192,6 +282,7 @@ export class BundleService {
     if (!slug) throw new ValidationError("title produces an empty slug");
 
     if (input.scheduleSettings) validateSchedule(input.scheduleSettings);
+    if (input.displaySettings) validateDisplay(input.displaySettings);
     if (input.startsAt && input.endsAt) {
       if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
         throw new ValidationError("endsAt must be on/after startsAt");
@@ -226,6 +317,7 @@ export class BundleService {
   ): Promise<unknown> {
     const existing = (await this.getById(shopId, id)) as {
       scheduleSettings?: unknown;
+      displaySettings?: unknown;
     };
     const data: Prisma.BundleUpdateInput = {};
     if (input.title !== undefined) {
@@ -240,7 +332,24 @@ export class BundleService {
       ) as Prisma.InputJsonValue;
     }
     if (input.displaySettings !== undefined) {
-      data.displaySettings = input.displaySettings as Prisma.InputJsonValue;
+      validateDisplay(input.displaySettings);
+      // Deep-merge so saving a single card doesn't drop sibling
+      // overrides. `null` for a key is the explicit "remove this
+      // override" signal — the field is deleted from the merged
+      // object so the storefront falls back to the shop default.
+      const prev = isObject(existing.displaySettings)
+        ? existing.displaySettings
+        : {};
+      const merged: Record<string, unknown> = { ...prev };
+      for (const [k, v] of Object.entries(input.displaySettings)) {
+        if (v === undefined) continue;
+        if (v === null) {
+          delete merged[k];
+        } else {
+          merged[k] = v;
+        }
+      }
+      data.displaySettings = merged as Prisma.InputJsonValue;
     }
     if (input.scheduleSettings !== undefined) {
       validateSchedule(input.scheduleSettings);
