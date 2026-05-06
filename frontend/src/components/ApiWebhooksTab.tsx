@@ -1,13 +1,10 @@
 /**
- * API & webhooks tab content (M-168).
+ * API & webhooks tab content (M-168 + M-168b).
  *
  * Two cards: API tokens and Outbound webhooks. Both follow the
  * "show plaintext exactly once at create" pattern — the plaintext
  * is rendered in a one-shot Banner that the merchant must copy
  * before closing the modal.
- *
- * The Banner explaining that delivery itself is wired in M-168b
- * stays in place until the worker lands.
  */
 import { useEffect, useState } from "react";
 import {
@@ -626,14 +623,6 @@ export function ApiWebhooksTab(): JSX.Element {
 
   return (
     <BlockStack gap="400">
-      <Banner tone="info" title="Webhook delivery wires up in M-168b">
-        <p>
-          You can configure tokens and webhook subscriptions today.
-          BundleForge starts firing the actual HTTP POSTs when the
-          delivery worker lands in M-168b — the configuration here is
-          ready and waiting.
-        </p>
-      </Banner>
       <TokensCard
         rows={tokens}
         onCreated={onTokenCreated}
