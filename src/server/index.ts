@@ -13,6 +13,17 @@
 // eslint-disable-next-line no-console
 console.log("[boot] entrypoint reached, loading modules…");
 
+// Teach JSON.stringify how to serialize BigInt values (Prisma returns
+// these for `BigInt?` columns — e.g. Bundle.shopifyProductId — and
+// Express's res.json otherwise crashes with "Do not know how to
+// serialize a BigInt"). Convert to string; consumers can BigInt(...)
+// it back if they need numeric ops.
+(BigInt.prototype as unknown as { toJSON: () => string }).toJSON = function (
+  this: bigint,
+) {
+  return this.toString();
+};
+
 // Surface any unhandled error before exit. Without these handlers a
 // synchronous throw at module-load can exit silently on some runtimes.
 process.on("uncaughtException", (err) => {

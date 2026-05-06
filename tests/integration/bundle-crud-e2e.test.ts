@@ -99,17 +99,42 @@ beforeAll(async () => {
   mockAgent = new MockAgent();
   mockAgent.disableNetConnect();
   setGlobalDispatcher(mockAgent);
+  // Catch-all GraphQL handler: returns a productCreate-shaped success
+  // when the request body contains the productCreate mutation; returns
+  // a generic shop-name response otherwise (used by hasValidAccessToken
+  // to verify the token is live). This keeps every Shopify probe
+  // happy without per-test interceptor wiring.
   mockAgent
     .get(`https://${SHOP}`)
     .intercept({
       path: /\/admin\/api\/[^/]+\/graphql\.json$/,
       method: "POST",
     })
-    .reply(
-      200,
-      JSON.stringify({ data: { shop: { name: "E2E" } } }),
-      { headers: { "content-type": "application/json" } },
-    )
+    .reply((opts: { body?: string }) => {
+      const body = typeof opts.body === "string" ? opts.body : "";
+      if (body.includes("productCreate")) {
+        return {
+          statusCode: 200,
+          data: JSON.stringify({
+            data: {
+              productCreate: {
+                product: {
+                  id: "gid://shopify/Product/9876543210",
+                  legacyResourceId: "9876543210",
+                },
+                userErrors: [],
+              },
+            },
+          }),
+          responseOptions: { headers: { "content-type": "application/json" } },
+        };
+      }
+      return {
+        statusCode: 200,
+        data: JSON.stringify({ data: { shop: { name: "E2E" } } }),
+        responseOptions: { headers: { "content-type": "application/json" } },
+      };
+    })
     .persist();
 
   // Pre-seed Shop row. requireShopSession looks the shop up by domain
@@ -335,6 +360,85 @@ describe.skipIf(!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("
         (putRes.body as { pricingRules: Array<{ type: string }> }).pricingRules[0]
           .type,
       ).toBe("percentage");
+    });
+
+    it("publish() creates a Shopify product and saves the GID + ID (M-051)", async () => {
+      if (!dbAvailable) return;
+      const app = createApp();
+      const jwt = mintJwt();
+      const auth = `Bearer ${jwt}`;
+
+      // Create a draft bundle.
+      const createRes = await request(app)
+        .post("/api/v1/bundles")
+        .set("Authorization", auth)
+        .send({
+          title: "E2E publish-creates-product",
+          type: "fixed",
+          items: [],
+          pricingRules: [],
+        });
+      const bundleId = (createRes.body as { id: string }).id;
+
+      // The beforeAll catch-all interceptor already returns a
+      // productCreate-success body when it sees the mutation in the
+      // request body — no per-test interceptor needed.
+
+      // Publish.
+      const publishRes = await request(app)
+        .post(`/api/v1/bundles/${bundleId}/publish`)
+        .set("Authorization", auth);
+      expect(publishRes.status, publishRes.text).toBe(200);
+      expect(publishRes.body).toMatchObject({
+        id: bundleId,
+        status: "active",
+        shopifyProductGid: "gid://shopify/Product/9876543210",
+      });
+      // BigInt round-trips as string in JSON.
+      expect(String(publishRes.body.shopifyProductId)).toBe("9876543210");
+    });
+
+    it("publish() reuses existing Shopify product on re-publish", async () => {
+      if (!dbAvailable || !createdShopId) return;
+      // Create a bundle that already has a Shopify product (e.g. was
+      // published once, then archived). Re-publish must NOT call
+      // productCreate a second time.
+      const bundle = await prisma.bundle.create({
+        data: {
+          shopId: createdShopId,
+          title: "E2E republish",
+          slug: `e2e-republish-${RUN_TAG}`,
+          type: "fixed",
+          status: "archived",
+          shopifyProductGid: "gid://shopify/Product/1111111111",
+          shopifyProductId: BigInt("1111111111"),
+          config: {},
+          displaySettings: {},
+        },
+      });
+
+      try {
+        const app = createApp();
+        const jwt = mintJwt();
+        const auth = `Bearer ${jwt}`;
+
+        // Note: NO mock interceptor for productCreate registered. If the
+        // route called Shopify, undici's disableNetConnect would throw.
+        // Net-disconnect IS the assertion that productCreate wasn't called.
+        const publishRes = await request(app)
+          .post(`/api/v1/bundles/${bundle.id}/publish`)
+          .set("Authorization", auth);
+        expect(publishRes.status, publishRes.text).toBe(200);
+        expect(publishRes.body).toMatchObject({
+          id: bundle.id,
+          status: "active",
+          shopifyProductGid: "gid://shopify/Product/1111111111",
+        });
+      } finally {
+        await prisma.bundle
+          .delete({ where: { id: bundle.id } })
+          .catch(() => undefined);
+      }
     });
 
     it("PUT replaces items array (BundleDetailPage Save items button)", async () => {

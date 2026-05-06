@@ -262,11 +262,69 @@ export class BundleService {
   }
 
   /** M-051 — publish: marks active. Real Shopify product sync lands later. */
-  async publish(shopId: string, id: string): Promise<unknown> {
-    await this.getById(shopId, id);
+  /**
+   * Publish bundle (M-051): creates a Shopify product representing the
+   * bundle (so it can be added to cart, ordered, scanned at POS, and
+   * resolved by theme blocks via product handle), then flips status to
+   * active.
+   *
+   * `onCreateProduct` is dependency-injected so the service stays
+   * testable without a Shopify session. Route handler in
+   * src/routes/bundles.ts wires the real Shopify Admin GraphQL call.
+   * If the callback is omitted (e.g. older tests), publish behaves as
+   * the legacy stub (status flip only) and logs a warning.
+   *
+   * If the bundle already has a shopifyProductGid (re-publish after
+   * archive, or accidental duplicate publish), the create call is
+   * skipped — the existing product is reused.
+   */
+  async publish(
+    shopId: string,
+    id: string,
+    opts: {
+      onCreateProduct?: (bundle: {
+        id: string;
+        title: string;
+        slug: string;
+        description: string | null;
+      }) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
+    } = {},
+  ): Promise<unknown> {
+    const existing = (await this.getById(shopId, id)) as {
+      id: string;
+      title: string;
+      slug: string;
+      description: string | null;
+      shopifyProductGid: string | null;
+      shopifyProductId: bigint | null;
+    };
+
+    let shopifyProductGid = existing.shopifyProductGid;
+    let shopifyProductId = existing.shopifyProductId;
+
+    // Create Shopify product on first publish only.
+    if (!shopifyProductGid && opts.onCreateProduct) {
+      const created = await opts.onCreateProduct({
+        id: existing.id,
+        title: existing.title,
+        slug: existing.slug,
+        description: existing.description,
+      });
+      shopifyProductGid = created.shopifyProductGid;
+      shopifyProductId = created.shopifyProductId;
+    }
+
     return bundleRepo.update({
       where: { id },
-      data: { status: "active" },
+      data: {
+        status: "active",
+        ...(shopifyProductGid !== existing.shopifyProductGid && {
+          shopifyProductGid,
+        }),
+        ...(shopifyProductId !== existing.shopifyProductId && {
+          shopifyProductId,
+        }),
+      },
       include: { items: true, pricingRules: true },
     });
   }

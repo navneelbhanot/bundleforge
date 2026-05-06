@@ -5,18 +5,105 @@
  * req.shopId). Endpoints follow ARCHITECTURE.md §5.1.
  */
 import { Router, type Request, type Response, type NextFunction } from "express";
+import type { Session } from "@shopify/shopify-api";
 
 import { BundleService } from "../services/bundles";
 import { CreateBundleInput, PaginationParams } from "../types";
 import { UnauthorizedError } from "../middleware/errorHandler";
+import { shopifyGraphql } from "../shopify/graphql";
 
 export interface BundleRouteDeps {
   service?: BundleService;
+  /**
+   * Optional override for the publish-creates-Shopify-product hook.
+   * Tests inject a fake; production uses the default that hits Shopify
+   * Admin GraphQL via the request's session.
+   */
+  createShopifyProduct?: (
+    session: Session,
+    bundle: { id: string; title: string; slug: string; description: string | null },
+  ) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
 }
+
+/**
+ * Default productCreate mutation. Creates a Shopify product
+ * representing the bundle: a single default variant priced at $0
+ * (the Cart Transform Function applies the real bundle price), with
+ * a metafield carrying the bundle id so other code (theme blocks,
+ * cart transform, POS) can resolve back.
+ */
+const PRODUCT_CREATE_MUTATION = `#graphql
+  mutation BundleforgeProductCreate($input: ProductInput!) {
+    productCreate(input: $input) {
+      product {
+        id
+        legacyResourceId
+      }
+      userErrors { field message }
+    }
+  }
+`;
+
+interface ProductCreateResponse {
+  productCreate?: {
+    product?: { id: string; legacyResourceId: string };
+    userErrors?: Array<{ field?: string[]; message: string }>;
+  };
+}
+
+const defaultCreateShopifyProduct: NonNullable<
+  BundleRouteDeps["createShopifyProduct"]
+> = async (session, bundle) => {
+  const data = await shopifyGraphql<ProductCreateResponse>(
+    session,
+    PRODUCT_CREATE_MUTATION,
+    {
+      input: {
+        title: bundle.title,
+        descriptionHtml: bundle.description ?? "",
+        handle: bundle.slug,
+        productType: "Bundle",
+        vendor: "BundleForge",
+        status: "ACTIVE",
+        tags: ["bundleforge", `bundleforge-bundle-${bundle.id}`],
+        metafields: [
+          {
+            namespace: "bundleforge",
+            key: "bundle_id",
+            value: bundle.id,
+            type: "single_line_text_field",
+          },
+          {
+            namespace: "bundleforge",
+            key: "is_bundle",
+            value: "true",
+            type: "boolean",
+          },
+        ],
+      },
+    },
+  );
+  const userErrors = data.productCreate?.userErrors ?? [];
+  if (userErrors.length > 0) {
+    throw new Error(
+      `productCreate userErrors: ${userErrors.map((e) => e.message).join("; ")}`,
+    );
+  }
+  const product = data.productCreate?.product;
+  if (!product?.id || !product?.legacyResourceId) {
+    throw new Error("productCreate returned no product");
+  }
+  return {
+    shopifyProductGid: product.id,
+    shopifyProductId: BigInt(product.legacyResourceId),
+  };
+};
 
 export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
   const router = Router();
   const service = deps.service ?? new BundleService();
+  const createShopifyProduct =
+    deps.createShopifyProduct ?? defaultCreateShopifyProduct;
 
   function shopIdOr401(req: Request): string {
     if (!req.shopId) throw new UnauthorizedError("No shop context");
@@ -74,7 +161,19 @@ export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const shopId = shopIdOr401(req);
-        res.json(await service.publish(shopId, req.params.id));
+        // Pull the Shopify session put on res.locals by
+        // validateAuthenticatedSession (M-021). If absent, fall back
+        // to the legacy status-flip-only behaviour rather than 500.
+        const session = (
+          res.locals as { shopify?: { session?: Session } }
+        ).shopify?.session;
+        const opts = session
+          ? {
+              onCreateProduct: (bundle: Parameters<typeof createShopifyProduct>[1]) =>
+                createShopifyProduct(session, bundle),
+            }
+          : {};
+        res.json(await service.publish(shopId, req.params.id, opts));
       } catch (err) {
         next(err);
       }
