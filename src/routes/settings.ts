@@ -24,13 +24,17 @@ import {
 } from "express";
 import { z } from "zod";
 
+import type { Session } from "@shopify/shopify-api";
+
 import { prisma } from "../config/database";
+import { logger } from "../config/logger";
 import { SUPPORTED_LOCALES } from "../i18n";
 import {
   NotFoundError,
   UnauthorizedError,
 } from "../middleware/errorHandler";
 import { BUNDLE_TYPES } from "../services/bundles/validators";
+import { writeShopMetafield } from "../shopify/metafields";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -226,6 +230,11 @@ export interface SettingsClient {
 
 export interface SettingsDeps {
   client?: SettingsClient;
+  /**
+   * DI seam for the shop metafield writer (M-164b).
+   * Tests stub; production uses Shopify Admin GraphQL.
+   */
+  writeShopMetafieldImpl?: typeof writeShopMetafield;
 }
 
 const SHOP_SELECT = {
@@ -284,9 +293,12 @@ function buildGeneral(shop: ShopRow): MergedGeneral {
   };
 }
 
+const settingsLog = logger.child({ module: "settings" });
+
 export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
   const router = Router();
   const client = deps.client ?? (prisma as unknown as SettingsClient);
+  const writeMetafield = deps.writeShopMetafieldImpl ?? writeShopMetafield;
 
   function shopIdOr401(req: Request): string {
     if (!req.shopId) throw new UnauthorizedError("No shop context");
@@ -379,6 +391,37 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
       const updatedSettings = isObject(updated.settings)
         ? updated.settings
         : {};
+
+      // M-164b: when the merchant changes Cart & Checkout's
+      // defaultMode, push it to the shop metafield the Cart
+      // Transform Function reads. Best-effort — a write
+      // failure logs but doesn't fail the settings save.
+      if (patch.cart?.defaultMode !== undefined) {
+        const session = (
+          res.locals as { shopify?: { session?: Session } }
+        ).shopify?.session;
+        if (session) {
+          try {
+            await writeMetafield(session, {
+              namespace: "bundleforge",
+              key: "cart_default_mode",
+              value: patch.cart.defaultMode,
+              type: "single_line_text_field",
+            });
+          } catch (err) {
+            settingsLog.warn(
+              { err, shopId, value: patch.cart.defaultMode },
+              "writeShopMetafield(cart_default_mode) failed; settings save still committed",
+            );
+          }
+        } else {
+          settingsLog.warn(
+            { shopId },
+            "No Shopify session on settings PUT; cart_default_mode metafield not written",
+          );
+        }
+      }
+
       res.json({
         ...updatedSettings,
         general: buildGeneral({

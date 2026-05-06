@@ -1,19 +1,42 @@
 import express, { type Express } from "express";
 import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
+import type { Session } from "@shopify/shopify-api";
 
 import { errorHandler, requestId } from "../middleware/errorHandler";
-import { installSettingsRoutes, type SettingsClient } from "./settings";
+import {
+  installSettingsRoutes,
+  type SettingsClient,
+  type SettingsDeps,
+} from "./settings";
 
-function buildApp(client: SettingsClient): Express {
+interface BuildOpts {
+  writeShopMetafieldImpl?: SettingsDeps["writeShopMetafieldImpl"];
+  withSession?: boolean;
+}
+
+function buildApp(client: SettingsClient, opts: BuildOpts = {}): Express {
+  const { withSession = true, writeShopMetafieldImpl } = opts;
   const app = express();
   app.use(requestId);
   app.use(express.json());
-  app.use((req, _res, next) => {
+  app.use((req, res, next) => {
     req.shopId = "shop-uuid";
+    if (withSession) {
+      const locals = res.locals as { shopify?: { session?: Session } };
+      locals.shopify = {
+        session: { shop: "devstore.myshopify.com" } as unknown as Session,
+      };
+    }
     next();
   });
-  app.use("/settings", installSettingsRoutes({ client }));
+  app.use(
+    "/settings",
+    installSettingsRoutes({
+      client,
+      ...(writeShopMetafieldImpl && { writeShopMetafieldImpl }),
+    }),
+  );
   app.use(errorHandler);
   return app;
 }
@@ -889,5 +912,92 @@ describe("Saved views (M-176)", () => {
         ],
       });
     expect(res.status).toBe(400);
+  });
+});
+
+describe("PUT /settings cart_default_mode metafield (M-164b)", () => {
+  function clientWithUpdate(): {
+    client: SettingsClient;
+    update: ReturnType<typeof vi.fn>;
+  } {
+    const update = vi.fn().mockResolvedValue({
+      id: "shop-uuid",
+      settings: { cart: { defaultMode: "components_as_attributes" } },
+    });
+    return {
+      client: {
+        shop: {
+          findUnique: vi.fn().mockResolvedValue({
+            ...SHOP_BASE,
+            settings: {},
+          }),
+          update,
+        },
+      },
+      update,
+    };
+  }
+
+  it("PUT with cart.defaultMode calls writeShopMetafield", async () => {
+    const writeShopMetafieldImpl = vi
+      .fn()
+      .mockResolvedValue({ id: "gid://shopify/Metafield/1" });
+    const { client } = clientWithUpdate();
+    const app = buildApp(client, {
+      writeShopMetafieldImpl: writeShopMetafieldImpl as unknown as SettingsDeps["writeShopMetafieldImpl"],
+    });
+    const res = await request(app)
+      .put("/settings")
+      .send({ cart: { defaultMode: "components_as_attributes" } });
+    expect(res.status).toBe(200);
+    expect(writeShopMetafieldImpl).toHaveBeenCalledTimes(1);
+    expect(writeShopMetafieldImpl.mock.calls[0][1]).toEqual({
+      namespace: "bundleforge",
+      key: "cart_default_mode",
+      value: "components_as_attributes",
+      type: "single_line_text_field",
+    });
+  });
+
+  it("PUT without cart.defaultMode does not call writeShopMetafield", async () => {
+    const writeShopMetafieldImpl = vi.fn();
+    const { client } = clientWithUpdate();
+    const app = buildApp(client, {
+      writeShopMetafieldImpl: writeShopMetafieldImpl as unknown as SettingsDeps["writeShopMetafieldImpl"],
+    });
+    const res = await request(app)
+      .put("/settings")
+      .send({ general: { brandColor: "#aabbcc" } });
+    expect(res.status).toBe(200);
+    expect(writeShopMetafieldImpl).not.toHaveBeenCalled();
+  });
+
+  it("metafield-write failure does not poison the settings PUT", async () => {
+    const writeShopMetafieldImpl = vi
+      .fn()
+      .mockRejectedValue(new Error("Shopify down"));
+    const { client } = clientWithUpdate();
+    const app = buildApp(client, {
+      writeShopMetafieldImpl: writeShopMetafieldImpl as unknown as SettingsDeps["writeShopMetafieldImpl"],
+    });
+    const res = await request(app)
+      .put("/settings")
+      .send({ cart: { defaultMode: "bundle_as_product" } });
+    expect(res.status).toBe(200);
+    expect(writeShopMetafieldImpl).toHaveBeenCalled();
+  });
+
+  it("missing Shopify session: skips the metafield write but still 200s", async () => {
+    const writeShopMetafieldImpl = vi.fn();
+    const { client } = clientWithUpdate();
+    const app = buildApp(client, {
+      writeShopMetafieldImpl: writeShopMetafieldImpl as unknown as SettingsDeps["writeShopMetafieldImpl"],
+      withSession: false,
+    });
+    const res = await request(app)
+      .put("/settings")
+      .send({ cart: { defaultMode: "components_as_attributes" } });
+    expect(res.status).toBe(200);
+    expect(writeShopMetafieldImpl).not.toHaveBeenCalled();
   });
 });
