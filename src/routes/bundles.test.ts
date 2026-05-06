@@ -237,6 +237,55 @@ describe("POST /bundles/bulk/* (M-177)", () => {
   });
 });
 
+describe("GET /bundles/templates + POST /bundles/templates/:id/instantiate (M-179)", () => {
+  it("GET /templates returns the registry", async () => {
+    const svc = mocked();
+    const app = buildApp(svc);
+    const res = await request(app).get("/bundles/templates");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    // Stable contract: every template has id + label + type.
+    expect(res.body.data[0]).toEqual(
+      expect.objectContaining({
+        id: expect.any(String) as unknown as string,
+        label: expect.any(String) as unknown as string,
+        type: expect.any(String) as unknown as string,
+      }),
+    );
+  });
+
+  it("POST /templates/:id/instantiate calls service.create with the template's contents", async () => {
+    const svc = mocked();
+    svc.create.mockResolvedValueOnce({ id: "new-bundle-id" });
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/templates/holiday-gift-box/instantiate")
+      .send({});
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBe("new-bundle-id");
+    expect(svc.create).toHaveBeenCalledTimes(1);
+    const args = svc.create.mock.calls[0];
+    expect(args[0]).toBe("shop-uuid");
+    expect(args[1]).toEqual(
+      expect.objectContaining({
+        title: "Holiday gift box",
+        type: "fixed",
+      }),
+    );
+  });
+
+  it("POST /templates/unknown/instantiate → 404", async () => {
+    const svc = mocked();
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/templates/does-not-exist/instantiate")
+      .send({});
+    expect(res.status).toBe(404);
+    expect(svc.create).not.toHaveBeenCalled();
+  });
+});
+
 describe("GET /bundles/:id/activity (M-174)", () => {
   it("returns paginated activity rows newest first", async () => {
     const svc = mocked();

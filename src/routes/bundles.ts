@@ -10,8 +10,15 @@ import { z } from "zod";
 
 import { BundleService } from "../services/bundles";
 import { bundleActivityRepo } from "../services/bundles/activityRepo";
+import {
+  BUNDLE_TEMPLATES,
+  findTemplate,
+} from "../services/bundles/templates";
 import { CreateBundleInput, PaginationParams } from "../types";
-import { UnauthorizedError } from "../middleware/errorHandler";
+import {
+  NotFoundError,
+  UnauthorizedError,
+} from "../middleware/errorHandler";
 import { shopifyGraphql } from "../shopify/graphql";
 
 const BulkBody = z
@@ -280,6 +287,40 @@ export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
           }
         }
         res.status(pickStatus(out)).json(out);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  // Template routes — same /bulk-style ordering rule applies.
+  // GET returns the read-only registry; POST instantiates a
+  // template into a fresh draft via service.create.
+  router.get(
+    "/templates",
+    (_req: Request, res: Response) => {
+      res.json({ data: BUNDLE_TEMPLATES });
+    },
+  );
+
+  router.post(
+    "/templates/:id/instantiate",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const shopId = shopIdOr401(req);
+        const template = findTemplate(req.params.id);
+        if (!template) {
+          throw new NotFoundError("Template");
+        }
+        const created = (await service.create(shopId, {
+          title: template.defaultTitle,
+          type: template.type,
+          description: template.description,
+          config: template.config,
+          items: [],
+          pricingRules: template.pricingRules,
+        })) as { id: string };
+        res.status(201).json(created);
       } catch (err) {
         next(err);
       }

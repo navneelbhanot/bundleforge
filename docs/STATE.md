@@ -6,18 +6,19 @@
 
 ## Current milestone
 
-**Phase R3 in progress — Bundle List richness.**
+**Phase R3 closed — Bundle List richness complete.**
 
-M-176 + M-177 + M-178 landed 2026-05-06. The bundle list page
-now wraps Polaris IndexFilters around the table with: live
-debounced search, status + type chip filters, saved views,
-bulk actions (publish / archive / delete), **a 6-option sort
-dropdown, three view modes (Table / Compact / Card), and real
-server-driven pagination**. Saved views round-trip filters +
-sort + view mode so a saved "All compact" restores its own
-density across reloads.
+M-176..M-179 all landed 2026-05-06. The bundle list now
+ships full IndexFilters chrome (debounced search, status +
+type chip filters, saved views), bulk actions, sort + view
+modes + true pagination, and a curated 6-template "Browse
+templates" gallery. Templates carry type + config + pricing
+rules but no items — the merchant adds their own SKUs after
+the one-click instantiate.
 
-M-179 (templates gallery) is the only remaining R3 milestone.
+Phase R4 next: cross-cutting polish (cmd+k search, in-app
+help drawer, unified toast/confirm/skeleton patterns,
+empty-state illustrations — M-180..M-183).
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -35,23 +36,18 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-179 — Bundle list templates /
-preset gallery. Spec first:
-`docs/specs/M-179-bundle-list-templates.md`. Closes Phase R3.
-A curated set of starter bundles (e.g. "Holiday gift box",
-"BOGO weekender", "Subscription starter") a merchant can clone
-with one click into a draft. Likely needs:
-- A small read-only `BUNDLE_TEMPLATES` registry on the server
-  (handful of pre-defined bundle configs — no schema changes).
-- New `GET /api/v1/bundles/templates` route returning the
-  registry.
-- New `POST /api/v1/bundles/templates/:id/instantiate`
-  route that calls the existing `service.create` with the
-  template's contents.
-- New "Browse templates" entry-point on `BundlesListPage`
-  (a Polaris `Modal` listing templates as Cards with a
-  "Use this template" button each).
-Sizing: medium.
+**Code (next session):** Run M-180 — global cmd+k search
+(Phase R4 start). Spec first:
+`docs/specs/M-180-global-cmdk-search.md`. A modal search
+palette triggered by ⌘K / Ctrl-K that lets the merchant jump
+to any bundle by title, navigate to the main admin pages
+(Bundles, Orders, Inventory, Analytics, Settings, Billing),
+and trigger common actions (Create bundle, Browse templates).
+Search uses the existing `/api/v1/bundles?search=` endpoint
+for bundles + a small static action registry for everything
+else. New `frontend/src/components/CommandPalette.tsx`
+mounted globally inside the App shell. Sizing: medium —
+sets the pattern for M-181 help drawer.
 
 Other open threads (mostly user-owned):
 
@@ -120,6 +116,26 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-179 — Bundle list · templates / preset gallery**
+  (2026-05-06 late). **Closes Phase R3.** New
+  `src/services/bundles/templates.ts` registry seeds 6
+  starter templates (Holiday gift box, BOGO weekender,
+  Build-a-box starter, Mix-and-match trio, Subscription
+  starter, Volume tier starter). Templates carry `type +
+  config + pricingRules` but no `items` — the merchant
+  adds their own SKUs via the existing ResourcePicker
+  after the one-click instantiate, so the registry is
+  product-agnostic and can't go stale. Two new server
+  routes registered alongside the bulk routes:
+  `GET /api/v1/bundles/templates` returns the registry,
+  `POST /api/v1/bundles/templates/:id/instantiate` calls
+  `service.create({...template, items: []})` and returns
+  the new bundle's id. New `TemplatesModal.tsx` renders a
+  Polaris Modal with category filter chips + a Grid of
+  template cards. "Browse templates" lives in the
+  populated-list page's `secondaryActions` and in the
+  fresh-shop dashboard CTA row.
+  `docs/sessions/0179-bundle-list-templates.md`.
 - **M-178 — Bundle list · sort + view modes + pagination**
   (2026-05-06 late). Wires Polaris IndexFilters' `sortOptions`
   slot to the existing `sortBy / sortOrder` server surface
@@ -453,11 +469,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **664 / 664 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +1 settings savedView viewMode case + +3
-  BundlesListTable sort/view-mode/pagination cases + +1
-  BundlesListPage initial-fetch query-param case since M-177.
-- **514 / 514** when no real DB is available — the bundle CRUD
+- **676 / 676 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 templates registry cases + +3 server
+  template-route cases + +3 TemplatesModal UI cases + +1
+  BundlesListPage UI case since M-178.
+- **526 / 526** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

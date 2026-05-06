@@ -33,6 +33,10 @@ import {
   type SavedView,
   type ViewMode,
 } from "../components/bundlesList/BundlesListTable";
+import {
+  TemplatesModal,
+  type BundleTemplate,
+} from "../components/bundlesList/TemplatesModal";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { PageLoading } from "../components/PageLoading";
 
@@ -140,10 +144,12 @@ function StatCard({ label, value, tone = "default" }: StatCardProps): JSX.Elemen
 function FreshShopDashboard({
   onCreate,
   onTour,
+  onBrowseTemplates,
   onDismiss,
 }: {
   onCreate: () => void;
   onTour: () => void;
+  onBrowseTemplates: () => void;
   onDismiss: () => void;
 }): JSX.Element {
   return (
@@ -169,6 +175,7 @@ function FreshShopDashboard({
               <Button variant="primary" onClick={onCreate}>
                 Create your first bundle
               </Button>
+              <Button onClick={onBrowseTemplates}>Browse templates</Button>
               <Button onClick={onTour}>Take the 30-second tour</Button>
               <Button variant="tertiary" onClick={onDismiss}>
                 I'll explore on my own
@@ -276,6 +283,9 @@ export function BundlesListPage(): JSX.Element {
   const [hasEverHadBundles, setHasEverHadBundles] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<BundleTemplate[]>([]);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [instantiateBusy, setInstantiateBusy] = useState(false);
   const [sort, setSort] = useState<BundleSort>(DEFAULT_SORT);
   const [viewMode, setViewMode] = useState<ViewMode>(DEFAULT_VIEW_MODE);
   const [page, setPage] = useState(1);
@@ -487,6 +497,43 @@ export function BundlesListPage(): JSX.Element {
     [runBulk],
   );
 
+  // Lazy-load templates the first time the merchant opens
+  // the modal. They're a small static list so one fetch
+  // per page-load is fine; we don't bother to refresh.
+  const openTemplates = useCallback(async (): Promise<void> => {
+    setTemplatesOpen(true);
+    if (templates.length > 0) return;
+    try {
+      const res = await fetch("/api/v1/bundles/templates");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const body = (await res.json()) as { data: BundleTemplate[] };
+      setTemplates(body.data);
+    } catch (e) {
+      setToast(`Could not load templates: ${(e as Error).message}`);
+    }
+  }, [templates.length]);
+
+  const handleUseTemplate = useCallback(
+    async (templateId: string): Promise<void> => {
+      setInstantiateBusy(true);
+      try {
+        const res = await fetch(
+          `/api/v1/bundles/templates/${templateId}/instantiate`,
+          { method: "POST" },
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const body = (await res.json()) as { id: string };
+        setTemplatesOpen(false);
+        navigate(`/bundles/${body.id}#setup`);
+      } catch (e) {
+        setToast(`Couldn't create from template: ${(e as Error).message}`);
+      } finally {
+        setInstantiateBusy(false);
+      }
+    },
+    [navigate],
+  );
+
   if (error && rows === null) {
     return (
       <Page title="Bundles">
@@ -523,13 +570,23 @@ export function BundlesListPage(): JSX.Element {
     Boolean(filters.search && filters.search.trim().length > 0);
   if (rows.length === 0 && total === 0 && !hasEverHadBundles && !filtersActive) {
     return (
-      <Page title="Bundles">
-        <FreshShopDashboard
-          onCreate={() => navigate("/bundles/new")}
-          onTour={() => setShowWizard(true)}
-          onDismiss={handleDismiss}
+      <Frame>
+        <Page title="Bundles">
+          <FreshShopDashboard
+            onCreate={() => navigate("/bundles/new")}
+            onTour={() => setShowWizard(true)}
+            onBrowseTemplates={openTemplates}
+            onDismiss={handleDismiss}
+          />
+        </Page>
+        <TemplatesModal
+          open={templatesOpen}
+          templates={templates}
+          busy={instantiateBusy}
+          onUseTemplate={handleUseTemplate}
+          onClose={() => setTemplatesOpen(false)}
         />
-      </Page>
+      </Frame>
     );
   }
 
@@ -546,6 +603,9 @@ export function BundlesListPage(): JSX.Element {
       <Page
         title="Bundles"
         primaryAction={{ content: "Create bundle", url: "/bundles/new" }}
+        secondaryActions={[
+          { content: "Browse templates", onAction: openTemplates },
+        ]}
       >
         <BlockStack gap="500">
           <Grid>
@@ -595,6 +655,13 @@ export function BundlesListPage(): JSX.Element {
         </BlockStack>
       </Page>
       {toast && <Toast content={toast} onDismiss={() => setToast(null)} />}
+      <TemplatesModal
+        open={templatesOpen}
+        templates={templates}
+        busy={instantiateBusy}
+        onUseTemplate={handleUseTemplate}
+        onClose={() => setTemplatesOpen(false)}
+      />
     </Frame>
   );
 }

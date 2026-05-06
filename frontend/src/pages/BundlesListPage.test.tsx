@@ -210,6 +210,80 @@ describe("BundlesListPage", () => {
     expect(bundlesCall).toContain("sortOrder=desc");
   });
 
+  it("clicking 'Browse templates' fetches /api/v1/bundles/templates and renders the modal (M-179)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(async (input) => {
+        if (input.startsWith("/api/v1/bundles/templates")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: [
+                {
+                  id: "holiday-gift-box",
+                  label: "Holiday gift box",
+                  description:
+                    "Curated 3-product seasonal gift set with 15% off.",
+                  category: "seasonal",
+                  type: "fixed",
+                  defaultTitle: "Holiday gift box",
+                },
+              ],
+            }),
+          };
+        }
+        if (input.startsWith("/api/v1/bundles")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: [
+                {
+                  id: "b-1",
+                  title: "Existing",
+                  type: "fixed",
+                  status: "active",
+                  slug: "existing",
+                },
+              ],
+              pagination: { total: 1 },
+            }),
+          };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ savedViews: [] }),
+        };
+      }),
+    );
+
+    const { container } = renderPage();
+    // Wait for the populated-list page to render.
+    await waitFor(() =>
+      expect(screen.getByText("Existing")).toBeTruthy(),
+    );
+
+    // Polaris Page renders secondaryActions as buttons in the
+    // page header. Click the "Browse templates" entry.
+    const browseBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Browse templates");
+    expect(browseBtn).toBeTruthy();
+    browseBtn!.click();
+
+    // Modal opens — assert the template heading from the
+    // fixture appears (Polaris renders the modal into a portal).
+    await waitFor(() =>
+      expect(
+        Array.from(document.querySelectorAll("h3")).some(
+          (h) => h.textContent === "Holiday gift box",
+        ),
+      ).toBe(true),
+    );
+  });
+
   it("clicking a row's checkbox + bulk Publish POSTs to /api/v1/bundles/bulk/publish (M-177)", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     vi.stubGlobal(

@@ -281,7 +281,7 @@
 | M-176 | IndexFilters + saved views | done (2026-05-06) — `docs/specs/M-176-bundle-list-indexfilters.md` |
 | M-177 | Bulk actions | done (2026-05-06) — `docs/specs/M-177-bundle-list-bulk-actions.md` |
 | M-178 | Sort + view modes | done (2026-05-06) — `docs/specs/M-178-bundle-list-sort-view-modes.md` |
-| M-179 | Templates / Presets gallery | pending |
+| M-179 | Templates / Presets gallery | done (2026-05-06) — `docs/specs/M-179-bundle-list-templates.md` |
 
 ### Phase R4 — Cross-cutting polish
 
