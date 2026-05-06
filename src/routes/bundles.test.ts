@@ -157,6 +157,86 @@ describe("Auth gate", () => {
   });
 });
 
+describe("POST /bundles/bulk/* (M-177)", () => {
+  it("bulk publish: succeeds for all valid ids → 200", async () => {
+    const svc = mocked();
+    svc.publish.mockResolvedValue({ id: "ok" });
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/bulk/publish")
+      .send({ ids: ["b-1", "b-2", "b-3"] });
+    expect(res.status).toBe(200);
+    expect(res.body.succeeded).toEqual(["b-1", "b-2", "b-3"]);
+    expect(res.body.failed).toEqual([]);
+    expect(svc.publish).toHaveBeenCalledTimes(3);
+  });
+
+  it("bulk archive: rejects empty ids array → 400", async () => {
+    const svc = mocked();
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/bulk/archive")
+      .send({ ids: [] });
+    expect(res.status).toBe(400);
+    expect(svc.archive).not.toHaveBeenCalled();
+  });
+
+  it("bulk archive: rejects > 50 ids → 400", async () => {
+    const svc = mocked();
+    const app = buildApp(svc);
+    const tooMany = Array.from({ length: 51 }, (_, i) => `b-${i}`);
+    const res = await request(app)
+      .post("/bundles/bulk/archive")
+      .send({ ids: tooMany });
+    expect(res.status).toBe(400);
+    expect(svc.archive).not.toHaveBeenCalled();
+  });
+
+  it("bulk delete: partial failure → 207 with failed[] populated", async () => {
+    const svc = mocked();
+    svc.softDelete
+      .mockResolvedValueOnce(undefined) // b-1 ok
+      .mockRejectedValueOnce(new NotFoundError("Bundle")) // b-2 fails
+      .mockResolvedValueOnce(undefined); // b-3 ok
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/bulk/delete")
+      .send({ ids: ["b-1", "b-2", "b-3"] });
+    expect(res.status).toBe(207);
+    expect(res.body.succeeded).toEqual(["b-1", "b-3"]);
+    expect(res.body.failed).toEqual([
+      { id: "b-2", reason: expect.stringContaining("Bundle") as unknown as string },
+    ]);
+  });
+
+  it("bulk publish: all-fail → 422", async () => {
+    const svc = mocked();
+    svc.publish.mockRejectedValue(new NotFoundError("Bundle"));
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/bulk/publish")
+      .send({ ids: ["b-1", "b-2"] });
+    expect(res.status).toBe(422);
+    expect(res.body.succeeded).toEqual([]);
+    expect(res.body.failed).toHaveLength(2);
+  });
+
+  it("bulk publish: per-id error is captured, never propagated as 5xx", async () => {
+    const svc = mocked();
+    svc.publish
+      .mockResolvedValueOnce({ id: "b-1" })
+      .mockRejectedValueOnce(new Error("Shopify GraphQL boom"));
+    const app = buildApp(svc);
+    const res = await request(app)
+      .post("/bundles/bulk/publish")
+      .send({ ids: ["b-1", "b-2"] });
+    expect(res.status).toBe(207);
+    expect(res.body.succeeded).toEqual(["b-1"]);
+    expect(res.body.failed[0].id).toBe("b-2");
+    expect(res.body.failed[0].reason).toContain("Shopify GraphQL boom");
+  });
+});
+
 describe("GET /bundles/:id/activity (M-174)", () => {
   it("returns paginated activity rows newest first", async () => {
     const svc = mocked();

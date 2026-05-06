@@ -8,18 +8,16 @@
 
 **Phase R3 in progress — Bundle List richness.**
 
-M-176 landed 2026-05-06. The bundle list page now wraps
-Polaris IndexFilters around the table: live debounced search,
-status + type chip filters, and saved views that persist to
-`settings.savedViews`. Stats strip reflects the filtered
-result set (Total relabels to Filtered when chips are
-active). The fresh-shop / onboarding-wizard branch is
-unchanged.
+M-176 + M-177 landed 2026-05-06. The bundle list page now
+wraps Polaris IndexFilters around the table: live debounced
+search, status + type chip filters, saved views, **and bulk
+actions** (publish / archive / delete) on selectable rows.
+Bulk endpoints loop the existing single-bundle service
+methods sequentially, capture per-id outcomes
+(`{succeeded[], failed[]}`), and surface results via a Toast.
 
-M-177..M-179 plug into the IndexFilters chrome shipped today:
-bulk actions (selectable rows + promoted bulk-action slot),
-sort + view modes (table / card / compact + true pagination),
-and a templates gallery.
+M-178 (sort + view modes + true pagination) and M-179
+(templates gallery) remaining.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -37,20 +35,18 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-177 — Bundle list bulk actions.
-Spec first: `docs/specs/M-177-bundle-list-bulk-actions.md`.
-Adds row selection to the IndexFilters table shipped in M-176
-(flip `selectable=true`) and wires Polaris IndexFilters'
-promoted bulk-action slot to call new server endpoints:
-- `POST /api/v1/bundles/bulk/publish` — publish many at once.
-- `POST /api/v1/bundles/bulk/archive` — archive many at once.
-- `POST /api/v1/bundles/bulk/delete` — soft-delete many at
-  once.
-Each bulk endpoint should validate the id list belongs to the
-shop, then loop the existing single-bundle service method
-(no new business logic) and emit one activity-log row per
-target. Confirmation dialog for the destructive paths.
-Sizing: small-medium.
+**Code (next session):** Run M-178 — Bundle list sort + view
+modes + true pagination. Spec first:
+`docs/specs/M-178-bundle-list-sort-view-modes.md`. Wires the
+Polaris `IndexFilters` `sortOptions` slot to the existing
+server-side sort (sortBy=createdAt|updatedAt|title|priority,
+sortOrder=asc|desc) and exposes view modes (table / card /
+compact). Replaces today's `limit=100` truncation footer with
+a real `Pagination` component that drives `page=N&limit=20`
+through the existing service surface. Saved views persist
+the chosen sort + view mode alongside filters (the M-176
+schema already accepts a `sort` sub-object — no new
+validator). Sizing: medium.
 
 Other open threads (mostly user-owned):
 
@@ -119,6 +115,27 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-177 — Bundle list · bulk actions** (2026-05-06 late).
+  Plugs row selection + Polaris IndexFilters' promoted
+  bulk-action slot into the chrome from M-176. Three new
+  server routes —
+  `POST /api/v1/bundles/bulk/{publish,archive,delete}` —
+  loop the existing single-bundle service methods
+  sequentially, capture per-id outcomes
+  (`{succeeded: string[], failed: Array<{id, reason}>}`),
+  and return 200 / 207 / 422 based on the mix. Cap of 50
+  ids/request keeps Shopify Admin GraphQL rate limits
+  happy on the publish path. Bulk publish reuses the same
+  session-bound `onCreateProduct` hook from M-051. Activity
+  log writes are emitted by the existing service methods
+  (M-174 added the writers) — no duplication. Frontend
+  uses `useIndexResourceState` for selection, a confirm
+  modal for archive + delete, and a Toast summary like
+  "Published 12 bundles" or "Published 10, 2 failed".
+  Route ordering in bundles.ts had to be adjusted: bulk
+  routes register before `/:id/*` matchers because Express
+  matches in registration order.
+  `docs/sessions/0177-bundle-list-bulk-actions.md`.
 - **M-176 — Bundle list · IndexFilters + saved views**
   (2026-05-06 late, **Phase R3 start**). Replaced the bare
   IndexTable on `BundlesListPage` with Polaris `IndexFilters`
@@ -417,11 +434,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **650 / 650 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 settings savedViews cases + +5
-  BundlesListTable UI cases + +3 BundlesListPage UI cases
-  since M-175.
-- **500 / 500** when no real DB is available — the bundle CRUD
+- **659 / 659 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 server bulk-route cases + +2
+  BundlesListTable selectable cases + +1 BundlesListPage
+  bulk-handler case since M-176.
+- **509 / 509** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

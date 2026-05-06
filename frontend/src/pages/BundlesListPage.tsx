@@ -17,10 +17,12 @@ import {
   Box,
   Button,
   Card,
+  Frame,
   Grid,
   InlineStack,
   Page,
   Text,
+  Toast,
 } from "@shopify/polaris";
 
 import {
@@ -252,6 +254,8 @@ export function BundlesListPage(): JSX.Element {
   const [views, setViews] = useState<SavedView[]>([]);
   const [selectedViewIndex, setSelectedViewIndex] = useState(-1);
   const [hasEverHadBundles, setHasEverHadBundles] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchBundles = useCallback(
@@ -361,6 +365,61 @@ export function BundlesListPage(): JSX.Element {
     [views, persistViews],
   );
 
+  const runBulk = useCallback(
+    async (
+      path: "publish" | "archive" | "delete",
+      ids: string[],
+    ): Promise<void> => {
+      if (ids.length === 0) return;
+      setBulkBusy(true);
+      try {
+        const res = await fetch(`/api/v1/bundles/bulk/${path}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids }),
+        });
+        if (res.status === 400 || res.status === 401) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const body = (await res.json()) as {
+          succeeded: string[];
+          failed: Array<{ id: string; reason: string }>;
+        };
+        const verb = path === "publish" ? "Published" : path === "archive" ? "Archived" : "Deleted";
+        if (body.failed.length === 0) {
+          setToast(
+            `${verb} ${body.succeeded.length} bundle${body.succeeded.length === 1 ? "" : "s"}.`,
+          );
+        } else if (body.succeeded.length === 0) {
+          setToast(`${verb}: 0 succeeded, ${body.failed.length} failed.`);
+        } else {
+          setToast(
+            `${verb} ${body.succeeded.length}, ${body.failed.length} failed.`,
+          );
+        }
+        await fetchBundles(filters);
+      } catch (e) {
+        setToast(`Bulk ${path} failed: ${(e as Error).message}`);
+      } finally {
+        setBulkBusy(false);
+      }
+    },
+    [fetchBundles, filters],
+  );
+
+  const handleBulkPublish = useCallback(
+    (ids: string[]) => runBulk("publish", ids),
+    [runBulk],
+  );
+  const handleBulkArchive = useCallback(
+    (ids: string[]) => runBulk("archive", ids),
+    [runBulk],
+  );
+  const handleBulkDelete = useCallback(
+    (ids: string[]) => runBulk("delete", ids),
+    [runBulk],
+  );
+
   if (error && rows === null) {
     return (
       <Page title="Bundles">
@@ -416,46 +475,53 @@ export function BundlesListPage(): JSX.Element {
   const archived = rows.filter((b) => b.status === "archived").length;
 
   return (
-    <Page
-      title="Bundles"
-      primaryAction={{ content: "Create bundle", url: "/bundles/new" }}
-    >
-      <BlockStack gap="500">
-        <Grid>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
-            <StatCard label={filtersActive ? "Filtered" : "Total"} value={rows.length} />
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
-            <StatCard label="Active" value={active} tone="success" />
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
-            <StatCard label="Draft" value={draft} tone="info" />
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
-            <StatCard
-              label="Archived"
-              value={archived}
-              tone={archived > 0 ? "warning" : "default"}
-            />
-          </Grid.Cell>
-        </Grid>
+    <Frame>
+      <Page
+        title="Bundles"
+        primaryAction={{ content: "Create bundle", url: "/bundles/new" }}
+      >
+        <BlockStack gap="500">
+          <Grid>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <StatCard label={filtersActive ? "Filtered" : "Total"} value={rows.length} />
+            </Grid.Cell>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <StatCard label="Active" value={active} tone="success" />
+            </Grid.Cell>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <StatCard label="Draft" value={draft} tone="info" />
+            </Grid.Cell>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
+              <StatCard
+                label="Archived"
+                value={archived}
+                tone={archived > 0 ? "warning" : "default"}
+              />
+            </Grid.Cell>
+          </Grid>
 
-        <Card>
-          <BundlesListTable
-            rows={rows}
-            total={total}
-            views={views}
-            selectedViewIndex={selectedViewIndex}
-            filters={filters}
-            bundleTypes={BUNDLE_TYPES}
-            onFilterChange={handleFilterChange}
-            onViewSelect={handleViewSelect}
-            onSaveView={handleSaveView}
-            onDeleteView={handleDeleteView}
-            onRowClick={(id) => navigate(`/bundles/${id}`)}
-          />
-        </Card>
-      </BlockStack>
-    </Page>
+          <Card>
+            <BundlesListTable
+              rows={rows}
+              total={total}
+              views={views}
+              selectedViewIndex={selectedViewIndex}
+              filters={filters}
+              bundleTypes={BUNDLE_TYPES}
+              onFilterChange={handleFilterChange}
+              onViewSelect={handleViewSelect}
+              onSaveView={handleSaveView}
+              onDeleteView={handleDeleteView}
+              onRowClick={(id) => navigate(`/bundles/${id}`)}
+              onBulkPublish={handleBulkPublish}
+              onBulkArchive={handleBulkArchive}
+              onBulkDelete={handleBulkDelete}
+              bulkBusy={bulkBusy}
+            />
+          </Card>
+        </BlockStack>
+      </Page>
+      {toast && <Toast content={toast} onDismiss={() => setToast(null)} />}
+    </Frame>
   );
 }

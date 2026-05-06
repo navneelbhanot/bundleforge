@@ -6,12 +6,19 @@
  */
 import { Router, type Request, type Response, type NextFunction } from "express";
 import type { Session } from "@shopify/shopify-api";
+import { z } from "zod";
 
 import { BundleService } from "../services/bundles";
 import { bundleActivityRepo } from "../services/bundles/activityRepo";
 import { CreateBundleInput, PaginationParams } from "../types";
 import { UnauthorizedError } from "../middleware/errorHandler";
 import { shopifyGraphql } from "../shopify/graphql";
+
+const BulkBody = z
+  .object({
+    ids: z.array(z.string().min(1)).min(1).max(50),
+  })
+  .strict();
 
 export interface BundleRouteDeps {
   service?: BundleService;
@@ -187,6 +194,97 @@ export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
       next(err);
     }
   });
+
+  // Bulk routes must be registered before the /:id/* matchers
+  // because Express does first-match routing — otherwise
+  // POST /bundles/bulk/publish would route to /:id/publish with
+  // id="bulk" and 404 inside service.publish.
+  interface BulkOutcome {
+    succeeded: string[];
+    failed: Array<{ id: string; reason: string }>;
+  }
+
+  function pickStatus(out: BulkOutcome): number {
+    if (out.failed.length === 0) return 200;
+    if (out.succeeded.length === 0) return 422;
+    return 207;
+  }
+
+  router.post(
+    "/bulk/publish",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const shopId = shopIdOr401(req);
+        const body = BulkBody.parse(req.body);
+        const session = (
+          res.locals as { shopify?: { session?: Session } }
+        ).shopify?.session;
+        const opts = session
+          ? {
+              onCreateProduct: (
+                bundle: Parameters<typeof createShopifyProduct>[1],
+              ) => createShopifyProduct(session, bundle),
+            }
+          : {};
+        const out: BulkOutcome = { succeeded: [], failed: [] };
+        for (const id of body.ids) {
+          try {
+            await service.publish(shopId, id, opts);
+            out.succeeded.push(id);
+          } catch (err) {
+            out.failed.push({ id, reason: (err as Error).message });
+          }
+        }
+        res.status(pickStatus(out)).json(out);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.post(
+    "/bulk/archive",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const shopId = shopIdOr401(req);
+        const body = BulkBody.parse(req.body);
+        const out: BulkOutcome = { succeeded: [], failed: [] };
+        for (const id of body.ids) {
+          try {
+            await service.archive(shopId, id);
+            out.succeeded.push(id);
+          } catch (err) {
+            out.failed.push({ id, reason: (err as Error).message });
+          }
+        }
+        res.status(pickStatus(out)).json(out);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.post(
+    "/bulk/delete",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const shopId = shopIdOr401(req);
+        const body = BulkBody.parse(req.body);
+        const out: BulkOutcome = { succeeded: [], failed: [] };
+        for (const id of body.ids) {
+          try {
+            await service.softDelete(shopId, id);
+            out.succeeded.push(id);
+          } catch (err) {
+            out.failed.push({ id, reason: (err as Error).message });
+          }
+        }
+        res.status(pickStatus(out)).json(out);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   router.post(
     "/:id/duplicate",

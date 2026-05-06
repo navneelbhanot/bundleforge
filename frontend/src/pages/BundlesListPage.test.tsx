@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   render,
   screen,
+  fireEvent,
   waitFor,
   cleanup,
 } from "@testing-library/react";
@@ -164,5 +165,86 @@ describe("BundlesListPage", () => {
     await waitFor(() =>
       expect(screen.getAllByText("Active drafts").length).toBeGreaterThan(0),
     );
+  });
+
+  it("clicking a row's checkbox + bulk Publish POSTs to /api/v1/bundles/bulk/publish (M-177)", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(async (input, init) => {
+        calls.push({ url: input, init });
+        if (
+          input.startsWith("/api/v1/bundles/bulk/")
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              succeeded: ["b-1"],
+              failed: [],
+            }),
+          };
+        }
+        if (input.startsWith("/api/v1/bundles")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: [
+                {
+                  id: "b-1",
+                  title: "Holiday",
+                  type: "fixed",
+                  status: "draft",
+                  slug: "holiday",
+                },
+              ],
+              pagination: { total: 1 },
+            }),
+          };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ savedViews: [] }),
+        };
+      }),
+    );
+    const { container } = renderPage();
+    await waitFor(() =>
+      expect(screen.getByText("Holiday")).toBeTruthy(),
+    );
+
+    // Click the row checkbox to select it. Polaris IndexTable
+    // renders <input type="checkbox"> for each selectable row.
+    const checkboxes = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    expect(checkboxes.length).toBeGreaterThan(0);
+    fireEvent.click(checkboxes[0]);
+
+    // Promoted "Publish" bulk action button appears in the
+    // IndexFilters chrome after selection.
+    await waitFor(() => {
+      const publishBtn = (
+        Array.from(document.querySelectorAll("button")) as HTMLButtonElement[]
+      ).find((b) => b.textContent?.trim() === "Publish");
+      expect(publishBtn).toBeTruthy();
+    });
+    const publishBtn = (
+      Array.from(document.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Publish")!;
+    publishBtn.click();
+
+    await waitFor(() =>
+      expect(
+        calls.some((c) => c.url === "/api/v1/bundles/bulk/publish"),
+      ).toBe(true),
+    );
+    const bulkCall = calls.find(
+      (c) => c.url === "/api/v1/bundles/bulk/publish",
+    )!;
+    const body = JSON.parse(String(bulkCall.init?.body ?? "{}"));
+    expect(body.ids).toEqual(["b-1"]);
   });
 });

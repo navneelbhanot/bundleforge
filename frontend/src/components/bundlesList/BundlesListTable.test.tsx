@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react";
 import { AppProvider } from "@shopify/polaris";
 
 import {
@@ -48,6 +54,9 @@ interface RenderOpts {
   onSaveView?: (label: string) => Promise<void>;
   onDeleteView?: (id: string) => Promise<void>;
   onRowClick?: (id: string) => void;
+  onBulkPublish?: (ids: string[]) => Promise<void>;
+  onBulkArchive?: (ids: string[]) => Promise<void>;
+  onBulkDelete?: (ids: string[]) => Promise<void>;
 }
 
 function renderTable(opts: RenderOpts = {}) {
@@ -56,12 +65,21 @@ function renderTable(opts: RenderOpts = {}) {
   const onSaveView = opts.onSaveView ?? vi.fn().mockResolvedValue(undefined);
   const onDeleteView = opts.onDeleteView ?? vi.fn().mockResolvedValue(undefined);
   const onRowClick = opts.onRowClick ?? vi.fn();
+  const onBulkPublish =
+    opts.onBulkPublish ?? vi.fn().mockResolvedValue(undefined);
+  const onBulkArchive =
+    opts.onBulkArchive ?? vi.fn().mockResolvedValue(undefined);
+  const onBulkDelete =
+    opts.onBulkDelete ?? vi.fn().mockResolvedValue(undefined);
   return {
     onFilterChange,
     onViewSelect,
     onSaveView,
     onDeleteView,
     onRowClick,
+    onBulkPublish,
+    onBulkArchive,
+    onBulkDelete,
     ...render(
       wrap(
         <BundlesListTable
@@ -76,6 +94,9 @@ function renderTable(opts: RenderOpts = {}) {
           onSaveView={onSaveView}
           onDeleteView={onDeleteView}
           onRowClick={onRowClick}
+          onBulkPublish={onBulkPublish}
+          onBulkArchive={onBulkArchive}
+          onBulkDelete={onBulkDelete}
         />,
       ),
     ),
@@ -139,5 +160,51 @@ describe("BundlesListTable", () => {
     expect(editButtons.length).toBeGreaterThan(0);
     editButtons[0].click();
     expect(onRowClick).toHaveBeenCalledWith("b-1");
+  });
+
+  it("renders selectable rows with row checkboxes (M-177)", () => {
+    const { container } = renderTable();
+    // Polaris flips selectable rows to render <input type="checkbox">
+    // per row plus a header. Sanity-check that more than one is in
+    // the DOM, proving selectable=true is wired.
+    const checkboxes = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    expect(checkboxes.length).toBeGreaterThan(0);
+  });
+
+  it("opens the bulk archive confirm modal when 'Archive' is invoked on a selection", async () => {
+    const onBulkArchive = vi.fn().mockResolvedValue(undefined);
+    const { container } = renderTable({ onBulkArchive });
+
+    // Simulate the selection state by clicking the header
+    // checkbox (Polaris IndexTable wires it to select all).
+    const checkboxes = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    expect(checkboxes.length).toBeGreaterThan(0);
+    fireEvent.click(checkboxes[0]);
+
+    // After selection, Polaris promotes the bulk-action buttons.
+    // The Archive promoted action becomes a button in the chrome.
+    await waitFor(() => {
+      const archiveBtn = (
+        Array.from(document.querySelectorAll("button")) as HTMLButtonElement[]
+      ).find((b) => b.textContent?.trim() === "Archive");
+      expect(archiveBtn).toBeTruthy();
+    });
+    const archiveBtn = (
+      Array.from(document.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Archive")!;
+    archiveBtn.click();
+
+    // Confirm modal heading.
+    await waitFor(() =>
+      expect(
+        Array.from(document.querySelectorAll("h2")).some((h) =>
+          (h.textContent ?? "").startsWith("Archive "),
+        ),
+      ).toBe(true),
+    );
   });
 });

@@ -279,7 +279,7 @@
 | ID | Title | Status |
 |----|-------|--------|
 | M-176 | IndexFilters + saved views | done (2026-05-06) — `docs/specs/M-176-bundle-list-indexfilters.md` |
-| M-177 | Bulk actions | pending |
+| M-177 | Bulk actions | done (2026-05-06) — `docs/specs/M-177-bundle-list-bulk-actions.md` |
 | M-178 | Sort + view modes | pending |
 | M-179 | Templates / Presets gallery | pending |
 

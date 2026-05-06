@@ -21,6 +21,7 @@ import {
   Modal,
   TextField,
   Text,
+  useIndexResourceState,
   useSetIndexFiltersMode,
 } from "@shopify/polaris";
 
@@ -66,6 +67,14 @@ export interface BundlesListTableProps {
   onSaveView: (label: string) => Promise<void>;
   onDeleteView: (id: string) => Promise<void>;
   onRowClick: (id: string) => void;
+  /** Bulk publish: called with the selected ids. */
+  onBulkPublish?: (ids: string[]) => Promise<void>;
+  /** Bulk archive: called with the selected ids. */
+  onBulkArchive?: (ids: string[]) => Promise<void>;
+  /** Bulk delete (soft): called with the selected ids. */
+  onBulkDelete?: (ids: string[]) => Promise<void>;
+  /** Disable bulk action buttons (in flight). */
+  bulkBusy?: boolean;
 }
 
 const STATUS_CHOICES: Array<{ label: string; value: BundleStatusFilter }> = [
@@ -93,6 +102,10 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
     onSaveView,
     onDeleteView,
     onRowClick,
+    onBulkPublish,
+    onBulkArchive,
+    onBulkDelete,
+    bulkBusy = false,
   } = props;
 
   const { mode, setMode } = useSetIndexFiltersMode();
@@ -100,6 +113,19 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<SavedView | null>(null);
+  const [bulkConfirm, setBulkConfirm] = useState<
+    null | "archive" | "delete"
+  >(null);
+
+  // Polaris's resource-state hook tracks selection.
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(
+    rows as unknown as Array<{ [key: string]: unknown; id: string }>,
+  );
 
   // Polaris IndexFilters tabs prop. First tab is the built-in All;
   // selectedViewIndex of -1 maps to tab 0.
@@ -234,13 +260,51 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
           { title: "Status" },
           { title: "" },
         ]}
-        selectable={false}
+        selectable
+        selectedItemsCount={
+          allResourcesSelected ? "All" : selectedResources.length
+        }
+        onSelectionChange={handleSelectionChange}
+        promotedBulkActions={[
+          ...(onBulkPublish
+            ? [
+                {
+                  content: "Publish",
+                  onAction: async () => {
+                    if (selectedResources.length === 0) return;
+                    await onBulkPublish(selectedResources);
+                    clearSelection();
+                  },
+                  disabled: bulkBusy,
+                },
+              ]
+            : []),
+          ...(onBulkArchive
+            ? [
+                {
+                  content: "Archive",
+                  onAction: () => setBulkConfirm("archive"),
+                  disabled: bulkBusy,
+                },
+              ]
+            : []),
+          ...(onBulkDelete
+            ? [
+                {
+                  content: "Delete",
+                  onAction: () => setBulkConfirm("delete"),
+                  disabled: bulkBusy,
+                },
+              ]
+            : []),
+        ]}
       >
         {rows.map((b, i) => (
           <IndexTable.Row
             id={b.id}
             key={b.id}
             position={i}
+            selected={selectedResources.includes(b.id)}
             onClick={() => onRowClick(b.id)}
           >
             <IndexTable.Cell>
@@ -340,6 +404,43 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
           <Text as="p">
             "{confirmDelete?.label}" will be removed. The bundles
             themselves are not affected — only this saved view.
+          </Text>
+        </Modal.Section>
+      </Modal>
+
+      <Modal
+        open={bulkConfirm !== null}
+        onClose={() => setBulkConfirm(null)}
+        title={
+          bulkConfirm === "delete"
+            ? `Delete ${selectedResources.length} bundle${selectedResources.length === 1 ? "" : "s"}?`
+            : `Archive ${selectedResources.length} bundle${selectedResources.length === 1 ? "" : "s"}?`
+        }
+        primaryAction={{
+          content: bulkConfirm === "delete" ? "Delete" : "Archive",
+          destructive: bulkConfirm === "delete",
+          loading: bulkBusy,
+          disabled: bulkBusy || selectedResources.length === 0,
+          onAction: async () => {
+            const action = bulkConfirm;
+            setBulkConfirm(null);
+            if (action === "archive" && onBulkArchive) {
+              await onBulkArchive(selectedResources);
+            } else if (action === "delete" && onBulkDelete) {
+              await onBulkDelete(selectedResources);
+            }
+            clearSelection();
+          },
+        }}
+        secondaryActions={[
+          { content: "Cancel", onAction: () => setBulkConfirm(null) },
+        ]}
+      >
+        <Modal.Section>
+          <Text as="p">
+            {bulkConfirm === "delete"
+              ? "Selected bundles will be hidden from the storefront and the list. Past orders that include them keep their history. This is reversible until the next GDPR shop-redact."
+              : "Selected bundles will be removed from the storefront. They stay in the list under the Archived filter and can be moved back to draft."}
           </Text>
         </Modal.Section>
       </Modal>
