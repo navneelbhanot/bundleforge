@@ -105,6 +105,29 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-187 — Support page** (2026-05-07). New `/support` route
+  consolidates merchant-help into one discoverable surface.
+  Two-pane layout: article list (search-filtered, grouped by
+  category) + selected article rendered with the same
+  `MarkdownView` the help drawer uses (extracted to
+  `frontend/src/components/help/MarkdownView.tsx` so both
+  surfaces share one implementation). "Talk to us" card with
+  Crisp chat trigger (only shown when `window.$crisp` loads —
+  3-second poll) + `mailto:` link to `support@bundleforge.app`
+  (overridable via `VITE_SUPPORT_EMAIL`). Resources card with
+  optional changelog / status / GitHub links — each shown only
+  when its env var is set, so dev with no env shows a friendly
+  placeholder. URL hash-routing for article selection
+  (`/support#bundle-types`); deep-links and back/forward
+  cycles work. NavMenu and top-bar tabs gain a "Help" entry as
+  the last item. HelpDrawer behaviour unchanged from `?` and
+  ⌘K. 808/808 vitest pass (+5 SupportPage). Typecheck clean.
+  Lint baseline unchanged. New env keys documented in
+  `.env.example` (`VITE_SUPPORT_EMAIL` / `VITE_CHANGELOG_URL` /
+  `VITE_STATUS_URL` / `VITE_GITHUB_REPO_URL`); `env.test.ts`
+  updated to skip VITE_* keys when comparing
+  `.env.example` against the server's runtime schema.
+  `docs/sessions/0197-187-support-page.md`.
 - **M-186 — Dashboard onboarding checklist + language select**
   (2026-05-07). New `SetupChecklist` Polaris Card on the
   dashboard above the widgets with three steps: Create your
@@ -686,9 +709,8 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **803 / 803 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 SetupChecklist + +3 AppLanguageSelect + +2
-  settings onboarding round-trip cases since M-186.
+- **808 / 808 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 SupportPage cases since M-187.
 - **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

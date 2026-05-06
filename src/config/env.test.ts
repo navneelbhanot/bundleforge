@@ -186,7 +186,13 @@ describe(".env.example matches schema", () => {
   });
 
   it(".env.example contains no keys that are not in the schema", () => {
-    const extra = [...exampleKeys].filter((k) => !schemaKeys.has(k));
+    // VITE_* keys are build-time substitutions consumed by Vite for
+    // the SPA bundle; the server's runtime envSchema doesn't (and
+    // shouldn't) know about them. They live in .env.example for
+    // operator documentation only.
+    const extra = [...exampleKeys].filter(
+      (k) => !schemaKeys.has(k) && !k.startsWith("VITE_"),
+    );
     expect(extra).toEqual([]);
   });
 });

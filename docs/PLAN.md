@@ -299,6 +299,7 @@
 | M-184 | Dashboard widgets on app home | done (2026-05-07) — `docs/specs/M-184-dashboard-widgets.md` |
 | M-185 | Settings two-pane left sidebar | done (2026-05-07) — `docs/specs/M-185-settings-left-sidebar.md` |
 | M-186 | Dashboard onboarding checklist + language select | done (2026-05-07) — `docs/specs/M-186-onboarding-checklist.md` |
+| M-187 | Support page (`/support`) | done (2026-05-07) — `docs/specs/M-187-support-page.md` |
 
 ---
 

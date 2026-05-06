@@ -7,11 +7,8 @@ import {
 } from "@testing-library/react";
 import { AppProvider } from "@shopify/polaris";
 
-import {
-  HelpDrawer,
-  MarkdownView,
-  OPEN_HELP_EVENT,
-} from "./HelpDrawer";
+import { HelpDrawer, OPEN_HELP_EVENT } from "./HelpDrawer";
+import { MarkdownView } from "./help/MarkdownView";
 
 const i18n = { Polaris: { Common: { cancel: "Cancel", save: "Save" } } };
 

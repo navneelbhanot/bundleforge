@@ -42,6 +42,7 @@ export function NavMenu(): JSX.Element {
       <a href="/ab-tests">A/B tests</a>
       <a href="/settings">Settings</a>
       <a href="/billing">Billing</a>
+      <a href="/support">Help</a>
     </ui-nav-menu>
   );
 }

@@ -15,6 +15,7 @@ import { NavMenu } from "./components/NavMenu";
 import { ToastsProvider } from "./components/shell/Toasts";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { SupportPage } from "./pages/SupportPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
 import { BundleDetailPage } from "./pages/BundleDetailPage";
 import { OrdersListPage } from "./pages/OrdersListPage";
@@ -53,6 +54,7 @@ const NAV_TABS: NavTab[] = [
   { id: "abtests", content: "A/B", path: "/ab-tests" },
   { id: "settings", content: "Settings", path: "/settings" },
   { id: "billing", content: "Billing", path: "/billing" },
+  { id: "support", content: "Help", path: "/support" },
 ];
 
 function pickSelected(pathname: string): number {
@@ -136,6 +138,7 @@ function Shell(): JSX.Element {
         <Route path="/ab-tests" element={<AbTestsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/billing" element={<BillingPage />} />
+        <Route path="/support" element={<SupportPage />} />
       </Routes>
       <CommandPalette />
       <HelpDrawer />
