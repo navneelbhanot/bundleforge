@@ -219,13 +219,13 @@ describe("SettingsPage", () => {
 
   it("non-built tabs render the placeholder pointing at their milestone", async () => {
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/settings#notifications");
+      window.history.replaceState(null, "", "/settings#integrations");
     }
     render(wrap(<SettingsPage />));
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-165/)).toBeTruthy();
+    expect(screen.getByText(/M-166/)).toBeTruthy();
   });
 
   it("Display tab renders three editable cards", async () => {
@@ -543,6 +543,156 @@ describe("SettingsPage", () => {
         ((putCall![1] as RequestInit).body as string) ?? "{}",
       );
       expect(body.cart.defaultMode).toBe("components_as_attributes");
+    });
+  });
+
+  it("Notifications tab renders the three cards", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#notifications");
+    }
+    render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Channels", level: 2 }),
+      ).toBeTruthy(),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Email channel", level: 2 }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Alert rules", level: 2 }),
+    ).toBeTruthy();
+  });
+
+  it("Notifications PATCH sends slackWebhookUrl in the notifications subobject", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#notifications");
+    }
+    const fetchSpy = vi.fn(
+      mockFetch(async (_input, init) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => BASE_PAYLOAD,
+          };
+        }
+        const body = JSON.parse((init.body as string) ?? "{}") as {
+          notifications?: Record<string, unknown>;
+        };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ...BASE_PAYLOAD,
+            notifications: {
+              ...BASE_PAYLOAD.notifications,
+              ...(body.notifications ?? {}),
+            },
+          }),
+        };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Channels", level: 2 }),
+      ).toBeTruthy(),
+    );
+
+    // Find the Slack URL input (placeholder distinguishes it).
+    const slackInput = Array.from(
+      container.querySelectorAll<HTMLInputElement>("input"),
+    ).find((i) => i.placeholder?.includes("hooks.slack.com")) ?? null;
+    expect(slackInput).toBeTruthy();
+    fireEvent.change(slackInput!, {
+      target: { value: "https://hooks.slack.com/services/T/B/X" },
+    });
+
+    // Click first Save button (Channels card).
+    const saveBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Save");
+    expect(saveBtn).toBeTruthy();
+    saveBtn!.click();
+
+    await waitFor(() => {
+      const putCall = fetchSpy.mock.calls.find((c) => {
+        const init = c[1] as RequestInit | undefined;
+        if (!init || init.method !== "PUT") return false;
+        const body = JSON.parse((init.body as string) ?? "{}");
+        return body.notifications?.slackWebhookUrl !== undefined;
+      });
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(
+        ((putCall![1] as RequestInit).body as string) ?? "{}",
+      );
+      expect(body.notifications.slackWebhookUrl).toBe(
+        "https://hooks.slack.com/services/T/B/X",
+      );
+    });
+  });
+
+  it("Notifications recipient add → tag → save sends the array", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#notifications");
+    }
+    const fetchSpy = vi.fn(
+      mockFetch(async (_input, init) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => BASE_PAYLOAD,
+          };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => BASE_PAYLOAD,
+        };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Channels", level: 2 }),
+      ).toBeTruthy(),
+    );
+
+    // Add a recipient via the Add input + Add button, then save.
+    const addInput = Array.from(
+      container.querySelectorAll<HTMLInputElement>("input"),
+    ).find((i) => i.placeholder?.includes("ops@example.com"))!;
+    fireEvent.change(addInput, { target: { value: "ops@example.com" } });
+    const addBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Add")!;
+    addBtn.click();
+
+    await waitFor(() => expect(screen.getByText("ops@example.com")).toBeTruthy());
+
+    const saveBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Save")!;
+    saveBtn.click();
+
+    await waitFor(() => {
+      const putCall = fetchSpy.mock.calls.find((c) => {
+        const init = c[1] as RequestInit | undefined;
+        if (!init || init.method !== "PUT") return false;
+        const body = JSON.parse((init.body as string) ?? "{}");
+        return Array.isArray(body.notifications?.recipients);
+      });
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(
+        ((putCall![1] as RequestInit).body as string) ?? "{}",
+      );
+      expect(body.notifications.recipients).toContain("ops@example.com");
     });
   });
 

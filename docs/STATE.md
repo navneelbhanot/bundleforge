@@ -8,27 +8,26 @@
 
 **Phase R1 — rich Settings page in progress.**
 
-M-161..M-164 all landed 2026-05-06. The SettingsPage now has 5 of
+M-161..M-165 all landed 2026-05-06. The SettingsPage now has 6 of
 10 tabs fully built (General, Display, Inventory, Pricing,
-Cart & checkout). M-164 also extended the Cart Transform Function
-to branch on an optional shop metafield
-(`bundleforge.cart_default_mode`) so merchants who pick
-"components_as_attributes" skip the expand path. Writing that
-metafield from the admin Save lands in M-164b (a thin follow-on).
-Remaining R1 milestones: M-165..M-167.
-Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
+Cart & checkout, Notifications). The notifications schema was
+upgraded from two booleans to a structured tree (recipients,
+Slack/Teams webhooks, per-rule channel subscriptions) without
+losing backwards compat — the existing webhook handler and the
+`settings.notifications.email` toggle keep working. Remaining R1
+milestones: M-166 (Integrations), M-167 (API + Localization +
+Billing). Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-165 — Notifications & alerts tab.
-Spec first: `docs/specs/M-165-settings-notifications.md`. Roadmap
-specifies email recipients (multi-input), Slack/Teams webhook
-URLs, alert rules (low stock, failed webhook, AI-service down,
-publish failure, bundle order without resolved bundle) with per-
-rule channel selection. The existing top-level
-`settings.notifications` (email/inApp toggles) should be
-re-surfaced on this tab; new fields land under
-`settings.notifications.*` (deep-merged).
+**Code (next session):** Run M-166 — Integrations tab. Spec
+first: `docs/specs/M-166-settings-integrations.md`. Roadmap
+specifies status row per integration (Crisp, ShipStation,
+Recharge, Bold, Klaviyo, Google Merchant, Amazon) with a
+"Configure" drawer per row + a Test connection button. Adapter
+files already exist under `src/services/integrations/`; this
+milestone is mostly UI binding the existing adapters' config
+shapes.
 
 Other open threads (mostly user-owned):
 
@@ -97,6 +96,20 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-165 — Settings · Notifications & alerts tab** (2026-05-06
+  late). Three cards: Channels (Polaris Tag chips for email
+  recipients with Add input + remove, Slack and Teams webhook
+  URL fields, in-app checkbox), Email channel (master enable
+  toggle re-surfacing the existing setting + helpful copy when
+  no recipients are configured), Alert rules (5 rules × 4
+  channels each via ChoiceList allowMultiple). Server upgraded
+  notifications schema from `{email,inApp}` to a structured
+  tree, with two-level deep-merge so saving one rule doesn't
+  drop sibling rules. Existing `email`/`inApp` toggles kept
+  working unchanged. Wiring: emitters that already exist will
+  multiplex to channels in M-165b; events without an emitter
+  today persist their config until built.
+  `docs/sessions/0165-settings-notifications.md`.
 - **M-164 — Settings · Cart & Checkout tab** (2026-05-06 late).
   Two cards: Cart mode (bundle_as_product /
   components_as_attributes Select with merchant-friendly
@@ -207,9 +220,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **507 / 507 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 settings-route, +2 SettingsPage, +3
-  cart-transform run cases since 0163.
+- **516 / 516 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 settings-route, +3 SettingsPage cases since
+  0164.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

@@ -107,15 +107,39 @@ const CartPatch = z
   })
   .strict();
 
+const NotificationChannel = z.enum(["email", "inApp", "slack", "teams"]);
+
+const NotificationRule = z
+  .object({
+    enabled: z.boolean().optional(),
+    channels: z.array(NotificationChannel).optional(),
+  })
+  .strict();
+
+const NotificationsPatch = z
+  .object({
+    email: z.boolean().optional(),
+    inApp: z.boolean().optional(),
+    recipients: z.array(z.string().email()).max(20).optional(),
+    slackWebhookUrl: z.string().url().optional().or(z.literal("")),
+    teamsWebhookUrl: z.string().url().optional().or(z.literal("")),
+    rules: z
+      .object({
+        lowStock: NotificationRule.optional(),
+        publishFailure: NotificationRule.optional(),
+        webhookFailure: NotificationRule.optional(),
+        aiServiceDown: NotificationRule.optional(),
+        unresolvedBundleOrder: NotificationRule.optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
-    notifications: z
-      .object({
-        email: z.boolean().optional(),
-        inApp: z.boolean().optional(),
-      })
-      .optional(),
+    notifications: NotificationsPatch.optional(),
     general: GeneralPatch.optional(),
     display: DisplayPatch.optional(),
     inventory: InventoryPatch.optional(),
@@ -260,17 +284,29 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
 
       // Deep-merge each subobject so a Save on one card doesn't wipe
       // sibling fields set by another card.
+      // Notifications has a nested `rules` map that itself needs
+      // deep-merge — saving one rule mustn't wipe siblings. So
+      // we merge two levels deep: top-level keys get
+      // `mergeSubobject`, and `rules` gets its own merge.
+      const prevNotifs = isObject(prev.notifications) ? prev.notifications : {};
+      const patchNotifs = patch.notifications;
+      const mergedNotifications = patchNotifs
+        ? {
+            ...prevNotifs,
+            ...patchNotifs,
+            rules: {
+              ...(isObject(prevNotifs.rules) ? prevNotifs.rules : {}),
+              ...(patchNotifs.rules ?? {}),
+            },
+          }
+        : prevNotifs;
+
       const merged: Record<string, unknown> = {
         ...prev,
         ...(patch.safetyLock !== undefined && {
           safetyLock: patch.safetyLock,
         }),
-        ...(patch.notifications && {
-          notifications: {
-            ...(isObject(prev.notifications) ? prev.notifications : {}),
-            ...patch.notifications,
-          },
-        }),
+        notifications: mergedNotifications,
         general: mergeSubobject(prev.general, patch.general),
         display: mergeSubobject(prev.display, patch.display),
         inventory: mergeSubobject(prev.inventory, patch.inventory),

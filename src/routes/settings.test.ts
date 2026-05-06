@@ -506,6 +506,152 @@ describe("PUT /settings", () => {
     });
   });
 
+  it("round-trips a full notifications patch with channels + rules", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        notifications: {
+          email: true,
+          inApp: true,
+          recipients: ["ops@example.com", "oncall@example.com"],
+          slackWebhookUrl: "https://hooks.slack.com/services/T/B/X",
+          rules: {
+            lowStock: { enabled: true, channels: ["email", "slack"] },
+            publishFailure: { enabled: true, channels: ["email"] },
+          },
+        },
+      });
+    expect(res.status, res.text).toBe(200);
+    expect(res.body.notifications).toMatchObject({
+      email: true,
+      recipients: ["ops@example.com", "oncall@example.com"],
+      slackWebhookUrl: "https://hooks.slack.com/services/T/B/X",
+    });
+    expect(res.body.notifications.rules.lowStock).toEqual({
+      enabled: true,
+      channels: ["email", "slack"],
+    });
+  });
+
+  it("rejects a non-email entry in recipients", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ notifications: { recipients: ["ops@example.com", "not-an-email"] } });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a slackWebhookUrl that isn't a URL", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ notifications: { slackWebhookUrl: "not-a-url" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a recipients list with > 20 entries", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const recipients = Array.from(
+      { length: 21 },
+      (_, i) => `user${i}@example.com`,
+    );
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ notifications: { recipients } });
+    expect(res.status).toBe(400);
+  });
+
+  it("deep-merges notifications.rules — saving lowStock doesn't drop publishFailure", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {
+            notifications: {
+              email: true,
+              rules: {
+                publishFailure: { enabled: true, channels: ["email"] },
+              },
+            },
+          },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        notifications: {
+          rules: { lowStock: { enabled: true, channels: ["slack"] } },
+        },
+      });
+    expect(res.status, res.text).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.notifications.email).toBe(true);
+    expect(writtenSettings.notifications.rules.publishFailure).toEqual({
+      enabled: true,
+      channels: ["email"],
+    });
+    expect(writtenSettings.notifications.rules.lowStock).toEqual({
+      enabled: true,
+      channels: ["slack"],
+    });
+  });
+
+  it("recipients save doesn't drop a previously saved email: true", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: { notifications: { email: true, inApp: false } },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        notifications: { recipients: ["ops@example.com"] },
+      });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.notifications).toMatchObject({
+      email: true,
+      inApp: false,
+      recipients: ["ops@example.com"],
+    });
+  });
+
   it("persists top-level safetyLock and general.brandColor in the same patch", async () => {
     const updateSpy = vi.fn().mockImplementation(({ data }) =>
       Promise.resolve({ id: "s", settings: data.settings }),

@@ -18,11 +18,13 @@ import {
   Button,
   Card,
   Checkbox,
+  ChoiceList,
   InlineStack,
   Layout,
   Page,
   Select,
   Tabs,
+  Tag,
   Text,
   TextField,
 } from "@shopify/polaris";
@@ -78,9 +80,31 @@ interface CartBlock {
   cartNoteTemplate?: string;
 }
 
+type NotificationChannel = "email" | "inApp" | "slack" | "teams";
+
+interface NotificationRule {
+  enabled?: boolean;
+  channels?: NotificationChannel[];
+}
+
+interface NotificationsBlock {
+  email?: boolean;
+  inApp?: boolean;
+  recipients?: string[];
+  slackWebhookUrl?: string;
+  teamsWebhookUrl?: string;
+  rules?: {
+    lowStock?: NotificationRule;
+    publishFailure?: NotificationRule;
+    webhookFailure?: NotificationRule;
+    aiServiceDown?: NotificationRule;
+    unresolvedBundleOrder?: NotificationRule;
+  };
+}
+
 interface SettingsPayload {
   safetyLock?: boolean;
-  notifications?: { email?: boolean; inApp?: boolean };
+  notifications: NotificationsBlock;
   general: GeneralBlock;
   display: DisplayBlock;
   inventory: InventoryBlock;
@@ -134,7 +158,7 @@ const TABS: TabSpec[] = [
   { id: "inventory", hash: "inventory", content: "Inventory", status: "ready" },
   { id: "pricing", hash: "pricing", content: "Pricing", status: "ready" },
   { id: "cart", hash: "cart", content: "Cart & checkout", status: "ready" },
-  { id: "notifications", hash: "notifications", content: "Notifications", status: "deferred", milestone: "M-165" },
+  { id: "notifications", hash: "notifications", content: "Notifications", status: "ready" },
   { id: "integrations", hash: "integrations", content: "Integrations", status: "deferred", milestone: "M-166" },
   { id: "api", hash: "api", content: "API & webhooks", status: "deferred", milestone: "M-167" },
   { id: "localization", hash: "localization", content: "Localization", status: "deferred", milestone: "M-167" },
@@ -1126,6 +1150,329 @@ function CheckoutProtectionsCard({
 
 // ---------------- /Cart & Checkout tab cards ----------------
 
+// ---------------- Notifications tab cards (M-165) ----------------
+
+const ALERT_RULES: Array<{
+  key: keyof NonNullable<NotificationsBlock["rules"]>;
+  label: string;
+  hint: string;
+}> = [
+  {
+    key: "lowStock",
+    label: "Low stock",
+    hint: "When a bundle component drops at/below the threshold from the Inventory tab.",
+  },
+  {
+    key: "publishFailure",
+    label: "Publish failure",
+    hint: "When publishing a bundle to Shopify fails (productCreate userErrors, network, etc.).",
+  },
+  {
+    key: "webhookFailure",
+    label: "Webhook delivery failure",
+    hint: "When a Shopify webhook handler raises (HMAC mismatch ignored — that's silent).",
+  },
+  {
+    key: "aiServiceDown",
+    label: "AI service down",
+    hint: "When the recommender service stops responding to health checks.",
+  },
+  {
+    key: "unresolvedBundleOrder",
+    label: "Unresolved bundle order",
+    hint: "When orders/create webhook arrives for an order whose lines don't resolve to a known bundle.",
+  },
+];
+
+const ALL_CHANNELS: { label: string; value: NotificationChannel }[] = [
+  { label: "Email", value: "email" },
+  { label: "In-app", value: "inApp" },
+  { label: "Slack", value: "slack" },
+  { label: "Teams", value: "teams" },
+];
+
+interface ChannelsCardProps {
+  initial: Pick<
+    NotificationsBlock,
+    "recipients" | "slackWebhookUrl" | "teamsWebhookUrl" | "inApp"
+  >;
+  busy: boolean;
+  onSave: (
+    patch: Pick<
+      NotificationsBlock,
+      "recipients" | "slackWebhookUrl" | "teamsWebhookUrl" | "inApp"
+    >,
+  ) => Promise<void>;
+}
+
+function ChannelsCard({ initial, busy, onSave }: ChannelsCardProps): JSX.Element {
+  const [recipients, setRecipients] = useState<string[]>(initial.recipients ?? []);
+  const [pending, setPending] = useState<string>("");
+  const [slack, setSlack] = useState<string>(initial.slackWebhookUrl ?? "");
+  const [teams, setTeams] = useState<string>(initial.teamsWebhookUrl ?? "");
+  const [inApp, setInApp] = useState<boolean>(initial.inApp !== false);
+  const [error, setError] = useState<string | null>(null);
+
+  function addPending(): void {
+    const trimmed = pending.trim();
+    if (trimmed.length === 0) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (recipients.includes(trimmed)) {
+      setPending("");
+      return;
+    }
+    if (recipients.length >= 20) {
+      setError("Max 20 recipients.");
+      return;
+    }
+    setRecipients([...recipients, trimmed]);
+    setPending("");
+    setError(null);
+  }
+
+  function removeRecipient(addr: string): void {
+    setRecipients(recipients.filter((r) => r !== addr));
+  }
+
+  const slackValid =
+    slack.length === 0 || /^https?:\/\//.test(slack);
+  const teamsValid =
+    teams.length === 0 || /^https?:\/\//.test(teams);
+
+  const dirty =
+    JSON.stringify(initial.recipients ?? []) !== JSON.stringify(recipients) ||
+    (initial.slackWebhookUrl ?? "") !== slack ||
+    (initial.teamsWebhookUrl ?? "") !== teams ||
+    (initial.inApp !== false) !== inApp;
+
+  async function save(): Promise<void> {
+    if (!slackValid) {
+      setError("Slack webhook URL must start with http:// or https://.");
+      return;
+    }
+    if (!teamsValid) {
+      setError("Teams webhook URL must start with http:// or https://.");
+      return;
+    }
+    setError(null);
+    await onSave({
+      recipients,
+      slackWebhookUrl: slack,
+      teamsWebhookUrl: teams,
+      inApp,
+    });
+  }
+
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Channels
+        </Text>
+        <Text as="p" tone="subdued">
+          Where alerts are sent. The Email channel uses these
+          recipients; the in-app channel surfaces inside the
+          BundleForge admin.
+        </Text>
+        {error && (
+          <Banner tone="critical" title="Couldn't save channels">
+            {error}
+          </Banner>
+        )}
+
+        <Box>
+          <Text as="p" variant="bodyMd" fontWeight="semibold">
+            Email recipients
+          </Text>
+          <InlineStack gap="200" align="start" blockAlign="center" wrap>
+            {recipients.map((r) => (
+              <Tag key={r} onRemove={() => removeRecipient(r)}>
+                {r}
+              </Tag>
+            ))}
+          </InlineStack>
+          <Box paddingBlockStart="200">
+            <InlineStack gap="200" wrap={false} blockAlign="end">
+              <Box minWidth="280px">
+                <TextField
+                  label="Add recipient"
+                  value={pending}
+                  onChange={setPending}
+                  type="email"
+                  autoComplete="off"
+                  placeholder="ops@example.com"
+                />
+              </Box>
+              <Button onClick={addPending}>Add</Button>
+            </InlineStack>
+          </Box>
+        </Box>
+
+        <TextField
+          label="Slack webhook URL"
+          value={slack}
+          onChange={setSlack}
+          autoComplete="off"
+          placeholder="https://hooks.slack.com/services/..."
+          error={!slackValid ? "Must start with http(s)://" : undefined}
+        />
+        <TextField
+          label="Teams webhook URL"
+          value={teams}
+          onChange={setTeams}
+          autoComplete="off"
+          placeholder="https://outlook.office.com/webhook/..."
+          error={!teamsValid ? "Must start with http(s)://" : undefined}
+        />
+
+        <Checkbox
+          label="In-app notifications (banner inside the admin)"
+          checked={inApp}
+          onChange={setInApp}
+        />
+
+        <CardSaveBar busy={busy} dirty={dirty} onSave={save} />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface EmailEnableCardProps {
+  initial: Pick<NotificationsBlock, "email">;
+  recipientsCount: number;
+  busy: boolean;
+  onSave: (patch: Pick<NotificationsBlock, "email">) => Promise<void>;
+}
+
+function EmailEnableCard({
+  initial,
+  recipientsCount,
+  busy,
+  onSave,
+}: EmailEnableCardProps): JSX.Element {
+  const [enabled, setEnabled] = useState<boolean>(initial.email !== false);
+  const dirty = (initial.email !== false) !== enabled;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Email channel
+        </Text>
+        <Checkbox
+          label="Send alerts via email"
+          checked={enabled}
+          onChange={setEnabled}
+        />
+        <Text as="p" tone="subdued">
+          {recipientsCount === 0
+            ? "No recipients configured yet — alerts won't be delivered until you add at least one address in the Channels card above."
+            : `Will go to ${recipientsCount} recipient${recipientsCount === 1 ? "" : "s"} configured in the Channels card.`}
+        </Text>
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() => onSave({ email: enabled })}
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface AlertRulesCardProps {
+  initial: NonNullable<NotificationsBlock["rules"]>;
+  busy: boolean;
+  onSave: (patch: { rules: NotificationsBlock["rules"] }) => Promise<void>;
+}
+
+function AlertRulesCard({
+  initial,
+  busy,
+  onSave,
+}: AlertRulesCardProps): JSX.Element {
+  // Local mutable state mirrors the persisted shape; one ChoiceList per rule.
+  const [rules, setRules] = useState<NonNullable<NotificationsBlock["rules"]>>(initial);
+
+  function updateRule(
+    key: keyof NonNullable<NotificationsBlock["rules"]>,
+    next: NotificationRule,
+  ): void {
+    setRules({ ...rules, [key]: { ...(rules[key] ?? {}), ...next } });
+  }
+
+  const dirty = JSON.stringify(rules) !== JSON.stringify(initial);
+
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Alert rules
+        </Text>
+        <Text as="p" tone="subdued">
+          Pick which events trigger an alert and which channels each
+          one uses. Channels still need to be configured above.
+          Behaviour wiring for events without an emitter today is
+          tracked in M-165b.
+        </Text>
+        <BlockStack gap="400">
+          {ALERT_RULES.map((rule) => {
+            const current = rules[rule.key] ?? { enabled: false, channels: [] };
+            return (
+              <Box
+                key={rule.key}
+                padding="300"
+                borderColor="border"
+                borderWidth="025"
+                borderRadius="200"
+              >
+                <BlockStack gap="200">
+                  <InlineStack align="space-between" blockAlign="center" wrap>
+                    <Text as="h3" variant="headingSm">
+                      {rule.label}
+                    </Text>
+                    <Checkbox
+                      label="Enabled"
+                      labelHidden
+                      checked={current.enabled === true}
+                      onChange={(checked) =>
+                        updateRule(rule.key, { enabled: checked })
+                      }
+                    />
+                  </InlineStack>
+                  <Text as="p" tone="subdued" variant="bodySm">
+                    {rule.hint}
+                  </Text>
+                  <ChoiceList
+                    title="Channels"
+                    titleHidden
+                    allowMultiple
+                    choices={ALL_CHANNELS}
+                    selected={(current.channels ?? []) as string[]}
+                    onChange={(selected) =>
+                      updateRule(rule.key, {
+                        channels: selected as NotificationChannel[],
+                      })
+                    }
+                  />
+                </BlockStack>
+              </Box>
+            );
+          })}
+        </BlockStack>
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() => onSave({ rules })}
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Notifications tab cards ----------------
+
 interface PlaceholderTabProps {
   tab: TabSpec;
 }
@@ -1178,7 +1525,13 @@ export function SettingsPage(): JSX.Element {
   }
 
   async function patchSubobject(
-    key: "general" | "display" | "inventory" | "pricing" | "cart",
+    key:
+      | "general"
+      | "display"
+      | "inventory"
+      | "pricing"
+      | "cart"
+      | "notifications",
     patch: Record<string, unknown>,
   ): Promise<void> {
     setSaving(true);
@@ -1211,6 +1564,8 @@ export function SettingsPage(): JSX.Element {
     patchSubobject("pricing", patch);
   const patchCart = (patch: Record<string, unknown>) =>
     patchSubobject("cart", patch);
+  const patchNotifications = (patch: Record<string, unknown>) =>
+    patchSubobject("notifications", patch);
 
   async function patchSafetyLock(next: boolean): Promise<void> {
     setSaving(true);
@@ -1350,6 +1705,36 @@ export function SettingsPage(): JSX.Element {
                   }}
                   busy={saving}
                   onSave={patchPricing}
+                />
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "notifications" ? (
+          <Layout>
+            <Layout.Section>
+              <BlockStack gap="400">
+                <ChannelsCard
+                  initial={{
+                    recipients: state.notifications.recipients,
+                    slackWebhookUrl: state.notifications.slackWebhookUrl,
+                    teamsWebhookUrl: state.notifications.teamsWebhookUrl,
+                    inApp: state.notifications.inApp,
+                  }}
+                  busy={saving}
+                  onSave={patchNotifications}
+                />
+                <EmailEnableCard
+                  initial={{ email: state.notifications.email }}
+                  recipientsCount={
+                    state.notifications.recipients?.length ?? 0
+                  }
+                  busy={saving}
+                  onSave={patchNotifications}
+                />
+                <AlertRulesCard
+                  initial={state.notifications.rules ?? {}}
+                  busy={saving}
+                  onSave={patchNotifications}
                 />
               </BlockStack>
             </Layout.Section>
