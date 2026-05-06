@@ -24,7 +24,31 @@ import {
   breakdownBundleSkus,
   type BundleItemSnapshot,
 } from "../../services/orders/skuBreakdown";
+import { shopify } from "../../shopify";
+import { shopifyGraphql } from "../../shopify/graphql";
 import type { WebhookHandler } from "../handlers";
+
+/**
+ * Tags this milestone applies to a Shopify order so merchants can
+ * spot bundle orders at a glance. We use `tagsAdd` (additive) not
+ * `orderUpdate` (which replaces tags wholesale), so we never
+ * clobber tags the merchant or other apps set.
+ */
+const TAGS_ADD_MUTATION = `#graphql
+  mutation BundleforgeTagsAdd($id: ID!, $tags: [String!]!) {
+    tagsAdd(id: $id, tags: $tags) {
+      node { id }
+      userErrors { field message }
+    }
+  }
+`;
+
+interface TagsAddResponse {
+  tagsAdd?: {
+    node?: { id?: string };
+    userErrors?: Array<{ field?: string[]; message: string }>;
+  };
+}
 
 const handlerLogger = logger.child({ module: "wh:orders/create" });
 
@@ -37,10 +61,16 @@ export interface OrdersCreateDeps {
     shopId: string,
   ) => Promise<{
     id: string;
+    title: string;
     items: BundleItemSnapshot[];
     inventoryItemGid?: string | null;
     locationGid?: string | null;
   } | null>;
+  markOrderInShopify?: (args: {
+    shopDomain: string;
+    orderGid: string;
+    bundleTitle: string;
+  }) => Promise<void>;
   createBundleOrder?: (data: {
     shopId: string;
     bundleId: string;
@@ -82,6 +112,7 @@ export function ordersCreateHandler(
       if (!b) return null;
       return {
         id: b.id,
+        title: b.title,
         items: b.items.map((it) => ({
           sku: it.sku ?? null,
           shopifyProductGid: it.shopifyProductGid,
@@ -92,6 +123,53 @@ export function ordersCreateHandler(
         inventoryItemGid: null,
         locationGid: null,
       };
+    });
+  const markOrderInShopify =
+    deps.markOrderInShopify ??
+    (async ({ shopDomain, orderGid, bundleTitle }) => {
+      // Load the offline session for this shop. This is the same
+      // session the SDK persists at OAuth install time. If it's
+      // missing (uninstalled mid-flight, never installed) we just
+      // log and skip — the BundleOrder row is already persisted.
+      const storage = shopify.config.sessionStorage;
+      if (!storage) {
+        handlerLogger.warn(
+          { shopDomain },
+          "No session storage configured — can't tag order",
+        );
+        return;
+      }
+      const sessions = await storage.findSessionsByShop(shopDomain);
+      const offline = sessions.find((s) => s.isOnline === false);
+      if (!offline) {
+        handlerLogger.warn(
+          { shopDomain },
+          "No offline session for shop — can't tag order",
+        );
+        return;
+      }
+      // Tag list:
+      //  - "bundleforge"      → app-wide filter
+      //  - "bundle"           → simpler filter for ops
+      //  - "bundle: <title>"  → human-readable per-bundle marker
+      // Shopify tags are case-insensitive and trimmed; we cap the
+      // title slice at 100 chars to stay under their per-tag limit.
+      const titleTag = `bundle: ${bundleTitle.slice(0, 100)}`;
+      const data = await shopifyGraphql<TagsAddResponse>(
+        offline,
+        TAGS_ADD_MUTATION,
+        {
+          id: orderGid,
+          tags: ["bundleforge", "bundle", titleTag],
+        },
+      );
+      const userErrors = data.tagsAdd?.userErrors ?? [];
+      if (userErrors.length > 0) {
+        handlerLogger.warn(
+          { orderGid, userErrors },
+          "tagsAdd userErrors",
+        );
+      }
     });
   const createBundleOrder =
     deps.createBundleOrder ??
@@ -160,6 +238,25 @@ export function ordersCreateHandler(
           lineItems: [lineItem],
           skuBreakdown,
         });
+
+        // Tag the Shopify order so it's identifiable in the merchant's
+        // native Orders list. Failure here MUST NOT fail the webhook —
+        // the BundleOrder row is already persisted, and a missing
+        // tag is a UI nuisance, not a data integrity problem.
+        if (orderGid) {
+          try {
+            await markOrderInShopify({
+              shopDomain,
+              orderGid,
+              bundleTitle: bundle.title,
+            });
+          } catch (tagErr) {
+            handlerLogger.warn(
+              { err: tagErr, orderGid, bundleId, webhookId },
+              "Failed to tag Shopify order — BundleOrder row persisted regardless",
+            );
+          }
+        }
 
         // Inventory: only attempt if the bundle has inventoryItemGid +
         // location. Otherwise we have nothing to decrement (data not yet

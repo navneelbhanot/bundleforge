@@ -95,6 +95,15 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Bundle-order tagging in Shopify** (2026-05-06 late, hotfix
+  before M-168). The `orders/create` webhook handler now calls
+  Shopify's `tagsAdd` mutation (additive — never clobbers
+  existing tags) to mark every bundle-containing order with
+  `bundleforge`, `bundle`, and `bundle: <title>`. Merchants can
+  filter their Shopify Orders list by these tags. Failure to
+  tag is logged but never fails the webhook — the BundleOrder
+  row is already persisted by then, so a missing tag is a UI
+  nuisance not a data integrity bug. 541/541 vitest pass.
 - **M-167 — Settings · Localization + Billing + GM feed URL**
   (2026-05-06 late). Re-scoped mid-spec from "API & webhooks +
   Localization + Billing in one milestone" to just the three
@@ -248,9 +257,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **538 / 538 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +3 settings-route, +3 SettingsPage, +1
-  IntegrationsTab cases since 0166.
+- **541 / 541 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +3 ordersCreate handler cases since the M-167
+  push (bundle-order Shopify tagging hotfix).
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
