@@ -131,6 +131,123 @@ describe("BundleService.create", () => {
       }),
     ).rejects.toThrow();
   });
+
+  it("persists scheduleSettings on create (M-170)", async () => {
+    mockedRepo.create.mockResolvedValueOnce({ id: "b-2" });
+    const svc = new BundleService();
+    await svc.create("shop", {
+      title: "Holiday",
+      type: "fixed",
+      items: [],
+      pricingRules: [],
+      scheduleSettings: {
+        timezone: "America/Los_Angeles",
+        recurringRule: {
+          type: "weekly",
+          daysOfWeek: [5, 6],
+          startTime: "09:00",
+          endTime: "23:59",
+        },
+        endBehavior: "archive",
+      },
+    });
+    const args = mockedRepo.create.mock.calls[0][0];
+    expect(args.data.scheduleSettings).toMatchObject({
+      timezone: "America/Los_Angeles",
+      endBehavior: "archive",
+    });
+  });
+
+  it("rejects scheduleSettings.endBehavior with an unknown value (M-170)", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        scheduleSettings: {
+          endBehavior: "burn-it-down" as unknown as "archive",
+        },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects daysOfWeek without weekly type (M-170)", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        scheduleSettings: {
+          recurringRule: { type: "daily", daysOfWeek: [1, 2] },
+        },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects endsAt before startsAt (M-170)", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        startsAt: "2026-12-25T00:00:00Z",
+        endsAt: "2026-12-24T00:00:00Z",
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+});
+
+describe("BundleService.update — scheduleSettings (M-170)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+  });
+
+  it("deep-merges scheduleSettings — saving timezone alone keeps recurringRule", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      scheduleSettings: {
+        timezone: "UTC",
+        recurringRule: {
+          type: "weekly",
+          daysOfWeek: [5, 6],
+        },
+        endBehavior: "pause",
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      scheduleSettings: { timezone: "America/Los_Angeles" },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.scheduleSettings).toEqual({
+      timezone: "America/Los_Angeles",
+      recurringRule: {
+        type: "weekly",
+        daysOfWeek: [5, 6],
+      },
+      endBehavior: "pause",
+    });
+  });
+
+  it("validates schedule on update too", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1", scheduleSettings: {} });
+    const svc = new BundleService();
+    await expect(
+      svc.update("shop", "b-1", {
+        scheduleSettings: {
+          recurringRule: { type: "monthly", dayOfMonth: 99 },
+        },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
 });
 
 describe("BundleService.getById", () => {

@@ -80,6 +80,27 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export type RecurringRuleType = "daily" | "weekly" | "monthly";
+
+export interface RecurringRuleInput {
+  type: RecurringRuleType | null;
+  /** Weekly only — 0 = Sunday … 6 = Saturday. */
+  daysOfWeek?: number[];
+  /** Monthly only — 1..31. */
+  dayOfMonth?: number;
+  /** "HH:MM" 24h. */
+  startTime?: string;
+  endTime?: string;
+}
+
+export type ScheduleEndBehavior = "archive" | "pause";
+
+export interface ScheduleSettingsInput {
+  timezone?: string;
+  recurringRule?: RecurringRuleInput | null;
+  endBehavior?: ScheduleEndBehavior;
+}
+
 export interface CreateBundleInput {
   title: string;
   type: BundleType;
@@ -88,6 +109,7 @@ export interface CreateBundleInput {
   pricingRules: CreatePricingRuleInput[];
   config?: Record<string, unknown>;
   displaySettings?: Record<string, unknown>;
+  scheduleSettings?: ScheduleSettingsInput;
   startsAt?: string;
   endsAt?: string;
 }

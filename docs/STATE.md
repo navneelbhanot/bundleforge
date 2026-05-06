@@ -8,38 +8,38 @@
 
 **Phase R2 in progress — Bundle Detail richness.**
 
-Phase R1 (M-161..M-168) closed 2026-05-06 with all 10 Settings
-tabs built. **Phase R2 numbering note:** original roadmap had
-R2 starting at M-168, but M-167's split into M-168 shifted
-every R2-R4 slot by 1. Phase R2 now runs M-169..M-175. PLAN.md
-renumbered.
+M-169 (Detail shell tab refactor) and M-170 (Schedule tab) both
+landed 2026-05-06. The Bundle Detail page now has 2 of 8 tabs
+fully built: Setup (visually identical to the previous
+scrolling form) and Schedule (Window / Recurrence / End
+behavior). Remaining R2 tabs (Display, Customers, Inventory,
+Performance + Activity, Advanced) are placeholders pointing at
+M-171..M-175.
 
-M-169 (Detail shell tab refactor) landed 2026-05-06. The Bundle
-Detail page is now an 8-tab shell (Setup, Schedule, Display,
-Customers, Inventory, Performance, Activity, Advanced) with hash
-routing. Setup tab is visually identical to the previous
-scrolling form; the other 7 render placeholder cards. Form
-state survives tab switches via display:none toggle (DOM stays
-mounted). Sidebar (Status / Quick stats / Live Preview) persists
-across all tabs.
+Form state survives tab switches via the display:none toggle
+established in M-169. Schedule tab persists `startsAt`,
+`endsAt`, `scheduleSettings` (timezone, recurringRule,
+endBehavior) on the Bundle row.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (still pending from M-168):**
-Apply the M-168 migration on the production database. Either via
-`prisma migrate deploy` from a CI shell or by running the SQL in
-`prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/migration.sql`
-directly. Two empty tables, no backfill — safe during normal
-traffic.
+**User action required (still pending — two migrations queued):**
+1. M-168: `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`
+2. M-170: `prisma/migrations/20260506180000_bundle_schedule_settings/`
 
-**Code (next session):** Run M-170 — Schedule tab content. Spec
-first: `docs/specs/M-170-bundle-detail-schedule.md`. Roadmap:
-start date / end date / recurring (daily/weekly/monthly) /
-timezone (default from shop) / auto-archive vs auto-pause on
-end. Server side extends `Bundle.startsAt` / `Bundle.endsAt`
-(already exist) plus a new `recurringRule` JSON field.
+Both safe during normal traffic — M-168 creates 2 empty tables,
+M-170 adds a single nullable JSON column to bundles. Apply via
+`prisma migrate deploy` from a CI shell.
+
+**Code (next session):** Run M-171 — Display tab content (Bundle
+Detail). Spec first: `docs/specs/M-171-bundle-detail-display.md`.
+Per-bundle override of the shop-level Display defaults from M-162
+(layout / color preset / image preference / Add-to-cart copy /
+sold-out behavior / custom CSS). Persists in
+`Bundle.displaySettings` (existing JSON column — no migration
+needed).
 
 Other open threads (mostly user-owned):
 
@@ -108,6 +108,19 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-170 — Bundle Detail · Schedule tab** (2026-05-06 late).
+  Three cards: Window (start date+time / end date+time / IANA
+  timezone Select), Recurrence (None / Daily / Weekly /
+  Monthly with conditional daysOfWeek ChoiceList for weekly +
+  dayOfMonth TextField for monthly + per-cycle start/end times),
+  End behavior (archive vs pause). Server: new Bundle JSON
+  column `scheduleSettings`, validates timezone +
+  recurringRule.type/daysOfWeek/dayOfMonth/start-end shapes;
+  cross-field guard rejects endsAt < startsAt; deep-merge so a
+  Save on one card doesn't drop sibling fields. Migration file
+  ready (NOT applied per CLAUDE.md §5). Worker for auto-archive
+  / auto-pause at endsAt-passes deferred to M-170b.
+  `docs/sessions/0170-bundle-detail-schedule.md`.
 - **M-169 — Bundle Detail tab shell refactor** (2026-05-06 late,
   Phase R2 start). The 500-line single-scroll BundleDetailPage
   is now an 8-tab shell (Setup, Schedule, Display, Customers,
@@ -295,9 +308,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **570 / 570 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 BundleDetailPage tab-shell cases since
-  M-168.
+- **582 / 582 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 BundleService schedule cases + +5
+  ScheduleTab UI cases + +1 BundleDetailPage hash test since
+  M-169.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

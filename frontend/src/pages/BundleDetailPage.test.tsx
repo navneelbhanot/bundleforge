@@ -134,12 +134,14 @@ describe("BundleDetailPage tab shell", () => {
     ).toBeTruthy();
   });
 
-  it("non-Setup tabs render the placeholder card pointing at their milestone", async () => {
-    renderAt("#schedule");
+  it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
+    // Schedule is now wired (M-170). Use #customers which is still
+    // placeholder for M-172.
+    renderAt("#customers");
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-170/)).toBeTruthy();
+    expect(screen.getByText(/M-172/)).toBeTruthy();
   });
 
   it("hash routing: deep-link to #display selects the Display tab on mount", async () => {
@@ -148,6 +150,18 @@ describe("BundleDetailPage tab shell", () => {
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
     expect(screen.getByText(/M-171/)).toBeTruthy();
+  });
+
+  it("hash routing: deep-link to #schedule renders the Schedule tab content (M-170 wired)", async () => {
+    renderAt("#schedule");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Window", level: 2 }),
+      ).toBeTruthy(),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Recurrence", level: 2 }),
+    ).toBeTruthy();
   });
 
   it("switching tabs preserves dirty title field", async () => {
@@ -166,9 +180,10 @@ describe("BundleDetailPage tab shell", () => {
     fireEvent.change(titleInput!, { target: { value: "Edited title" } });
 
     // Switch to a placeholder tab via the hash. We dispatch a hashchange
-    // event so the page-level listener picks it up.
+    // event so the page-level listener picks it up. Use #customers
+    // because Schedule (M-170) is now wired and renders real content.
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/bundles/bundle-1#schedule");
+      window.history.replaceState(null, "", "/bundles/bundle-1#customers");
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     }
     await waitFor(() =>

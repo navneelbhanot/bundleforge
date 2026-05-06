@@ -27,6 +27,10 @@ import {
 } from "@shopify/polaris";
 
 import { findBundleType } from "../components/bundleTypes";
+import {
+  ScheduleTab,
+  type ScheduleSettings,
+} from "../components/bundleDetail/ScheduleTab";
 import { PageLoading } from "../components/PageLoading";
 import {
   PricingRulesEditor,
@@ -76,6 +80,10 @@ interface BundleDetail {
   config: Record<string, unknown>;
   items: BundleItem[];
   pricingRules?: PricingRuleRow[];
+  startsAt?: string | null;
+  endsAt?: string | null;
+  scheduleSettings?: ScheduleSettings;
+  shopTimezone?: string;
 }
 
 function statusTone(status: string): "success" | "info" | "warning" | "attention" {
@@ -369,13 +377,27 @@ export function BundleDetailPage(): JSX.Element {
               {/* Setup-tab form is always mounted (just hidden when
                   another tab is active) so that switching tabs never
                   discards in-flight title/description/items/rules
-                  edits. Placeholder tabs render outside this block so
-                  the form's React state stays alive in the DOM. */}
-              {TABS[tabIndex].id !== "setup" && (
+                  edits. Other tabs render their content above the
+                  hidden Setup form so the form's React state stays
+                  alive in the DOM. */}
+              {TABS[tabIndex].id === "schedule" && (
                 <Box paddingBlockEnd="400">
-                  <PlaceholderTab tab={TABS[tabIndex]} />
+                  <ScheduleTab
+                    startsAt={bundle.startsAt ?? null}
+                    endsAt={bundle.endsAt ?? null}
+                    scheduleSettings={bundle.scheduleSettings ?? {}}
+                    shopTimezone={bundle.shopTimezone ?? "UTC"}
+                    busy={busy}
+                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                  />
                 </Box>
               )}
+              {TABS[tabIndex].id !== "setup" &&
+                TABS[tabIndex].id !== "schedule" && (
+                  <Box paddingBlockEnd="400">
+                    <PlaceholderTab tab={TABS[tabIndex]} />
+                  </Box>
+                )}
               <div
                 style={{
                   display: TABS[tabIndex].id === "setup" ? "block" : "none",

@@ -12,6 +12,7 @@ import {
   CreatePricingRuleInput,
   PaginatedResponse,
   PaginationParams,
+  type ScheduleSettingsInput,
 } from "../../types";
 import {
   ConflictError,
@@ -50,6 +51,81 @@ function mapItem(
     maxQuantity: item.maxQuantity,
     priceOverride: item.priceOverride,
   };
+}
+
+/**
+ * Validate a ScheduleSettings patch in shape — Zod-style without
+ * the dependency. Throws ValidationError on the first violation.
+ * Accepts a partial; field absence is fine.
+ */
+function validateSchedule(input: ScheduleSettingsInput): void {
+  if (input.timezone !== undefined && typeof input.timezone !== "string") {
+    throw new ValidationError("scheduleSettings.timezone must be a string");
+  }
+  if (input.timezone !== undefined && input.timezone.length === 0) {
+    throw new ValidationError("scheduleSettings.timezone must be non-empty");
+  }
+  if (input.endBehavior !== undefined) {
+    if (input.endBehavior !== "archive" && input.endBehavior !== "pause") {
+      throw new ValidationError(
+        `scheduleSettings.endBehavior must be 'archive' or 'pause'`,
+      );
+    }
+  }
+  const r = input.recurringRule;
+  if (r === null || r === undefined) return;
+  if (
+    r.type !== null &&
+    r.type !== "daily" &&
+    r.type !== "weekly" &&
+    r.type !== "monthly"
+  ) {
+    throw new ValidationError(
+      "scheduleSettings.recurringRule.type must be daily | weekly | monthly | null",
+    );
+  }
+  if (r.daysOfWeek !== undefined) {
+    if (r.type !== "weekly") {
+      throw new ValidationError(
+        "scheduleSettings.recurringRule.daysOfWeek requires type='weekly'",
+      );
+    }
+    for (const d of r.daysOfWeek) {
+      if (!Number.isInteger(d) || d < 0 || d > 6) {
+        throw new ValidationError(
+          "scheduleSettings.recurringRule.daysOfWeek must contain integers 0..6",
+        );
+      }
+    }
+  }
+  if (r.dayOfMonth !== undefined) {
+    if (r.type !== "monthly") {
+      throw new ValidationError(
+        "scheduleSettings.recurringRule.dayOfMonth requires type='monthly'",
+      );
+    }
+    if (
+      !Number.isInteger(r.dayOfMonth) ||
+      r.dayOfMonth < 1 ||
+      r.dayOfMonth > 31
+    ) {
+      throw new ValidationError(
+        "scheduleSettings.recurringRule.dayOfMonth must be 1..31",
+      );
+    }
+  }
+  for (const k of ["startTime", "endTime"] as const) {
+    const v = r[k];
+    if (v !== undefined && !/^[0-2]\d:[0-5]\d$/.test(v)) {
+      throw new ValidationError(
+        `scheduleSettings.recurringRule.${k} must be HH:MM`,
+      );
+    }
+  }
+}
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 function mapRule(
@@ -115,6 +191,13 @@ export class BundleService {
     const slug = slugify(input.title);
     if (!slug) throw new ValidationError("title produces an empty slug");
 
+    if (input.scheduleSettings) validateSchedule(input.scheduleSettings);
+    if (input.startsAt && input.endsAt) {
+      if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
+        throw new ValidationError("endsAt must be on/after startsAt");
+      }
+    }
+
     return bundleRepo.create({
       data: {
         shopId,
@@ -125,6 +208,8 @@ export class BundleService {
         config: config as Prisma.InputJsonValue,
         displaySettings:
           (input.displaySettings ?? {}) as Prisma.InputJsonValue,
+        scheduleSettings:
+          (input.scheduleSettings ?? {}) as unknown as Prisma.InputJsonValue,
         startsAt: input.startsAt ? new Date(input.startsAt) : undefined,
         endsAt: input.endsAt ? new Date(input.endsAt) : undefined,
         items: { create: (input.items ?? []).map((it, i) => mapItem(it, i)) },
@@ -139,7 +224,9 @@ export class BundleService {
     id: string,
     input: Partial<CreateBundleInput>,
   ): Promise<unknown> {
-    await this.getById(shopId, id);
+    const existing = (await this.getById(shopId, id)) as {
+      scheduleSettings?: unknown;
+    };
     const data: Prisma.BundleUpdateInput = {};
     if (input.title !== undefined) {
       data.title = input.title;
@@ -155,11 +242,30 @@ export class BundleService {
     if (input.displaySettings !== undefined) {
       data.displaySettings = input.displaySettings as Prisma.InputJsonValue;
     }
+    if (input.scheduleSettings !== undefined) {
+      validateSchedule(input.scheduleSettings);
+      // Deep-merge so saving a single card doesn't drop sibling
+      // fields (timezone vs recurringRule vs endBehavior).
+      const prev = isObject(existing.scheduleSettings)
+        ? existing.scheduleSettings
+        : {};
+      const merged: Record<string, unknown> = { ...prev };
+      for (const [k, v] of Object.entries(input.scheduleSettings)) {
+        if (v === undefined) continue;
+        merged[k] = v;
+      }
+      data.scheduleSettings = merged as unknown as Prisma.InputJsonValue;
+    }
     if (input.startsAt !== undefined) {
       data.startsAt = input.startsAt ? new Date(input.startsAt) : null;
     }
     if (input.endsAt !== undefined) {
       data.endsAt = input.endsAt ? new Date(input.endsAt) : null;
+    }
+    if (input.startsAt && input.endsAt) {
+      if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
+        throw new ValidationError("endsAt must be on/after startsAt");
+      }
     }
     // Replace pricing rules atomically when an array is supplied.
     // Sending [] clears all rules. Omitting the field leaves the
