@@ -42,6 +42,12 @@ export interface BundleLookup {
         // settings to merge displaySettings (M-171b).
         // validate-cart and storefront read paths skip it.
         shop?: { select: { settings: true } };
+        // Optional eligibility + inventoryRules fields —
+        // proxy /bundle/:slug requests them so the
+        // storefront web component can decide visibility
+        // (M-172c, M-173c). validate-cart skips.
+        eligibility?: true;
+        inventoryRules?: true;
       };
     }): Promise<unknown | null>;
   };
@@ -121,6 +127,8 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
             description: true,
             config: true,
             displaySettings: true,
+            eligibility: true,
+            inventoryRules: true,
             shop: { select: { settings: true } },
             items: {
               select: {
@@ -138,6 +146,8 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
         })) as
           | (Record<string, unknown> & {
               displaySettings?: unknown;
+              eligibility?: unknown;
+              inventoryRules?: unknown;
               shop?: { settings?: unknown };
             })
           | null;
@@ -152,6 +162,10 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
         const { shop: _shop, ...payload } = bundle;
         void _shop;
         res.set("Cache-Control", "public, max-age=60");
+        // eligibility + inventoryRules already on `payload`
+        // (passed through from the select). The web component
+        // reads them for storefront-side enforcement
+        // (M-172c, M-173c).
         res.json({ ...payload, displaySettings: resolved });
       } catch (err) {
         next(err);

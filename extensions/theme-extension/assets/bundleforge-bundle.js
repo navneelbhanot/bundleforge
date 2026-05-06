@@ -10,6 +10,12 @@
  * automated browser tests when Playwright lands.
  */
 
+// Stub HTMLElement so the module is importable in Node tests.
+// At browser load time HTMLElement is already defined.
+if (typeof globalThis.HTMLElement === "undefined") {
+  globalThis.HTMLElement = class {};
+}
+
 const PROXY_BASE = "/apps/bundleforge/bundle";
 
 async function fetchBundle(slug) {
@@ -30,6 +36,89 @@ let scopeCounter = 0;
 function nextScopeId() {
   scopeCounter += 1;
   return `bundleforge-scope-${scopeCounter}`;
+}
+
+/**
+ * Storefront-side eligibility check (M-172c). Mirrors the
+ * CTF `isEligible` from extensions/cart-transform PLUS
+ * tag-based gating that the CTF can't do because Shopify
+ * Functions don't reliably read customer.tags.
+ *
+ * Allow takes priority — having an allow tag wins even if
+ * the customer also matches a deny tag (matches the M-172
+ * admin Banner copy).
+ *
+ * @param {object | null} eligibility — parsed blob from
+ *   /apps/bundleforge/bundle/:slug.
+ * @param {{customerId: string, customerTags: string[],
+ *          country: string, language: string}} ctx
+ * @returns {boolean}
+ */
+export function isEligibleStorefront(eligibility, ctx) {
+  if (!eligibility || typeof eligibility !== "object") return true;
+  const customerId =
+    ctx && typeof ctx.customerId === "string" ? ctx.customerId : "";
+  const customerTags = Array.isArray(ctx && ctx.customerTags)
+    ? ctx.customerTags.filter((t) => typeof t === "string" && t.length > 0)
+    : [];
+  const country =
+    ctx && typeof ctx.country === "string" ? ctx.country : "";
+  const language =
+    ctx && typeof ctx.language === "string" ? ctx.language : "";
+
+  if (eligibility.requireLogin === true && customerId.length === 0) {
+    return false;
+  }
+
+  let allowMatched = false;
+  if (
+    Array.isArray(eligibility.customerTagsAllow) &&
+    eligibility.customerTagsAllow.length > 0
+  ) {
+    allowMatched = customerTags.some((t) =>
+      eligibility.customerTagsAllow.includes(t),
+    );
+    if (!allowMatched) return false;
+  }
+  if (
+    !allowMatched &&
+    Array.isArray(eligibility.customerTagsDeny) &&
+    eligibility.customerTagsDeny.length > 0
+  ) {
+    if (customerTags.some((t) => eligibility.customerTagsDeny.includes(t))) {
+      return false;
+    }
+  }
+
+  if (Array.isArray(eligibility.markets) && eligibility.markets.length > 0) {
+    if (!country || !eligibility.markets.includes(country)) return false;
+  }
+  if (Array.isArray(eligibility.locales) && eligibility.locales.length > 0) {
+    if (!language || !eligibility.locales.includes(language)) return false;
+  }
+  return true;
+}
+
+/**
+ * Read storefront context (customer + localization) from
+ * the bundle element's data-* attributes (Liquid populates
+ * them via shop globals). Returns the shape isEligibleStorefront
+ * expects.
+ */
+export function readStorefrontContext(elem) {
+  if (!elem || typeof elem.getAttribute !== "function") {
+    return { customerId: "", customerTags: [], country: "", language: "" };
+  }
+  const tagsRaw = elem.getAttribute("data-customer-tags") ?? "";
+  return {
+    customerId: elem.getAttribute("data-customer-id") ?? "",
+    customerTags: tagsRaw
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0),
+    country: elem.getAttribute("data-country") ?? "",
+    language: elem.getAttribute("data-language") ?? "",
+  };
 }
 
 /**
@@ -82,6 +171,35 @@ class BundleforgeBundle extends HTMLElement {
     if (!slug) return;
     try {
       const bundle = await fetchBundle(slug);
+
+      // M-172c: storefront-side eligibility. If the customer
+      // doesn't qualify, hide the widget or render a friendly
+      // placeholder per the block's data-on-ineligible setting.
+      const ctx = readStorefrontContext(this);
+      if (!isEligibleStorefront(bundle.eligibility, ctx)) {
+        const mode = this.getAttribute("data-on-ineligible") || "hide";
+        if (mode === "placeholder") {
+          this.innerHTML = `<p class="bundleforge-ineligible">This bundle isn't available in your region.</p>`;
+        } else {
+          this.style.display = "none";
+        }
+        return;
+      }
+
+      // M-173c: storefront-side inventory rule check. When
+      // componentOnlyMode is on, the merchant has chosen to
+      // render components individually elsewhere; the
+      // <bundleforge-bundle> widget should hide so it doesn't
+      // duplicate the cart line.
+      if (
+        bundle.inventoryRules &&
+        typeof bundle.inventoryRules === "object" &&
+        bundle.inventoryRules.componentOnlyMode === true
+      ) {
+        this.style.display = "none";
+        return;
+      }
+
       const display = applyDisplaySettings(bundle.displaySettings);
       this.innerHTML = "";
       // Apply colorPreset class on the wrapper itself.
@@ -205,8 +323,13 @@ class BundleforgeBogo extends HTMLElement {
   }
 }
 
-customElements.define("bundleforge-bundle", BundleforgeBundle);
-customElements.define("bundleforge-variant-picker", BundleforgeVariantPicker);
-customElements.define("bundleforge-build-box", BundleforgeBuildBox);
-customElements.define("bundleforge-mix-match", BundleforgeMixMatch);
-customElements.define("bundleforge-bogo", BundleforgeBogo);
+// Guard customElements.define so the module can be imported
+// in a Node test runtime (where customElements is undefined).
+// At browser load time this branch always runs.
+if (typeof customElements !== "undefined" && customElements.define) {
+  customElements.define("bundleforge-bundle", BundleforgeBundle);
+  customElements.define("bundleforge-variant-picker", BundleforgeVariantPicker);
+  customElements.define("bundleforge-build-box", BundleforgeBuildBox);
+  customElements.define("bundleforge-mix-match", BundleforgeMixMatch);
+  customElements.define("bundleforge-bogo", BundleforgeBogo);
+}

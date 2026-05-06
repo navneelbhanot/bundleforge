@@ -38,20 +38,11 @@ from a CI shell.
 **Code (next session):** No queued roadmap milestone.
 
 Open candidates if the user picks one:
-- **M-164b** — the only behavior-wiring sub-milestone left.
-  Admin Save action on the Cart & Checkout settings tab
-  should write the `bundleforge.cart_default_mode` shop
-  metafield the Cart Transform Function already reads.
-  Small.
-- **M-172c** — theme-block-side eligibility enforcement.
-  Storefront should hide the Add-to-cart button for
-  customers who don't qualify (CTF only kicks in after the
-  line is in cart). Needs Storefront API customer.tags +
-  context fetch in `bundleforge-bundle.js`.
-- **M-173c** — theme-block-side `pauseWhenComponentBelow`.
-  Same shape: read live component stock from Storefront
-  API, hide buy button when any component is below the
-  threshold.
+- **M-173d** — `pauseWhenComponentBelow` live-stock
+  enforcement on the storefront. Needs per-component
+  Storefront API queries from the browser, or a
+  denormalised inventory feed on the proxy (M-070..M-074
+  inventory engine could feed it). Bigger design task.
 - **Migration application** — five `prisma migrate deploy`
   events queued: M-168, M-170, M-172, M-173, M-174.
 - **Beta merchant onboarding** — `docs/onboarding-beta.md`
@@ -124,6 +115,31 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Behavior wiring round 2 — M-164b + M-172c + M-173c**
+  (2026-05-07).
+  - **M-164b** — settings PUT writes
+    `bundleforge.cart_default_mode` shop metafield via
+    `metafieldsSet` (two-call: shop GID query → mutation)
+    when the Cart & Checkout tab's `defaultMode` changes.
+    Best-effort — write failures log but don't block the
+    settings save.
+  - **M-172c** — storefront-side eligibility enforcement.
+    Proxy `/bundle/:slug` now returns `eligibility`. The
+    Liquid block passes customer state via data-*
+    attributes (id / tags / country / language). New
+    `isEligibleStorefront(blob, ctx)` helper in
+    bundleforge-bundle.js mirrors the CTF check **plus**
+    tag-based gating (allow takes priority over deny).
+    On fail: hides the widget or renders a friendly
+    placeholder per the block's
+    `data-on-ineligible` setting.
+  - **M-173c** — storefront-side `componentOnlyMode`.
+    Web component hides the widget when
+    `inventoryRules.componentOnlyMode === true`.
+    `pauseWhenComponentBelow` enforcement deferred to
+    M-173d (needs live component stock).
+  Net 769/769 vitest pass (+12 cases). No new lint
+  violations.
 - **Behavior wiring batch — M-167b through M-173b**
   (2026-05-06 late). Six sub-milestones shipped
   sequentially across commits 4802de4..501c82d:
@@ -592,11 +608,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **749 / 749 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 settingsLogo + 12 outbound webhook +
-  6 scheduleSweep + 6 proxy.merge + 14 cart-transform
-  eligibility + 2 publish-callback cases since M-183.
-- **599 / 599** when no real DB is available — the bundle CRUD
+- **769 / 769 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 metafields helper + +4 settings PUT
+  cart-default-mode cases + +12 storefront eligibility cases
+  since the M-167b..M-173b batch.
+- **619 / 619** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

@@ -1,9 +1,14 @@
 {% comment %}
-  BundleForge — Bundle Display Block (M-088)
+  BundleForge — Bundle Display Block (M-088 + M-172c).
 
   Renders a bundle widget on the product page. The widget is a custom
   element (`<bundleforge-bundle>`) that fetches the bundle config from
   the App Proxy at /apps/bundleforge/bundle/<slug>.
+
+  M-172c: customer state (id, tags, country, language) is passed via
+  data-* attributes so the web component can run eligibility checks
+  storefront-side (cleaner UX than waiting for the Cart Transform
+  Function to refuse the bundle at expand time).
 {% endcomment %}
 
 {% schema %}
@@ -20,7 +25,13 @@
       ],
       "default": "grid" },
     { "type": "checkbox", "id": "show_compare_price",  "label": "Show compare price",  "default": true },
-    { "type": "checkbox", "id": "show_savings_badge",  "label": "Show savings badge",  "default": true }
+    { "type": "checkbox", "id": "show_savings_badge",  "label": "Show savings badge",  "default": true },
+    { "type": "select",   "id": "on_ineligible",       "label": "When customer doesn't qualify",
+      "options": [
+        { "value": "hide",        "label": "Hide the bundle" },
+        { "value": "placeholder", "label": "Show a friendly placeholder" }
+      ],
+      "default": "hide" }
   ]
 }
 {% endschema %}
@@ -31,7 +42,12 @@
   data-product-id="{{ product.id }}"
   data-layout="{{ block.settings.layout }}"
   data-show-compare="{{ block.settings.show_compare_price }}"
-  data-show-badge="{{ block.settings.show_savings_badge }}">
+  data-show-badge="{{ block.settings.show_savings_badge }}"
+  data-on-ineligible="{{ block.settings.on_ineligible }}"
+  data-customer-id="{{ customer.id | default: '' }}"
+  data-customer-tags="{{ customer.tags | join: ',' | escape }}"
+  data-country="{{ localization.country.iso_code }}"
+  data-language="{{ localization.language.iso_code }}">
   <p class="bundleforge-loading">Loading bundle…</p>
 </bundleforge-bundle>
 
