@@ -16,10 +16,11 @@ import {
   Card,
   Collapsible,
   InlineStack,
-  Modal,
   Text,
   TextField,
 } from "@shopify/polaris";
+
+import { ConfirmDialog } from "../shell/ConfirmDialog";
 
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 320;
@@ -213,8 +214,6 @@ function DangerCard({
   onDelete,
 }: DangerCardProps): JSX.Element {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmText, setConfirmText] = useState("");
-  const canDelete = confirmText.trim().toUpperCase() === "DELETE";
 
   return (
     <Card>
@@ -244,50 +243,26 @@ function DangerCard({
           </Button>
         </InlineStack>
       </BlockStack>
-      <Modal
+      <ConfirmDialog
         open={confirmOpen}
-        onClose={() => {
-          setConfirmOpen(false);
-          setConfirmText("");
-        }}
         title="Delete this bundle?"
-        primaryAction={{
-          content: "Delete",
-          destructive: true,
-          loading: busy,
-          disabled: !canDelete || busy,
-          onAction: async () => {
-            await onDelete();
-            setConfirmOpen(false);
-            setConfirmText("");
-          },
+        body={
+          <Text as="p">
+            The bundle is hidden from the storefront and the list,
+            but past orders that include it keep their history. To
+            confirm, type <strong>DELETE</strong> below.
+          </Text>
+        }
+        confirmLabel="Delete"
+        destructive
+        requireTyped="DELETE"
+        loading={busy}
+        onConfirm={async () => {
+          await onDelete();
+          setConfirmOpen(false);
         }}
-        secondaryActions={[
-          {
-            content: "Cancel",
-            onAction: () => {
-              setConfirmOpen(false);
-              setConfirmText("");
-            },
-          },
-        ]}
-      >
-        <Modal.Section>
-          <BlockStack gap="300">
-            <Text as="p">
-              The bundle is hidden from the storefront and the list,
-              but past orders that include it keep their history. To
-              confirm, type <strong>DELETE</strong> below.
-            </Text>
-            <TextField
-              label="Type DELETE to confirm"
-              value={confirmText}
-              onChange={setConfirmText}
-              autoComplete="off"
-            />
-          </BlockStack>
-        </Modal.Section>
-      </Modal>
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Card>
   );
 }

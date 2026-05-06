@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppProvider } from "@shopify/polaris";
 
 import { BundleDetailPage } from "./BundleDetailPage";
+import { ToastsProvider } from "../components/shell/Toasts";
 
 const i18n = { Polaris: { Common: { cancel: "Cancel", save: "Save" } } };
 
@@ -49,11 +50,13 @@ function renderAt(hash: string) {
   }
   return render(
     <AppProvider i18n={i18n}>
-      <MemoryRouter initialEntries={[`/bundles/bundle-1${hash}`]}>
-        <Routes>
-          <Route path="/bundles/:id" element={<BundleDetailPage />} />
-        </Routes>
-      </MemoryRouter>
+      <ToastsProvider>
+        <MemoryRouter initialEntries={[`/bundles/bundle-1${hash}`]}>
+          <Routes>
+            <Route path="/bundles/:id" element={<BundleDetailPage />} />
+          </Routes>
+        </MemoryRouter>
+      </ToastsProvider>
     </AppProvider>,
   );
 }

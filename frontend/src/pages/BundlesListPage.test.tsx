@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppProvider } from "@shopify/polaris";
 
 import { BundlesListPage } from "./BundlesListPage";
+import { ToastsProvider } from "../components/shell/Toasts";
 
 const i18n = { Polaris: { Common: { cancel: "Cancel", save: "Save" } } };
 
@@ -33,11 +34,13 @@ function mockFetch(
 function renderPage() {
   return render(
     <AppProvider i18n={i18n}>
-      <MemoryRouter initialEntries={["/"]}>
-        <Routes>
-          <Route path="/" element={<BundlesListPage />} />
-        </Routes>
-      </MemoryRouter>
+      <ToastsProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route path="/" element={<BundlesListPage />} />
+          </Routes>
+        </MemoryRouter>
+      </ToastsProvider>
     </AppProvider>,
   );
 }

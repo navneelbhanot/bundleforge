@@ -8,17 +8,18 @@
 
 **Phase R4 in progress — cross-cutting polish.**
 
-M-180 + M-181 landed 2026-05-06. The App shell now mounts
-two global components reachable from every route: the ⌘K
-command palette (search bundles, jump to admin pages, run
-actions), and a help drawer (Polaris Modal opened by `?` or
-the palette's "Open help" action) that surfaces the existing
-9-article `docs/help/` markdown library inline with a tiny
-self-contained markdown renderer (`javascript:` URLs are
-stripped for safety).
+M-180 + M-181 + M-182 landed 2026-05-06. The App shell now
+mounts three global components: ⌘K command palette, help
+drawer (`?` hotkey), and a `<ToastsProvider>` exposing
+`useToasts()` to every component in the tree. Shared
+primitives in `frontend/src/components/shell/`:
+`ToastsProvider` + `ToastHost`, `ConfirmDialog` (with
+optional typed-confirm), `InlineLoader` + `SkeletonRows`.
+BundlesListPage + BundleDetailPage migrated off local Toast
+state; BundlesListTable + AdvancedTab migrated off
+hand-rolled confirm Modals.
 
-M-182 (unified toast/confirm/skeleton patterns) and M-183
-(empty-state illustrations) remaining.
+M-183 (empty-state illustrations) is the last R4 milestone.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -36,22 +37,14 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-182 — unified toast / confirm
-/ skeleton patterns. Spec first:
-`docs/specs/M-182-unified-toast-confirm-skeleton.md`. Distill
-the ad-hoc `<Toast>` mounts + confirm modals scattered across
-pages (BundleDetailPage's delete modal, BundlesListPage's bulk
-confirm, AdvancedTab's typed-confirm, etc.) into a single
-shared hook + helper components so every surface emits the
-same UX. Likely produces:
-- `useToasts()` hook returning `{ show, dismiss, current }`.
-- A globally-mounted `<ToastHost />` in App.tsx that owns the
-  Polaris `Toast` rendering.
-- `<ConfirmDialog>` helper with optional typed-confirm.
-- `<Skeleton />` / `<SkeletonRows />` primitives so the
-  PageLoading variants stop being copy-pasted.
-Sizing: medium-large — it's a refactor pass across 6+ pages
-plus a few new primitives.
+**Code (next session):** Run M-183 — empty-state
+illustrations. Spec first:
+`docs/specs/M-183-empty-state-illustrations.md`. Closes Phase
+R4. A small set of inline SVG illustrations + a shared
+`<EmptyStateCard>` primitive wrapping Polaris's `EmptyState`,
+applied to the empty-list surfaces that today render bare
+text or no graphic at all (no orders, no analytics events,
+no audit log entries, no AI suggestions). Sizing: small.
 
 Other open threads (mostly user-owned):
 
@@ -120,6 +113,27 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-182 — Unified toast / confirm / skeleton patterns**
+  (2026-05-06 late). New shared primitives in
+  `frontend/src/components/shell/`:
+  - `Toasts.tsx` — `ToastsProvider` (wraps the App in a
+    React context) + `useToasts()` hook (`{ show, dismiss }`)
+    + `<ToastHost />` that mounts the Polaris Toast inside
+    the existing `<Frame>`. Replaces per-page
+    `useState<string | null>` + local `<Toast>` JSX.
+  - `ConfirmDialog.tsx` — shared confirm dialog with
+    optional `requireTyped` for the typed-Delete pattern
+    from M-175.
+  - `Skeleton.tsx` — `InlineLoader` + `SkeletonRows`
+    helpers for inline "Loading…" placeholders.
+  Migrations: BundlesListPage + BundleDetailPage moved off
+  local Toast state; BundlesListTable (saved-view delete +
+  bulk archive/delete) and AdvancedTab (typed-Delete) moved
+  off hand-rolled confirm Modals. Other Toast/Modal users
+  (Integrations, API tokens, BillingPanel) keep their
+  existing patterns until they're touched for unrelated
+  work — M-182 is not a "rewrite everything" pass.
+  `docs/sessions/0182-unified-toast-confirm-skeleton.md`.
 - **M-181 — In-app help drawer** (2026-05-06 late). Surfaces
   the 9-article `docs/help/` markdown library inside the
   admin. New `src/routes/help.ts` exposes
@@ -514,15 +528,17 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **691 / 691 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 server help-route cases + +6
-  HelpDrawer/MarkdownView UI cases since M-180.
-- **541 / 541** when no real DB is available — the bundle CRUD
+- **698 / 698 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +3 ToastsProvider/useToasts/ToastHost cases
+  + +4 ConfirmDialog cases since M-181.
+- **548 / 548** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
 - Typecheck clean (server + frontend).
-- Lint: 6 pre-existing errors only; no new violations.
+- Lint: 6 pre-existing errors / 16 warnings — net-down 1
+  warning from baseline (M-182 cleaned up a stale
+  `readDismissed` helper while migrating).
 
 ## Working branch
 

@@ -289,7 +289,7 @@
 |----|-------|--------|
 | M-180 | Global cmd+k search | done (2026-05-06) — `docs/specs/M-180-global-cmdk-search.md` |
 | M-181 | In-app help drawer | done (2026-05-06) — `docs/specs/M-181-help-drawer.md` |
-| M-182 | Unified toast / confirm / skeleton | pending |
+| M-182 | Unified toast / confirm / skeleton | done (2026-05-06) — `docs/specs/M-182-unified-toast-confirm-skeleton.md` |
 | M-183 | Empty-state illustrations | pending |
 
 ---

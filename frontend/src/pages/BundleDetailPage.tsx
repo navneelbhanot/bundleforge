@@ -23,9 +23,9 @@ import {
   Tabs,
   Text,
   TextField,
-  Toast,
 } from "@shopify/polaris";
 
+import { ToastHost, useToasts } from "../components/shell/Toasts";
 import { findBundleType } from "../components/bundleTypes";
 import { ActivityTab } from "../components/bundleDetail/ActivityTab";
 import { AdvancedTab } from "../components/bundleDetail/AdvancedTab";
@@ -162,7 +162,7 @@ export function BundleDetailPage(): JSX.Element {
   const [items, setItems] = useState<BundleItem[]>([]);
   const [busy, setBusy] = useState(false);
   const [pickerBusy, setPickerBusy] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const { show: showToast } = useToasts();
   const [tabIndex, setTabIndex] = useState<number>(readHashTab());
   const [shopDisplayDefaults, setShopDisplayDefaults] =
     useState<ShopDisplayDefaults | null>(null);
@@ -234,7 +234,7 @@ export function BundleDetailPage(): JSX.Element {
   async function pickProducts(): Promise<void> {
     const shopify = getShopify();
     if (!shopify?.resourcePicker) {
-      setToast(
+      showToast(
         "Product picker only works inside the Shopify admin. Use the dev store install link.",
       );
       return;
@@ -266,7 +266,7 @@ export function BundleDetailPage(): JSX.Element {
         }));
       setItems([...kept, ...added]);
     } catch (e) {
-      setToast(`Picker error: ${(e as Error).message}`);
+      showToast(`Picker error: ${(e as Error).message}`);
     } finally {
       setPickerBusy(false);
     }
@@ -311,7 +311,7 @@ export function BundleDetailPage(): JSX.Element {
       }
       const fresh = (await res.json()) as BundleDetail;
       hydrate(fresh);
-      setToast("Saved");
+      showToast("Saved");
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -363,7 +363,7 @@ export function BundleDetailPage(): JSX.Element {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const fresh = (await res.json()) as BundleDetail;
       hydrate(fresh);
-      setToast(path === "publish" ? "Bundle published" : "Bundle archived");
+      showToast(path === "publish" ? "Bundle published" : "Bundle archived");
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -742,7 +742,7 @@ export function BundleDetailPage(): JSX.Element {
         </BlockStack>
       </Page>
 
-      {toast && <Toast content={toast} onDismiss={() => setToast(null)} />}
+      <ToastHost />
     </Frame>
   );
 }

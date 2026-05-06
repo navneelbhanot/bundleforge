@@ -12,6 +12,7 @@ import { AppBridgeProvider } from "./AppBridgeProvider";
 import { CommandPalette } from "./components/CommandPalette";
 import { HelpDrawer } from "./components/HelpDrawer";
 import { NavMenu } from "./components/NavMenu";
+import { ToastsProvider } from "./components/shell/Toasts";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
 import { BundleDetailPage } from "./pages/BundleDetailPage";
@@ -143,9 +144,11 @@ export function App() {
   return (
     <AppBridgeProvider>
       <AppProvider i18n={i18n}>
-        <BrowserRouter>
-          <Shell />
-        </BrowserRouter>
+        <ToastsProvider>
+          <BrowserRouter>
+            <Shell />
+          </BrowserRouter>
+        </ToastsProvider>
       </AppProvider>
     </AppBridgeProvider>
   );

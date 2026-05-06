@@ -33,6 +33,8 @@ import {
   useSetIndexFiltersMode,
 } from "@shopify/polaris";
 
+import { ConfirmDialog } from "../shell/ConfirmDialog";
+
 export type BundleStatusFilter = "draft" | "active" | "archived";
 
 export interface BundleListFilters {
@@ -655,66 +657,51 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
         </Modal.Section>
       </Modal>
 
-      <Modal
+      <ConfirmDialog
         open={confirmDelete !== null}
-        onClose={() => setConfirmDelete(null)}
         title="Delete this saved view?"
-        primaryAction={{
-          content: "Delete",
-          destructive: true,
-          onAction: async () => {
-            if (confirmDelete) await onDeleteView(confirmDelete.id);
-            setConfirmDelete(null);
-          },
-        }}
-        secondaryActions={[
-          { content: "Cancel", onAction: () => setConfirmDelete(null) },
-        ]}
-      >
-        <Modal.Section>
+        body={
           <Text as="p">
             "{confirmDelete?.label}" will be removed. The bundles
             themselves are not affected — only this saved view.
           </Text>
-        </Modal.Section>
-      </Modal>
+        }
+        confirmLabel="Delete"
+        destructive
+        onConfirm={async () => {
+          if (confirmDelete) await onDeleteView(confirmDelete.id);
+          setConfirmDelete(null);
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
 
-      <Modal
+      <ConfirmDialog
         open={bulkConfirm !== null}
-        onClose={() => setBulkConfirm(null)}
         title={
           bulkConfirm === "delete"
             ? `Delete ${selectedResources.length} bundle${selectedResources.length === 1 ? "" : "s"}?`
             : `Archive ${selectedResources.length} bundle${selectedResources.length === 1 ? "" : "s"}?`
         }
-        primaryAction={{
-          content: bulkConfirm === "delete" ? "Delete" : "Archive",
-          destructive: bulkConfirm === "delete",
-          loading: bulkBusy,
-          disabled: bulkBusy || selectedResources.length === 0,
-          onAction: async () => {
-            const action = bulkConfirm;
-            setBulkConfirm(null);
-            if (action === "archive" && onBulkArchive) {
-              await onBulkArchive(selectedResources);
-            } else if (action === "delete" && onBulkDelete) {
-              await onBulkDelete(selectedResources);
-            }
-            clearSelection();
-          },
+        body={
+          bulkConfirm === "delete"
+            ? "Selected bundles will be hidden from the storefront and the list. Past orders that include them keep their history. This is reversible until the next GDPR shop-redact."
+            : "Selected bundles will be removed from the storefront. They stay in the list under the Archived filter and can be moved back to draft."
+        }
+        confirmLabel={bulkConfirm === "delete" ? "Delete" : "Archive"}
+        destructive={bulkConfirm === "delete"}
+        loading={bulkBusy}
+        onConfirm={async () => {
+          const action = bulkConfirm;
+          setBulkConfirm(null);
+          if (action === "archive" && onBulkArchive) {
+            await onBulkArchive(selectedResources);
+          } else if (action === "delete" && onBulkDelete) {
+            await onBulkDelete(selectedResources);
+          }
+          clearSelection();
         }}
-        secondaryActions={[
-          { content: "Cancel", onAction: () => setBulkConfirm(null) },
-        ]}
-      >
-        <Modal.Section>
-          <Text as="p">
-            {bulkConfirm === "delete"
-              ? "Selected bundles will be hidden from the storefront and the list. Past orders that include them keep their history. This is reversible until the next GDPR shop-redact."
-              : "Selected bundles will be removed from the storefront. They stay in the list under the Archived filter and can be moved back to draft."}
-          </Text>
-        </Modal.Section>
-      </Modal>
+        onCancel={() => setBulkConfirm(null)}
+      />
     </>
   );
 }

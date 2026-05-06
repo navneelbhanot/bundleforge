@@ -22,8 +22,9 @@ import {
   InlineStack,
   Page,
   Text,
-  Toast,
 } from "@shopify/polaris";
+
+import { ToastHost, useToasts } from "../components/shell/Toasts";
 
 import {
   BundlesListTable,
@@ -61,14 +62,6 @@ const BUNDLE_TYPES = [
   "wholesale",
   "custom",
 ] as const;
-
-function readDismissed(): boolean {
-  try {
-    return window.localStorage.getItem(ONBOARDING_DISMISSED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 function writeDismissed(): void {
   try {
@@ -282,7 +275,7 @@ export function BundlesListPage(): JSX.Element {
   const [selectedViewIndex, setSelectedViewIndex] = useState(-1);
   const [hasEverHadBundles, setHasEverHadBundles] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const { show: showToast } = useToasts();
   const [templates, setTemplates] = useState<BundleTemplate[]>([]);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [instantiateBusy, setInstantiateBusy] = useState(false);
@@ -464,19 +457,19 @@ export function BundlesListPage(): JSX.Element {
         };
         const verb = path === "publish" ? "Published" : path === "archive" ? "Archived" : "Deleted";
         if (body.failed.length === 0) {
-          setToast(
+          showToast(
             `${verb} ${body.succeeded.length} bundle${body.succeeded.length === 1 ? "" : "s"}.`,
           );
         } else if (body.succeeded.length === 0) {
-          setToast(`${verb}: 0 succeeded, ${body.failed.length} failed.`);
+          showToast(`${verb}: 0 succeeded, ${body.failed.length} failed.`);
         } else {
-          setToast(
+          showToast(
             `${verb} ${body.succeeded.length}, ${body.failed.length} failed.`,
           );
         }
         await fetchBundles(filters, sort, page);
       } catch (e) {
-        setToast(`Bulk ${path} failed: ${(e as Error).message}`);
+        showToast(`Bulk ${path} failed: ${(e as Error).message}`);
       } finally {
         setBulkBusy(false);
       }
@@ -509,7 +502,7 @@ export function BundlesListPage(): JSX.Element {
       const body = (await res.json()) as { data: BundleTemplate[] };
       setTemplates(body.data);
     } catch (e) {
-      setToast(`Could not load templates: ${(e as Error).message}`);
+      showToast(`Could not load templates: ${(e as Error).message}`);
     }
   }, [templates.length]);
 
@@ -547,7 +540,7 @@ export function BundlesListPage(): JSX.Element {
         setTemplatesOpen(false);
         navigate(`/bundles/${body.id}#setup`);
       } catch (e) {
-        setToast(`Couldn't create from template: ${(e as Error).message}`);
+        showToast(`Couldn't create from template: ${(e as Error).message}`);
       } finally {
         setInstantiateBusy(false);
       }
@@ -675,7 +668,7 @@ export function BundlesListPage(): JSX.Element {
           </Card>
         </BlockStack>
       </Page>
-      {toast && <Toast content={toast} onDismiss={() => setToast(null)} />}
+      <ToastHost />
       <TemplatesModal
         open={templatesOpen}
         templates={templates}
