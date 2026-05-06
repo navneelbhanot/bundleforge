@@ -167,6 +167,49 @@ describe("BundlesListPage", () => {
     );
   });
 
+  it("initial fetch carries page + sort query params (M-178)", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(async (input) => {
+        calls.push(input);
+        if (input.startsWith("/api/v1/bundles")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: [],
+              pagination: {
+                page: 1,
+                limit: 20,
+                total: 0,
+                totalPages: 1,
+                hasNext: false,
+                hasPrev: false,
+              },
+            }),
+          };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ savedViews: [] }),
+        };
+      }),
+    );
+    renderPage();
+    await waitFor(() =>
+      expect(
+        calls.some((c) => c.includes("/api/v1/bundles?")),
+      ).toBe(true),
+    );
+    const bundlesCall = calls.find((c) => c.includes("/api/v1/bundles?"))!;
+    expect(bundlesCall).toContain("page=1");
+    expect(bundlesCall).toContain("limit=20");
+    expect(bundlesCall).toContain("sortBy=createdAt");
+    expect(bundlesCall).toContain("sortOrder=desc");
+  });
+
   it("clicking a row's checkbox + bulk Publish POSTs to /api/v1/bundles/bulk/publish (M-177)", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     vi.stubGlobal(

@@ -14,11 +14,19 @@
 import { useCallback, useState } from "react";
 import {
   Badge,
+  BlockStack,
+  Box,
   Button,
+  ButtonGroup,
+  Card,
   ChoiceList,
+  Grid,
   IndexFilters,
   IndexTable,
+  IndexTableSelectionType,
+  InlineStack,
   Modal,
+  Pagination,
   TextField,
   Text,
   useIndexResourceState,
@@ -38,11 +46,14 @@ export interface BundleSort {
   sortOrder: "asc" | "desc";
 }
 
+export type ViewMode = "table" | "compact" | "card";
+
 export interface SavedView {
   id: string;
   label: string;
   filters?: BundleListFilters;
   sort?: BundleSort;
+  viewMode?: ViewMode;
 }
 
 export interface BundleRow {
@@ -51,6 +62,13 @@ export interface BundleRow {
   type: string;
   status: string;
   slug: string;
+}
+
+export interface PaginationInfo {
+  page: number;
+  totalPages: number;
+  hasPrev: boolean;
+  hasNext: boolean;
 }
 
 export interface BundlesListTableProps {
@@ -62,7 +80,16 @@ export interface BundlesListTableProps {
   selectedViewIndex: number;
   filters: BundleListFilters;
   bundleTypes: readonly string[];
+  /** Current sort. Defaults to createdAt desc when omitted. */
+  sort: BundleSort;
+  /** Current view mode. Defaults to "table". */
+  viewMode: ViewMode;
+  /** Server-driven pagination state. */
+  pagination: PaginationInfo;
   onFilterChange: (next: BundleListFilters) => void;
+  onSortChange: (next: BundleSort) => void;
+  onViewModeChange: (next: ViewMode) => void;
+  onPageChange: (next: number) => void;
   onViewSelect: (index: number) => void;
   onSaveView: (label: string) => Promise<void>;
   onDeleteView: (id: string) => Promise<void>;
@@ -83,6 +110,179 @@ const STATUS_CHOICES: Array<{ label: string; value: BundleStatusFilter }> = [
   { label: "Archived", value: "archived" },
 ];
 
+interface SortOption {
+  // Polaris's SortButtonChoice requires a `${string} asc | ${string} desc`
+  // template-literal type for `value`. We mirror that here.
+  key: `${string} asc` | `${string} desc`;
+  label: string;
+  sort: BundleSort;
+}
+
+const SORT_OPTIONS: SortOption[] = [
+  {
+    key: "createdAt desc",
+    label: "Newest first",
+    sort: { sortBy: "createdAt", sortOrder: "desc" },
+  },
+  {
+    key: "createdAt asc",
+    label: "Oldest first",
+    sort: { sortBy: "createdAt", sortOrder: "asc" },
+  },
+  {
+    key: "updatedAt desc",
+    label: "Recently updated",
+    sort: { sortBy: "updatedAt", sortOrder: "desc" },
+  },
+  {
+    key: "title asc",
+    label: "Title A → Z",
+    sort: { sortBy: "title", sortOrder: "asc" },
+  },
+  {
+    key: "title desc",
+    label: "Title Z → A",
+    sort: { sortBy: "title", sortOrder: "desc" },
+  },
+  {
+    key: "priority desc",
+    label: "Priority high → low",
+    sort: { sortBy: "priority", sortOrder: "desc" },
+  },
+];
+
+function sortKey(
+  s: BundleSort,
+): `${string} asc` | `${string} desc` {
+  return s.sortOrder === "asc"
+    ? (`${s.sortBy} asc` as const)
+    : (`${s.sortBy} desc` as const);
+}
+
+type SelectionChangeFn = ReturnType<
+  typeof useIndexResourceState
+>["handleSelectionChange"];
+
+interface BundleCardGridProps {
+  rows: BundleRow[];
+  selectedResources: string[];
+  onSelectionChange: SelectionChangeFn;
+  onRowClick: (id: string) => void;
+  onBulkPublish?: (ids: string[]) => Promise<void>;
+  onBulkArchive: () => void;
+  onBulkDelete: () => void;
+  bulkBusy: boolean;
+}
+
+function BundleCardGrid({
+  rows,
+  selectedResources,
+  onSelectionChange,
+  onRowClick,
+  onBulkPublish,
+  onBulkArchive,
+  onBulkDelete,
+  bulkBusy,
+}: BundleCardGridProps): JSX.Element {
+  const allSelected =
+    rows.length > 0 && selectedResources.length === rows.length;
+  return (
+    <BlockStack gap="300">
+      {selectedResources.length > 0 && (
+        <Box
+          padding="300"
+          background="bg-surface-secondary"
+          borderRadius="200"
+        >
+          <InlineStack align="space-between" blockAlign="center">
+            <Text as="p" variant="bodyMd">
+              {selectedResources.length} selected
+            </Text>
+            <ButtonGroup>
+              {onBulkPublish && (
+                <Button
+                  disabled={bulkBusy}
+                  onClick={() => onBulkPublish(selectedResources)}
+                >
+                  Publish
+                </Button>
+              )}
+              <Button disabled={bulkBusy} onClick={onBulkArchive}>
+                Archive
+              </Button>
+              <Button
+                tone="critical"
+                disabled={bulkBusy}
+                onClick={onBulkDelete}
+              >
+                Delete
+              </Button>
+            </ButtonGroup>
+          </InlineStack>
+        </Box>
+      )}
+      {rows.length > 0 && (
+        <InlineStack align="end">
+          <Button
+            variant="tertiary"
+            onClick={() =>
+              onSelectionChange(IndexTableSelectionType.All, !allSelected)
+            }
+          >
+            {allSelected ? "Deselect all" : "Select all"}
+          </Button>
+        </InlineStack>
+      )}
+      <Grid>
+        {rows.map((b) => {
+          const selected = selectedResources.includes(b.id);
+          return (
+            <Grid.Cell
+              key={b.id}
+              columnSpan={{ xs: 6, sm: 6, md: 4, lg: 3, xl: 3 }}
+            >
+              <Card>
+                <BlockStack gap="200">
+                  <InlineStack align="space-between" blockAlign="center">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${b.title}`}
+                      checked={selected}
+                      onChange={() =>
+                        onSelectionChange(
+                          IndexTableSelectionType.Single,
+                          !selected,
+                          b.id,
+                        )
+                      }
+                    />
+                    <Badge
+                      tone={b.status === "active" ? "success" : "info"}
+                    >
+                      {b.status}
+                    </Badge>
+                  </InlineStack>
+                  <Text as="h3" variant="headingSm">
+                    {b.title}
+                  </Text>
+                  <Text as="p" tone="subdued" variant="bodySm">
+                    {b.type}
+                  </Text>
+                  <InlineStack align="end">
+                    <Button onClick={() => onRowClick(b.id)} variant="tertiary">
+                      Edit
+                    </Button>
+                  </InlineStack>
+                </BlockStack>
+              </Card>
+            </Grid.Cell>
+          );
+        })}
+      </Grid>
+    </BlockStack>
+  );
+}
+
 function statusLabel(s: BundleStatusFilter | undefined): string | null {
   if (!s) return null;
   const opt = STATUS_CHOICES.find((o) => o.value === s);
@@ -97,7 +297,13 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
     selectedViewIndex,
     filters,
     bundleTypes,
+    sort,
+    viewMode,
+    pagination,
     onFilterChange,
+    onSortChange,
+    onViewModeChange,
+    onPageChange,
     onViewSelect,
     onSaveView,
     onDeleteView,
@@ -246,95 +452,160 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
           await onSaveView(label);
           return true;
         }}
+        sortOptions={SORT_OPTIONS.map((o) => ({
+          label: o.label,
+          value: o.key,
+          directionLabel: o.label,
+        }))}
+        sortSelected={[sortKey(sort)]}
+        onSort={(selected) => {
+          const next = SORT_OPTIONS.find((o) => o.key === selected[0]);
+          if (next) onSortChange(next.sort);
+        }}
         filters={indexFilters}
         appliedFilters={appliedFilters}
         onClearAll={handleClearAll}
         mode={mode}
         setMode={setMode}
       />
-      <IndexTable
-        itemCount={rows.length}
-        headings={[
-          { title: "Title" },
-          { title: "Type" },
-          { title: "Status" },
-          { title: "" },
-        ]}
-        selectable
-        selectedItemsCount={
-          allResourcesSelected ? "All" : selectedResources.length
-        }
-        onSelectionChange={handleSelectionChange}
-        promotedBulkActions={[
-          ...(onBulkPublish
-            ? [
-                {
-                  content: "Publish",
-                  onAction: async () => {
-                    if (selectedResources.length === 0) return;
-                    await onBulkPublish(selectedResources);
-                    clearSelection();
+      {/* View-mode toggle. Polaris doesn't ship a built-in
+          IndexFilters slot for view modes, so we render our own
+          ButtonGroup above the table body. */}
+      <Box paddingBlockStart="200" paddingBlockEnd="200">
+        <InlineStack align="end">
+          <ButtonGroup variant="segmented">
+            <Button
+              pressed={viewMode === "table"}
+              onClick={() => onViewModeChange("table")}
+            >
+              Table
+            </Button>
+            <Button
+              pressed={viewMode === "compact"}
+              onClick={() => onViewModeChange("compact")}
+            >
+              Compact
+            </Button>
+            <Button
+              pressed={viewMode === "card"}
+              onClick={() => onViewModeChange("card")}
+            >
+              Cards
+            </Button>
+          </ButtonGroup>
+        </InlineStack>
+      </Box>
+      {viewMode === "card" ? (
+        <BundleCardGrid
+          rows={rows}
+          selectedResources={selectedResources}
+          onSelectionChange={handleSelectionChange}
+          onRowClick={onRowClick}
+          onBulkPublish={onBulkPublish}
+          onBulkArchive={() => setBulkConfirm("archive")}
+          onBulkDelete={() => setBulkConfirm("delete")}
+          bulkBusy={bulkBusy}
+        />
+      ) : (
+        <IndexTable
+          itemCount={rows.length}
+          condensed={viewMode === "compact"}
+          headings={[
+            { title: "Title" },
+            { title: "Type" },
+            { title: "Status" },
+            { title: "" },
+          ]}
+          selectable
+          selectedItemsCount={
+            allResourcesSelected ? "All" : selectedResources.length
+          }
+          onSelectionChange={handleSelectionChange}
+          promotedBulkActions={[
+            ...(onBulkPublish
+              ? [
+                  {
+                    content: "Publish",
+                    onAction: async () => {
+                      if (selectedResources.length === 0) return;
+                      await onBulkPublish(selectedResources);
+                      clearSelection();
+                    },
+                    disabled: bulkBusy,
                   },
-                  disabled: bulkBusy,
-                },
-              ]
-            : []),
-          ...(onBulkArchive
-            ? [
-                {
-                  content: "Archive",
-                  onAction: () => setBulkConfirm("archive"),
-                  disabled: bulkBusy,
-                },
-              ]
-            : []),
-          ...(onBulkDelete
-            ? [
-                {
-                  content: "Delete",
-                  onAction: () => setBulkConfirm("delete"),
-                  disabled: bulkBusy,
-                },
-              ]
-            : []),
-        ]}
-      >
-        {rows.map((b, i) => (
-          <IndexTable.Row
-            id={b.id}
-            key={b.id}
-            position={i}
-            selected={selectedResources.includes(b.id)}
-            onClick={() => onRowClick(b.id)}
-          >
-            <IndexTable.Cell>
-              <Text as="span" fontWeight="semibold">
-                {b.title}
-              </Text>
-            </IndexTable.Cell>
-            <IndexTable.Cell>{b.type}</IndexTable.Cell>
-            <IndexTable.Cell>
-              <Badge tone={b.status === "active" ? "success" : "info"}>
-                {b.status}
-              </Badge>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <Button
-                onClick={() => onRowClick(b.id)}
-                variant="tertiary"
-              >
-                Edit
-              </Button>
-            </IndexTable.Cell>
-          </IndexTable.Row>
-        ))}
-      </IndexTable>
-      {total > rows.length && (
-        <Text as="p" tone="subdued" alignment="center">
-          Showing first {rows.length} of {total}. Refine the filters to
-          narrow your view.
-        </Text>
+                ]
+              : []),
+            ...(onBulkArchive
+              ? [
+                  {
+                    content: "Archive",
+                    onAction: () => setBulkConfirm("archive"),
+                    disabled: bulkBusy,
+                  },
+                ]
+              : []),
+            ...(onBulkDelete
+              ? [
+                  {
+                    content: "Delete",
+                    onAction: () => setBulkConfirm("delete"),
+                    disabled: bulkBusy,
+                  },
+                ]
+              : []),
+          ]}
+        >
+          {rows.map((b, i) => (
+            <IndexTable.Row
+              id={b.id}
+              key={b.id}
+              position={i}
+              selected={selectedResources.includes(b.id)}
+              onClick={() => onRowClick(b.id)}
+            >
+              <IndexTable.Cell>
+                <Text as="span" fontWeight="semibold">
+                  {b.title}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>{b.type}</IndexTable.Cell>
+              <IndexTable.Cell>
+                <Badge tone={b.status === "active" ? "success" : "info"}>
+                  {b.status}
+                </Badge>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Button
+                  onClick={() => onRowClick(b.id)}
+                  variant="tertiary"
+                >
+                  Edit
+                </Button>
+              </IndexTable.Cell>
+            </IndexTable.Row>
+          ))}
+        </IndexTable>
       )}
+      <Box paddingBlockStart="300">
+        <InlineStack align="space-between" blockAlign="center">
+          <Text as="p" tone="subdued" variant="bodySm">
+            {total === 0
+              ? "No bundles match the current filters."
+              : `Page ${pagination.page} of ${pagination.totalPages} · ${total} bundle${total === 1 ? "" : "s"} total`}
+          </Text>
+          {(pagination.hasPrev || pagination.hasNext) && (
+            <Pagination
+              label={`${pagination.page} / ${pagination.totalPages}`}
+              hasPrevious={pagination.hasPrev}
+              hasNext={pagination.hasNext}
+              onPrevious={() =>
+                onPageChange(Math.max(1, pagination.page - 1))
+              }
+              onNext={() => onPageChange(pagination.page + 1)}
+            />
+          )}
+        </InlineStack>
+      </Box>
 
       {/* The built-in canCreateNewView modal is fine for the happy
           path; this fallback Modal is here for the explicit "Save

@@ -837,6 +837,39 @@ describe("Saved views (M-176)", () => {
     expect(res.status).toBe(400);
   });
 
+  it("PUT /settings accepts savedView.viewMode (M-178) and rejects unknown values", async () => {
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: "shop-uuid",
+      settings: {
+        savedViews: [
+          { id: "v1", label: "Cards", viewMode: "card" },
+        ],
+      },
+    });
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: updateSpy,
+      },
+    };
+    const okRes = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        savedViews: [{ id: "v1", label: "Cards", viewMode: "card" }],
+      });
+    expect(okRes.status).toBe(200);
+
+    const badRes = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        savedViews: [{ id: "v1", label: "X", viewMode: "kanban" }],
+      });
+    expect(badRes.status).toBe(400);
+  });
+
   it("PUT /settings rejects savedView with unsupported status filter", async () => {
     const client: SettingsClient = {
       shop: {

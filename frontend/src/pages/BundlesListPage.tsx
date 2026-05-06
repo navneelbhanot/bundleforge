@@ -29,13 +29,18 @@ import {
   BundlesListTable,
   type BundleListFilters,
   type BundleRow,
+  type BundleSort,
   type SavedView,
+  type ViewMode,
 } from "../components/bundlesList/BundlesListTable";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { PageLoading } from "../components/PageLoading";
 
 const ONBOARDING_DISMISSED_KEY = "bundleforge:onboarding-dismissed";
-const PAGE_LIMIT = 100; // bumps from API default 20 so filtered counts are accurate
+const PAGE_SIZE = 20; // matches the API's natural page size
+
+const DEFAULT_SORT: BundleSort = { sortBy: "createdAt", sortOrder: "desc" };
+const DEFAULT_VIEW_MODE: ViewMode = "table";
 
 const BUNDLE_TYPES = [
   "fixed",
@@ -214,9 +219,17 @@ function FreshShopDashboard({
   );
 }
 
-function buildQuery(filters: BundleListFilters, limit: number): string {
+function buildQuery(
+  filters: BundleListFilters,
+  sort: BundleSort,
+  page: number,
+  limit: number,
+): string {
   const params = new URLSearchParams();
   params.set("limit", String(limit));
+  params.set("page", String(page));
+  params.set("sortBy", sort.sortBy);
+  params.set("sortOrder", sort.sortOrder);
   if (filters.status) params.set("status", filters.status);
   if (filters.type) params.set("type", filters.type);
   if (filters.search && filters.search.trim().length > 0) {
@@ -227,7 +240,14 @@ function buildQuery(filters: BundleListFilters, limit: number): string {
 
 interface BundlesPayload {
   data: BundleRow[];
-  pagination: { total: number };
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 interface SettingsPayload {
@@ -256,18 +276,37 @@ export function BundlesListPage(): JSX.Element {
   const [hasEverHadBundles, setHasEverHadBundles] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [sort, setSort] = useState<BundleSort>(DEFAULT_SORT);
+  const [viewMode, setViewMode] = useState<ViewMode>(DEFAULT_VIEW_MODE);
+  const [page, setPage] = useState(1);
+  const [paginationInfo, setPaginationInfo] = useState({
+    page: 1,
+    totalPages: 1,
+    hasPrev: false,
+    hasNext: false,
+  });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchBundles = useCallback(
-    async (next: BundleListFilters): Promise<void> => {
+    async (
+      nextFilters: BundleListFilters,
+      nextSort: BundleSort,
+      nextPage: number,
+    ): Promise<void> => {
       try {
         const res = await fetch(
-          `/api/v1/bundles?${buildQuery(next, PAGE_LIMIT)}`,
+          `/api/v1/bundles?${buildQuery(nextFilters, nextSort, nextPage, PAGE_SIZE)}`,
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const body = (await res.json()) as BundlesPayload;
         setRows(body.data);
         setTotal(body.pagination?.total ?? body.data.length);
+        setPaginationInfo({
+          page: body.pagination?.page ?? nextPage,
+          totalPages: body.pagination?.totalPages ?? 1,
+          hasPrev: body.pagination?.hasPrev ?? false,
+          hasNext: body.pagination?.hasNext ?? false,
+        });
         if (body.data.length > 0 || (body.pagination?.total ?? 0) > 0) {
           setHasEverHadBundles(true);
         }
@@ -278,16 +317,16 @@ export function BundlesListPage(): JSX.Element {
     [],
   );
 
-  // Initial load + debounced reload on filter change.
+  // Initial load + debounced reload on (filters, sort, page) change.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      void fetchBundles(filters);
+      void fetchBundles(filters, sort, page);
     }, 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filters, fetchBundles]);
+  }, [filters, sort, page, fetchBundles]);
 
   // Load saved views once on mount.
   useEffect(() => {
@@ -308,19 +347,42 @@ export function BundlesListPage(): JSX.Element {
   }
 
   const handleFilterChange = useCallback((next: BundleListFilters) => {
-    // Editing filters drops you back into the All view.
+    // Editing filters drops you back into the All view + page 1.
     setSelectedViewIndex(-1);
     setFilters(next);
+    setPage(1);
+  }, []);
+
+  const handleSortChange = useCallback((next: BundleSort) => {
+    setSelectedViewIndex(-1);
+    setSort(next);
+    setPage(1);
+  }, []);
+
+  const handleViewModeChange = useCallback((next: ViewMode) => {
+    setSelectedViewIndex(-1);
+    setViewMode(next);
+  }, []);
+
+  const handlePageChange = useCallback((next: number) => {
+    setPage(Math.max(1, next));
   }, []);
 
   const handleViewSelect = useCallback(
     (index: number) => {
       setSelectedViewIndex(index);
+      setPage(1);
       if (index < 0) {
         setFilters({});
+        setSort(DEFAULT_SORT);
+        setViewMode(DEFAULT_VIEW_MODE);
       } else {
         const view = views[index];
-        if (view) setFilters(view.filters ?? {});
+        if (view) {
+          setFilters(view.filters ?? {});
+          setSort(view.sort ?? DEFAULT_SORT);
+          setViewMode(view.viewMode ?? DEFAULT_VIEW_MODE);
+        }
       }
     },
     [views],
@@ -346,13 +408,15 @@ export function BundlesListPage(): JSX.Element {
         id: genId(),
         label,
         filters: { ...filters },
+        sort: { ...sort },
+        viewMode,
       };
       const next = [...views, view];
       await persistViews(next);
       // Auto-select the newly saved view.
       setSelectedViewIndex(next.length - 1);
     },
-    [filters, views, persistViews],
+    [filters, sort, viewMode, views, persistViews],
   );
 
   const handleDeleteView = useCallback(
@@ -361,6 +425,9 @@ export function BundlesListPage(): JSX.Element {
       await persistViews(next);
       setSelectedViewIndex(-1);
       setFilters({});
+      setSort(DEFAULT_SORT);
+      setViewMode(DEFAULT_VIEW_MODE);
+      setPage(1);
     },
     [views, persistViews],
   );
@@ -397,14 +464,14 @@ export function BundlesListPage(): JSX.Element {
             `${verb} ${body.succeeded.length}, ${body.failed.length} failed.`,
           );
         }
-        await fetchBundles(filters);
+        await fetchBundles(filters, sort, page);
       } catch (e) {
         setToast(`Bulk ${path} failed: ${(e as Error).message}`);
       } finally {
         setBulkBusy(false);
       }
     },
-    [fetchBundles, filters],
+    [fetchBundles, filters, sort, page],
   );
 
   const handleBulkPublish = useCallback(
@@ -508,7 +575,13 @@ export function BundlesListPage(): JSX.Element {
               selectedViewIndex={selectedViewIndex}
               filters={filters}
               bundleTypes={BUNDLE_TYPES}
+              sort={sort}
+              viewMode={viewMode}
+              pagination={paginationInfo}
               onFilterChange={handleFilterChange}
+              onSortChange={handleSortChange}
+              onViewModeChange={handleViewModeChange}
+              onPageChange={handlePageChange}
               onViewSelect={handleViewSelect}
               onSaveView={handleSaveView}
               onDeleteView={handleDeleteView}

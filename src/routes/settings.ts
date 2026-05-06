@@ -173,6 +173,7 @@ const SavedView = z
     label: z.string().min(1).max(40),
     filters: SavedViewFilters.optional(),
     sort: SavedViewSort.optional(),
+    viewMode: z.enum(["table", "compact", "card"]).optional(),
   })
   .strict();
 

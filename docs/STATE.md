@@ -8,16 +8,16 @@
 
 **Phase R3 in progress — Bundle List richness.**
 
-M-176 + M-177 landed 2026-05-06. The bundle list page now
-wraps Polaris IndexFilters around the table: live debounced
-search, status + type chip filters, saved views, **and bulk
-actions** (publish / archive / delete) on selectable rows.
-Bulk endpoints loop the existing single-bundle service
-methods sequentially, capture per-id outcomes
-(`{succeeded[], failed[]}`), and surface results via a Toast.
+M-176 + M-177 + M-178 landed 2026-05-06. The bundle list page
+now wraps Polaris IndexFilters around the table with: live
+debounced search, status + type chip filters, saved views,
+bulk actions (publish / archive / delete), **a 6-option sort
+dropdown, three view modes (Table / Compact / Card), and real
+server-driven pagination**. Saved views round-trip filters +
+sort + view mode so a saved "All compact" restores its own
+density across reloads.
 
-M-178 (sort + view modes + true pagination) and M-179
-(templates gallery) remaining.
+M-179 (templates gallery) is the only remaining R3 milestone.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -35,18 +35,23 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-178 — Bundle list sort + view
-modes + true pagination. Spec first:
-`docs/specs/M-178-bundle-list-sort-view-modes.md`. Wires the
-Polaris `IndexFilters` `sortOptions` slot to the existing
-server-side sort (sortBy=createdAt|updatedAt|title|priority,
-sortOrder=asc|desc) and exposes view modes (table / card /
-compact). Replaces today's `limit=100` truncation footer with
-a real `Pagination` component that drives `page=N&limit=20`
-through the existing service surface. Saved views persist
-the chosen sort + view mode alongside filters (the M-176
-schema already accepts a `sort` sub-object — no new
-validator). Sizing: medium.
+**Code (next session):** Run M-179 — Bundle list templates /
+preset gallery. Spec first:
+`docs/specs/M-179-bundle-list-templates.md`. Closes Phase R3.
+A curated set of starter bundles (e.g. "Holiday gift box",
+"BOGO weekender", "Subscription starter") a merchant can clone
+with one click into a draft. Likely needs:
+- A small read-only `BUNDLE_TEMPLATES` registry on the server
+  (handful of pre-defined bundle configs — no schema changes).
+- New `GET /api/v1/bundles/templates` route returning the
+  registry.
+- New `POST /api/v1/bundles/templates/:id/instantiate`
+  route that calls the existing `service.create` with the
+  template's contents.
+- New "Browse templates" entry-point on `BundlesListPage`
+  (a Polaris `Modal` listing templates as Cards with a
+  "Use this template" button each).
+Sizing: medium.
 
 Other open threads (mostly user-owned):
 
@@ -115,6 +120,20 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-178 — Bundle list · sort + view modes + pagination**
+  (2026-05-06 late). Wires Polaris IndexFilters' `sortOptions`
+  slot to the existing `sortBy / sortOrder` server surface
+  with 6 options (Newest / Oldest / Recently updated / Title
+  A→Z / Z→A / Priority high→low). Replaces the old `limit=100`
+  truncation footer with a real `Pagination` component
+  driving `page=N&limit=20`. Adds a Table / Compact / Card
+  view-mode toggle: Compact passes `condensed={true}` to
+  IndexTable; Card swaps in a new responsive `BundleCardGrid`
+  that keeps M-177's bulk actions working via a per-grid
+  bulk-action bar. SavedView Zod schema gains
+  `viewMode?: "table" | "compact" | "card"` so saved views
+  round-trip filters + sort + view mode across reloads.
+  `docs/sessions/0178-bundle-list-sort-view-modes.md`.
 - **M-177 — Bundle list · bulk actions** (2026-05-06 late).
   Plugs row selection + Polaris IndexFilters' promoted
   bulk-action slot into the chrome from M-176. Three new
@@ -434,11 +453,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **659 / 659 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 server bulk-route cases + +2
-  BundlesListTable selectable cases + +1 BundlesListPage
-  bulk-handler case since M-176.
-- **509 / 509** when no real DB is available — the bundle CRUD
+- **664 / 664 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +1 settings savedView viewMode case + +3
+  BundlesListTable sort/view-mode/pagination cases + +1
+  BundlesListPage initial-fetch query-param case since M-177.
+- **514 / 514** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
