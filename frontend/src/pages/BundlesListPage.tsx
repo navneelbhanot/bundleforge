@@ -1,14 +1,16 @@
 /**
- * Bundles list page (M-097).
+ * Bundles list page (M-097, IndexFilters in M-176).
  *
- * Fetches /api/v1/bundles. When there are bundles, renders an
- * IndexTable with summary stat strip above. When there aren't, shows
- * a "welcome to BundleForge" landing that leans into our actual
- * technical differentiators (atomic inventory, pricing parity, audit
- * trail) rather than a generic onboarding checklist — and offers the
- * three-step OnboardingWizard for merchants who want a guided tour.
+ * Fetches /api/v1/bundles with filters. When there are bundles,
+ * renders Polaris IndexFilters + IndexTable wrapped in
+ * `BundlesListTable`. When there aren't, shows a "welcome to
+ * BundleForge" landing.
+ *
+ * Saved views are persisted under `settings.savedViews` and
+ * loaded once on mount. Saving/deleting a view PATCHes the
+ * whole array back; the client owns ordering.
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BlockStack,
@@ -16,25 +18,38 @@ import {
   Button,
   Card,
   Grid,
-  IndexTable,
   InlineStack,
   Page,
   Text,
-  Badge,
 } from "@shopify/polaris";
 
+import {
+  BundlesListTable,
+  type BundleListFilters,
+  type BundleRow,
+  type SavedView,
+} from "../components/bundlesList/BundlesListTable";
 import { OnboardingWizard } from "../components/OnboardingWizard";
 import { PageLoading } from "../components/PageLoading";
 
-interface BundleRow {
-  id: string;
-  title: string;
-  type: string;
-  status: string;
-  slug: string;
-}
-
 const ONBOARDING_DISMISSED_KEY = "bundleforge:onboarding-dismissed";
+const PAGE_LIMIT = 100; // bumps from API default 20 so filtered counts are accurate
+
+const BUNDLE_TYPES = [
+  "fixed",
+  "mix_match",
+  "bogo",
+  "bxgy",
+  "volume",
+  "build_box",
+  "multipack",
+  "gift",
+  "mystery",
+  "sample",
+  "subscription",
+  "wholesale",
+  "custom",
+] as const;
 
 function readDismissed(): boolean {
   try {
@@ -126,7 +141,6 @@ function FreshShopDashboard({
 }): JSX.Element {
   return (
     <BlockStack gap="500">
-      {/* Hero — distinctive, not a Bundler clone. Confident, technical voice. */}
       <Card>
         <Box
           padding="600"
@@ -157,9 +171,6 @@ function FreshShopDashboard({
         </Box>
       </Card>
 
-      {/* Three differentiators — these are real properties of the codebase,
-          not marketing fluff. Each maps to a specific code path the merchant
-          can verify. */}
       <Grid>
         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4, xl: 4 }}>
           <Differentiator
@@ -184,7 +195,6 @@ function FreshShopDashboard({
         </Grid.Cell>
       </Grid>
 
-      {/* Lightweight links — no aggressive checklist, no upsell card. */}
       <Card>
         <BlockStack gap="200">
           <Text as="h2" variant="headingMd">
@@ -202,25 +212,89 @@ function FreshShopDashboard({
   );
 }
 
+function buildQuery(filters: BundleListFilters, limit: number): string {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  if (filters.status) params.set("status", filters.status);
+  if (filters.type) params.set("type", filters.type);
+  if (filters.search && filters.search.trim().length > 0) {
+    params.set("search", filters.search.trim());
+  }
+  return params.toString();
+}
+
+interface BundlesPayload {
+  data: BundleRow[];
+  pagination: { total: number };
+}
+
+interface SettingsPayload {
+  savedViews?: SavedView[];
+}
+
+function genId(): string {
+  // crypto.randomUUID is broadly available in jsdom + browsers; fall
+  // back to a timestamp-based string if unavailable.
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `view-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+}
+
 export function BundlesListPage(): JSX.Element {
   const navigate = useNavigate();
   const [rows, setRows] = useState<BundleRow[] | null>(null);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
-  const [wizardDismissed, setWizardDismissed] = useState(readDismissed);
+  const [filters, setFilters] = useState<BundleListFilters>({});
+  const [views, setViews] = useState<SavedView[]>([]);
+  const [selectedViewIndex, setSelectedViewIndex] = useState(-1);
+  const [hasEverHadBundles, setHasEverHadBundles] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const fetchBundles = useCallback(
+    async (next: BundleListFilters): Promise<void> => {
+      try {
+        const res = await fetch(
+          `/api/v1/bundles?${buildQuery(next, PAGE_LIMIT)}`,
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const body = (await res.json()) as BundlesPayload;
+        setRows(body.data);
+        setTotal(body.pagination?.total ?? body.data.length);
+        if (body.data.length > 0 || (body.pagination?.total ?? 0) > 0) {
+          setHasEverHadBundles(true);
+        }
+      } catch (e) {
+        setError((e as Error).message);
+      }
+    },
+    [],
+  );
+
+  // Initial load + debounced reload on filter change.
   useEffect(() => {
-    fetch("/api/v1/bundles")
-      .then((r) =>
-        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
-      )
-      .then((body: { data: BundleRow[] }) => setRows(body.data))
-      .catch((e: Error) => setError(e.message));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      void fetchBundles(filters);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [filters, fetchBundles]);
+
+  // Load saved views once on mount.
+  useEffect(() => {
+    fetch("/api/v1/settings")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((body: SettingsPayload) => setViews(body.savedViews ?? []))
+      .catch(() => setViews([]));
   }, []);
 
   function handleDismiss(): void {
     writeDismissed();
-    setWizardDismissed(true);
     setShowWizard(false);
   }
 
@@ -229,7 +303,65 @@ export function BundlesListPage(): JSX.Element {
     navigate("/bundles/new");
   }
 
-  if (error) {
+  const handleFilterChange = useCallback((next: BundleListFilters) => {
+    // Editing filters drops you back into the All view.
+    setSelectedViewIndex(-1);
+    setFilters(next);
+  }, []);
+
+  const handleViewSelect = useCallback(
+    (index: number) => {
+      setSelectedViewIndex(index);
+      if (index < 0) {
+        setFilters({});
+      } else {
+        const view = views[index];
+        if (view) setFilters(view.filters ?? {});
+      }
+    },
+    [views],
+  );
+
+  const persistViews = useCallback(
+    async (next: SavedView[]): Promise<void> => {
+      const res = await fetch("/api/v1/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ savedViews: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const body = (await res.json()) as SettingsPayload;
+      setViews(body.savedViews ?? next);
+    },
+    [],
+  );
+
+  const handleSaveView = useCallback(
+    async (label: string): Promise<void> => {
+      const view: SavedView = {
+        id: genId(),
+        label,
+        filters: { ...filters },
+      };
+      const next = [...views, view];
+      await persistViews(next);
+      // Auto-select the newly saved view.
+      setSelectedViewIndex(next.length - 1);
+    },
+    [filters, views, persistViews],
+  );
+
+  const handleDeleteView = useCallback(
+    async (id: string): Promise<void> => {
+      const next = views.filter((v) => v.id !== id);
+      await persistViews(next);
+      setSelectedViewIndex(-1);
+      setFilters({});
+    },
+    [views, persistViews],
+  );
+
+  if (error && rows === null) {
     return (
       <Page title="Bundles">
         <Card>
@@ -256,11 +388,14 @@ export function BundlesListPage(): JSX.Element {
     );
   }
 
-  // Fresh shop: rich landing instead of a blank IndexTable. Reading
-  // wizardDismissed lets us also show this layout post-dismiss without
-  // re-prompting (still no bundles, but the welcome card stays as
-  // context until they create one).
-  if (rows.length === 0) {
+  // Fresh shop: show the welcome only when the shop *has never*
+  // had bundles. Once filters narrow the list to zero, we keep
+  // the IndexFilters chrome so the merchant can clear filters.
+  const filtersActive =
+    Boolean(filters.status) ||
+    Boolean(filters.type) ||
+    Boolean(filters.search && filters.search.trim().length > 0);
+  if (rows.length === 0 && total === 0 && !hasEverHadBundles && !filtersActive) {
     return (
       <Page title="Bundles">
         <FreshShopDashboard
@@ -272,7 +407,10 @@ export function BundlesListPage(): JSX.Element {
     );
   }
 
-  // Has bundles: stats strip + table.
+  // Stats reflect the *current filtered* result set so the strip
+  // matches what the merchant is looking at. Total counts
+  // unfiltered totals stay accessible via the "Showing first N of
+  // M" footer rendered inside BundlesListTable.
   const active = rows.filter((b) => b.status === "active").length;
   const draft = rows.filter((b) => b.status === "draft").length;
   const archived = rows.filter((b) => b.status === "archived").length;
@@ -285,7 +423,7 @@ export function BundlesListPage(): JSX.Element {
       <BlockStack gap="500">
         <Grid>
           <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
-            <StatCard label="Total" value={rows.length} />
+            <StatCard label={filtersActive ? "Filtered" : "Total"} value={rows.length} />
           </Grid.Cell>
           <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 3, xl: 3 }}>
             <StatCard label="Active" value={active} tone="success" />
@@ -303,45 +441,19 @@ export function BundlesListPage(): JSX.Element {
         </Grid>
 
         <Card>
-          <IndexTable
-            itemCount={rows.length}
-            headings={[
-              { title: "Title" },
-              { title: "Type" },
-              { title: "Status" },
-              { title: "" },
-            ]}
-            selectable={false}
-          >
-            {rows.map((b, i) => (
-              <IndexTable.Row
-                id={b.id}
-                key={b.id}
-                position={i}
-                onClick={() => navigate(`/bundles/${b.id}`)}
-              >
-                <IndexTable.Cell>
-                  <Text as="span" fontWeight="semibold">
-                    {b.title}
-                  </Text>
-                </IndexTable.Cell>
-                <IndexTable.Cell>{b.type}</IndexTable.Cell>
-                <IndexTable.Cell>
-                  <Badge tone={b.status === "active" ? "success" : "info"}>
-                    {b.status}
-                  </Badge>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                  <Button
-                    onClick={() => navigate(`/bundles/${b.id}`)}
-                    variant="tertiary"
-                  >
-                    Edit
-                  </Button>
-                </IndexTable.Cell>
-              </IndexTable.Row>
-            ))}
-          </IndexTable>
+          <BundlesListTable
+            rows={rows}
+            total={total}
+            views={views}
+            selectedViewIndex={selectedViewIndex}
+            filters={filters}
+            bundleTypes={BUNDLE_TYPES}
+            onFilterChange={handleFilterChange}
+            onViewSelect={handleViewSelect}
+            onSaveView={handleSaveView}
+            onDeleteView={handleDeleteView}
+            onRowClick={(id) => navigate(`/bundles/${id}`)}
+          />
         </Card>
       </BlockStack>
     </Page>

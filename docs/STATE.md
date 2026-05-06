@@ -6,21 +6,20 @@
 
 ## Current milestone
 
-**Phase R2 closed — Bundle Detail richness complete.**
+**Phase R3 in progress — Bundle List richness.**
 
-M-169..M-175 all landed 2026-05-06. Every Bundle Detail tab
-is wired: Setup, Schedule, Display, Customers, Inventory,
-Performance, Activity, Advanced. Advanced (M-175) collected
-SEO metadata (`seoTitle` / `seoDescription` finally have an
-admin entry point), a read-only JSON inspector for the 5
-per-bundle JSON columns, and the Duplicate / Delete actions
-that the BundleService had carried since M-050/M-052 but the
-frontend never exposed. The placeholder fallback in
-BundleDetailPage was removed entirely.
+M-176 landed 2026-05-06. The bundle list page now wraps
+Polaris IndexFilters around the table: live debounced search,
+status + type chip filters, and saved views that persist to
+`settings.savedViews`. Stats strip reflects the filtered
+result set (Total relabels to Filtered when chips are
+active). The fresh-shop / onboarding-wizard branch is
+unchanged.
 
-Phase R3 next: Bundle List richness (IndexFilters + saved
-views, Bulk actions, Sort + view modes, Templates gallery —
-M-176..M-179).
+M-177..M-179 plug into the IndexFilters chrome shipped today:
+bulk actions (selectable rows + promoted bulk-action slot),
+sort + view modes (table / card / compact + true pagination),
+and a templates gallery.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -38,18 +37,20 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-176 — Bundle list IndexFilters
-+ saved views (Phase R3 start). Spec first:
-`docs/specs/M-176-bundle-list-indexfilters.md`. Replaces the
-plain `IndexTable` on `BundlesListPage` with Polaris
-`IndexFilters` (search input + status / type filter chips +
-"Save view" support). Saved views persist to `Shop.settings`
-(or a small new column — TBD in spec) so a merchant who lives
-in "Active drafts only" doesn't reset on page reload. Likely
-introduces a small `/api/v1/saved-views` CRUD route or
-piggybacks on the existing settings PUT. Sizing: medium —
-this is the first Phase R3 milestone and sets the pattern for
-M-177..M-179.
+**Code (next session):** Run M-177 — Bundle list bulk actions.
+Spec first: `docs/specs/M-177-bundle-list-bulk-actions.md`.
+Adds row selection to the IndexFilters table shipped in M-176
+(flip `selectable=true`) and wires Polaris IndexFilters'
+promoted bulk-action slot to call new server endpoints:
+- `POST /api/v1/bundles/bulk/publish` — publish many at once.
+- `POST /api/v1/bundles/bulk/archive` — archive many at once.
+- `POST /api/v1/bundles/bulk/delete` — soft-delete many at
+  once.
+Each bulk endpoint should validate the id list belongs to the
+shop, then loop the existing single-bundle service method
+(no new business logic) and emit one activity-log row per
+target. Confirmation dialog for the destructive paths.
+Sizing: small-medium.
 
 Other open threads (mostly user-owned):
 
@@ -118,6 +119,21 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-176 — Bundle list · IndexFilters + saved views**
+  (2026-05-06 late, **Phase R3 start**). Replaced the bare
+  IndexTable on `BundlesListPage` with Polaris `IndexFilters`
+  wrapping a new `BundlesListTable` component. Live debounced
+  search + status / type chip filters call /api/v1/bundles
+  with the appropriate query string. Saved views persist via
+  a new `savedViews` array on `Shop.settings` (no new schema
+  column — piggybacks on the existing settings JSON);
+  whole-array replace semantics with max 20 views/shop, label
+  1..40 chars, status enum bounded to draft|active|archived.
+  Stats strip reflects the filtered result set (Total
+  relabels to Filtered when chips are active). Fresh-shop
+  branch + OnboardingWizard preserved. Sets the IndexFilters
+  chrome that M-177..M-179 plug into.
+  `docs/sessions/0176-bundle-list-indexfilters.md`.
 - **M-175 — Bundle Detail · Advanced tab** (2026-05-06 late).
   **Closes Phase R2.** Three cards on the previously-blank
   Advanced tab. Search engine listing wires `seoTitle` and
@@ -401,12 +417,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **637 / 637 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 BundleService SEO cases + +4 AdvancedTab
-  UI cases since M-174 (BundleDetailPage hash test count
-  unchanged — the M-175 deep-link replaced the now-obsolete
-  placeholder regression test).
-- **487 / 487** when no real DB is available — the bundle CRUD
+- **650 / 650 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 settings savedViews cases + +5
+  BundlesListTable UI cases + +3 BundlesListPage UI cases
+  since M-175.
+- **500 / 500** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

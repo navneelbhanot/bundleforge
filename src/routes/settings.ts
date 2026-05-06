@@ -30,6 +30,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../middleware/errorHandler";
+import { BUNDLE_TYPES } from "../services/bundles/validators";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -149,6 +150,34 @@ const NotificationsPatch = z
   })
   .strict();
 
+const SavedViewFilters = z
+  .object({
+    status: z.enum(["draft", "active", "archived"]).optional(),
+    type: z
+      .enum(BUNDLE_TYPES as unknown as [string, ...string[]])
+      .optional(),
+    search: z.string().max(200).optional(),
+  })
+  .strict();
+
+const SavedViewSort = z
+  .object({
+    sortBy: z.enum(["createdAt", "updatedAt", "title", "priority"]),
+    sortOrder: z.enum(["asc", "desc"]),
+  })
+  .strict();
+
+const SavedView = z
+  .object({
+    id: z.string().min(1).max(100),
+    label: z.string().min(1).max(40),
+    filters: SavedViewFilters.optional(),
+    sort: SavedViewSort.optional(),
+  })
+  .strict();
+
+const SavedViewsArray = z.array(SavedView).max(20);
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
@@ -159,6 +188,7 @@ const PatchSchema = z
     pricing: PricingPatch.optional(),
     cart: CartPatch.optional(),
     localization: LocalizationPatch.optional(),
+    savedViews: SavedViewsArray.optional(),
   })
   .strict();
 
@@ -281,6 +311,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         localization: isObject(settings.localization)
           ? settings.localization
           : {},
+        savedViews: Array.isArray(settings.savedViews)
+          ? settings.savedViews
+          : [],
       });
     } catch (err) {
       next(err);
@@ -330,6 +363,12 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         pricing: mergeSubobject(prev.pricing, patch.pricing),
         cart: mergeSubobject(prev.cart, patch.cart),
         localization: mergeSubobject(prev.localization, patch.localization),
+        // Saved views are whole-array replace (not merged) — the
+        // client owns ordering and partial CRUD would 4x the
+        // surface area for no merchant benefit.
+        ...(patch.savedViews !== undefined && {
+          savedViews: patch.savedViews,
+        }),
       };
 
       const updated = await client.shop.update({
@@ -358,6 +397,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         localization: isObject(updatedSettings.localization)
           ? updatedSettings.localization
           : {},
+        savedViews: Array.isArray(updatedSettings.savedViews)
+          ? updatedSettings.savedViews
+          : [],
       });
     } catch (err) {
       next(err);

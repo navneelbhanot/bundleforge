@@ -747,3 +747,114 @@ describe("PUT /settings", () => {
     expect(writtenSettings.general.brandColor).toBe("#abcdef");
   });
 });
+
+describe("Saved views (M-176)", () => {
+  it("GET /settings exposes savedViews defaulting to []", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client)).get("/settings");
+    expect(res.status).toBe(200);
+    expect(res.body.savedViews).toEqual([]);
+  });
+
+  it("PUT /settings persists a valid savedViews array (whole-array replace)", async () => {
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: "shop-uuid",
+      settings: {
+        savedViews: [
+          {
+            id: "v1",
+            label: "Active drafts",
+            filters: { status: "draft" },
+          },
+        ],
+      },
+    });
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        savedViews: [
+          {
+            id: "v1",
+            label: "Active drafts",
+            filters: { status: "draft" },
+            sort: { sortBy: "createdAt", sortOrder: "desc" },
+          },
+        ],
+      });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.savedViews).toHaveLength(1);
+    expect(writtenSettings.savedViews[0].label).toBe("Active drafts");
+    expect(res.body.savedViews[0].id).toBe("v1");
+  });
+
+  it("PUT /settings rejects a savedView missing label", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        savedViews: [{ id: "v1" }],
+      });
+    expect(res.status).toBe(400);
+  });
+
+  it("PUT /settings rejects > 20 savedViews", async () => {
+    const tooMany = Array.from({ length: 21 }, (_, i) => ({
+      id: `v${i}`,
+      label: `View ${i}`,
+    }));
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ savedViews: tooMany });
+    expect(res.status).toBe(400);
+  });
+
+  it("PUT /settings rejects savedView with unsupported status filter", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        savedViews: [
+          {
+            id: "v1",
+            label: "Bad",
+            filters: { status: "deleted" },
+          },
+        ],
+      });
+    expect(res.status).toBe(400);
+  });
+});
