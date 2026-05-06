@@ -12,6 +12,7 @@ import {
   CreateBundleItemInput,
   CreatePricingRuleInput,
   type EligibilityInput,
+  type InventoryRulesInput,
   PaginatedResponse,
   PaginationParams,
   type ScheduleSettingsInput,
@@ -222,6 +223,55 @@ function validateEligibility(input: EligibilityInput): void {
   }
 }
 
+const OVERSELL_POLICIES = [
+  "prevent",
+  "allow_negative",
+  "allow_to_zero",
+] as const;
+
+/**
+ * Validate a per-bundle InventoryRules patch. All fields optional.
+ * `null` for any field means "remove the override; fall back to
+ * the shop-level default at render time" — handled by the
+ * deep-merge in update().
+ *
+ * Bounds match M-163's shop-level InventoryPatch (0..100000 for
+ * thresholds, the same oversell-policy enum) so the per-bundle
+ * override surface can never set a value the shop level wouldn't
+ * accept.
+ */
+function validateInventoryRules(input: InventoryRulesInput): void {
+  for (const k of [
+    "lowStockThreshold",
+    "pauseWhenComponentBelow",
+  ] as const) {
+    const v = input[k];
+    if (v === undefined || v === null) continue;
+    if (!Number.isInteger(v) || v < 0 || v > 100000) {
+      throw new ValidationError(
+        `inventoryRules.${k} must be an integer 0..100000`,
+      );
+    }
+  }
+  if (
+    input.oversellPolicy !== undefined &&
+    input.oversellPolicy !== null &&
+    !OVERSELL_POLICIES.includes(
+      input.oversellPolicy as (typeof OVERSELL_POLICIES)[number],
+    )
+  ) {
+    throw new ValidationError(
+      `inventoryRules.oversellPolicy must be ${OVERSELL_POLICIES.join(" | ")}`,
+    );
+  }
+  for (const k of ["lowStockAlertEnabled", "componentOnlyMode"] as const) {
+    const v = input[k];
+    if (v !== undefined && v !== null && typeof v !== "boolean") {
+      throw new ValidationError(`inventoryRules.${k} must be boolean`);
+    }
+  }
+}
+
 /**
  * Validate a ScheduleSettings patch in shape — Zod-style without
  * the dependency. Throws ValidationError on the first violation.
@@ -363,6 +413,7 @@ export class BundleService {
     if (input.scheduleSettings) validateSchedule(input.scheduleSettings);
     if (input.displaySettings) validateDisplay(input.displaySettings);
     if (input.eligibility) validateEligibility(input.eligibility);
+    if (input.inventoryRules) validateInventoryRules(input.inventoryRules);
     if (input.startsAt && input.endsAt) {
       if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
         throw new ValidationError("endsAt must be on/after startsAt");
@@ -383,6 +434,8 @@ export class BundleService {
           (input.scheduleSettings ?? {}) as unknown as Prisma.InputJsonValue,
         eligibility:
           (input.eligibility ?? {}) as unknown as Prisma.InputJsonValue,
+        inventoryRules:
+          (input.inventoryRules ?? {}) as unknown as Prisma.InputJsonValue,
         startsAt: input.startsAt ? new Date(input.startsAt) : undefined,
         endsAt: input.endsAt ? new Date(input.endsAt) : undefined,
         items: { create: (input.items ?? []).map((it, i) => mapItem(it, i)) },
@@ -401,6 +454,7 @@ export class BundleService {
       scheduleSettings?: unknown;
       displaySettings?: unknown;
       eligibility?: unknown;
+      inventoryRules?: unknown;
     };
     const data: Prisma.BundleUpdateInput = {};
     if (input.title !== undefined) {
@@ -466,6 +520,25 @@ export class BundleService {
         }
       }
       data.eligibility = merged as Prisma.InputJsonValue;
+    }
+    if (input.inventoryRules !== undefined) {
+      validateInventoryRules(input.inventoryRules);
+      // Same null-removes-override pattern as displaySettings /
+      // eligibility — `null` for any key falls the bundle back
+      // to the shop-level default at render time.
+      const prev = isObject(existing.inventoryRules)
+        ? existing.inventoryRules
+        : {};
+      const merged: Record<string, unknown> = { ...prev };
+      for (const [k, v] of Object.entries(input.inventoryRules)) {
+        if (v === undefined) continue;
+        if (v === null) {
+          delete merged[k];
+        } else {
+          merged[k] = v;
+        }
+      }
+      data.inventoryRules = merged as Prisma.InputJsonValue;
     }
     if (input.startsAt !== undefined) {
       data.startsAt = input.startsAt ? new Date(input.startsAt) : null;

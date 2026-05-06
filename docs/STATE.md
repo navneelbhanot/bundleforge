@@ -8,37 +8,45 @@
 
 **Phase R2 in progress — Bundle Detail richness.**
 
-M-169..M-172 all landed 2026-05-06. The Bundle Detail page now
-has 4 of 8 tabs fully built: Setup, Schedule, Display, Customers.
-Customers tab covers tag-based allow/deny gating, login required,
-Shopify Segment GIDs, market codes, and locale gating. Same
-null-removes-restriction semantics as Display: empty allow array
-saves as `null` so the server deletes the override and the
-storefront stops gating that dimension.
+M-169..M-173 all landed 2026-05-06. The Bundle Detail page now
+has 5 of 8 tabs fully built: Setup, Schedule, Display, Customers,
+Inventory. Inventory tab covers per-bundle override of the
+shop-level low-stock threshold / oversell policy / low-stock
+alert from M-163, plus two bundle-specific rules: pause when any
+component drops below N, and component-only rendering mode.
+Same null-removes-key semantics as Display / Customers: "Use
+shop default" Select option and blank number fields save as
+`null` so the deep-merge deletes the override and the bundle
+falls back to the shop default at render time.
 
-Remaining R2 tabs (Inventory, Performance + Activity, Advanced)
-are placeholders pointing at M-173..M-175.
+Remaining R2 tabs (Performance + Activity, Advanced) are
+placeholders pointing at M-174..M-175.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (three migrations queued):**
+**User action required (four migrations queued):**
 1. M-168: `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`
 2. M-170: `prisma/migrations/20260506180000_bundle_schedule_settings/`
 3. M-172: `prisma/migrations/20260506200000_bundle_eligibility/`
+4. M-173: `prisma/migrations/20260506220000_bundle_inventory_rules/`
 
-All three safe during normal traffic — M-168 creates 2 empty
-tables, M-170/M-172 each add a single JSON column to bundles
-defaulting to `{}`. Apply via `prisma migrate deploy` from a CI
-shell.
+All four safe during normal traffic — M-168 creates 2 empty
+tables, M-170/M-172/M-173 each add a single JSON column to
+bundles defaulting to `{}`. Apply via `prisma migrate deploy`
+from a CI shell.
 
-**Code (next session):** Run M-173 — Inventory tab (Bundle
-Detail). Spec first: `docs/specs/M-173-bundle-detail-inventory.md`.
-Per-bundle override of the shop-level Inventory settings from
-M-163 (low-stock threshold, oversell policy) plus per-bundle
-"pause when any component < N" toggle and a "component-only
-mode" toggle. Adds an `inventoryRules` JSON column on Bundle.
+**Code (next session):** Run M-174 — Performance + Activity log
+tabs (Bundle Detail). Spec first:
+`docs/specs/M-174-bundle-detail-performance-activity.md`. Two
+tabs in one milestone: Performance reads existing
+`/api/v1/analytics/bundle/:id` data (revenue/orders/conversion
+in a date-range KPI strip + a small revenue series chart);
+Activity reads a paginated audit-style trail of admin actions
+on the bundle (status changes, item edits, settings overrides
+from M-170..M-173). May add an `audit_log` table or piggyback
+on `inventory_audit_log` — TBD in spec.
 
 Other open threads (mostly user-owned):
 
@@ -107,6 +115,25 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-173 — Bundle Detail · Inventory tab** (2026-05-06 late).
+  Per-bundle override layer for the shop-level Inventory
+  defaults from M-163 plus two new bundle-specific rules.
+  Three cards: Low-stock thresholds (lowStockThreshold,
+  pauseWhenComponentBelow, lowStockAlertEnabled), Oversell
+  policy (Select with "Use shop default" sentinel),
+  Bundle rendering mode (componentOnlyMode checkbox + info
+  banner). New `Bundle.inventoryRules` JSON column with
+  migration. Server `validateInventoryRules` enforces 0..100000
+  integer bounds (matches M-163's shop-level constraint) and
+  the `prevent | allow_negative | allow_to_zero` enum. Same
+  null-removes-key semantics as M-171/M-172: blank number
+  fields and "Use shop default" Select save as `null`, the
+  deep-merge in update() deletes the key, the storefront falls
+  back to the shop default at render time. M-173b will wire
+  the Cart Transform Function + theme blocks to honor
+  `pauseWhenComponentBelow` and `componentOnlyMode` via a new
+  `bundleforge.inventory_rules` product metafield.
+  `docs/sessions/0173-bundle-detail-inventory.md`.
 - **M-172 — Bundle Detail · Customers tab** (2026-05-06 late).
   Per-bundle eligibility surface: tag-based allow/deny chips,
   Shopify Segment GID multiline input, requireLogin checkbox,
@@ -336,16 +363,16 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **604 / 604 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 BundleService eligibility cases + +4
-  CustomersTab UI cases + +1 BundleDetailPage hash test since
-  M-171.
-- **454 / 454** when no real DB is available — the bundle CRUD
+- **614 / 614 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 BundleService inventoryRules cases + +4
+  InventoryTab UI cases + +1 BundleDetailPage hash test since
+  M-172.
+- **464 / 464** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
 - Typecheck clean (server + frontend).
-- Lint: 5 pre-existing errors only; no new violations.
+- Lint: 6 pre-existing errors only; no new violations.
 
 ## Working branch
 

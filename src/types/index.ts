@@ -110,6 +110,21 @@ export interface EligibilityInput {
   locales?: string[];
 }
 
+export type OversellPolicy = "prevent" | "allow_negative" | "allow_to_zero";
+
+export interface InventoryRulesInput {
+  /** Override of shop-level lowStockThreshold. `null` removes the override. */
+  lowStockThreshold?: number | null;
+  /** Override of shop-level oversellPolicy. `null` removes the override. */
+  oversellPolicy?: OversellPolicy | null;
+  /** Override of shop-level lowStockAlertEnabled. `null` removes the override. */
+  lowStockAlertEnabled?: boolean | null;
+  /** When any component drops below this, pause the bundle. 0 = no guard. */
+  pauseWhenComponentBelow?: number | null;
+  /** Render this bundle's components individually rather than as one bundle line. */
+  componentOnlyMode?: boolean | null;
+}
+
 export interface CreateBundleInput {
   title: string;
   type: BundleType;
@@ -120,6 +135,7 @@ export interface CreateBundleInput {
   displaySettings?: Record<string, unknown>;
   scheduleSettings?: ScheduleSettingsInput;
   eligibility?: EligibilityInput;
+  inventoryRules?: InventoryRulesInput;
   startsAt?: string;
   endsAt?: string;
 }

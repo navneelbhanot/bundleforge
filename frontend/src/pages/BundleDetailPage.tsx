@@ -37,6 +37,11 @@ import {
   type ShopDisplayDefaults,
 } from "../components/bundleDetail/DisplayTab";
 import {
+  InventoryTab,
+  type InventoryRules,
+  type ShopInventoryDefaults,
+} from "../components/bundleDetail/InventoryTab";
+import {
   ScheduleTab,
   type ScheduleSettings,
 } from "../components/bundleDetail/ScheduleTab";
@@ -94,6 +99,7 @@ interface BundleDetail {
   scheduleSettings?: ScheduleSettings;
   displaySettings?: DisplaySettings;
   eligibility?: Eligibility;
+  inventoryRules?: InventoryRules;
   shopTimezone?: string;
 }
 
@@ -179,6 +185,8 @@ export function BundleDetailPage(): JSX.Element {
   const [tabIndex, setTabIndex] = useState<number>(readHashTab());
   const [shopDisplayDefaults, setShopDisplayDefaults] =
     useState<ShopDisplayDefaults | null>(null);
+  const [shopInventoryDefaults, setShopInventoryDefaults] =
+    useState<ShopInventoryDefaults | null>(null);
 
   // Fetch shop-level Display defaults lazily — only when the
   // merchant lands on / switches to the Display tab. Avoids the
@@ -195,6 +203,20 @@ export function BundleDetailPage(): JSX.Element {
       )
       .catch(() => setShopDisplayDefaults({}));
   }, [tabIndex, shopDisplayDefaults]);
+
+  // Same lazy-fetch pattern for shop-level Inventory defaults.
+  useEffect(() => {
+    if (TABS[tabIndex].id !== "inventory") return;
+    if (shopInventoryDefaults !== null) return;
+    fetch("/api/v1/settings")
+      .then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
+      )
+      .then((body: { inventory?: ShopInventoryDefaults }) =>
+        setShopInventoryDefaults(body.inventory ?? {}),
+      )
+      .catch(() => setShopInventoryDefaults({}));
+  }, [tabIndex, shopInventoryDefaults]);
 
   useEffect(() => {
     function onHash(): void {
@@ -440,10 +462,21 @@ export function BundleDetailPage(): JSX.Element {
                   />
                 </Box>
               )}
+              {TABS[tabIndex].id === "inventory" && (
+                <Box paddingBlockEnd="400">
+                  <InventoryTab
+                    inventoryRules={bundle.inventoryRules ?? {}}
+                    shopDefaults={shopInventoryDefaults ?? {}}
+                    busy={busy}
+                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                  />
+                </Box>
+              )}
               {TABS[tabIndex].id !== "setup" &&
                 TABS[tabIndex].id !== "schedule" &&
                 TABS[tabIndex].id !== "display" &&
-                TABS[tabIndex].id !== "customers" && (
+                TABS[tabIndex].id !== "customers" &&
+                TABS[tabIndex].id !== "inventory" && (
                   <Box paddingBlockEnd="400">
                     <PlaceholderTab tab={TABS[tabIndex]} />
                   </Box>

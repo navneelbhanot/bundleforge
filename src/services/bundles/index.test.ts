@@ -443,6 +443,108 @@ describe("BundleService — eligibility (M-172)", () => {
   });
 });
 
+describe("BundleService — inventoryRules (M-173)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+  });
+
+  it("persists inventoryRules on create with all 5 fields", async () => {
+    mockedRepo.create.mockResolvedValueOnce({ id: "b-i1" });
+    const svc = new BundleService();
+    await svc.create("shop", {
+      title: "Holiday Box",
+      type: "fixed",
+      items: [],
+      pricingRules: [],
+      inventoryRules: {
+        lowStockThreshold: 5,
+        oversellPolicy: "prevent",
+        lowStockAlertEnabled: true,
+        pauseWhenComponentBelow: 3,
+        componentOnlyMode: false,
+      },
+    });
+    const args = mockedRepo.create.mock.calls[0][0];
+    expect(args.data.inventoryRules).toMatchObject({
+      lowStockThreshold: 5,
+      oversellPolicy: "prevent",
+      lowStockAlertEnabled: true,
+      pauseWhenComponentBelow: 3,
+      componentOnlyMode: false,
+    });
+  });
+
+  it("rejects oversellPolicy outside the enum", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        inventoryRules: {
+          oversellPolicy: "yolo" as unknown as "prevent",
+        },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects pauseWhenComponentBelow > 100000", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        inventoryRules: { pauseWhenComponentBelow: 1_000_000 },
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("update deep-merges — saving lowStockThreshold keeps componentOnlyMode", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      inventoryRules: {
+        componentOnlyMode: true,
+        oversellPolicy: "prevent",
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      inventoryRules: { lowStockThreshold: 7 },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.inventoryRules).toEqual({
+      componentOnlyMode: true,
+      oversellPolicy: "prevent",
+      lowStockThreshold: 7,
+    });
+  });
+
+  it("update treats null as 'remove this override'", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      inventoryRules: {
+        oversellPolicy: "prevent",
+        componentOnlyMode: true,
+      },
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      inventoryRules: {
+        oversellPolicy: null,
+      },
+    });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.inventoryRules).toEqual({ componentOnlyMode: true });
+  });
+});
+
 describe("BundleService.update — scheduleSettings (M-170)", () => {
   beforeEach(() => {
     Object.values(mockedRepo).forEach((m) => m.mockReset());

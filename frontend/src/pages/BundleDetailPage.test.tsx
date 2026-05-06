@@ -135,13 +135,26 @@ describe("BundleDetailPage tab shell", () => {
   });
 
   it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
-    // Schedule (M-170), Display (M-171), and Customers (M-172) are
-    // now wired. Use #inventory which is still placeholder for M-173.
-    renderAt("#inventory");
+    // Schedule (M-170), Display (M-171), Customers (M-172), and
+    // Inventory (M-173) are now wired. Use #performance which is
+    // still placeholder for M-174.
+    renderAt("#performance");
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-173/)).toBeTruthy();
+    expect(screen.getByText(/M-174/)).toBeTruthy();
+  });
+
+  it("hash routing: deep-link to #inventory renders the Inventory tab content (M-173 wired)", async () => {
+    renderAt("#inventory");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", {
+          name: "Low-stock thresholds",
+          level: 2,
+        }),
+      ).toBeTruthy(),
+    );
   });
 
   it("hash routing: deep-link to #customers renders the Customers tab content (M-172 wired)", async () => {
@@ -192,11 +205,11 @@ describe("BundleDetailPage tab shell", () => {
     expect(titleInput).toBeTruthy();
     fireEvent.change(titleInput!, { target: { value: "Edited title" } });
 
-    // Switch to a still-placeholder tab via the hash. M-170/171/172
-    // wired Schedule, Display, and Customers — use #inventory which
-    // remains a placeholder for M-173.
+    // Switch to a still-placeholder tab via the hash. M-170/171/172/173
+    // wired Schedule, Display, Customers, and Inventory — use
+    // #performance which remains a placeholder for M-174.
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/bundles/bundle-1#inventory");
+      window.history.replaceState(null, "", "/bundles/bundle-1#performance");
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     }
     await waitFor(() =>
