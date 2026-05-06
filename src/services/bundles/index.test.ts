@@ -686,6 +686,62 @@ describe("BundleService.publish (M-051)", () => {
     await svc.publish("shop", "b-1");
     expect(mockedRepo.update.mock.calls[0][0].data.status).toBe("active");
   });
+
+  it("passes eligibility + inventoryRules to onCreateProduct (M-172b/M-173b)", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "T",
+      slug: "t",
+      description: null,
+      shopifyProductGid: null,
+      shopifyProductId: null,
+      eligibility: {
+        markets: ["US", "CA"],
+        requireLogin: true,
+      },
+      inventoryRules: { componentOnlyMode: true },
+      items: [],
+      pricingRules: [],
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
+    const onCreateProduct = vi.fn().mockResolvedValue({
+      shopifyProductGid: "gid://shopify/Product/1",
+      shopifyProductId: 1n,
+    });
+    const svc = new BundleService();
+    await svc.publish("shop", "b-1", { onCreateProduct });
+    expect(onCreateProduct).toHaveBeenCalledTimes(1);
+    const arg = onCreateProduct.mock.calls[0][0];
+    expect(arg.eligibility).toEqual({
+      markets: ["US", "CA"],
+      requireLogin: true,
+    });
+    expect(arg.inventoryRules).toEqual({ componentOnlyMode: true });
+  });
+
+  it("eligibility/inventoryRules default to {} when null on the row", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-2",
+      title: "T",
+      slug: "t",
+      description: null,
+      shopifyProductGid: null,
+      shopifyProductId: null,
+      eligibility: null,
+      inventoryRules: null,
+      items: [],
+      pricingRules: [],
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-2" });
+    const onCreateProduct = vi.fn().mockResolvedValue({
+      shopifyProductGid: "gid://shopify/Product/2",
+      shopifyProductId: 2n,
+    });
+    await new BundleService().publish("shop", "b-2", { onCreateProduct });
+    const arg = onCreateProduct.mock.calls[0][0];
+    expect(arg.eligibility).toEqual({});
+    expect(arg.inventoryRules).toEqual({});
+  });
 });
 
 describe("BundleService.archive (M-052)", () => {

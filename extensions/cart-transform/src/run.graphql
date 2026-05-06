@@ -32,12 +32,37 @@ query Input {
             ) {
               value
             }
+            eligibilityMetafield: metafield(
+              namespace: "bundleforge"
+              key: "eligibility"
+            ) {
+              value
+            }
+            inventoryRulesMetafield: metafield(
+              namespace: "bundleforge"
+              key: "inventory_rules"
+            ) {
+              value
+            }
           }
         }
       }
     }
+    buyerIdentity {
+      customer {
+        id
+      }
+    }
   }
   presentmentCurrencyRate
+  localization {
+    country {
+      isoCode
+    }
+    language {
+      isoCode
+    }
+  }
   shop {
     cartDefaultModeMetafield: metafield(
       namespace: "bundleforge"

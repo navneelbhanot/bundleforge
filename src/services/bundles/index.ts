@@ -817,6 +817,8 @@ export class BundleService {
           maxQuantity: number | null;
           isStackable: boolean;
         }>;
+        eligibility: Record<string, unknown>;
+        inventoryRules: Record<string, unknown>;
       }) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
     } = {},
   ): Promise<unknown> {
@@ -827,6 +829,8 @@ export class BundleService {
       description: string | null;
       shopifyProductGid: string | null;
       shopifyProductId: bigint | null;
+      eligibility: unknown;
+      inventoryRules: unknown;
       items: Array<{
         shopifyProductGid: string;
         shopifyVariantGid: string | null;
@@ -865,6 +869,12 @@ export class BundleService {
           maxQuantity: r.maxQuantity,
           isStackable: r.isStackable,
         })),
+        eligibility: isObject(existing.eligibility)
+          ? existing.eligibility
+          : {},
+        inventoryRules: isObject(existing.inventoryRules)
+          ? existing.inventoryRules
+          : {},
       });
       shopifyProductGid = created.shopifyProductGid;
       shopifyProductId = created.shopifyProductId;

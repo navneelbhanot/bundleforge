@@ -56,6 +56,8 @@ export interface BundleRouteDeps {
         maxQuantity: number | null;
         isStackable: boolean;
       }>;
+      eligibility: Record<string, unknown>;
+      inventoryRules: Record<string, unknown>;
     },
   ) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
 }
@@ -134,6 +136,20 @@ const defaultCreateShopifyProduct: NonNullable<
             namespace: "bundleforge",
             key: "components",
             value: JSON.stringify(componentsPayload),
+            type: "json",
+          },
+          // M-172b — eligibility blob the Cart Transform Function reads.
+          {
+            namespace: "bundleforge",
+            key: "eligibility",
+            value: JSON.stringify(bundle.eligibility ?? {}),
+            type: "json",
+          },
+          // M-173b — per-bundle inventory rules the Cart Transform reads.
+          {
+            namespace: "bundleforge",
+            key: "inventory_rules",
+            value: JSON.stringify(bundle.inventoryRules ?? {}),
             type: "json",
           },
         ],

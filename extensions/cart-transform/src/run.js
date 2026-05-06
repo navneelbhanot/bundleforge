@@ -63,6 +63,116 @@ function componentsPayload(line) {
   }
 }
 
+function eligibilityPayload(line) {
+  const product =
+    line && line.merchandise && line.merchandise.product
+      ? line.merchandise.product
+      : null;
+  if (!product || !product.eligibilityMetafield) return null;
+  try {
+    const parsed = JSON.parse(product.eligibilityMetafield.value);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function inventoryRulesPayload(line) {
+  const product =
+    line && line.merchandise && line.merchandise.product
+      ? line.merchandise.product
+      : null;
+  if (!product || !product.inventoryRulesMetafield) return null;
+  try {
+    const parsed = JSON.parse(product.inventoryRulesMetafield.value);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Evaluate per-bundle eligibility against the cart context
+ * (M-172b). Returns true if the bundle is allowed; false if
+ * the merchant has rules that disqualify the customer for
+ * this checkout.
+ *
+ * Only checks rules the CTF runtime can verify:
+ *  - requireLogin       (customer id presence)
+ *  - markets            (localization.country.isoCode)
+ *  - locales            (localization.language.isoCode)
+ *
+ * Tag-based gating (`customerTagsAllow` / `customerTagsDeny`)
+ * lives in the storefront / theme block layer where the
+ * Storefront API exposes the customer's tag list. CTF
+ * treats those fields as informational metadata only.
+ *
+ * @param {object | null} eligibility — parsed eligibility blob.
+ * @param {{customerId: string | null, country: string | null, language: string | null}} ctx
+ * @returns {boolean}
+ */
+export function isEligible(eligibility, ctx) {
+  if (!eligibility || typeof eligibility !== "object") return true;
+
+  if (eligibility.requireLogin === true) {
+    if (!ctx || typeof ctx.customerId !== "string" || ctx.customerId.length === 0) {
+      return false;
+    }
+  }
+  if (Array.isArray(eligibility.markets) && eligibility.markets.length > 0) {
+    const country = ctx && typeof ctx.country === "string" ? ctx.country : null;
+    if (!country || !eligibility.markets.includes(country)) return false;
+  }
+  if (Array.isArray(eligibility.locales) && eligibility.locales.length > 0) {
+    const language = ctx && typeof ctx.language === "string" ? ctx.language : null;
+    if (!language || !eligibility.locales.includes(language)) return false;
+  }
+  return true;
+}
+
+/**
+ * Decide whether a per-bundle inventory rule blocks the
+ * expand path (M-173b). Two checks today:
+ *  - componentOnlyMode === true → don't expand. The
+ *    merchant has chosen to render components individually
+ *    on the storefront, so the cart line is already a
+ *    component, not a bundle SKU. Expanding here would
+ *    duplicate.
+ *  - pauseWhenComponentBelow > 0 with cart-side stock data
+ *    is left for storefront enforcement. CTF can't read
+ *    inventory levels in real time without a separate
+ *    fetch; the field is informational here.
+ *
+ * @param {object | null} rules
+ * @returns {boolean} true → allow expand; false → skip.
+ */
+export function inventoryAllowsExpand(rules) {
+  if (!rules || typeof rules !== "object") return true;
+  if (rules.componentOnlyMode === true) return false;
+  return true;
+}
+
+function ctxFromInput(input) {
+  const cart = input && input.cart ? input.cart : null;
+  const buyer = cart && cart.buyerIdentity ? cart.buyerIdentity : null;
+  const customer = buyer && buyer.customer ? buyer.customer : null;
+  const localization = input && input.localization ? input.localization : null;
+  return {
+    customerId:
+      customer && typeof customer.id === "string" ? customer.id : null,
+    country:
+      localization && localization.country && typeof localization.country.isoCode === "string"
+        ? localization.country.isoCode
+        : null,
+    language:
+      localization && localization.language && typeof localization.language.isoCode === "string"
+        ? localization.language.isoCode
+        : null,
+  };
+}
+
 function buildExpandOp(line, payload) {
   const components = Array.isArray(payload.components) ? payload.components : [];
   const expandedItems = [];
@@ -116,10 +226,17 @@ export function run(input) {
   // Skipped entirely when the merchant has opted into the legacy
   // components-as-attributes mode at the shop level.
   if (mode !== "components_as_attributes") {
+    const ctx = ctxFromInput(input);
     for (const line of lines) {
       if (!isBundleProduct(line)) continue;
       const payload = componentsPayload(line);
       if (!payload) continue;
+      // M-172b: skip expand when eligibility fails. The line
+      // stays as a placeholder bundle product; checkout-guardian
+      // can refuse it downstream.
+      if (!isEligible(eligibilityPayload(line), ctx)) continue;
+      // M-173b: skip expand when componentOnlyMode is on.
+      if (!inventoryAllowsExpand(inventoryRulesPayload(line))) continue;
       const expandOp = buildExpandOp(line, payload);
       if (expandOp) operations.push(expandOp);
     }
