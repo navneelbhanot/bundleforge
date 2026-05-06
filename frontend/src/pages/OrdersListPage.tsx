@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Card,
-  EmptyState,
   IndexTable,
   Page,
   Text,
@@ -9,6 +8,7 @@ import {
 } from "@shopify/polaris";
 
 import { PageLoading } from "../components/PageLoading";
+import { EmptyStateCard } from "../components/shell/EmptyStateCard";
 
 interface OrderRow {
   id: string;
@@ -49,18 +49,12 @@ export function OrdersListPage(): JSX.Element {
   if (rows.length === 0) {
     return (
       <Page title="Orders">
-        <Card>
-          <EmptyState
-            heading="No bundle orders yet"
-            image=""
-            action={{ content: "Create a bundle", url: "/bundles/new" }}
-          >
-            <p>
-              Orders containing a bundle appear here after checkout. Each row
-              maps to a Shopify order with its bundle line items.
-            </p>
-          </EmptyState>
-        </Card>
+        <EmptyStateCard
+          illustration="orders"
+          heading="No bundle orders yet"
+          body="Orders containing a bundle appear here after checkout. Each row maps to a Shopify order with its bundle line items."
+          primaryAction={{ content: "Create a bundle", url: "/bundles/new" }}
+        />
       </Page>
     );
   }

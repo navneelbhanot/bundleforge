@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Card,
-  EmptyState,
   IndexTable,
   Page,
   Text,
@@ -9,6 +8,7 @@ import {
 } from "@shopify/polaris";
 
 import { PageLoading } from "../components/PageLoading";
+import { EmptyStateCard } from "../components/shell/EmptyStateCard";
 
 interface AuditRow {
   id: string;
@@ -51,19 +51,12 @@ export function InventoryAuditPage(): JSX.Element {
   if (rows.length === 0) {
     return (
       <Page title="Inventory audit">
-        <Card>
-          <EmptyState
-            heading="No inventory events yet"
-            image=""
-            action={{ content: "Create a bundle", url: "/bundles/new" }}
-          >
-            <p>
-              Every inventory adjustment writes an immutable row here, one per
-              component SKU. This page populates after the first bundle order
-              is processed.
-            </p>
-          </EmptyState>
-        </Card>
+        <EmptyStateCard
+          illustration="audit"
+          heading="No inventory events yet"
+          body="Every inventory adjustment writes an immutable row here, one per component SKU. This page populates after the first bundle order is processed."
+          primaryAction={{ content: "Create a bundle", url: "/bundles/new" }}
+        />
       </Page>
     );
   }

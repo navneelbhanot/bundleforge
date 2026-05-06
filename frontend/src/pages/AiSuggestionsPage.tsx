@@ -17,7 +17,6 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
   IndexTable,
   InlineStack,
   Page,
@@ -25,6 +24,7 @@ import {
 } from "@shopify/polaris";
 
 import { PageLoading } from "../components/PageLoading";
+import { EmptyStateCard } from "../components/shell/EmptyStateCard";
 
 interface Pair {
   skuA: string;
@@ -87,24 +87,15 @@ export function AiSuggestionsPage(): JSX.Element {
   if (data.pairs.length === 0) {
     return (
       <Page title="AI suggestions">
-        <Card>
-          <EmptyState
-            heading="No suggestions yet"
-            action={{
-              content: "Create a bundle manually",
-              onAction: () => navigate("/bundles/new"),
-            }}
-            image=""
-          >
-            <p>
-              Suggestions appear once your shop has bundle orders to
-              learn from. We count which products customers buy
-              together across your recent orders, then rank pairs by
-              co-occurrence and lift. Until then, create bundles
-              manually using the picker on the create page.
-            </p>
-          </EmptyState>
-        </Card>
+        <EmptyStateCard
+          illustration="ai"
+          heading="No suggestions yet"
+          body="Suggestions appear once your shop has bundle orders to learn from. We count which products customers buy together across your recent orders, then rank pairs by co-occurrence and lift. Until then, create bundles manually using the picker on the create page."
+          primaryAction={{
+            content: "Create a bundle manually",
+            onAction: () => navigate("/bundles/new"),
+          }}
+        />
       </Page>
     );
   }

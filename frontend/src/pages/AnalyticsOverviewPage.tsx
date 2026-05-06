@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Card,
-  EmptyState,
   Page,
   Text,
   Layout,
@@ -9,6 +8,7 @@ import {
 } from "@shopify/polaris";
 
 import { PageLoading } from "../components/PageLoading";
+import { EmptyStateCard } from "../components/shell/EmptyStateCard";
 
 interface Overview {
   totalRevenue: number;
@@ -54,18 +54,12 @@ export function AnalyticsOverviewPage(): JSX.Element {
   if (totalOrders === 0 && topBundles.length === 0) {
     return (
       <Page title="Analytics">
-        <Card>
-          <EmptyState
-            heading="No bundle orders yet"
-            image=""
-            action={{ content: "Create a bundle", url: "/bundles/new" }}
-          >
-            <p>
-              Revenue and top bundles appear here after the first bundle order
-              is paid. Until then, this page is intentionally blank.
-            </p>
-          </EmptyState>
-        </Card>
+        <EmptyStateCard
+          illustration="analytics"
+          heading="No bundle orders yet"
+          body="Revenue and top bundles appear here after the first bundle order is paid. Until then, this page is intentionally blank."
+          primaryAction={{ content: "Create a bundle", url: "/bundles/new" }}
+        />
       </Page>
     );
   }

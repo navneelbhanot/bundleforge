@@ -26,6 +26,7 @@ import {
 } from "@shopify/polaris";
 
 import { ToastHost, useToasts } from "../components/shell/Toasts";
+import { getIllustration } from "../components/shell/illustrations";
 import { findBundleType } from "../components/bundleTypes";
 import { ActivityTab } from "../components/bundleDetail/ActivityTab";
 import { AdvancedTab } from "../components/bundleDetail/AdvancedTab";
@@ -579,7 +580,7 @@ export function BundleDetailPage(): JSX.Element {
                     {items.length === 0 ? (
                       <EmptyState
                         heading="No items yet"
-                        image=""
+                        image={getIllustration("inventory")}
                         action={{
                           content: "Add products",
                           onAction: pickProducts,

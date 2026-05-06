@@ -6,20 +6,21 @@
 
 ## Current milestone
 
-**Phase R4 in progress — cross-cutting polish.**
+**Phase R4 closed — rich-admin-ui roadmap complete.**
 
-M-180 + M-181 + M-182 landed 2026-05-06. The App shell now
-mounts three global components: ⌘K command palette, help
-drawer (`?` hotkey), and a `<ToastsProvider>` exposing
-`useToasts()` to every component in the tree. Shared
-primitives in `frontend/src/components/shell/`:
-`ToastsProvider` + `ToastHost`, `ConfirmDialog` (with
-optional typed-confirm), `InlineLoader` + `SkeletonRows`.
-BundlesListPage + BundleDetailPage migrated off local Toast
-state; BundlesListTable + AdvancedTab migrated off
-hand-rolled confirm Modals.
+M-180..M-183 all landed 2026-05-06. The App shell now
+mounts three global components (⌘K command palette, help
+drawer, ToastsProvider) plus a small set of shared
+primitives in `frontend/src/components/shell/`
+(`ToastsProvider` + `ToastHost`, `ConfirmDialog`,
+`InlineLoader` + `SkeletonRows`, `EmptyStateCard`,
+`illustrations` registry).
 
-M-183 (empty-state illustrations) is the last R4 milestone.
+The full rich-admin-ui roadmap (M-161..M-183, 23
+milestones) is now complete. Phase R1 (Settings depth),
+R2 (Bundle Detail richness), R3 (Bundle List richness),
+R4 (cross-cutting polish) all done. Test count went from
+454 → 704 net new across the sequence.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -37,14 +38,34 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-183 — empty-state
-illustrations. Spec first:
-`docs/specs/M-183-empty-state-illustrations.md`. Closes Phase
-R4. A small set of inline SVG illustrations + a shared
-`<EmptyStateCard>` primitive wrapping Polaris's `EmptyState`,
-applied to the empty-list surfaces that today render bare
-text or no graphic at all (no orders, no analytics events,
-no audit log entries, no AI suggestions). Sizing: small.
+**Code (next session):** No queued roadmap milestone. The
+formal rich-admin-ui sequence (M-161..M-183) is complete.
+
+Open candidates if the user picks one:
+- **Behavior wiring sub-milestones** — none on the formal
+  roster but each follows naturally from an admin feature
+  already shipped:
+  - **M-167b** — logo upload to Shopify Files (today's
+    Brand card just stores a URL).
+  - **M-168b** — outbound webhook delivery worker (the
+    config UI is live but no worker emits HTTP POSTs).
+  - **M-170b** — auto-archive / auto-pause cron honoring
+    `scheduleSettings.endBehavior` at endsAt-passes.
+  - **M-171b** — theme block reads `Bundle.displaySettings`
+    overrides at storefront render time.
+  - **M-172b** — Cart Transform Function reads
+    `bundleforge.eligibility` metafield + evaluates against
+    customer.tags / segments / markets / locales.
+  - **M-173b** — Cart Transform Function reads
+    `bundleforge.inventory_rules` metafield + honors
+    `pauseWhenComponentBelow` and `componentOnlyMode`.
+  - **M-164b** — admin Save action writes the
+    `bundleforge.cart_default_mode` shop metafield the Cart
+    Transform Function already reads.
+- **Migration application** — five `prisma migrate deploy`
+  events queued: M-168, M-170, M-172, M-173, M-174.
+- **Beta merchant onboarding** — `docs/onboarding-beta.md`
+  is ready; ops question, not code.
 
 Other open threads (mostly user-owned):
 
@@ -113,6 +134,22 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-183 — Empty-state illustrations** (2026-05-06 late).
+  **Closes Phase R4 + the rich-admin-ui roadmap.** New
+  `frontend/src/components/shell/illustrations.ts`
+  registry of 5 inline SVG illustrations
+  (`orders`, `analytics`, `audit`, `inventory`, `ai`)
+  rendered as `data:image/svg+xml` URIs — no external
+  assets, no pipeline changes, themable via embedded fill
+  colors. New `EmptyStateCard.tsx` wraps Polaris Card +
+  EmptyState with one component call accepting an
+  illustration name. Migrated 5 surfaces off the bare
+  `image=""` pattern: OrdersListPage, AnalyticsOverviewPage,
+  InventoryAuditPage, AiSuggestionsPage, BundleDetailPage
+  Items section (the latter kept the inline `<EmptyState>`
+  to avoid double-Card wrapping; just passed
+  `image={getIllustration("inventory")}`).
+  `docs/sessions/0183-empty-state-illustrations.md`.
 - **M-182 — Unified toast / confirm / skeleton patterns**
   (2026-05-06 late). New shared primitives in
   `frontend/src/components/shell/`:
@@ -528,10 +565,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **698 / 698 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +3 ToastsProvider/useToasts/ToastHost cases
-  + +4 ConfirmDialog cases since M-181.
-- **548 / 548** when no real DB is available — the bundle CRUD
+- **704 / 704 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +3 illustrations registry cases +
+  +3 EmptyStateCard cases since M-182.
+- **554 / 554** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
