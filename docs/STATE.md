@@ -6,21 +6,18 @@
 
 ## Current milestone
 
-**Phase R4 closed — rich-admin-ui roadmap complete.**
+**Phase R4 closed + behavior wiring batch complete.**
 
-M-180..M-183 all landed 2026-05-06. The App shell now
-mounts three global components (⌘K command palette, help
-drawer, ToastsProvider) plus a small set of shared
-primitives in `frontend/src/components/shell/`
-(`ToastsProvider` + `ToastHost`, `ConfirmDialog`,
-`InlineLoader` + `SkeletonRows`, `EmptyStateCard`,
-`illustrations` registry).
-
-The full rich-admin-ui roadmap (M-161..M-183, 23
-milestones) is now complete. Phase R1 (Settings depth),
-R2 (Bundle Detail richness), R3 (Bundle List richness),
-R4 (cross-cutting polish) all done. Test count went from
-454 → 704 net new across the sequence.
+M-180..M-183 closed the rich-admin-ui roadmap (23
+milestones, M-161..M-183) earlier in the session. After
+that, six storefront/worker behavior-wiring sub-milestones
+shipped sequentially: M-167b (logo upload to Shopify
+Files), M-168b (outbound webhook delivery worker), M-170b
+(schedule sweep cron), M-171b (theme block reads
+displaySettings overrides), M-172b (CTF reads eligibility
+metafield), M-173b (CTF reads inventoryRules metafield).
+Most of the admin features shipped in M-167..M-173 now
+have their storefront / worker side wired up.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -38,30 +35,23 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** No queued roadmap milestone. The
-formal rich-admin-ui sequence (M-161..M-183) is complete.
+**Code (next session):** No queued roadmap milestone.
 
 Open candidates if the user picks one:
-- **Behavior wiring sub-milestones** — none on the formal
-  roster but each follows naturally from an admin feature
-  already shipped:
-  - **M-167b** — logo upload to Shopify Files (today's
-    Brand card just stores a URL).
-  - **M-168b** — outbound webhook delivery worker (the
-    config UI is live but no worker emits HTTP POSTs).
-  - **M-170b** — auto-archive / auto-pause cron honoring
-    `scheduleSettings.endBehavior` at endsAt-passes.
-  - **M-171b** — theme block reads `Bundle.displaySettings`
-    overrides at storefront render time.
-  - **M-172b** — Cart Transform Function reads
-    `bundleforge.eligibility` metafield + evaluates against
-    customer.tags / segments / markets / locales.
-  - **M-173b** — Cart Transform Function reads
-    `bundleforge.inventory_rules` metafield + honors
-    `pauseWhenComponentBelow` and `componentOnlyMode`.
-  - **M-164b** — admin Save action writes the
-    `bundleforge.cart_default_mode` shop metafield the Cart
-    Transform Function already reads.
+- **M-164b** — the only behavior-wiring sub-milestone left.
+  Admin Save action on the Cart & Checkout settings tab
+  should write the `bundleforge.cart_default_mode` shop
+  metafield the Cart Transform Function already reads.
+  Small.
+- **M-172c** — theme-block-side eligibility enforcement.
+  Storefront should hide the Add-to-cart button for
+  customers who don't qualify (CTF only kicks in after the
+  line is in cart). Needs Storefront API customer.tags +
+  context fetch in `bundleforge-bundle.js`.
+- **M-173c** — theme-block-side `pauseWhenComponentBelow`.
+  Same shape: read live component stock from Storefront
+  API, hide buy button when any component is below the
+  threshold.
 - **Migration application** — five `prisma migrate deploy`
   events queued: M-168, M-170, M-172, M-173, M-174.
 - **Beta merchant onboarding** — `docs/onboarding-beta.md`
@@ -134,6 +124,43 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Behavior wiring batch — M-167b through M-173b**
+  (2026-05-06 late). Six sub-milestones shipped
+  sequentially across commits 4802de4..501c82d:
+  - **M-167b** — POST /api/v1/settings/logo route + UI
+    button does the Shopify Files 3-step flow
+    (stagedUploadsCreate → PUT → fileCreate → poll READY).
+    MIME allowlist, 2 MiB cap, base64 in JSON body (no
+    new deps).
+  - **M-168b** — outbound webhook delivery worker. New
+    BullMQ queue, dispatcher (best-effort), worker with
+    HMAC-SHA256 signing, 5xx-retry / 4xx-no-retry, 10
+    failures → auto-disable. Wired BundleService.publish
+    → bundle.published; archive → bundle.archived.
+  - **M-170b** — schedule sweep cron. Pure
+    `processExpiredBundles(now, deps)` flips
+    status="archived" or "draft" based on
+    scheduleSettings.endBehavior; activity-log writes
+    `auto_archived` / `auto_paused`. 5-minute setInterval.
+  - **M-171b** — theme-block reads displaySettings.
+    Proxy `/bundle/:slug` merges shop-level
+    `settings.display` defaults under per-bundle
+    overrides (only known M-171 keys exposed). Web
+    component applies layout / colorPreset CSS classes
+    and injects scoped cssOverride.
+  - **M-172b** — CTF reads `bundleforge.eligibility`
+    metafield. Pure `isEligible(blob, ctx)` checks
+    requireLogin / markets / locales (tag-based gating
+    stays in the theme block). Expand path skips when
+    eligibility fails.
+  - **M-173b** — CTF reads `bundleforge.inventory_rules`
+    metafield. Pure `inventoryAllowsExpand(rules)` blocks
+    expand when `componentOnlyMode === true`. Shipped
+    together with M-172b (same publish-flow + CTF
+    runtime files).
+  Net 749/749 vitest pass (+45 cases across the six
+  milestones). No new lint violations. All session logs
+  at `docs/sessions/0184..0189-*.md`.
 - **M-183 — Empty-state illustrations** (2026-05-06 late).
   **Closes Phase R4 + the rich-admin-ui roadmap.** New
   `frontend/src/components/shell/illustrations.ts`
@@ -565,10 +592,11 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **704 / 704 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +3 illustrations registry cases +
-  +3 EmptyStateCard cases since M-182.
-- **554 / 554** when no real DB is available — the bundle CRUD
+- **749 / 749 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 settingsLogo + 12 outbound webhook +
+  6 scheduleSweep + 6 proxy.merge + 14 cart-transform
+  eligibility + 2 publish-callback cases since M-183.
+- **599 / 599** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
