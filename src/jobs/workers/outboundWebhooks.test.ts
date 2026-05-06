@@ -44,7 +44,7 @@ function okResponse(status = 200): Response {
 
 describe("processOutboundWebhookJob (M-168b)", () => {
   it("computes HMAC-SHA256 of the body using the decrypted secret", async () => {
-    const captured: { body?: BodyInit | null; headers?: Record<string, string> } = {};
+    const captured: { body?: unknown; headers?: Record<string, string> } = {};
     const fetchImpl = vi.fn(async (_url, init?: RequestInit) => {
       captured.body = init?.body ?? null;
       captured.headers = (init?.headers ?? {}) as Record<string, string>;
