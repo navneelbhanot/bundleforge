@@ -18,6 +18,51 @@ async function fetchBundle(slug) {
   return res.json();
 }
 
+const ALLOWED_LAYOUTS = new Set(["grid", "list", "carousel"]);
+const ALLOWED_PRESETS = new Set([
+  "brand",
+  "neutral",
+  "high-contrast",
+  "minimal",
+]);
+
+let scopeCounter = 0;
+function nextScopeId() {
+  scopeCounter += 1;
+  return `bundleforge-scope-${scopeCounter}`;
+}
+
+/**
+ * Resolve the displaySettings object from the proxy into
+ * the CSS handles the web component applies. Pure helper —
+ * unit-tested in displaySettings.test.ts (M-171b).
+ */
+export function applyDisplaySettings(settings) {
+  const s = settings && typeof settings === "object" ? settings : {};
+  const out = {
+    wrapperClass: "",
+    listClass: "",
+    scopedCss: "",
+    scopeId: "",
+  };
+  if (typeof s.colorPreset === "string" && ALLOWED_PRESETS.has(s.colorPreset)) {
+    out.wrapperClass = `bundleforge-preset-${s.colorPreset}`;
+  }
+  if (typeof s.layout === "string" && ALLOWED_LAYOUTS.has(s.layout)) {
+    out.listClass = `bundleforge-layout-${s.layout}`;
+  }
+  if (typeof s.cssOverride === "string" && s.cssOverride.trim().length > 0) {
+    out.scopeId = nextScopeId();
+    // Scope by prefixing the merchant CSS with #<scopeId>.
+    // This isn't a full CSS sandbox but it scopes top-level
+    // selectors to the component for trivial overrides (font,
+    // color, spacing). Richer customization belongs at the
+    // theme level.
+    out.scopedCss = `#${out.scopeId} { ${s.cssOverride} }`;
+  }
+  return out;
+}
+
 function el(tag, props = {}, children = []) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -37,11 +82,26 @@ class BundleforgeBundle extends HTMLElement {
     if (!slug) return;
     try {
       const bundle = await fetchBundle(slug);
+      const display = applyDisplaySettings(bundle.displaySettings);
       this.innerHTML = "";
+      // Apply colorPreset class on the wrapper itself.
+      if (display.wrapperClass) {
+        this.classList.add(display.wrapperClass);
+      }
+      // Inject scoped cssOverride.
+      if (display.scopedCss) {
+        if (display.scopeId) this.id = display.scopeId;
+        const style = document.createElement("style");
+        style.textContent = display.scopedCss;
+        this.appendChild(style);
+      }
       this.appendChild(
         el("h3", { class: "bundleforge-title" }, [bundle.title]),
       );
-      const list = el("ul", { class: "bundleforge-items" });
+      const listClass = display.listClass
+        ? `bundleforge-items ${display.listClass}`
+        : "bundleforge-items";
+      const list = el("ul", { class: listClass });
       for (const item of bundle.items ?? []) {
         list.appendChild(
           el("li", { class: "bundleforge-item" }, [

@@ -38,9 +38,57 @@ export interface BundleLookup {
         config: true;
         displaySettings: true;
         items: { select: { shopifyProductGid: true; shopifyVariantGid: true; title: true; quantity: true; position: true; groupName: true; minQuantity: true; maxQuantity: true } };
+        // Optional shop join — proxy /bundle/:slug pulls
+        // settings to merge displaySettings (M-171b).
+        // validate-cart and storefront read paths skip it.
+        shop?: { select: { settings: true } };
       };
     }): Promise<unknown | null>;
   };
+}
+
+const DISPLAY_KEYS = [
+  "layout",
+  "colorPreset",
+  "imagePreference",
+  "addToCartCopy",
+  "soldOutBehavior",
+  "cssOverride",
+] as const;
+
+/**
+ * Merge shop-level display defaults with per-bundle
+ * overrides. Bundle wins per key; only the M-171 keys are
+ * exposed (so future shop-level keys don't accidentally
+ * leak to the storefront).
+ */
+export function resolveDisplaySettings(
+  shopSettings: unknown,
+  bundleSettings: unknown,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const shop =
+    shopSettings && typeof shopSettings === "object" && !Array.isArray(shopSettings)
+      ? (shopSettings as Record<string, unknown>)
+      : {};
+  const shopDisplay =
+    shop.display && typeof shop.display === "object" && !Array.isArray(shop.display)
+      ? (shop.display as Record<string, unknown>)
+      : {};
+  const bundle =
+    bundleSettings &&
+    typeof bundleSettings === "object" &&
+    !Array.isArray(bundleSettings)
+      ? (bundleSettings as Record<string, unknown>)
+      : {};
+  for (const k of DISPLAY_KEYS) {
+    if (bundle[k] !== undefined && bundle[k] !== null) {
+      out[k] = bundle[k];
+    } else if (shopDisplay[k] !== undefined && shopDisplay[k] !== null) {
+      out[k] = shopDisplay[k];
+    }
+  }
+  return out;
 }
 
 export interface ProxyDeps {
@@ -58,7 +106,7 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
         if (!req.shopifyShopDomain) {
           throw new UnauthorizedError("No shop on request");
         }
-        const bundle = await source.bundle.findFirst({
+        const bundle = (await source.bundle.findFirst({
           where: {
             shop: { shopifyDomain: req.shopifyShopDomain },
             slug: req.params.slug,
@@ -73,6 +121,7 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
             description: true,
             config: true,
             displaySettings: true,
+            shop: { select: { settings: true } },
             items: {
               select: {
                 shopifyProductGid: true,
@@ -86,10 +135,24 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
               },
             },
           },
-        });
+        })) as
+          | (Record<string, unknown> & {
+              displaySettings?: unknown;
+              shop?: { settings?: unknown };
+            })
+          | null;
         if (!bundle) throw new NotFoundError("Bundle");
+        // Resolve display overrides over shop defaults (M-171b).
+        // Drop the `shop` join from the response — only used to
+        // pull settings.
+        const resolved = resolveDisplaySettings(
+          bundle.shop?.settings,
+          bundle.displaySettings,
+        );
+        const { shop: _shop, ...payload } = bundle;
+        void _shop;
         res.set("Cache-Control", "public, max-age=60");
-        res.json(bundle);
+        res.json({ ...payload, displaySettings: resolved });
       } catch (err) {
         next(err);
       }
