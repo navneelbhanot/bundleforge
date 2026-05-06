@@ -15,8 +15,19 @@ vi.mock("./repository", () => {
   };
 });
 
+vi.mock("./activityRepo", () => {
+  return {
+    bundleActivityRepo: {
+      append: vi.fn().mockResolvedValue({ id: "act-1" }),
+      list: vi.fn(),
+    },
+  };
+});
+
 import { bundleRepo } from "./repository";
+import { bundleActivityRepo } from "./activityRepo";
 const mockedRepo = bundleRepo as unknown as Record<string, ReturnType<typeof vi.fn>>;
+const mockedActivity = bundleActivityRepo as unknown as Record<string, ReturnType<typeof vi.fn>>;
 
 describe("slugify", () => {
   it("normalizes spaces and special chars", () => {
@@ -702,5 +713,59 @@ describe("BundleService.softDelete", () => {
     const svc = new BundleService();
     await svc.softDelete("shop", "b-1");
     expect(mockedRepo.softDelete).toHaveBeenCalledWith("b-1");
+  });
+});
+
+describe("BundleService — activity log writers (M-174)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+    Object.values(mockedActivity).forEach((m) => m.mockReset());
+    mockedActivity.append.mockResolvedValue({ id: "act-1" });
+  });
+
+  it("publish() appends a 'published' activity entry", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
+    const svc = new BundleService();
+    await svc.publish("shop", "b-1");
+    expect(mockedActivity.append).toHaveBeenCalledTimes(1);
+    expect(mockedActivity.append.mock.calls[0][0].action).toBe("published");
+  });
+
+  it("archive() appends an 'archived' activity entry", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "archived" });
+    const svc = new BundleService();
+    await svc.archive("shop", "b-1");
+    expect(mockedActivity.append).toHaveBeenCalledTimes(1);
+    expect(mockedActivity.append.mock.calls[0][0].action).toBe("archived");
+  });
+
+  it("update() with displaySettings + eligibility appends two entries", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      displaySettings: {},
+      eligibility: {},
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      displaySettings: { layout: "grid" },
+      eligibility: { customerTagsAllow: ["vip"] },
+    });
+    expect(mockedActivity.append).toHaveBeenCalledTimes(2);
+    const actions = mockedActivity.append.mock.calls.map((c) => c[0].action);
+    expect(actions).toContain("display_updated");
+    expect(actions).toContain("eligibility_updated");
+  });
+
+  it("logging failure does not propagate to the caller", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
+    mockedActivity.append.mockRejectedValueOnce(new Error("DB down"));
+    const svc = new BundleService();
+    // Must resolve, not reject.
+    await expect(svc.publish("shop", "b-1")).resolves.toBeTruthy();
   });
 });

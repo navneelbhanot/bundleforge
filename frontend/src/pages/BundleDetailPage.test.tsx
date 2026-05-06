@@ -135,14 +135,33 @@ describe("BundleDetailPage tab shell", () => {
   });
 
   it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
-    // Schedule (M-170), Display (M-171), Customers (M-172), and
-    // Inventory (M-173) are now wired. Use #performance which is
-    // still placeholder for M-174.
-    renderAt("#performance");
+    // Schedule (M-170), Display (M-171), Customers (M-172),
+    // Inventory (M-173), Performance + Activity (M-174) are now
+    // wired. Use #advanced which is still placeholder for M-175.
+    renderAt("#advanced");
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-174/)).toBeTruthy();
+    expect(screen.getByText(/M-175/)).toBeTruthy();
+  });
+
+  it("hash routing: deep-link to #performance renders the Performance tab content (M-174 wired)", async () => {
+    // The shared mockFetch returns BUNDLE_FIXTURE for every URL,
+    // which has no `groups`. PerformanceTab treats that as zero
+    // events and falls through to its empty state.
+    renderAt("#performance");
+    await waitFor(() =>
+      expect(screen.getByText(/No performance data yet/i)).toBeTruthy(),
+    );
+  });
+
+  it("hash routing: deep-link to #activity renders the Activity tab content (M-174 wired)", async () => {
+    // Same shape mismatch as above — ActivityTab's empty state
+    // proves the tab is wired.
+    renderAt("#activity");
+    await waitFor(() =>
+      expect(screen.getByText(/No activity yet/i)).toBeTruthy(),
+    );
   });
 
   it("hash routing: deep-link to #inventory renders the Inventory tab content (M-173 wired)", async () => {
@@ -205,11 +224,10 @@ describe("BundleDetailPage tab shell", () => {
     expect(titleInput).toBeTruthy();
     fireEvent.change(titleInput!, { target: { value: "Edited title" } });
 
-    // Switch to a still-placeholder tab via the hash. M-170/171/172/173
-    // wired Schedule, Display, Customers, and Inventory — use
-    // #performance which remains a placeholder for M-174.
+    // Switch to a still-placeholder tab via the hash. After M-174,
+    // only Advanced (M-175) remains a placeholder.
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/bundles/bundle-1#performance");
+      window.history.replaceState(null, "", "/bundles/bundle-1#advanced");
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     }
     await waitFor(() =>

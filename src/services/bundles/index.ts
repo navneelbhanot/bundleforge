@@ -23,6 +23,11 @@ import {
   ValidationError,
 } from "../../middleware/errorHandler";
 import { bundleRepo, type ListFilters } from "./repository";
+import {
+  bundleActivityRepo,
+  type BundleActivityAction,
+} from "./activityRepo";
+import { logger } from "../../config/logger";
 import { BUNDLE_TYPES, validateBundleConfig, type BundleType } from "./validators";
 
 const ALLOWED_SORT_BY = new Set(["createdAt", "updatedAt", "title", "priority"]);
@@ -347,6 +352,34 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+/**
+ * Best-effort activity log writer (M-174). Caller doesn't await
+ * the result and a logging failure must never propagate to the
+ * underlying mutation.
+ */
+async function logActivity(
+  shopId: string,
+  bundleId: string,
+  action: BundleActivityAction,
+  summary: string,
+  metadata?: Record<string, unknown>,
+): Promise<void> {
+  try {
+    await bundleActivityRepo.append({
+      shopId,
+      bundleId,
+      action,
+      summary,
+      metadata,
+    });
+  } catch (err) {
+    logger.warn(
+      { module: "bundle-activity", bundleId, action, err },
+      "Failed to write bundle activity log",
+    );
+  }
+}
+
 function mapRule(
   rule: CreatePricingRuleInput,
 ): Prisma.PricingRuleCreateWithoutBundleInput {
@@ -567,16 +600,60 @@ export class BundleService {
         create: input.items.map((it, i) => mapItem(it, i)),
       };
     }
-    return bundleRepo.update({
+    const result = await bundleRepo.update({
       where: { id },
       data,
       include: { items: true, pricingRules: true },
     });
+
+    // Per-section activity entries. Multiple keys in one PUT
+    // produce multiple rows so the timeline reads naturally.
+    if (input.title !== undefined || input.description !== undefined) {
+      await logActivity(shopId, id, "details_updated", "Details updated");
+    }
+    if (input.items !== undefined) {
+      await logActivity(
+        shopId,
+        id,
+        "items_updated",
+        `Items updated (${input.items.length} item${input.items.length === 1 ? "" : "s"})`,
+        { count: input.items.length },
+      );
+    }
+    if (input.pricingRules !== undefined) {
+      await logActivity(
+        shopId,
+        id,
+        "pricing_updated",
+        `Pricing rules updated (${input.pricingRules.length} rule${input.pricingRules.length === 1 ? "" : "s"})`,
+        { count: input.pricingRules.length },
+      );
+    }
+    if (input.scheduleSettings !== undefined) {
+      await logActivity(shopId, id, "schedule_updated", "Schedule updated");
+    }
+    if (input.displaySettings !== undefined) {
+      await logActivity(shopId, id, "display_updated", "Display settings updated");
+    }
+    if (input.eligibility !== undefined) {
+      await logActivity(shopId, id, "eligibility_updated", "Customer eligibility updated");
+    }
+    if (input.inventoryRules !== undefined) {
+      await logActivity(
+        shopId,
+        id,
+        "inventory_rules_updated",
+        "Inventory rules updated",
+      );
+    }
+
+    return result;
   }
 
   async softDelete(shopId: string, id: string): Promise<void> {
     await this.getById(shopId, id);
     await bundleRepo.softDelete(id);
+    await logActivity(shopId, id, "deleted", "Bundle deleted");
   }
 
   /** M-050 — clone a bundle, copying items + pricing rules. */
@@ -743,7 +820,7 @@ export class BundleService {
       shopifyProductId = created.shopifyProductId;
     }
 
-    return bundleRepo.update({
+    const result = await bundleRepo.update({
       where: { id },
       data: {
         status: "active",
@@ -756,16 +833,20 @@ export class BundleService {
       },
       include: { items: true, pricingRules: true },
     });
+    await logActivity(shopId, id, "published", "Bundle published");
+    return result;
   }
 
   /** M-052 — archive: removes from storefront without soft-deleting. */
   async archive(shopId: string, id: string): Promise<unknown> {
     await this.getById(shopId, id);
-    return bundleRepo.update({
+    const result = await bundleRepo.update({
       where: { id },
       data: { status: "archived" },
       include: { items: true, pricingRules: true },
     });
+    await logActivity(shopId, id, "archived", "Bundle archived");
+    return result;
   }
 
   /** Sentinel for ConflictError so route handlers can re-throw as 409. */

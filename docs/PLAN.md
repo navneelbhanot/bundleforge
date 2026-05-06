@@ -271,7 +271,7 @@
 | M-171 | Display tab | done (2026-05-06) — `docs/specs/M-171-bundle-detail-display.md` |
 | M-172 | Customers tab | done (2026-05-06) — `docs/specs/M-172-bundle-detail-customers.md` |
 | M-173 | Inventory tab | done (2026-05-06) — `docs/specs/M-173-bundle-detail-inventory.md` |
-| M-174 | Performance + Activity log | pending |
+| M-174 | Performance + Activity log | done (2026-05-06) — `docs/specs/M-174-bundle-detail-performance-activity.md` |
 | M-175 | Advanced tab | pending |
 
 ### Phase R3 — Bundle List richness

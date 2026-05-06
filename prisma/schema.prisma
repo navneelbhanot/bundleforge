@@ -45,6 +45,7 @@ model Shop {
   integrations         Integration[]
   apiTokens            ApiToken[]
   outboundWebhooks     OutboundWebhook[]
+  bundleActivityLogs   BundleActivityLog[]
   subscription         BillingSubscription?
 
   @@map("shops")
@@ -87,6 +88,7 @@ model Bundle {
   inventoryAuditLogs InventoryAuditLog[]
   analyticsEvents    AnalyticsEvent[]
   abTests            AbTest[]
+  activityLogs       BundleActivityLog[]
 
   @@index([shopId, status, createdAt(sort: Desc)])
   @@index([shopId, type])
@@ -398,4 +400,24 @@ model OutboundWebhook {
 
   @@index([shopId])
   @@map("outbound_webhooks")
+}
+
+// =============================================================================
+// 15. BUNDLE_ACTIVITY_LOG — Per-bundle merchant action trail (M-174)
+// =============================================================================
+model BundleActivityLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  bundleId  String   @map("bundle_id") @db.Uuid
+  action    String                              // published|archived|moved_to_draft|details_updated|items_updated|pricing_updated|schedule_updated|display_updated|eligibility_updated|inventory_rules_updated|deleted
+  summary   String                              // human-readable, e.g. "Display settings updated"
+  metadata  Json     @default("{}")             // optional structured detail
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bundle    Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, bundleId, createdAt(sort: Desc)])
+  @@map("bundle_activity_log")
 }

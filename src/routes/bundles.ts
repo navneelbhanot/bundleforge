@@ -8,12 +8,15 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import type { Session } from "@shopify/shopify-api";
 
 import { BundleService } from "../services/bundles";
+import { bundleActivityRepo } from "../services/bundles/activityRepo";
 import { CreateBundleInput, PaginationParams } from "../types";
 import { UnauthorizedError } from "../middleware/errorHandler";
 import { shopifyGraphql } from "../shopify/graphql";
 
 export interface BundleRouteDeps {
   service?: BundleService;
+  /** Override for the activity-log read path. Tests inject a fake. */
+  activityRepo?: typeof bundleActivityRepo;
   /**
    * Optional override for the publish-creates-Shopify-product hook.
    * Tests inject a fake; production uses the default that hits Shopify
@@ -142,6 +145,7 @@ const defaultCreateShopifyProduct: NonNullable<
 export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
   const router = Router();
   const service = deps.service ?? new BundleService();
+  const activityRepo = deps.activityRepo ?? bundleActivityRepo;
   const createShopifyProduct =
     deps.createShopifyProduct ?? defaultCreateShopifyProduct;
 
@@ -240,6 +244,40 @@ export function installBundleRoutes(deps: BundleRouteDeps = {}): Router {
       next(err);
     }
   });
+
+  router.get(
+    "/:id/activity",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const shopId = shopIdOr401(req);
+        // Confirm the bundle is in this shop before exposing log rows.
+        await service.getById(shopId, req.params.id);
+        const page = Math.max(1, Number(req.query.page) || 1);
+        const limit = Math.min(
+          100,
+          Math.max(1, Number(req.query.limit) || 20),
+        );
+        const { data, total } = await activityRepo.list(
+          shopId,
+          req.params.id,
+          { page, limit },
+        );
+        res.json({
+          data,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit) || 1,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+          },
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   router.put("/:id", async (req: Request, res: Response, next: NextFunction) => {
     try {

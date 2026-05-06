@@ -27,6 +27,7 @@ import {
 } from "@shopify/polaris";
 
 import { findBundleType } from "../components/bundleTypes";
+import { ActivityTab } from "../components/bundleDetail/ActivityTab";
 import {
   CustomersTab,
   type Eligibility,
@@ -41,6 +42,7 @@ import {
   type InventoryRules,
   type ShopInventoryDefaults,
 } from "../components/bundleDetail/InventoryTab";
+import { PerformanceTab } from "../components/bundleDetail/PerformanceTab";
 import {
   ScheduleTab,
   type ScheduleSettings,
@@ -472,11 +474,23 @@ export function BundleDetailPage(): JSX.Element {
                   />
                 </Box>
               )}
+              {TABS[tabIndex].id === "performance" && (
+                <Box paddingBlockEnd="400">
+                  <PerformanceTab bundleId={bundle.id} />
+                </Box>
+              )}
+              {TABS[tabIndex].id === "activity" && (
+                <Box paddingBlockEnd="400">
+                  <ActivityTab bundleId={bundle.id} />
+                </Box>
+              )}
               {TABS[tabIndex].id !== "setup" &&
                 TABS[tabIndex].id !== "schedule" &&
                 TABS[tabIndex].id !== "display" &&
                 TABS[tabIndex].id !== "customers" &&
-                TABS[tabIndex].id !== "inventory" && (
+                TABS[tabIndex].id !== "inventory" &&
+                TABS[tabIndex].id !== "performance" &&
+                TABS[tabIndex].id !== "activity" && (
                   <Box paddingBlockEnd="400">
                     <PlaceholderTab tab={TABS[tabIndex]} />
                   </Box>

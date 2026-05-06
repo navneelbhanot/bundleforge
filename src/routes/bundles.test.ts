@@ -18,7 +18,19 @@ interface MockedService {
   archive: ReturnType<typeof vi.fn>;
 }
 
-function buildApp(service: MockedService, withShop = true): Express {
+interface MockedActivityRepo {
+  append: ReturnType<typeof vi.fn>;
+  list: ReturnType<typeof vi.fn>;
+}
+
+function buildApp(
+  service: MockedService,
+  options: {
+    withShop?: boolean;
+    activityRepo?: MockedActivityRepo;
+  } = {},
+): Express {
+  const { withShop = true, activityRepo } = options;
   const app = express();
   app.use(requestId);
   app.use(express.json());
@@ -26,9 +38,13 @@ function buildApp(service: MockedService, withShop = true): Express {
     if (withShop) req.shopId = "shop-uuid";
     next();
   });
+  const deps: Record<string, unknown> = {
+    service: service as unknown as BundleService,
+  };
+  if (activityRepo) deps.activityRepo = activityRepo;
   app.use(
     "/bundles",
-    installBundleRoutes({ service: service as unknown as BundleService }),
+    installBundleRoutes(deps as Parameters<typeof installBundleRoutes>[0]),
   );
   app.use(errorHandler);
   return app;
@@ -135,8 +151,68 @@ describe("POST /bundles/:id/{duplicate,publish,archive}", () => {
 describe("Auth gate", () => {
   it("401 when req.shopId is missing", async () => {
     const svc = mocked();
-    const app = buildApp(svc, /*withShop=*/ false);
+    const app = buildApp(svc, { withShop: false });
     const res = await request(app).get("/bundles");
     expect(res.status).toBe(401);
+  });
+});
+
+describe("GET /bundles/:id/activity (M-174)", () => {
+  it("returns paginated activity rows newest first", async () => {
+    const svc = mocked();
+    svc.getById.mockResolvedValueOnce({ id: "b-1" });
+    const activityRepo: MockedActivityRepo = {
+      append: vi.fn(),
+      list: vi.fn().mockResolvedValueOnce({
+        data: [
+          {
+            id: "act-1",
+            action: "published",
+            summary: "Bundle published",
+            createdAt: new Date(),
+            metadata: {},
+          },
+        ],
+        total: 1,
+      }),
+    };
+    const app = buildApp(svc, { activityRepo });
+    const res = await request(app).get("/bundles/b-1/activity");
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].action).toBe("published");
+    expect(res.body.pagination.total).toBe(1);
+    expect(activityRepo.list).toHaveBeenCalledWith("shop-uuid", "b-1", {
+      page: 1,
+      limit: 20,
+    });
+  });
+
+  it("respects ?limit and ?page", async () => {
+    const svc = mocked();
+    svc.getById.mockResolvedValueOnce({ id: "b-1" });
+    const activityRepo: MockedActivityRepo = {
+      append: vi.fn(),
+      list: vi.fn().mockResolvedValueOnce({ data: [], total: 0 }),
+    };
+    const app = buildApp(svc, { activityRepo });
+    await request(app).get("/bundles/b-1/activity?page=3&limit=5");
+    expect(activityRepo.list).toHaveBeenCalledWith("shop-uuid", "b-1", {
+      page: 3,
+      limit: 5,
+    });
+  });
+
+  it("404 when the bundle is not in this shop", async () => {
+    const svc = mocked();
+    svc.getById.mockRejectedValueOnce(new NotFoundError("Bundle"));
+    const activityRepo: MockedActivityRepo = {
+      append: vi.fn(),
+      list: vi.fn(),
+    };
+    const app = buildApp(svc, { activityRepo });
+    const res = await request(app).get("/bundles/b-1/activity");
+    expect(res.status).toBe(404);
+    expect(activityRepo.list).not.toHaveBeenCalled();
   });
 });

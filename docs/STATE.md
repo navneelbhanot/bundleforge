@@ -8,45 +8,44 @@
 
 **Phase R2 in progress — Bundle Detail richness.**
 
-M-169..M-173 all landed 2026-05-06. The Bundle Detail page now
-has 5 of 8 tabs fully built: Setup, Schedule, Display, Customers,
-Inventory. Inventory tab covers per-bundle override of the
-shop-level low-stock threshold / oversell policy / low-stock
-alert from M-163, plus two bundle-specific rules: pause when any
-component drops below N, and component-only rendering mode.
-Same null-removes-key semantics as Display / Customers: "Use
-shop default" Select option and blank number fields save as
-`null` so the deep-merge deletes the override and the bundle
-falls back to the shop default at render time.
+M-169..M-174 all landed 2026-05-06. The Bundle Detail page now
+has 7 of 8 tabs fully built: Setup, Schedule, Display, Customers,
+Inventory, Performance, Activity. Performance reads the existing
+analytics aggregate and shows a KPI strip + funnel breakdown.
+Activity is a new merchant-action audit trail (publish, archive,
+save) backed by a new `bundle_activity_log` table — every
+publish/archive/update writes one or more rows, and the GET
+endpoint paginates them newest-first.
 
-Remaining R2 tabs (Performance + Activity, Advanced) are
-placeholders pointing at M-174..M-175.
+Only Advanced (M-175) remains as a placeholder.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (four migrations queued):**
+**User action required (five migrations queued):**
 1. M-168: `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`
 2. M-170: `prisma/migrations/20260506180000_bundle_schedule_settings/`
 3. M-172: `prisma/migrations/20260506200000_bundle_eligibility/`
 4. M-173: `prisma/migrations/20260506220000_bundle_inventory_rules/`
+5. M-174: `prisma/migrations/20260506240000_bundle_activity_log/`
 
-All four safe during normal traffic — M-168 creates 2 empty
+All five safe during normal traffic — M-168/M-174 create new
 tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-174 — Performance + Activity log
-tabs (Bundle Detail). Spec first:
-`docs/specs/M-174-bundle-detail-performance-activity.md`. Two
-tabs in one milestone: Performance reads existing
-`/api/v1/analytics/bundle/:id` data (revenue/orders/conversion
-in a date-range KPI strip + a small revenue series chart);
-Activity reads a paginated audit-style trail of admin actions
-on the bundle (status changes, item edits, settings overrides
-from M-170..M-173). May add an `audit_log` table or piggyback
-on `inventory_audit_log` — TBD in spec.
+**Code (next session):** Run M-175 — Advanced tab (Bundle
+Detail). Spec first:
+`docs/specs/M-175-bundle-detail-advanced.md`. Closes Phase R2.
+Likely surfaces: bundle slug edit (with conflict check),
+duplicate / soft delete actions (already exist in service),
+raw JSON view of config / displaySettings / scheduleSettings /
+eligibility / inventoryRules for power users, optional SEO
+title + description fields (schema columns exist:
+`seoTitle`, `seoDescription` — neither is wired in admin yet).
+Sizing: small. After M-175 lands, we move to Phase R3 (Bundle
+List: IndexFilters, bulk actions, sort modes, templates).
 
 Other open threads (mostly user-owned):
 
@@ -115,6 +114,24 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-174 — Bundle Detail · Performance + Activity log tabs**
+  (2026-05-06 late). Two tabs in one milestone. Performance is
+  read-only against `/api/v1/analytics/bundles/:id` (M-112) and
+  renders a KPI strip (Views / Add-to-cart / Purchases /
+  Revenue / Conversion rate / AOV) plus per-event-type
+  breakdown. Activity is a new merchant-action audit trail:
+  new `bundle_activity_log` Prisma model + migration,
+  append-only repo, and writers in
+  `BundleService.publish/archive/softDelete/update` that emit
+  one row per affected section (so a single PUT updating both
+  display + eligibility produces two rows). Failures in the
+  log writer are best-effort — they warn and swallow rather
+  than failing the underlying mutation. New
+  `GET /api/v1/bundles/:id/activity` paginates newest-first
+  with the standard envelope shape. Frontend uses Polaris
+  `Pagination` + tone-aware action badges + relative timestamps
+  with absolute time on hover.
+  `docs/sessions/0174-bundle-detail-performance-activity.md`.
 - **M-173 — Bundle Detail · Inventory tab** (2026-05-06 late).
   Per-bundle override layer for the shop-level Inventory
   defaults from M-163 plus two new bundle-specific rules.
@@ -363,11 +380,12 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **614 / 614 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 BundleService inventoryRules cases + +4
-  InventoryTab UI cases + +1 BundleDetailPage hash test since
-  M-172.
-- **464 / 464** when no real DB is available — the bundle CRUD
+- **629 / 629 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 BundleService activity-writer cases + +3
+  bundles route activity cases + +3 PerformanceTab UI cases +
+  +3 ActivityTab UI cases + +2 BundleDetailPage hash tests
+  since M-173.
+- **479 / 479** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
