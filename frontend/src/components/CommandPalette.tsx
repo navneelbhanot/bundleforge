@@ -105,9 +105,10 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
   const [highlight, setHighlight] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Action list. Browse templates is special — it triggers a
-  // navigation to the bundles list with a query param the page
-  // reads on mount; that way it works from any route.
+  // Action list. Browse templates and Open help both work from
+  // any route — the first via a query-param handoff to the
+  // bundles list, the second via a window CustomEvent that the
+  // globally-mounted HelpDrawer listens for.
   const actions: ActionEntry[] = useMemo(
     () => [
       { id: "create-bundle", label: "Create bundle", path: "/bundles/new" },
@@ -115,6 +116,13 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
         id: "browse-templates",
         label: "Browse templates",
         path: "/?openTemplates=1",
+      },
+      {
+        id: "open-help",
+        label: "Open help",
+        run: () => {
+          window.dispatchEvent(new CustomEvent("bundleforge:open-help"));
+        },
       },
     ],
     [],

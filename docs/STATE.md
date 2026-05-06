@@ -8,16 +8,17 @@
 
 **Phase R4 in progress — cross-cutting polish.**
 
-M-180 landed 2026-05-06. A global ⌘K (Ctrl-K elsewhere)
-command palette is now mounted in the App shell and reachable
-from every route. Three result sections: Bundles (debounced
-search), Pages (admin nav targets), Actions (Create bundle,
-Browse templates). Browse-templates from any route is
-accomplished via a `?openTemplates=1` query param the
-BundlesListPage consumes on mount.
+M-180 + M-181 landed 2026-05-06. The App shell now mounts
+two global components reachable from every route: the ⌘K
+command palette (search bundles, jump to admin pages, run
+actions), and a help drawer (Polaris Modal opened by `?` or
+the palette's "Open help" action) that surfaces the existing
+9-article `docs/help/` markdown library inline with a tiny
+self-contained markdown renderer (`javascript:` URLs are
+stripped for safety).
 
-M-181..M-183 remaining: in-app help drawer, unified
-toast/confirm/skeleton patterns, empty-state illustrations.
+M-182 (unified toast/confirm/skeleton patterns) and M-183
+(empty-state illustrations) remaining.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -35,14 +36,22 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-181 — in-app help drawer.
-Spec first: `docs/specs/M-181-help-drawer.md`. A right-side
-Polaris `Sheet` triggered by a "Help" button in the App
-shell (or `?` keystroke) showing context-aware help: a
-search box over the existing `docs/help/` markdown files +
-a "What's new in BundleForge" section pulling from the
-session log latest. Uses the same global-mount pattern as
-M-180's CommandPalette. Sizing: medium.
+**Code (next session):** Run M-182 — unified toast / confirm
+/ skeleton patterns. Spec first:
+`docs/specs/M-182-unified-toast-confirm-skeleton.md`. Distill
+the ad-hoc `<Toast>` mounts + confirm modals scattered across
+pages (BundleDetailPage's delete modal, BundlesListPage's bulk
+confirm, AdvancedTab's typed-confirm, etc.) into a single
+shared hook + helper components so every surface emits the
+same UX. Likely produces:
+- `useToasts()` hook returning `{ show, dismiss, current }`.
+- A globally-mounted `<ToastHost />` in App.tsx that owns the
+  Polaris `Toast` rendering.
+- `<ConfirmDialog>` helper with optional typed-confirm.
+- `<Skeleton />` / `<SkeletonRows />` primitives so the
+  PageLoading variants stop being copy-pasted.
+Sizing: medium-large — it's a refactor pass across 6+ pages
+plus a few new primitives.
 
 Other open threads (mostly user-owned):
 
@@ -111,6 +120,28 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-181 — In-app help drawer** (2026-05-06 late). Surfaces
+  the 9-article `docs/help/` markdown library inside the
+  admin. New `src/routes/help.ts` exposes
+  `GET /api/v1/help/articles` (list metadata) +
+  `GET /api/v1/help/articles/:id` (full body). The id param
+  is regex-restricted to `[a-z0-9-]+` so path-traversal
+  attempts are rejected before any filesystem access.
+  Categories come from a static map (no per-file frontmatter
+  needed). Frontend
+  `frontend/src/components/HelpDrawer.tsx` is a Polaris
+  Modal with a two-column Grid: search-filtered article list
+  on the left, rendered markdown on the right. Lazy-loads on
+  first open; per-article responses are cached client-side.
+  Hotkey: `?` opens the drawer when not inside an input;
+  the ⌘K palette's new "Open help" action fires a
+  `bundleforge:open-help` window CustomEvent the drawer
+  listens for so the two components stay decoupled. Tiny
+  inline markdown renderer (`MarkdownView`) handles
+  headings / lists / fenced code / `**bold**` / `` `code` ``
+  / `[text](url)` and strips `javascript:` URLs to plain
+  text for safety.
+  `docs/sessions/0181-help-drawer.md`.
 - **M-180 — Global ⌘K command palette** (2026-05-06 late,
   **Phase R4 start**). New
   `frontend/src/components/CommandPalette.tsx` mounted in
@@ -483,9 +514,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **680 / 680 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 CommandPalette UI cases since M-179.
-- **530 / 530** when no real DB is available — the bundle CRUD
+- **691 / 691 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 server help-route cases + +6
+  HelpDrawer/MarkdownView UI cases since M-180.
+- **541 / 541** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

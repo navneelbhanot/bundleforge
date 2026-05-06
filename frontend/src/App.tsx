@@ -10,6 +10,7 @@ import {
 
 import { AppBridgeProvider } from "./AppBridgeProvider";
 import { CommandPalette } from "./components/CommandPalette";
+import { HelpDrawer } from "./components/HelpDrawer";
 import { NavMenu } from "./components/NavMenu";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
@@ -133,6 +134,7 @@ function Shell(): JSX.Element {
         <Route path="/billing" element={<BillingPage />} />
       </Routes>
       <CommandPalette />
+      <HelpDrawer />
     </Page>
   );
 }
