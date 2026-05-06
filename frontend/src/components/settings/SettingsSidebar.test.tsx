@@ -43,11 +43,15 @@ describe("SettingsSidebar (M-185)", () => {
         <SettingsSidebar tabs={TABS} activeIndex={2} onSelect={vi.fn()} />
       </AppProvider>,
     );
-    // Polaris primary buttons get a different class than tertiary; the
-    // exact class depends on Polaris internals, so assert structurally
-    // by mounting a control sample and comparing className shapes.
-    const inventory = screen.getByRole("button", { name: "Inventory" });
-    const general = screen.getByRole("button", { name: "General" });
-    expect(inventory.className).not.toEqual(general.className);
+    // The active item carries an inset box-shadow accent stripe and
+    // a tinted background; the inactive items render with transparent
+    // background and no shadow. Check the inline style attribute.
+    const inventory = screen.getByRole("button", { name: /Inventory/i });
+    const general = screen.getByRole("button", { name: /General/i });
+    expect(inventory.getAttribute("style")).not.toEqual(
+      general.getAttribute("style"),
+    );
+    expect(inventory.getAttribute("style")).toMatch(/inset 3px 0 0/);
+    expect(general.getAttribute("style")).not.toMatch(/inset 3px 0 0/);
   });
 });

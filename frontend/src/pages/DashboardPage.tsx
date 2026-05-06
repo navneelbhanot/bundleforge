@@ -131,32 +131,42 @@ export function DashboardPage(): JSX.Element {
         secondaryActions={[{ content: "Browse bundles", url: "/bundles" }]}
       >
         <BlockStack gap="500">
-          <Grid>
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-              <RevenueSnapshotWidget />
-            </Grid.Cell>
+          {/*
+           * Layout — top to bottom:
+           *   - Revenue snapshot full-width (marquee)
+           *   - 3 stat cards across (Bundle status / Inventory / Recent bundles)
+           *   - 2 list cards across (Recent orders / AI suggestions)
+           *   - Recent activity full-width
+           * Polaris Grid columnSpan max is 6, so at lg/xl breakpoints
+           * 6 = 50%. Full-width rows render the widget outside the
+           * Grid; column rows use Grid with explicit thirds/halves.
+           */}
+          <RevenueSnapshotWidget />
 
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4, xl: 4 }}>
+          <Grid>
+            {/* Thirds: md/6 col → span 2; lg/xl 12 col → span 4 */}
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 2, lg: 4, xl: 4 }}>
               <BundleCountsWidget />
             </Grid.Cell>
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4, xl: 4 }}>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 2, lg: 4, xl: 4 }}>
               <InventoryHealthWidget />
             </Grid.Cell>
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4, xl: 4 }}>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 2, lg: 4, xl: 4 }}>
               <RecentBundlesWidget />
             </Grid.Cell>
+          </Grid>
 
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+          <Grid>
+            {/* Halves: md/6 col → span 3; lg/xl 12 col → span 6 */}
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 3, lg: 6, xl: 6 }}>
               <RecentOrdersWidget />
             </Grid.Cell>
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 3, lg: 6, xl: 6 }}>
               <AiSuggestionsWidget />
             </Grid.Cell>
-
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 6, lg: 6, xl: 6 }}>
-              <RecentActivityWidget />
-            </Grid.Cell>
           </Grid>
+
+          <RecentActivityWidget />
         </BlockStack>
       </Page>
     </Frame>
