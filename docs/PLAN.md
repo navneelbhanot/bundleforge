@@ -256,7 +256,7 @@
 | M-165 | Notifications & alerts tab | done (2026-05-06) | `docs/specs/M-165-settings-notifications.md` | 3 cards: Channels (recipients, Slack/Teams URLs, in-app), Email channel (master toggle), Alert rules (5 rules × 4 channels each). Schema upgrade preserves backwards compat with the existing email/inApp toggles. |
 | M-166 | Integrations tab | done (2026-05-06) | `docs/specs/M-166-settings-integrations.md` | New `/api/v1/integrations` route with GET/PUT/POST-test/DELETE; AES-256 encrypted credentials; one Card + Configure modal per known adapter (ShipStation, Recharge, Bold, Klaviyo, Amazon, Google Merchant). |
 | M-167 | Localization + Billing tabs + GM feed URL | done (2026-05-06) | `docs/specs/M-167-settings-api-localization-billing.md` | Re-scoped mid-spec — API & webhooks split into M-168. Localization tab (3 controls), Billing tab (extracted shared BillingPanel), Google Merchant feed URL surfaced on Integrations tab. |
-| M-168 | API tokens + outbound webhooks tab | pending | — | Two new Prisma models (ApiToken, OutboundWebhook) + migrations, two new CRUD routes, frontend tables + Add modals. Split out from M-167 mid-spec because the schema work is its own milestone. Closes Phase R1. |
+| M-168 | API tokens + outbound webhooks tab | done (2026-05-06) | `docs/specs/M-168-settings-api-webhooks.md` | Two new Prisma models + migration, two new CRUD routes (/api/v1/api-tokens, /api/v1/outbound-webhooks), scrypt-based token hashing, frontend ApiWebhooksTab with Tokens + Webhooks cards. Plaintext token + HMAC secret returned exactly once. **Phase R1 closed: 8/8 milestones done.** |
 
 ### Phase R2 — Bundle Detail richness
 

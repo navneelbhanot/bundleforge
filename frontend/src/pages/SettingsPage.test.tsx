@@ -218,15 +218,49 @@ describe("SettingsPage", () => {
     expect(putCall).toBeUndefined();
   });
 
-  it("non-built API tab points at M-168 (re-scoped from M-167)", async () => {
+  it("API tab no longer renders a placeholder — Phase R1 closed", async () => {
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "/settings#api");
     }
-    render(wrap(<SettingsPage />));
-    await waitFor(() =>
-      expect(screen.getByText(/being built in/i)).toBeTruthy(),
+    // ApiWebhooksTab fetches /api/v1/api-tokens and /outbound-webhooks
+    // independently of /api/v1/settings. Stub them so the panel renders.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string) => {
+        if (input.includes("/api/v1/api-tokens")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => [],
+          } as unknown as Response;
+        }
+        if (input.includes("/api/v1/outbound-webhooks")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => [],
+          } as unknown as Response;
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => BASE_PAYLOAD,
+        } as unknown as Response;
+      }),
     );
-    expect(screen.getByText(/M-168/)).toBeTruthy();
+
+    render(wrap(<SettingsPage />));
+    // Heading from ApiWebhooksTab.
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "API tokens", level: 2 }),
+      ).toBeTruthy(),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Outbound webhooks", level: 2 }),
+    ).toBeTruthy();
+    // Placeholder copy is gone.
+    expect(screen.queryByText(/being built in/i)).toBeNull();
   });
 
   it("Display tab renders three editable cards", async () => {

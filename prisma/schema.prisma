@@ -43,6 +43,8 @@ model Shop {
   analyticsEvents      AnalyticsEvent[]
   abTests              AbTest[]
   integrations         Integration[]
+  apiTokens            ApiToken[]
+  outboundWebhooks     OutboundWebhook[]
   subscription         BillingSubscription?
 
   @@map("shops")
@@ -352,4 +354,45 @@ model Session {
 
   @@index([shop])
   @@map("sessions")
+}
+
+// =============================================================================
+// 13. API_TOKENS — Per-shop bearer tokens for headless / agency tools (M-168)
+// =============================================================================
+model ApiToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  label       String                            // human-readable, e.g. "Hydrogen storefront"
+  prefix      String                            // first 8 chars, shown in UI (never the full token)
+  hashedToken String    @map("hashed_token")    // bcrypt hash; raw token returned exactly once at create
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+
+  // Relations
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, revokedAt])
+  @@map("api_tokens")
+}
+
+// =============================================================================
+// 14. OUTBOUND_WEBHOOKS — Merchant-configured event subscriptions (M-168)
+// =============================================================================
+model OutboundWebhook {
+  id          String    @id @default(uuid()) @db.Uuid
+  shopId      String    @map("shop_id") @db.Uuid
+  url         String
+  events      String[]                          // bundle.published | bundle.archived | bundle.low_stock | order.dispatched
+  hmacSecret  String    @map("hmac_secret")     // AES-256 encrypted
+  lastFiredAt DateTime? @map("last_fired_at")
+  failCount   Int       @default(0) @map("fail_count")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  disabledAt  DateTime? @map("disabled_at")
+
+  // Relations
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@map("outbound_webhooks")
 }

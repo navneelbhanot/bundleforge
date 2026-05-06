@@ -6,27 +6,43 @@
 
 ## Current milestone
 
-**Phase R1 — rich Settings page nearly done.**
+**Phase R1 — rich Settings page COMPLETE.**
 
-M-161..M-167 all landed 2026-05-06. The SettingsPage now has 9
-of 10 tabs fully built. M-167 was re-scoped mid-spec — the
-original draft folded API & webhooks in too, but two new Prisma
-models (ApiToken, OutboundWebhook) + migrations + two CRUD routes
-is its own milestone per CLAUDE.md §4. So M-167 shipped:
-Localization tab, Billing tab (extracted shared `BillingPanel`),
-and the Google Merchant feed URL surfaced on the Integrations
-tab (deferred from M-166). API & webhooks split into M-168 to
-close Phase R1.
-Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
+M-161..M-168 all landed 2026-05-06. All 10 settings tabs are
+fully built. M-168 added `/api/v1/api-tokens` and
+`/api/v1/outbound-webhooks` CRUD routes, scrypt-based token
+hashing (no new deps), AES-256-encrypted webhook HMAC secrets,
+Polaris IndexTable + Add modal UI for both. Token plaintext and
+webhook HMAC secret are returned **exactly once** at create —
+the merchant must copy them before closing the dialog.
+
+A migration file (`prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`)
+was created in source but **NOT applied**. Per CLAUDE.md §5 the
+user reviews and applies migrations on the next deploy via
+`prisma migrate deploy` — the route tests use mocked clients so
+the rest of the suite is unaffected.
+
+Phase R2 (Bundle Detail richness — M-169..M-175) is the next
+roadmap section. Roadmap:
+`docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-168 — API & webhooks tab. Spec
-first: `docs/specs/M-168-settings-api-webhooks.md`. Roadmap (kept
-from M-167's superseded draft): two new Prisma models
-(`ApiToken`, `OutboundWebhook`) with migrations, two new CRUD
-routes (`/api/v1/api-tokens`, `/api/v1/outbound-webhooks`), token
-hashing, frontend tables + Add modals. Closes Phase R1.
+**User action required (next session, before Phase R2):**
+Apply the M-168 migration on the production database. Either via
+`prisma migrate deploy` from a CI shell or by running the SQL in
+`prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/migration.sql`
+directly. The migration creates two empty tables — no data
+backfill — so it's safe to apply during normal traffic.
+
+**Code (next session):** Phase R2 starts with M-169 — Bundle
+Detail tab refactor. Spec first:
+`docs/specs/M-169-bundle-detail-tab-shell.md`. Polaris Tabs in
+the existing BundleDetailPage with 8 tabs (Setup, Schedule,
+Display, Customers, Inventory, Performance, Activity, Advanced).
+The current scrolling form goes under "Setup" — visual parity
+with today's surface, then subsequent milestones populate the
+others.
 
 Other open threads (mostly user-owned):
 
@@ -95,6 +111,19 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-168 — Settings · API & webhooks tab** (2026-05-06 late,
+  closes Phase R1). Two new Prisma models (ApiToken,
+  OutboundWebhook) with a migration file ready for the next
+  deploy. Two CRUD routes: `/api/v1/api-tokens` (create/list/
+  revoke) and `/api/v1/outbound-webhooks` (create/update/list/
+  delete). Token hashing uses Node's built-in scryptSync — no
+  new deps. Plaintext API token and HMAC webhook secret are
+  returned exactly once at create; merchant copies before
+  closing. Frontend `ApiWebhooksTab` ships with two Polaris
+  IndexTables + Add modals; both surfaces include a banner
+  flagging M-168b (the worker that emits HTTP POSTs is its own
+  ticket — config is ready and waiting today).
+  `docs/sessions/0168-settings-api-webhooks.md`.
 - **Bundle-order tagging in Shopify** (2026-05-06 late, hotfix
   before M-168). The `orders/create` webhook handler now calls
   Shopify's `tagsAdd` mutation (additive — never clobbers
@@ -257,9 +286,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **541 / 541 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +3 ordersCreate handler cases since the M-167
-  push (bundle-order Shopify tagging hotfix).
+- **565 / 565 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 tokenHash util + +7 apiTokens route + +11
+  outboundWebhooks route cases since the bundle-tagging hotfix.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
