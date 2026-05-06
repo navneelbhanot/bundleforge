@@ -716,6 +716,72 @@ describe("BundleService.softDelete", () => {
   });
 });
 
+describe("BundleService — SEO fields (M-175)", () => {
+  beforeEach(() => {
+    Object.values(mockedRepo).forEach((m) => m.mockReset());
+    Object.values(mockedActivity).forEach((m) => m.mockReset());
+    mockedActivity.append.mockResolvedValue({ id: "act-1" });
+  });
+
+  it("persists seoTitle and seoDescription on create", async () => {
+    mockedRepo.create.mockResolvedValueOnce({ id: "b-seo" });
+    const svc = new BundleService();
+    await svc.create("shop", {
+      title: "Pack",
+      type: "fixed",
+      items: [],
+      pricingRules: [],
+      seoTitle: "Holiday Pack — Save 20%",
+      seoDescription: "Curated holiday gift set with three crowd-pleasers.",
+    });
+    const args = mockedRepo.create.mock.calls[0][0];
+    expect(args.data.seoTitle).toBe("Holiday Pack — Save 20%");
+    expect(args.data.seoDescription).toBe(
+      "Curated holiday gift set with three crowd-pleasers.",
+    );
+  });
+
+  it("rejects seoTitle longer than 60 chars", async () => {
+    const svc = new BundleService();
+    await expect(
+      svc.create("shop", {
+        title: "x",
+        type: "fixed",
+        items: [],
+        pricingRules: [],
+        seoTitle: "x".repeat(61),
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("update with empty string normalises to null", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+      seoTitle: "previous",
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", { seoTitle: "" });
+    const args = mockedRepo.update.mock.calls[0][0];
+    expect(args.data.seoTitle).toBeNull();
+  });
+
+  it("update with SEO fields appends a 'seo_updated' activity entry", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      title: "X",
+    });
+    mockedRepo.update.mockResolvedValueOnce({ id: "b-1" });
+    const svc = new BundleService();
+    await svc.update("shop", "b-1", {
+      seoTitle: "New SEO title",
+    });
+    expect(mockedActivity.append).toHaveBeenCalledTimes(1);
+    expect(mockedActivity.append.mock.calls[0][0].action).toBe("seo_updated");
+  });
+});
+
 describe("BundleService — activity log writers (M-174)", () => {
   beforeEach(() => {
     Object.values(mockedRepo).forEach((m) => m.mockReset());

@@ -7,7 +7,7 @@
  * editable inline; saving any of those fires PUT /api/v1/bundles/:id.
  */
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Badge,
   BlockStack,
@@ -28,6 +28,7 @@ import {
 
 import { findBundleType } from "../components/bundleTypes";
 import { ActivityTab } from "../components/bundleDetail/ActivityTab";
+import { AdvancedTab } from "../components/bundleDetail/AdvancedTab";
 import {
   CustomersTab,
   type Eligibility,
@@ -102,6 +103,8 @@ interface BundleDetail {
   displaySettings?: DisplaySettings;
   eligibility?: Eligibility;
   inventoryRules?: InventoryRules;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   shopTimezone?: string;
 }
 
@@ -116,20 +119,17 @@ interface TabSpec {
   id: string;
   hash: string;
   content: string;
-  status: "ready" | "deferred";
-  /** Milestone that ships this tab. */
-  milestone?: string;
 }
 
 const TABS: TabSpec[] = [
-  { id: "setup", hash: "setup", content: "Setup", status: "ready" },
-  { id: "schedule", hash: "schedule", content: "Schedule", status: "deferred", milestone: "M-170" },
-  { id: "display", hash: "display", content: "Display", status: "deferred", milestone: "M-171" },
-  { id: "customers", hash: "customers", content: "Customers", status: "deferred", milestone: "M-172" },
-  { id: "inventory", hash: "inventory", content: "Inventory", status: "deferred", milestone: "M-173" },
-  { id: "performance", hash: "performance", content: "Performance", status: "deferred", milestone: "M-174" },
-  { id: "activity", hash: "activity", content: "Activity", status: "deferred", milestone: "M-174" },
-  { id: "advanced", hash: "advanced", content: "Advanced", status: "deferred", milestone: "M-175" },
+  { id: "setup", hash: "setup", content: "Setup" },
+  { id: "schedule", hash: "schedule", content: "Schedule" },
+  { id: "display", hash: "display", content: "Display" },
+  { id: "customers", hash: "customers", content: "Customers" },
+  { id: "inventory", hash: "inventory", content: "Inventory" },
+  { id: "performance", hash: "performance", content: "Performance" },
+  { id: "activity", hash: "activity", content: "Activity" },
+  { id: "advanced", hash: "advanced", content: "Advanced" },
 ];
 
 function readHashTab(): number {
@@ -148,30 +148,9 @@ function writeHashTab(idx: number): void {
   }
 }
 
-interface PlaceholderTabProps {
-  tab: TabSpec;
-}
-
-function PlaceholderTab({ tab }: PlaceholderTabProps): JSX.Element {
-  return (
-    <Card>
-      <BlockStack gap="200">
-        <Text as="h2" variant="headingMd">
-          {tab.content}
-        </Text>
-        <Text as="p" tone="subdued">
-          This tab is being built in {tab.milestone ?? "a future milestone"}.
-          See <code>docs/plans/rich-admin-ui-roadmap.md</code> for the
-          full plan. Setup, status, and the live preview keep
-          working — only this tab&apos;s content is queued up.
-        </Text>
-      </BlockStack>
-    </Card>
-  );
-}
-
 export function BundleDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [bundle, setBundle] = useState<BundleDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -340,6 +319,39 @@ export function BundleDetailPage(): JSX.Element {
     }
   }
 
+  async function duplicate(): Promise<void> {
+    if (!id) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/bundles/${id}/duplicate`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const fresh = (await res.json()) as { id: string };
+      navigate(`/bundles/${fresh.id}#setup`);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteBundle(): Promise<void> {
+    if (!id) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/bundles/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      navigate("/");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function statusAction(path: "publish" | "archive"): Promise<void> {
     if (!id) return;
     setBusy(true);
@@ -484,17 +496,26 @@ export function BundleDetailPage(): JSX.Element {
                   <ActivityTab bundleId={bundle.id} />
                 </Box>
               )}
-              {TABS[tabIndex].id !== "setup" &&
-                TABS[tabIndex].id !== "schedule" &&
-                TABS[tabIndex].id !== "display" &&
-                TABS[tabIndex].id !== "customers" &&
-                TABS[tabIndex].id !== "inventory" &&
-                TABS[tabIndex].id !== "performance" &&
-                TABS[tabIndex].id !== "activity" && (
-                  <Box paddingBlockEnd="400">
-                    <PlaceholderTab tab={TABS[tabIndex]} />
-                  </Box>
-                )}
+              {TABS[tabIndex].id === "advanced" && (
+                <Box paddingBlockEnd="400">
+                  <AdvancedTab
+                    bundleId={bundle.id}
+                    initialSeoTitle={bundle.seoTitle ?? null}
+                    initialSeoDescription={bundle.seoDescription ?? null}
+                    rawConfig={{
+                      config: bundle.config,
+                      displaySettings: bundle.displaySettings ?? {},
+                      scheduleSettings: bundle.scheduleSettings ?? {},
+                      eligibility: bundle.eligibility ?? {},
+                      inventoryRules: bundle.inventoryRules ?? {},
+                    }}
+                    busy={busy}
+                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                    onDuplicate={duplicate}
+                    onDelete={deleteBundle}
+                  />
+                </Box>
+              )}
               <div
                 style={{
                   display: TABS[tabIndex].id === "setup" ? "block" : "none",

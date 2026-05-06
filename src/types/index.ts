@@ -136,6 +136,8 @@ export interface CreateBundleInput {
   scheduleSettings?: ScheduleSettingsInput;
   eligibility?: EligibilityInput;
   inventoryRules?: InventoryRulesInput;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   startsAt?: string;
   endsAt?: string;
 }

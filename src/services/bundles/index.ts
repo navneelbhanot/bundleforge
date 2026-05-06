@@ -352,6 +352,38 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+const SEO_TITLE_MAX = 60;
+const SEO_DESCRIPTION_MAX = 320;
+
+/**
+ * Validate SEO fields. Matches Shopify storefront limits — anything
+ * longer is silently truncated by the storefront anyway. Throws on
+ * the first violation. Empty string is normalised to null by the
+ * caller; this helper accepts either.
+ */
+function validateSeo(seoTitle?: string | null, seoDescription?: string | null): void {
+  if (typeof seoTitle === "string" && seoTitle.length > SEO_TITLE_MAX) {
+    throw new ValidationError(
+      `seoTitle must be <= ${SEO_TITLE_MAX} chars`,
+    );
+  }
+  if (
+    typeof seoDescription === "string" &&
+    seoDescription.length > SEO_DESCRIPTION_MAX
+  ) {
+    throw new ValidationError(
+      `seoDescription must be <= ${SEO_DESCRIPTION_MAX} chars`,
+    );
+  }
+}
+
+/** Empty string → null for SEO fields. Matches storage normalisation. */
+function normaliseSeo(v: string | null | undefined): string | null | undefined {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  return v.trim().length === 0 ? null : v;
+}
+
 /**
  * Best-effort activity log writer (M-174). Caller doesn't await
  * the result and a logging failure must never propagate to the
@@ -447,6 +479,9 @@ export class BundleService {
     if (input.displaySettings) validateDisplay(input.displaySettings);
     if (input.eligibility) validateEligibility(input.eligibility);
     if (input.inventoryRules) validateInventoryRules(input.inventoryRules);
+    validateSeo(input.seoTitle, input.seoDescription);
+    const seoTitle = normaliseSeo(input.seoTitle);
+    const seoDescription = normaliseSeo(input.seoDescription);
     if (input.startsAt && input.endsAt) {
       if (new Date(input.endsAt).getTime() < new Date(input.startsAt).getTime()) {
         throw new ValidationError("endsAt must be on/after startsAt");
@@ -469,6 +504,8 @@ export class BundleService {
           (input.eligibility ?? {}) as unknown as Prisma.InputJsonValue,
         inventoryRules:
           (input.inventoryRules ?? {}) as unknown as Prisma.InputJsonValue,
+        ...(seoTitle !== undefined && { seoTitle }),
+        ...(seoDescription !== undefined && { seoDescription }),
         startsAt: input.startsAt ? new Date(input.startsAt) : undefined,
         endsAt: input.endsAt ? new Date(input.endsAt) : undefined,
         items: { create: (input.items ?? []).map((it, i) => mapItem(it, i)) },
@@ -573,6 +610,15 @@ export class BundleService {
       }
       data.inventoryRules = merged as Prisma.InputJsonValue;
     }
+    if (input.seoTitle !== undefined || input.seoDescription !== undefined) {
+      validateSeo(input.seoTitle, input.seoDescription);
+      if (input.seoTitle !== undefined) {
+        data.seoTitle = normaliseSeo(input.seoTitle) ?? null;
+      }
+      if (input.seoDescription !== undefined) {
+        data.seoDescription = normaliseSeo(input.seoDescription) ?? null;
+      }
+    }
     if (input.startsAt !== undefined) {
       data.startsAt = input.startsAt ? new Date(input.startsAt) : null;
     }
@@ -645,6 +691,9 @@ export class BundleService {
         "inventory_rules_updated",
         "Inventory rules updated",
       );
+    }
+    if (input.seoTitle !== undefined || input.seoDescription !== undefined) {
+      await logActivity(shopId, id, "seo_updated", "SEO metadata updated");
     }
 
     return result;

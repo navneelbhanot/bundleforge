@@ -6,18 +6,21 @@
 
 ## Current milestone
 
-**Phase R2 in progress — Bundle Detail richness.**
+**Phase R2 closed — Bundle Detail richness complete.**
 
-M-169..M-174 all landed 2026-05-06. The Bundle Detail page now
-has 7 of 8 tabs fully built: Setup, Schedule, Display, Customers,
-Inventory, Performance, Activity. Performance reads the existing
-analytics aggregate and shows a KPI strip + funnel breakdown.
-Activity is a new merchant-action audit trail (publish, archive,
-save) backed by a new `bundle_activity_log` table — every
-publish/archive/update writes one or more rows, and the GET
-endpoint paginates them newest-first.
+M-169..M-175 all landed 2026-05-06. Every Bundle Detail tab
+is wired: Setup, Schedule, Display, Customers, Inventory,
+Performance, Activity, Advanced. Advanced (M-175) collected
+SEO metadata (`seoTitle` / `seoDescription` finally have an
+admin entry point), a read-only JSON inspector for the 5
+per-bundle JSON columns, and the Duplicate / Delete actions
+that the BundleService had carried since M-050/M-052 but the
+frontend never exposed. The placeholder fallback in
+BundleDetailPage was removed entirely.
 
-Only Advanced (M-175) remains as a placeholder.
+Phase R3 next: Bundle List richness (IndexFilters + saved
+views, Bulk actions, Sort + view modes, Templates gallery —
+M-176..M-179).
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -35,17 +38,18 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-175 — Advanced tab (Bundle
-Detail). Spec first:
-`docs/specs/M-175-bundle-detail-advanced.md`. Closes Phase R2.
-Likely surfaces: bundle slug edit (with conflict check),
-duplicate / soft delete actions (already exist in service),
-raw JSON view of config / displaySettings / scheduleSettings /
-eligibility / inventoryRules for power users, optional SEO
-title + description fields (schema columns exist:
-`seoTitle`, `seoDescription` — neither is wired in admin yet).
-Sizing: small. After M-175 lands, we move to Phase R3 (Bundle
-List: IndexFilters, bulk actions, sort modes, templates).
+**Code (next session):** Run M-176 — Bundle list IndexFilters
++ saved views (Phase R3 start). Spec first:
+`docs/specs/M-176-bundle-list-indexfilters.md`. Replaces the
+plain `IndexTable` on `BundlesListPage` with Polaris
+`IndexFilters` (search input + status / type filter chips +
+"Save view" support). Saved views persist to `Shop.settings`
+(or a small new column — TBD in spec) so a merchant who lives
+in "Active drafts only" doesn't reset on page reload. Likely
+introduces a small `/api/v1/saved-views` CRUD route or
+piggybacks on the existing settings PUT. Sizing: medium —
+this is the first Phase R3 milestone and sets the pattern for
+M-177..M-179.
 
 Other open threads (mostly user-owned):
 
@@ -114,6 +118,23 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-175 — Bundle Detail · Advanced tab** (2026-05-06 late).
+  **Closes Phase R2.** Three cards on the previously-blank
+  Advanced tab. Search engine listing wires `seoTitle` and
+  `seoDescription` columns (in the schema since M-009 but
+  never reachable from admin); 60/320 char limits with live
+  counters and error messages; empty string normalises to
+  `null` server-side. Raw configuration is a Polaris
+  `Collapsible` of pretty-printed JSON for the 5 per-bundle
+  JSON columns — useful for support-ticket attachments.
+  Danger zone exposes Duplicate (calls existing
+  `POST /:id/duplicate` and navigates to the new bundle) and
+  Delete (typed-confirmation modal — merchant must type
+  `DELETE` — calls existing `DELETE /:id` soft-delete).
+  Service activity-log writer emits `seo_updated` on SEO
+  patches. PlaceholderTab component removed: every tab is
+  now wired.
+  `docs/sessions/0175-bundle-detail-advanced.md`.
 - **M-174 — Bundle Detail · Performance + Activity log tabs**
   (2026-05-06 late). Two tabs in one milestone. Performance is
   read-only against `/api/v1/analytics/bundles/:id` (M-112) and
@@ -380,12 +401,12 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **629 / 629 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 BundleService activity-writer cases + +3
-  bundles route activity cases + +3 PerformanceTab UI cases +
-  +3 ActivityTab UI cases + +2 BundleDetailPage hash tests
-  since M-173.
-- **479 / 479** when no real DB is available — the bundle CRUD
+- **637 / 637 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 BundleService SEO cases + +4 AdvancedTab
+  UI cases since M-174 (BundleDetailPage hash test count
+  unchanged — the M-175 deep-link replaced the now-obsolete
+  placeholder regression test).
+- **487 / 487** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

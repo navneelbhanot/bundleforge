@@ -19,6 +19,7 @@ export type BundleActivityAction =
   | "display_updated"
   | "eligibility_updated"
   | "inventory_rules_updated"
+  | "seo_updated"
   | "deleted";
 
 export interface AppendInput {

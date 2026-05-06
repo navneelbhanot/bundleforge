@@ -134,15 +134,16 @@ describe("BundleDetailPage tab shell", () => {
     ).toBeTruthy();
   });
 
-  it("non-Setup placeholder tabs render the placeholder card pointing at their milestone", async () => {
-    // Schedule (M-170), Display (M-171), Customers (M-172),
-    // Inventory (M-173), Performance + Activity (M-174) are now
-    // wired. Use #advanced which is still placeholder for M-175.
+  it("hash routing: deep-link to #advanced renders the Advanced tab content (M-175 wired, closes Phase R2)", async () => {
     renderAt("#advanced");
     await waitFor(() =>
-      expect(screen.getByText(/being built in/i)).toBeTruthy(),
+      expect(
+        screen.getByRole("heading", {
+          name: "Search engine listing",
+          level: 2,
+        }),
+      ).toBeTruthy(),
     );
-    expect(screen.getByText(/M-175/)).toBeTruthy();
   });
 
   it("hash routing: deep-link to #performance renders the Performance tab content (M-174 wired)", async () => {
@@ -224,14 +225,21 @@ describe("BundleDetailPage tab shell", () => {
     expect(titleInput).toBeTruthy();
     fireEvent.change(titleInput!, { target: { value: "Edited title" } });
 
-    // Switch to a still-placeholder tab via the hash. After M-174,
-    // only Advanced (M-175) remains a placeholder.
+    // After M-175, every tab is wired — there's no placeholder
+    // fallback to assert against. Switch to Advanced (one of the
+    // simpler non-Setup tabs) and verify its real content
+    // renders, proving the tab actually changed.
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "/bundles/bundle-1#advanced");
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     }
     await waitFor(() =>
-      expect(screen.getByText(/being built in/i)).toBeTruthy(),
+      expect(
+        screen.getByRole("heading", {
+          name: "Search engine listing",
+          level: 2,
+        }),
+      ).toBeTruthy(),
     );
 
     // Switch back to Setup — the dirty title must still be there.
