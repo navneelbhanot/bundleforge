@@ -14,6 +14,7 @@ import { HelpDrawer } from "./components/HelpDrawer";
 import { NavMenu } from "./components/NavMenu";
 import { ToastsProvider } from "./components/shell/Toasts";
 import { BundlesListPage } from "./pages/BundlesListPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
 import { BundleDetailPage } from "./pages/BundleDetailPage";
 import { OrdersListPage } from "./pages/OrdersListPage";
@@ -37,7 +38,8 @@ interface NavTab {
 }
 
 const NAV_TABS: NavTab[] = [
-  { id: "bundles", content: "Bundles", path: "/", prefixes: ["/bundles"] },
+  { id: "dashboard", content: "Dashboard", path: "/" },
+  { id: "bundles", content: "Bundles", path: "/bundles", prefixes: ["/bundles"] },
   { id: "orders", content: "Orders", path: "/orders" },
   {
     id: "inventory",
@@ -121,7 +123,8 @@ function Shell(): JSX.Element {
       <NavMenu />
       {embedded ? null : <InAppTabs />}
       <Routes>
-        <Route path="/" element={<BundlesListPage />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/bundles" element={<BundlesListPage />} />
         <Route path="/bundles/new" element={<BundleCreatePage />} />
         <Route path="/bundles/:id" element={<BundleDetailPage />} />
         <Route path="/orders" element={<OrdersListPage />} />

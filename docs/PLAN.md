@@ -292,6 +292,13 @@
 | M-182 | Unified toast / confirm / skeleton | done (2026-05-06) — `docs/specs/M-182-unified-toast-confirm-skeleton.md` |
 | M-183 | Empty-state illustrations | done (2026-05-06) — `docs/specs/M-183-empty-state-illustrations.md` |
 
+### Phase R5 — App home + navigation polish
+
+| ID | Title | Status |
+|----|-------|--------|
+| M-184 | Dashboard widgets on app home | done (2026-05-07) — `docs/specs/M-184-dashboard-widgets.md` |
+| M-185 | Settings two-pane left sidebar | pending — `docs/specs/M-185-settings-left-sidebar.md` |
+
 ---
 
 ## Phase O — Beta + Launch (M-151 to M-155)

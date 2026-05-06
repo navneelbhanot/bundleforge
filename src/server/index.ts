@@ -66,6 +66,7 @@ import { feedRoutes } from "../routes/feeds";
 import { gdprRoutes } from "../routes/gdpr";
 import { aiRoutes } from "../routes/ai";
 import { helpRoutes } from "../routes/help";
+import { activityRoutes } from "../routes/activity";
 import { settingsLogoRoutes } from "../routes/settingsLogo";
 import { analyticsRoutes } from "../routes/analytics";
 import { billingRoutes } from "../routes/billing";
@@ -233,6 +234,7 @@ export function createApp(): Express {
   app.use("/api/v1/ai", aiRoutes);
   app.use("/api/v1/gdpr", gdprRoutes);
   app.use("/api/v1/help", helpRoutes);
+  app.use("/api/v1/activity", activityRoutes);
   app.use("/api/v1/settings", settingsLogoRoutes);
 
   // Catch-all 501 for /api/v1/*

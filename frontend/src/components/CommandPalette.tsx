@@ -115,7 +115,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
       {
         id: "browse-templates",
         label: "Browse templates",
-        path: "/?openTemplates=1",
+        path: "/bundles?openTemplates=1",
       },
       {
         id: "open-help",

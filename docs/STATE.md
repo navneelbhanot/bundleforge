@@ -6,27 +6,28 @@
 
 ## Current milestone
 
-**Phase R4 closed + behavior wiring batch complete.**
+**Phase R5 in progress.** M-184 done (Dashboard widgets);
+M-185 (Settings two-pane left sidebar) is next.
 
-M-180..M-183 closed the rich-admin-ui roadmap (23
-milestones, M-161..M-183) earlier in the session. After
-that, six storefront/worker behavior-wiring sub-milestones
-shipped sequentially: M-167b (logo upload to Shopify
-Files), M-168b (outbound webhook delivery worker), M-170b
-(schedule sweep cron), M-171b (theme block reads
-displaySettings overrides), M-172b (CTF reads eligibility
-metafield), M-173b (CTF reads inventoryRules metafield).
-Most of the admin features shipped in M-167..M-173 now
-have their storefront / worker side wired up.
+Phase R4 closed earlier in the session. M-180..M-183
+closed the rich-admin-ui roadmap (23 milestones,
+M-161..M-183). Then six storefront/worker behavior-wiring
+sub-milestones shipped sequentially: M-167b, M-168b,
+M-170b, M-171b, M-172b, M-173b. Then M-164b, M-172c,
+M-173c, M-173d. Every admin feature shipped in
+M-167..M-173 now has its storefront / worker side wired
+up.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** No queued roadmap milestone.
-Every admin feature in M-161..M-183 now has its
-storefront / worker side wired up. The behavior-wiring
-backlog (M-167b..M-173d) is empty.
+**Code (next session):** Execute **M-185** —
+refactor `frontend/src/pages/SettingsPage.tsx` to use a
+Polaris `<Layout>` two-pane structure (vertical section
+list on the left, active section's cards on the right)
+replacing today's horizontal `<Tabs>` row. Spec:
+`docs/specs/M-185-settings-left-sidebar.md`.
 
 **Note on migrations going forward:** Railway's `start:web`
 script (`scripts/start-web.cjs`) runs `prisma migrate deploy`
@@ -106,6 +107,26 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-184 — Dashboard widgets on app home** (2026-05-07).
+  Phase R5 start. New `DashboardPage` at `/`; the existing
+  `BundlesListPage` moves to `/bundles`. Composes seven
+  widget cards from across the app's domains: Revenue
+  snapshot (analytics overview), Bundle status counts,
+  Recent bundles, Inventory health, Recent orders, AI
+  bundle suggestions, Recent activity. Each widget owns
+  its own fetch + loading/empty/error state — one widget
+  failing renders an inline error banner inside that card
+  while the others keep rendering. New shop-wide activity
+  endpoint `GET /api/v1/activity` (M-184) backed by
+  `bundleActivityRepo.findShopWide`. Fresh-shop welcome
+  surface extracted from BundlesListPage to
+  `frontend/src/components/dashboard/FreshShopDashboard.tsx`
+  so both pages can share it. NavMenu now lists Dashboard
+  first (rel="home") and Bundles second. CommandPalette's
+  Browse-templates path updated to `/bundles?openTemplates=1`.
+  A/B tests widget deferred — there's no list endpoint
+  today, only a calculator. 789/789 vitest pass (+8).
+  `docs/sessions/0194-184-dashboard-widgets.md`.
 - **Prisma 6.18.x pin + prod migrations applied**
   (2026-05-07). `prisma`, `@prisma/client`, and
   `@prisma/adapter-pg` pinned from `^6.19.3` to `~6.18.0`
@@ -629,9 +650,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **781 / 781 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +9 inventory helper cases + +3
-  sessionFromShop cases since M-172c/M-173c.
+- **789 / 789 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 activity-route cases + +3 DashboardPage
+  cases since M-184.
 - **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

@@ -31,8 +31,9 @@ export function NavMenu(): JSX.Element {
   return (
     <ui-nav-menu>
       <a href="/" rel="home">
-        Bundles
+        Dashboard
       </a>
+      <a href="/bundles">Bundles</a>
       <a href="/orders">Orders</a>
       <a href="/inventory">Inventory</a>
       <a href="/inventory/audit">Audit</a>

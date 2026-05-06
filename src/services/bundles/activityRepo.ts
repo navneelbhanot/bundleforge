@@ -63,4 +63,21 @@ export const bundleActivityRepo = {
     ]);
     return { data, total };
   },
+
+  /**
+   * Shop-wide activity feed for the M-184 dashboard. Same shape
+   * as `list` but scoped only by `shopId` so the merchant sees
+   * activity across every bundle in newest-first order.
+   */
+  async findShopWide(
+    shopId: string,
+    params: { limit: number },
+  ) {
+    const limit = Math.min(50, Math.max(1, params.limit));
+    return prisma.bundleActivityLog.findMany({
+      where: { shopId },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
 };
