@@ -105,6 +105,28 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-186 — Dashboard onboarding checklist + language select**
+  (2026-05-07). New `SetupChecklist` Polaris Card on the
+  dashboard above the widgets with three steps: Create your
+  first bundle (auto-detected), Publish a bundle (auto-detected
+  via active count), Add the Bundle block to your storefront
+  (manual mark-complete; deep-links to the Shopify theme editor
+  with `addAppBlockId={CLIENT_ID}/bundle-display`). Card
+  auto-retires when all three are complete; X button
+  persists `dismissedAt` ISO so it stays hidden across
+  reloads. New `AppLanguageSelect` Polaris Select wired to
+  `settings.localization.fallbackLocale` with optimistic
+  toast feedback. New `frontend/src/lib/locales.ts` extracted
+  as a single source of truth for the 15 supported locales
+  + their human labels (Localization tab updated to import
+  from this module). Server: new `OnboardingPatch` Zod schema
+  (4 nullable ISO datetime fields), wired into `PatchSchema`,
+  GET response, and `mergeSubobject` deep-merge so saving one
+  field doesn't drop siblings. 803/803 vitest pass (+13:
+  +6 SetupChecklist, +3 AppLanguageSelect, +2 settings PUT
+  onboarding round-trip, +2 Dashboard checklist visibility
+  rewrites, +1 net composition). Typecheck clean. Lint
+  baseline unchanged. `docs/sessions/0196-186-onboarding-checklist.md`.
 - **M-185 — Settings two-pane left sidebar** (2026-05-07).
   Phase R5 close. SettingsPage's horizontal Polaris
   `<Tabs>` row replaced with a `<Layout>` two-pane: a
@@ -664,8 +686,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **792 / 792 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +3 SettingsSidebar cases since M-185.
+- **803 / 803 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 SetupChecklist + +3 AppLanguageSelect + +2
+  settings onboarding round-trip cases since M-186.
 - **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

@@ -35,6 +35,9 @@ import { BillingPanel } from "../components/BillingPanel";
 import { IntegrationsTab } from "../components/IntegrationsTab";
 import { PageLoading } from "../components/PageLoading";
 import { SettingsSidebar } from "../components/settings/SettingsSidebar";
+// SUPPORTED_LOCALES is shared with the dashboard's app-language
+// selector — single source of truth in `lib/locales.ts`.
+import { SUPPORTED_LOCALES } from "../lib/locales";
 
 interface GeneralBlock {
   name: string;
@@ -189,23 +192,6 @@ const TABS: TabSpec[] = [
   { id: "billing", hash: "billing", content: "Billing", status: "ready" },
 ];
 
-const SUPPORTED_LOCALES = [
-  "en",
-  "es",
-  "fr",
-  "de",
-  "it",
-  "pt",
-  "ja",
-  "zh",
-  "ko",
-  "nl",
-  "pl",
-  "sv",
-  "da",
-  "no",
-  "ru",
-] as const;
 
 const COMMON_CURRENCIES = [
   "USD",

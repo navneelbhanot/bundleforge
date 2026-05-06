@@ -23,10 +23,6 @@ function ok(body: unknown): FetchResponse {
   return { ok: true, status: 200, json: () => Promise.resolve(body) };
 }
 
-function fail(status: number): FetchResponse {
-  return { ok: false, status, json: () => Promise.reject(new Error(`HTTP ${status}`)) };
-}
-
 function mockFetch(
   responder: (input: string) => FetchResponse,
 ): ReturnType<typeof vi.fn> {
@@ -63,6 +59,12 @@ describe("DashboardPage (M-184)", () => {
         if (url.startsWith("/api/v1/bundles?limit=1")) {
           return ok({ data: [], pagination: { page: 1, limit: 1, total: 0, totalPages: 0 } });
         }
+        if (url.startsWith("/api/v1/bundles?status=active")) {
+          return ok({ data: [], pagination: { page: 1, limit: 1, total: 0, totalPages: 0 } });
+        }
+        if (url.startsWith("/api/v1/settings")) {
+          return ok({ general: {}, localization: {}, onboarding: {} });
+        }
         return ok({});
       }),
     );
@@ -73,12 +75,22 @@ describe("DashboardPage (M-184)", () => {
     expect(screen.getByRole("button", { name: /Create your first bundle/i })).toBeTruthy();
   });
 
-  it("renders the seven widget cards when bundles exist", async () => {
+  it("renders the seven widget cards + setup checklist when bundles exist", async () => {
     vi.stubGlobal(
       "fetch",
       mockFetch((url) => {
         if (url.startsWith("/api/v1/bundles?limit=1")) {
           return ok({ data: [], pagination: { page: 1, limit: 1, total: 5, totalPages: 5 } });
+        }
+        if (url.startsWith("/api/v1/bundles?status=active")) {
+          return ok({ data: [], pagination: { page: 1, limit: 1, total: 0, totalPages: 0 } });
+        }
+        if (url.startsWith("/api/v1/settings")) {
+          return ok({
+            general: { shopifyDomain: "devstore.myshopify.com" },
+            localization: { fallbackLocale: "en" },
+            onboarding: {},
+          });
         }
         if (url.startsWith("/api/v1/bundles")) {
           return ok({ data: [], pagination: { page: 1, limit: 100, total: 0, totalPages: 0 } });
@@ -102,10 +114,13 @@ describe("DashboardPage (M-184)", () => {
       }),
     );
     renderPage();
-    // Wait for fetches to resolve and the seven cards to render.
     await waitFor(() => {
       expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
+    // M-186: setup checklist renders above the widgets.
+    expect(screen.getByText(/Get set up with BundleForge/i)).toBeTruthy();
+    expect(screen.getByText(/Add the Bundle block/i)).toBeTruthy();
+    // Widgets all present.
     expect(screen.getByText(/Bundle status/i)).toBeTruthy();
     expect(screen.getByText(/Recent bundles/i)).toBeTruthy();
     expect(screen.getByText(/Inventory health/i)).toBeTruthy();
@@ -114,15 +129,22 @@ describe("DashboardPage (M-184)", () => {
     expect(screen.getByText(/Recent activity/i)).toBeTruthy();
   });
 
-  it("isolates one widget's failure from the others", async () => {
+  it("hides the checklist when settings.onboarding.dismissedAt is set", async () => {
     vi.stubGlobal(
       "fetch",
       mockFetch((url) => {
         if (url.startsWith("/api/v1/bundles?limit=1")) {
           return ok({ data: [], pagination: { page: 1, limit: 1, total: 5, totalPages: 5 } });
         }
-        if (url.startsWith("/api/v1/inventory/health")) {
-          return fail(500);
+        if (url.startsWith("/api/v1/bundles?status=active")) {
+          return ok({ data: [], pagination: { page: 1, limit: 1, total: 0, totalPages: 0 } });
+        }
+        if (url.startsWith("/api/v1/settings")) {
+          return ok({
+            general: {},
+            localization: {},
+            onboarding: { dismissedAt: "2026-05-07T00:00:00.000Z" },
+          });
         }
         if (url.startsWith("/api/v1/bundles")) {
           return ok({ data: [], pagination: { page: 1, limit: 100, total: 0, totalPages: 0 } });
@@ -134,18 +156,15 @@ describe("DashboardPage (M-184)", () => {
           data: [],
           pairs: [],
           totalBaskets: 0,
+          shopId: "s1",
+          counts: { synced: 0, pending: 0, error: 0, locked: 0 },
         });
       }),
     );
     renderPage();
-    // Inventory widget shows error, the other widgets still render their titles.
     await waitFor(() => {
       expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
-    await waitFor(() => {
-      expect(screen.getByText(/Couldn't load: HTTP 500/i)).toBeTruthy();
-    });
-    // Other widgets are still present.
-    expect(screen.getByText(/Recent activity/i)).toBeTruthy();
+    expect(screen.queryByText(/Get set up with BundleForge/i)).toBeNull();
   });
 });

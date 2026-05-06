@@ -183,6 +183,21 @@ const SavedView = z
 
 const SavedViewsArray = z.array(SavedView).max(20);
 
+/**
+ * Onboarding checklist state (M-186). Each field is an ISO
+ * datetime string set when the merchant completes the step (or
+ * dismisses the card). Steps 1 and 2 are auto-detected client-
+ * side from bundle counts; step 3 is manual mark-complete.
+ */
+const OnboardingPatch = z
+  .object({
+    firstBundleAt: z.string().datetime().nullable().optional(),
+    publishedBundleAt: z.string().datetime().nullable().optional(),
+    blockAddedAt: z.string().datetime().nullable().optional(),
+    dismissedAt: z.string().datetime().nullable().optional(),
+  })
+  .strict();
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
@@ -193,6 +208,7 @@ const PatchSchema = z
     pricing: PricingPatch.optional(),
     cart: CartPatch.optional(),
     localization: LocalizationPatch.optional(),
+    onboarding: OnboardingPatch.optional(),
     savedViews: SavedViewsArray.optional(),
   })
   .strict();
@@ -324,6 +340,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         localization: isObject(settings.localization)
           ? settings.localization
           : {},
+        onboarding: isObject(settings.onboarding)
+          ? settings.onboarding
+          : {},
         savedViews: Array.isArray(settings.savedViews)
           ? settings.savedViews
           : [],
@@ -376,6 +395,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         pricing: mergeSubobject(prev.pricing, patch.pricing),
         cart: mergeSubobject(prev.cart, patch.cart),
         localization: mergeSubobject(prev.localization, patch.localization),
+        onboarding: mergeSubobject(prev.onboarding, patch.onboarding),
         // Saved views are whole-array replace (not merged) — the
         // client owns ordering and partial CRUD would 4x the
         // surface area for no merchant benefit.

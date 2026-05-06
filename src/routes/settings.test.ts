@@ -1000,4 +1000,46 @@ describe("PUT /settings cart_default_mode metafield (M-164b)", () => {
     expect(res.status).toBe(200);
     expect(writeShopMetafieldImpl).not.toHaveBeenCalled();
   });
+
+  it("round-trips an onboarding patch (M-186)", async () => {
+    const ts = "2026-05-07T12:34:56.000Z";
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: "s",
+      settings: { onboarding: { blockAddedAt: ts } },
+    });
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValueOnce({ ...SHOP_BASE, settings: {} })
+          .mockResolvedValueOnce({
+            ...SHOP_BASE,
+            settings: { onboarding: { blockAddedAt: ts } },
+          }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ onboarding: { blockAddedAt: ts } });
+    expect(res.status).toBe(200);
+    expect(res.body.onboarding).toMatchObject({ blockAddedAt: ts });
+    expect(updateSpy).toHaveBeenCalled();
+    const merged = (updateSpy.mock.calls[0][0] as { data: { settings: { onboarding: { blockAddedAt: string } } } })
+      .data.settings.onboarding;
+    expect(merged.blockAddedAt).toBe(ts);
+  });
+
+  it("rejects malformed onboarding datetime", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ onboarding: { blockAddedAt: "yesterday" } });
+    expect(res.status).toBe(400);
+  });
 });
