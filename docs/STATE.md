@@ -8,25 +8,27 @@
 
 **Phase R1 — rich Settings page in progress.**
 
-M-161 (shell + General), M-162 (Display), and M-163 (Inventory +
-Pricing) all landed 2026-05-06. The SettingsPage now has 4 of 10
-tabs fully built (General, Display, Inventory, Pricing). The
-existing safetyLock toggle was re-surfaced on the Inventory tab
-without changing where it lives in the data shape (still
-top-level), so the existing webhook handler keeps working
-unchanged. Remaining R1 milestones (M-164..M-167) still
-placeholder. Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
+M-161..M-164 all landed 2026-05-06. The SettingsPage now has 5 of
+10 tabs fully built (General, Display, Inventory, Pricing,
+Cart & checkout). M-164 also extended the Cart Transform Function
+to branch on an optional shop metafield
+(`bundleforge.cart_default_mode`) so merchants who pick
+"components_as_attributes" skip the expand path. Writing that
+metafield from the admin Save lands in M-164b (a thin follow-on).
+Remaining R1 milestones: M-165..M-167.
+Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-164 — Cart & Checkout tab. Spec
-first: `docs/specs/M-164-settings-cart-checkout.md`. Roadmap
-specifies: default cart mode (bundle-as-product vs components-as-
-attributes — informs the Cart Transform Function path),
-atomic-checkout enforcement toggle, abandonment behavior. The
-M-160 commit added Cart Transform expansion (metafield-driven);
-this tab gives merchants the toggle that picks which mode is
-default for new bundles.
+**Code (next session):** Run M-165 — Notifications & alerts tab.
+Spec first: `docs/specs/M-165-settings-notifications.md`. Roadmap
+specifies email recipients (multi-input), Slack/Teams webhook
+URLs, alert rules (low stock, failed webhook, AI-service down,
+publish failure, bundle order without resolved bundle) with per-
+rule channel selection. The existing top-level
+`settings.notifications` (email/inApp toggles) should be
+re-surfaced on this tab; new fields land under
+`settings.notifications.*` (deep-merged).
 
 Other open threads (mostly user-owned):
 
@@ -95,6 +97,20 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-164 — Settings · Cart & Checkout tab** (2026-05-06 late).
+  Two cards: Cart mode (bundle_as_product /
+  components_as_attributes Select with merchant-friendly
+  explainer) and Checkout protections (atomic enforcement
+  strict/warn/off, abandonment behavior keep/clear/prompt,
+  optional cart-line note template max 280 chars with
+  `{bundle_title}`/`{components_count}` placeholders). Cart
+  Transform Function in `extensions/cart-transform/src/run.js`
+  now reads an optional shop metafield
+  `bundleforge.cart_default_mode` and skips the expand path
+  when it's `components_as_attributes` — defaults
+  fall back to today's behavior so absent metafield = no
+  regression. Writing the metafield from admin Save lands in
+  M-164b. `docs/sessions/0164-settings-cart-checkout.md`.
 - **M-163 — Settings · Inventory + Pricing tabs** (2026-05-06
   late). Two tabs in one milestone (each was small enough that
   splitting would have created an empty session). Inventory tab
@@ -191,9 +207,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **498 / 498 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 settings-route + +4 SettingsPage cases since
-  0162.
+- **507 / 507 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 settings-route, +2 SettingsPage, +3
+  cart-transform run cases since 0163.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

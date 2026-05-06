@@ -85,20 +85,44 @@ function buildExpandOp(line, payload) {
 }
 
 /**
+ * Read the shop-level default cart mode from the optional shop
+ * metafield `bundleforge.cart_default_mode`. Absent or unrecognized
+ * values fall through to the default ("bundle_as_product"), which
+ * keeps both paths active — matches today's behaviour.
+ *
+ * @param {object} input
+ * @returns {"bundle_as_product" | "components_as_attributes"}
+ */
+function shopDefaultMode(input) {
+  const v =
+    input &&
+    input.shop &&
+    input.shop.cartDefaultModeMetafield &&
+    input.shop.cartDefaultModeMetafield.value;
+  if (v === "components_as_attributes") return "components_as_attributes";
+  return "bundle_as_product";
+}
+
+/**
  * @param {object} input
  * @returns {object}
  */
 export function run(input) {
   const lines = (input && input.cart && input.cart.lines) || [];
   const operations = [];
+  const mode = shopDefaultMode(input);
 
-  // --- Path 1: expand bundle products into component lines. ---
-  for (const line of lines) {
-    if (!isBundleProduct(line)) continue;
-    const payload = componentsPayload(line);
-    if (!payload) continue;
-    const expandOp = buildExpandOp(line, payload);
-    if (expandOp) operations.push(expandOp);
+  // --- Path 1: expand bundle products into component lines.
+  // Skipped entirely when the merchant has opted into the legacy
+  // components-as-attributes mode at the shop level.
+  if (mode !== "components_as_attributes") {
+    for (const line of lines) {
+      if (!isBundleProduct(line)) continue;
+      const payload = componentsPayload(line);
+      if (!payload) continue;
+      const expandOp = buildExpandOp(line, payload);
+      if (expandOp) operations.push(expandOp);
+    }
   }
 
   // --- Path 2: discount component lines that already carry bundle attributes. ---

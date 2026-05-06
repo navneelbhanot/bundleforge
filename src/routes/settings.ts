@@ -92,6 +92,21 @@ const PricingPatch = z
   })
   .strict();
 
+const CartPatch = z
+  .object({
+    defaultMode: z
+      .enum(["bundle_as_product", "components_as_attributes"])
+      .optional(),
+    atomicCheckoutEnforcement: z
+      .enum(["strict", "warn", "off"])
+      .optional(),
+    abandonmentBehavior: z
+      .enum(["keep_selections", "clear_selections", "prompt_user"])
+      .optional(),
+    cartNoteTemplate: z.string().max(280).optional(),
+  })
+  .strict();
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
@@ -105,6 +120,7 @@ const PatchSchema = z
     display: DisplayPatch.optional(),
     inventory: InventoryPatch.optional(),
     pricing: PricingPatch.optional(),
+    cart: CartPatch.optional(),
   })
   .strict();
 
@@ -223,6 +239,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         display: isObject(settings.display) ? settings.display : {},
         inventory: isObject(settings.inventory) ? settings.inventory : {},
         pricing: isObject(settings.pricing) ? settings.pricing : {},
+        cart: isObject(settings.cart) ? settings.cart : {},
       });
     } catch (err) {
       next(err);
@@ -258,6 +275,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         display: mergeSubobject(prev.display, patch.display),
         inventory: mergeSubobject(prev.inventory, patch.inventory),
         pricing: mergeSubobject(prev.pricing, patch.pricing),
+        cart: mergeSubobject(prev.cart, patch.cart),
       };
 
       const updated = await client.shop.update({
@@ -282,6 +300,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         pricing: isObject(updatedSettings.pricing)
           ? updatedSettings.pricing
           : {},
+        cart: isObject(updatedSettings.cart) ? updatedSettings.cart : {},
       });
     } catch (err) {
       next(err);

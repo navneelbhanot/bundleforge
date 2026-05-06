@@ -114,6 +114,34 @@ describe("Cart Transform Function — run()", () => {
       expect(out.operations).toEqual([]);
     });
 
+    it("skips expand when shop opts into components_as_attributes mode", () => {
+      const out = run({
+        cart: { lines: [bundleProductLine()] },
+        shop: {
+          cartDefaultModeMetafield: { value: "components_as_attributes" },
+        },
+      });
+      expect(out.operations).toEqual([]);
+    });
+
+    it("still expands when shop metafield is unset (default mode)", () => {
+      const out = run({
+        cart: { lines: [bundleProductLine()] },
+        shop: {},
+      });
+      expect(out.operations).toHaveLength(1);
+      expect(Object.keys(out.operations[0] as object)[0]).toBe("expand");
+    });
+
+    it("still expands when shop metafield value is unrecognized", () => {
+      const out = run({
+        cart: { lines: [bundleProductLine()] },
+        shop: { cartDefaultModeMetafield: { value: "nope" } },
+      });
+      expect(out.operations).toHaveLength(1);
+      expect(Object.keys(out.operations[0] as object)[0]).toBe("expand");
+    });
+
     it("returns expand + update ops together when both paths fire", () => {
       const out = run({
         cart: {

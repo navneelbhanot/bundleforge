@@ -421,6 +421,91 @@ describe("PUT /settings", () => {
     });
   });
 
+  it("round-trips a full cart patch", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        cart: {
+          defaultMode: "components_as_attributes",
+          atomicCheckoutEnforcement: "warn",
+          abandonmentBehavior: "prompt_user",
+          cartNoteTemplate: "Bundle: {bundle_title} ({components_count} items)",
+        },
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.cart).toMatchObject({
+      defaultMode: "components_as_attributes",
+      atomicCheckoutEnforcement: "warn",
+      abandonmentBehavior: "prompt_user",
+      cartNoteTemplate: "Bundle: {bundle_title} ({components_count} items)",
+    });
+  });
+
+  it("rejects an unknown cart.defaultMode enum value", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ cart: { defaultMode: "weird" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects cartNoteTemplate longer than 280 chars", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ cart: { cartNoteTemplate: "x".repeat(281) } });
+    expect(res.status).toBe(400);
+  });
+
+  it("deep-merges cart — defaultMode save doesn't drop atomicCheckoutEnforcement", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {
+            cart: {
+              atomicCheckoutEnforcement: "strict",
+              abandonmentBehavior: "keep_selections",
+            },
+          },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ cart: { defaultMode: "components_as_attributes" } });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.cart).toEqual({
+      atomicCheckoutEnforcement: "strict",
+      abandonmentBehavior: "keep_selections",
+      defaultMode: "components_as_attributes",
+    });
+  });
+
   it("persists top-level safetyLock and general.brandColor in the same patch", async () => {
     const updateSpy = vi.fn().mockImplementation(({ data }) =>
       Promise.resolve({ id: "s", settings: data.settings }),

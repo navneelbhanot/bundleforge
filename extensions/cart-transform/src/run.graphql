@@ -38,4 +38,12 @@ query Input {
     }
   }
   presentmentCurrencyRate
+  shop {
+    cartDefaultModeMetafield: metafield(
+      namespace: "bundleforge"
+      key: "cart_default_mode"
+    ) {
+      value
+    }
+  }
 }

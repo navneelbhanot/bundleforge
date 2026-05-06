@@ -26,6 +26,7 @@ const BASE_PAYLOAD = {
   display: {} as Record<string, unknown>,
   inventory: {} as Record<string, unknown>,
   pricing: {} as Record<string, unknown>,
+  cart: {} as Record<string, unknown>,
 };
 
 interface FetchResponse {
@@ -218,13 +219,13 @@ describe("SettingsPage", () => {
 
   it("non-built tabs render the placeholder pointing at their milestone", async () => {
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/settings#cart");
+      window.history.replaceState(null, "", "/settings#notifications");
     }
     render(wrap(<SettingsPage />));
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-164/)).toBeTruthy();
+    expect(screen.getByText(/M-165/)).toBeTruthy();
   });
 
   it("Display tab renders three editable cards", async () => {
@@ -460,6 +461,88 @@ describe("SettingsPage", () => {
       expect(body.safetyLock).toBe(true);
       // Crucially: NOT nested under inventory.
       expect(body.inventory).toBeUndefined();
+    });
+  });
+
+  it("Cart tab renders Cart-mode and Checkout-protections cards", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#cart");
+    }
+    render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Cart mode", level: 2 }),
+      ).toBeTruthy(),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Checkout protections", level: 2 }),
+    ).toBeTruthy();
+  });
+
+  it("Cart PATCH sends cart subobject (not nested elsewhere)", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#cart");
+    }
+    const fetchSpy = vi.fn(
+      mockFetch(async (_input, init) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => BASE_PAYLOAD,
+          };
+        }
+        const body = JSON.parse((init.body as string) ?? "{}") as {
+          cart?: Record<string, unknown>;
+        };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ...BASE_PAYLOAD,
+            cart: { ...BASE_PAYLOAD.cart, ...(body.cart ?? {}) },
+          }),
+        };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Cart mode", level: 2 }),
+      ).toBeTruthy(),
+    );
+
+    // Cart mode select defaults to bundle_as_product (CART_DEFAULTS).
+    const modeSelect = (
+      Array.from(container.querySelectorAll<HTMLSelectElement>("select")).find(
+        (s) => s.value === "bundle_as_product",
+      ) ?? null
+    );
+    expect(modeSelect).toBeTruthy();
+    fireEvent.change(modeSelect!, {
+      target: { value: "components_as_attributes" },
+    });
+
+    const saveBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Save");
+    expect(saveBtn).toBeTruthy();
+    saveBtn!.click();
+
+    await waitFor(() => {
+      const putCall = fetchSpy.mock.calls.find((c) => {
+        const init = c[1] as RequestInit | undefined;
+        if (!init || init.method !== "PUT") return false;
+        const body = JSON.parse((init.body as string) ?? "{}");
+        return body.cart !== undefined;
+      });
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(
+        ((putCall![1] as RequestInit).body as string) ?? "{}",
+      );
+      expect(body.cart.defaultMode).toBe("components_as_attributes");
     });
   });
 

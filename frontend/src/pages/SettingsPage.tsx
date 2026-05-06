@@ -71,6 +71,13 @@ interface PricingBlock {
     | "custom";
 }
 
+interface CartBlock {
+  defaultMode?: "bundle_as_product" | "components_as_attributes";
+  atomicCheckoutEnforcement?: "strict" | "warn" | "off";
+  abandonmentBehavior?: "keep_selections" | "clear_selections" | "prompt_user";
+  cartNoteTemplate?: string;
+}
+
 interface SettingsPayload {
   safetyLock?: boolean;
   notifications?: { email?: boolean; inApp?: boolean };
@@ -78,7 +85,15 @@ interface SettingsPayload {
   display: DisplayBlock;
   inventory: InventoryBlock;
   pricing: PricingBlock;
+  cart: CartBlock;
 }
+
+const CART_DEFAULTS: Required<CartBlock> = {
+  defaultMode: "bundle_as_product",
+  atomicCheckoutEnforcement: "warn",
+  abandonmentBehavior: "keep_selections",
+  cartNoteTemplate: "",
+};
 
 const INVENTORY_DEFAULTS: Required<InventoryBlock> = {
   lowStockThreshold: 5,
@@ -118,7 +133,7 @@ const TABS: TabSpec[] = [
   { id: "display", hash: "display", content: "Display", status: "ready" },
   { id: "inventory", hash: "inventory", content: "Inventory", status: "ready" },
   { id: "pricing", hash: "pricing", content: "Pricing", status: "ready" },
-  { id: "cart", hash: "cart", content: "Cart & checkout", status: "deferred", milestone: "M-164" },
+  { id: "cart", hash: "cart", content: "Cart & checkout", status: "ready" },
   { id: "notifications", hash: "notifications", content: "Notifications", status: "deferred", milestone: "M-165" },
   { id: "integrations", hash: "integrations", content: "Integrations", status: "deferred", milestone: "M-166" },
   { id: "api", hash: "api", content: "API & webhooks", status: "deferred", milestone: "M-167" },
@@ -948,6 +963,169 @@ function PricingDefaultsCard({
 
 // ---------------- /Pricing tab cards ----------------
 
+// ---------------- Cart & Checkout tab cards (M-164) ----------------
+
+const CART_MODE_OPTIONS = [
+  {
+    label: "Sell as a single product line that expands at cart time (recommended)",
+    value: "bundle_as_product",
+  },
+  {
+    label: "Add component lines directly with bundle attributes",
+    value: "components_as_attributes",
+  },
+] as const;
+
+const ENFORCEMENT_OPTIONS = [
+  { label: "Strict — block checkout if a component goes OOS", value: "strict" },
+  { label: "Warn — let checkout proceed, surface a warning", value: "warn" },
+  { label: "Off — no validation at checkout", value: "off" },
+] as const;
+
+const ABANDONMENT_OPTIONS = [
+  { label: "Keep selections", value: "keep_selections" },
+  { label: "Clear selections", value: "clear_selections" },
+  { label: "Ask the customer", value: "prompt_user" },
+] as const;
+
+interface CartModeCardProps {
+  initial: Pick<CartBlock, "defaultMode">;
+  busy: boolean;
+  onSave: (patch: Pick<CartBlock, "defaultMode">) => Promise<void>;
+}
+
+function CartModeCard({ initial, busy, onSave }: CartModeCardProps): JSX.Element {
+  const [mode, setMode] = useState<CartBlock["defaultMode"]>(
+    initial.defaultMode ?? CART_DEFAULTS.defaultMode,
+  );
+  const dirty = (initial.defaultMode ?? CART_DEFAULTS.defaultMode) !== mode;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Cart mode
+        </Text>
+        <Text as="p" tone="subdued">
+          Picks which Cart Transform path runs at checkout.
+          <strong> Bundle-as-product</strong> means a single product
+          line that BundleForge expands into components at cart time
+          — best for inventory tracking and 3PL routing.
+          <strong> Components-as-attributes</strong> places components
+          directly on the cart with line attributes — best when your
+          theme block already manages selections.
+        </Text>
+        <Select
+          label="Default mode for new bundles"
+          options={CART_MODE_OPTIONS as unknown as { label: string; value: string }[]}
+          value={mode ?? CART_DEFAULTS.defaultMode}
+          onChange={(v) => setMode(v as CartBlock["defaultMode"])}
+        />
+        <Banner tone="info">
+          <p>
+            Saving here persists the merchant preference. The Cart
+            Transform Function reads it from the
+            <code> bundleforge.cart_default_mode </code>
+            shop metafield (write of that metafield from this admin
+            lands in M-164b — until then the function falls back to
+            today&apos;s default behaviour, no regression).
+          </p>
+        </Banner>
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() => onSave({ defaultMode: mode })}
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface CheckoutProtectionsCardProps {
+  initial: Pick<
+    CartBlock,
+    "atomicCheckoutEnforcement" | "abandonmentBehavior" | "cartNoteTemplate"
+  >;
+  busy: boolean;
+  onSave: (
+    patch: Pick<
+      CartBlock,
+      "atomicCheckoutEnforcement" | "abandonmentBehavior" | "cartNoteTemplate"
+    >,
+  ) => Promise<void>;
+}
+
+function CheckoutProtectionsCard({
+  initial,
+  busy,
+  onSave,
+}: CheckoutProtectionsCardProps): JSX.Element {
+  const [enforcement, setEnforcement] = useState<
+    CartBlock["atomicCheckoutEnforcement"]
+  >(initial.atomicCheckoutEnforcement ?? CART_DEFAULTS.atomicCheckoutEnforcement);
+  const [abandon, setAbandon] = useState<CartBlock["abandonmentBehavior"]>(
+    initial.abandonmentBehavior ?? CART_DEFAULTS.abandonmentBehavior,
+  );
+  const [note, setNote] = useState<string>(
+    initial.cartNoteTemplate ?? CART_DEFAULTS.cartNoteTemplate,
+  );
+  const noteTooLong = note.length > 280;
+  const dirty =
+    (initial.atomicCheckoutEnforcement ?? CART_DEFAULTS.atomicCheckoutEnforcement) !==
+      enforcement ||
+    (initial.abandonmentBehavior ?? CART_DEFAULTS.abandonmentBehavior) !==
+      abandon ||
+    (initial.cartNoteTemplate ?? CART_DEFAULTS.cartNoteTemplate) !== note;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Checkout protections
+        </Text>
+        <Select
+          label="Atomic checkout enforcement"
+          options={ENFORCEMENT_OPTIONS as unknown as { label: string; value: string }[]}
+          value={enforcement ?? CART_DEFAULTS.atomicCheckoutEnforcement}
+          onChange={(v) =>
+            setEnforcement(v as CartBlock["atomicCheckoutEnforcement"])
+          }
+          helpText="What to do if a component goes out of stock between cart-add and payment authorization. Wired by the checkout-validation extension in a follow-on ticket; the setting persists today."
+        />
+        <Select
+          label="Cart abandonment behavior"
+          options={ABANDONMENT_OPTIONS as unknown as { label: string; value: string }[]}
+          value={abandon ?? CART_DEFAULTS.abandonmentBehavior}
+          onChange={(v) => setAbandon(v as CartBlock["abandonmentBehavior"])}
+          helpText="What to do with in-progress bundle selections when the customer leaves and comes back. Storefront block reads this in a follow-on ticket."
+        />
+        <TextField
+          label="Cart line note template"
+          value={note}
+          onChange={setNote}
+          autoComplete="off"
+          multiline={3}
+          maxLength={280}
+          showCharacterCount
+          error={noteTooLong ? "Max 280 chars" : undefined}
+          helpText="Optional. Inserted as a Shopify cart-line note on every bundle line. Supports {bundle_title} and {components_count} placeholders. Useful for 3PL/accounting visibility."
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty && !noteTooLong}
+          onSave={() =>
+            onSave({
+              atomicCheckoutEnforcement: enforcement,
+              abandonmentBehavior: abandon,
+              cartNoteTemplate: note,
+            })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Cart & Checkout tab cards ----------------
+
 interface PlaceholderTabProps {
   tab: TabSpec;
 }
@@ -1000,7 +1178,7 @@ export function SettingsPage(): JSX.Element {
   }
 
   async function patchSubobject(
-    key: "general" | "display" | "inventory" | "pricing",
+    key: "general" | "display" | "inventory" | "pricing" | "cart",
     patch: Record<string, unknown>,
   ): Promise<void> {
     setSaving(true);
@@ -1031,6 +1209,8 @@ export function SettingsPage(): JSX.Element {
     patchSubobject("inventory", patch);
   const patchPricing = (patch: Record<string, unknown>) =>
     patchSubobject("pricing", patch);
+  const patchCart = (patch: Record<string, unknown>) =>
+    patchSubobject("cart", patch);
 
   async function patchSafetyLock(next: boolean): Promise<void> {
     setSaving(true);
@@ -1170,6 +1350,27 @@ export function SettingsPage(): JSX.Element {
                   }}
                   busy={saving}
                   onSave={patchPricing}
+                />
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "cart" ? (
+          <Layout>
+            <Layout.Section>
+              <BlockStack gap="400">
+                <CartModeCard
+                  initial={{ defaultMode: state.cart.defaultMode }}
+                  busy={saving}
+                  onSave={patchCart}
+                />
+                <CheckoutProtectionsCard
+                  initial={{
+                    atomicCheckoutEnforcement: state.cart.atomicCheckoutEnforcement,
+                    abandonmentBehavior: state.cart.abandonmentBehavior,
+                    cartNoteTemplate: state.cart.cartNoteTemplate,
+                  }}
+                  busy={saving}
+                  onSave={patchCart}
                 />
               </BlockStack>
             </Layout.Section>
