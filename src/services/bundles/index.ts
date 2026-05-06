@@ -287,6 +287,19 @@ export class BundleService {
         title: string;
         slug: string;
         description: string | null;
+        components: Array<{
+          shopifyProductGid: string;
+          shopifyVariantGid: string | null;
+          quantity: number;
+          sku: string | null;
+        }>;
+        pricingRules: Array<{
+          type: string;
+          value: string;
+          minQuantity: number;
+          maxQuantity: number | null;
+          isStackable: boolean;
+        }>;
       }) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
     } = {},
   ): Promise<unknown> {
@@ -297,6 +310,19 @@ export class BundleService {
       description: string | null;
       shopifyProductGid: string | null;
       shopifyProductId: bigint | null;
+      items: Array<{
+        shopifyProductGid: string;
+        shopifyVariantGid: string | null;
+        quantity: number;
+        sku: string | null;
+      }>;
+      pricingRules: Array<{
+        type: string;
+        value: { toString(): string };
+        minQuantity: number;
+        maxQuantity: number | null;
+        isStackable: boolean;
+      }>;
     };
 
     let shopifyProductGid = existing.shopifyProductGid;
@@ -309,6 +335,19 @@ export class BundleService {
         title: existing.title,
         slug: existing.slug,
         description: existing.description,
+        components: existing.items.map((it) => ({
+          shopifyProductGid: it.shopifyProductGid,
+          shopifyVariantGid: it.shopifyVariantGid,
+          quantity: it.quantity,
+          sku: it.sku,
+        })),
+        pricingRules: existing.pricingRules.map((r) => ({
+          type: r.type,
+          value: r.value.toString(),
+          minQuantity: r.minQuantity,
+          maxQuantity: r.maxQuantity,
+          isStackable: r.isStackable,
+        })),
       });
       shopifyProductGid = created.shopifyProductGid;
       shopifyProductId = created.shopifyProductId;

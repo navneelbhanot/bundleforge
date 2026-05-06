@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Paketet hittades inte.",
+    "validation_failed": "Validering av begäran misslyckades.",
+    "rate_limited": "För många förfrågningar — försök igen om en stund.",
+    "feature_not_in_plan": "Den här funktionen ingår inte i din plan.",
+    "negative_inventory": "Den här justeringen skulle göra lagret negativt."
+  },
+  "checkout": {
+    "select_min": "Välj minst {min} artiklar.",
+    "select_max": "Välj högst {max} artiklar.",
+    "exact_pack_qty": "Det här paketet kräver exakt {qty} enheter.",
+    "duplicates_not_allowed": "Dubbletter är inte tillåtna i det här paketet.",
+    "step_pick_count": "Steget \"{step}\" kräver {count} val."
+  },
+  "common": {
+    "save": "Spara",
+    "cancel": "Avbryt"
+  }
+}

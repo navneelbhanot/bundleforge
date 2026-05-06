@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Pakke ikke fundet.",
+    "validation_failed": "Validering af anmodning mislykkedes.",
+    "rate_limited": "For mange anmodninger — prøv igen om et øjeblik.",
+    "feature_not_in_plan": "Denne funktion er ikke inkluderet i din plan.",
+    "negative_inventory": "Denne justering ville gøre lageret negativt."
+  },
+  "checkout": {
+    "select_min": "Vælg mindst {min} varer.",
+    "select_max": "Vælg højst {max} varer.",
+    "exact_pack_qty": "Denne pakke kræver præcis {qty} enheder.",
+    "duplicates_not_allowed": "Dubletter er ikke tilladt i denne pakke.",
+    "step_pick_count": "Trinet \"{step}\" kræver {count} valg."
+  },
+  "common": {
+    "save": "Gem",
+    "cancel": "Annuller"
+  }
+}

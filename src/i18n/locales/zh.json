@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "未找到捆绑包。",
+    "validation_failed": "请求验证失败。",
+    "rate_limited": "请求过多 — 请稍后重试。",
+    "feature_not_in_plan": "此功能不包含在您的套餐中。",
+    "negative_inventory": "此调整会使库存低于零。"
+  },
+  "checkout": {
+    "select_min": "请至少选择 {min} 件商品。",
+    "select_max": "请选择不超过 {max} 件商品。",
+    "exact_pack_qty": "此捆绑包需要恰好 {qty} 件。",
+    "duplicates_not_allowed": "此捆绑包不允许重复商品。",
+    "step_pick_count": "步骤 \"{step}\" 需要 {count} 次选择。"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消"
+  }
+}

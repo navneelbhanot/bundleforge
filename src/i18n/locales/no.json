@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Pakken ble ikke funnet.",
+    "validation_failed": "Validering av forespørselen mislyktes.",
+    "rate_limited": "For mange forespørsler — prøv igjen om litt.",
+    "feature_not_in_plan": "Denne funksjonen er ikke inkludert i planen din.",
+    "negative_inventory": "Denne justeringen ville gjøre lageret negativt."
+  },
+  "checkout": {
+    "select_min": "Velg minst {min} varer.",
+    "select_max": "Velg høyst {max} varer.",
+    "exact_pack_qty": "Denne pakken krever nøyaktig {qty} enheter.",
+    "duplicates_not_allowed": "Duplikater er ikke tillatt i denne pakken.",
+    "step_pick_count": "Trinnet \"{step}\" krever {count} valg."
+  },
+  "common": {
+    "save": "Lagre",
+    "cancel": "Avbryt"
+  }
+}

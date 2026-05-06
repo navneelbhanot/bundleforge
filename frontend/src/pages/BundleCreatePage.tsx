@@ -11,7 +11,7 @@
  * from the detail page after save.
  */
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Banner,
   BlockStack,
@@ -208,10 +208,20 @@ function ConfigFields({ typeId, values, onChange }: ConfigFieldsProps): JSX.Elem
   return null;
 }
 
+interface AiHintState {
+  suggestedSkus?: string[];
+  suggestedFromAi?: boolean;
+}
+
 export function BundleCreatePage(): JSX.Element {
   const navigate = useNavigate();
+  const location = useLocation();
+  const aiHint = (location.state ?? {}) as AiHintState;
+  const aiSkus = aiHint.suggestedFromAi ? aiHint.suggestedSkus ?? [] : [];
   const [type, setType] = useState<string>("fixed");
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(
+    aiSkus.length === 2 ? `${aiSkus[0]} + ${aiSkus[1]}` : "",
+  );
   const [description, setDescription] = useState("");
   const [config, setConfig] = useState({
     minItems: "1",
@@ -302,6 +312,18 @@ export function BundleCreatePage(): JSX.Element {
           {error && (
             <Banner tone="critical" title="Could not create bundle">
               {error}
+            </Banner>
+          )}
+
+          {aiSkus.length === 2 && (
+            <Banner tone="info" title="Suggested by AI from your order history">
+              <p>
+                Customers buy <strong>{aiSkus[0]}</strong> and{" "}
+                <strong>{aiSkus[1]}</strong> together more often than
+                chance. We've pre-filled a working title — pick a
+                bundle type below, save, then add these two products
+                from the picker on the next page.
+              </p>
             </Banner>
           )}
 

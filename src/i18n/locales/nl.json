@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Bundel niet gevonden.",
+    "validation_failed": "Aanvraagvalidatie mislukt.",
+    "rate_limited": "Te veel verzoeken — probeer het later opnieuw.",
+    "feature_not_in_plan": "Deze functie is niet inbegrepen in uw abonnement.",
+    "negative_inventory": "Deze aanpassing zou de voorraad onder nul brengen."
+  },
+  "checkout": {
+    "select_min": "Selecteer minimaal {min} artikelen.",
+    "select_max": "Selecteer maximaal {max} artikelen.",
+    "exact_pack_qty": "Deze bundel vereist precies {qty} eenheden.",
+    "duplicates_not_allowed": "Dubbele artikelen zijn niet toegestaan in deze bundel.",
+    "step_pick_count": "Stap \"{step}\" vereist {count} keuzes."
+  },
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren"
+  }
+}

@@ -19,6 +19,7 @@ import { InventoryAuditPage } from "./pages/InventoryAuditPage";
 import { InventoryHealthPage } from "./pages/InventoryHealthPage";
 import { AnalyticsOverviewPage } from "./pages/AnalyticsOverviewPage";
 import { AbTestsPage } from "./pages/AbTestsPage";
+import { AiSuggestionsPage } from "./pages/AiSuggestionsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { BillingPage } from "./pages/BillingPage";
 
@@ -43,6 +44,7 @@ const NAV_TABS: NavTab[] = [
   },
   { id: "audit", content: "Audit", path: "/inventory/audit" },
   { id: "analytics", content: "Analytics", path: "/analytics" },
+  { id: "ai", content: "AI suggestions", path: "/ai-suggestions" },
   { id: "abtests", content: "A/B", path: "/ab-tests" },
   { id: "settings", content: "Settings", path: "/settings" },
   { id: "billing", content: "Billing", path: "/billing" },
@@ -124,6 +126,7 @@ function Shell(): JSX.Element {
         <Route path="/inventory" element={<InventoryHealthPage />} />
         <Route path="/inventory/audit" element={<InventoryAuditPage />} />
         <Route path="/analytics" element={<AnalyticsOverviewPage />} />
+        <Route path="/ai-suggestions" element={<AiSuggestionsPage />} />
         <Route path="/ab-tests" element={<AbTestsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/billing" element={<BillingPage />} />

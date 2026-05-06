@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "バンドルが見つかりません。",
+    "validation_failed": "リクエストの検証に失敗しました。",
+    "rate_limited": "リクエストが多すぎます。しばらくしてから再試行してください。",
+    "feature_not_in_plan": "この機能は現在のプランに含まれていません。",
+    "negative_inventory": "この調整により在庫がゼロを下回ります。"
+  },
+  "checkout": {
+    "select_min": "少なくとも{min}個のアイテムを選択してください。",
+    "select_max": "{max}個以下のアイテムを選択してください。",
+    "exact_pack_qty": "このバンドルにはちょうど{qty}個必要です。",
+    "duplicates_not_allowed": "このバンドルでは重複したアイテムは使用できません。",
+    "step_pick_count": "ステップ「{step}」では{count}個の選択が必要です。"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル"
+  }
+}

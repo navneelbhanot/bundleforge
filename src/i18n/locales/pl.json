@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "bundle_not_found": "Nie znaleziono pakietu.",
+    "validation_failed": "Walidacja żądania nie powiodła się.",
+    "rate_limited": "Zbyt wiele żądań — spróbuj ponownie za chwilę.",
+    "feature_not_in_plan": "Ta funkcja nie jest zawarta w Twoim planie.",
+    "negative_inventory": "Ta korekta spowodowałaby spadek zapasów poniżej zera."
+  },
+  "checkout": {
+    "select_min": "Wybierz co najmniej {min} produktów.",
+    "select_max": "Wybierz nie więcej niż {max} produktów.",
+    "exact_pack_qty": "Ten pakiet wymaga dokładnie {qty} sztuk.",
+    "duplicates_not_allowed": "Duplikaty nie są dozwolone w tym pakiecie.",
+    "step_pick_count": "Krok \"{step}\" wymaga {count} wyborów."
+  },
+  "common": {
+    "save": "Zapisz",
+    "cancel": "Anuluj"
+  }
+}

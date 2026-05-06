@@ -15,6 +15,26 @@ query Input {
       bundleforgeRules: attribute(key: "_bundleforge_rules") {
         value
       }
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            id
+            isBundleMetafield: metafield(
+              namespace: "bundleforge"
+              key: "is_bundle"
+            ) {
+              value
+            }
+            componentsMetafield: metafield(
+              namespace: "bundleforge"
+              key: "components"
+            ) {
+              value
+            }
+          }
+        }
+      }
     }
   }
   presentmentCurrencyRate

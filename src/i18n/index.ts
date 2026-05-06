@@ -11,8 +11,32 @@ import fr from "./locales/fr.json";
 import de from "./locales/de.json";
 import it from "./locales/it.json";
 import pt from "./locales/pt.json";
+import ja from "./locales/ja.json";
+import zh from "./locales/zh.json";
+import ko from "./locales/ko.json";
+import nl from "./locales/nl.json";
+import pl from "./locales/pl.json";
+import sv from "./locales/sv.json";
+import da from "./locales/da.json";
+import no from "./locales/no.json";
+import ru from "./locales/ru.json";
 
-export type Locale = "en" | "es" | "fr" | "de" | "it" | "pt";
+export type Locale =
+  | "en"
+  | "es"
+  | "fr"
+  | "de"
+  | "it"
+  | "pt"
+  | "ja"
+  | "zh"
+  | "ko"
+  | "nl"
+  | "pl"
+  | "sv"
+  | "da"
+  | "no"
+  | "ru";
 
 type Bundle = Record<string, unknown>;
 
@@ -23,9 +47,34 @@ const BUNDLES: Record<Locale, Bundle> = {
   de: de as Bundle,
   it: it as Bundle,
   pt: pt as Bundle,
+  ja: ja as Bundle,
+  zh: zh as Bundle,
+  ko: ko as Bundle,
+  nl: nl as Bundle,
+  pl: pl as Bundle,
+  sv: sv as Bundle,
+  da: da as Bundle,
+  no: no as Bundle,
+  ru: ru as Bundle,
 };
 
-export const SUPPORTED_LOCALES: Locale[] = ["en", "es", "fr", "de", "it", "pt"];
+export const SUPPORTED_LOCALES: Locale[] = [
+  "en",
+  "es",
+  "fr",
+  "de",
+  "it",
+  "pt",
+  "ja",
+  "zh",
+  "ko",
+  "nl",
+  "pl",
+  "sv",
+  "da",
+  "no",
+  "ru",
+];
 
 function lookup(bundle: Bundle, key: string): string | undefined {
   const parts = key.split(".");

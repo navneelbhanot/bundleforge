@@ -21,7 +21,25 @@ export interface BundleRouteDeps {
    */
   createShopifyProduct?: (
     session: Session,
-    bundle: { id: string; title: string; slug: string; description: string | null },
+    bundle: {
+      id: string;
+      title: string;
+      slug: string;
+      description: string | null;
+      components: Array<{
+        shopifyProductGid: string;
+        shopifyVariantGid: string | null;
+        quantity: number;
+        sku: string | null;
+      }>;
+      pricingRules: Array<{
+        type: string;
+        value: string;
+        minQuantity: number;
+        maxQuantity: number | null;
+        isStackable: boolean;
+      }>;
+    },
   ) => Promise<{ shopifyProductGid: string; shopifyProductId: bigint }>;
 }
 
@@ -54,6 +72,22 @@ interface ProductCreateResponse {
 const defaultCreateShopifyProduct: NonNullable<
   BundleRouteDeps["createShopifyProduct"]
 > = async (session, bundle) => {
+  // Components metafield is the source of truth the Cart Transform
+  // Function reads at checkout — when this product appears in a cart,
+  // the function expands the line into one line per component using
+  // these GIDs and quantities. Schema version lets the function reject
+  // metafields it doesn't understand.
+  const componentsPayload = {
+    schemaVersion: 1,
+    bundleId: bundle.id,
+    components: bundle.components.map((c) => ({
+      productGid: c.shopifyProductGid,
+      variantGid: c.shopifyVariantGid,
+      quantity: c.quantity,
+      sku: c.sku,
+    })),
+    pricingRules: bundle.pricingRules,
+  };
   const data = await shopifyGraphql<ProductCreateResponse>(
     session,
     PRODUCT_CREATE_MUTATION,
@@ -78,6 +112,12 @@ const defaultCreateShopifyProduct: NonNullable<
             key: "is_bundle",
             value: "true",
             type: "boolean",
+          },
+          {
+            namespace: "bundleforge",
+            key: "components",
+            value: JSON.stringify(componentsPayload),
+            type: "json",
           },
         ],
       },

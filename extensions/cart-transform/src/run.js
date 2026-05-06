@@ -1,39 +1,27 @@
 /**
  * Cart Transform Function entrypoint.
  *
- * Shopify invokes this with the input shape declared in run.graphql.
- * For each cart line carrying the BundleForge bundle attribute, we
- * compute a discount via the shared pricing engine and emit an
- * `update` operation to override the line price.
+ * Two paths run side-by-side:
+ *
+ *  1. Expand path (metafield-driven). When a cart line's variant
+ *     belongs to a product flagged with `bundleforge.is_bundle = true`
+ *     and carries a `bundleforge.components` JSON metafield, we emit
+ *     an `expand` operation that swaps the bundle line for one line
+ *     per component (variantId + quantity from the metafield). The
+ *     bundle product's price is preserved as the parent — Shopify
+ *     prices the expanded children at $0 unless overridden.
+ *
+ *  2. Update path (attribute-driven). Existing flow for storefronts
+ *     that already place component variants in the cart with
+ *     `_bundleforge_bundle_id` line attributes — we group, run the
+ *     shared pricing engine, and emit `update` operations to override
+ *     per-unit prices.
+ *
+ * Both paths can fire in the same call; they don't overlap because a
+ * single cart line is either a packaged bundle (path 1) or a
+ * components-as-attributes line (path 2).
  */
 import { computeBundlePrice, toCents, fromCents } from "./pricing.js";
-
-const BUNDLE_ATTR = "_bundleforge_bundle_id";
-const RULES_ATTR = "_bundleforge_rules";
-
-/**
- * @typedef {{
- *   id: string,
- *   quantity: number,
- *   cost: { amountPerQuantity: { amount: string, currencyCode: string } },
- *   bundleforgeBundleId?: { value: string } | null,
- *   bundleforgeRules?: { value: string } | null
- * }} CartLine
- *
- * @typedef {{
- *   cart: { lines: CartLine[] },
- *   presentmentCurrencyRate: string
- * }} RunInput
- *
- * @typedef {{
- *   operations: Array<{
- *     update: {
- *       cartLineId: string,
- *       price: { adjustment: { fixedPricePerUnit: { amount: string } } }
- *     }
- *   }>
- * }} RunOutput
- */
 
 function bundleIdOf(line) {
   return line && line.bundleforgeBundleId ? line.bundleforgeBundleId.value : null;
@@ -49,13 +37,71 @@ function rulesOf(line) {
   }
 }
 
+function isBundleProduct(line) {
+  const product =
+    line && line.merchandise && line.merchandise.product
+      ? line.merchandise.product
+      : null;
+  if (!product) return false;
+  const flag = product.isBundleMetafield && product.isBundleMetafield.value;
+  return flag === "true" || flag === true;
+}
+
+function componentsPayload(line) {
+  const product =
+    line && line.merchandise && line.merchandise.product
+      ? line.merchandise.product
+      : null;
+  if (!product || !product.componentsMetafield) return null;
+  try {
+    const parsed = JSON.parse(product.componentsMetafield.value);
+    if (!parsed || typeof parsed !== "object") return null;
+    if (parsed.schemaVersion !== 1) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function buildExpandOp(line, payload) {
+  const components = Array.isArray(payload.components) ? payload.components : [];
+  const expandedItems = [];
+  for (const c of components) {
+    if (!c || typeof c !== "object") continue;
+    if (typeof c.variantGid !== "string" || c.variantGid.length === 0) continue;
+    const qty = Number.isFinite(c.quantity) ? Math.max(1, Math.floor(c.quantity)) : 1;
+    expandedItems.push({
+      merchandiseId: c.variantGid,
+      quantity: qty,
+    });
+  }
+  if (expandedItems.length === 0) return null;
+  return {
+    expand: {
+      cartLineId: line.id,
+      expandedCartItems: expandedItems,
+    },
+  };
+}
+
 /**
- * @param {RunInput} input
- * @returns {RunOutput}
+ * @param {object} input
+ * @returns {object}
  */
 export function run(input) {
   const lines = (input && input.cart && input.cart.lines) || [];
-  // Group cart lines by bundle id.
+  const operations = [];
+
+  // --- Path 1: expand bundle products into component lines. ---
+  for (const line of lines) {
+    if (!isBundleProduct(line)) continue;
+    const payload = componentsPayload(line);
+    if (!payload) continue;
+    const expandOp = buildExpandOp(line, payload);
+    if (expandOp) operations.push(expandOp);
+  }
+
+  // --- Path 2: discount component lines that already carry bundle attributes. ---
   const groups = new Map();
   for (const line of lines) {
     const bundleId = bundleIdOf(line);
@@ -63,9 +109,8 @@ export function run(input) {
     if (!groups.has(bundleId)) groups.set(bundleId, []);
     groups.get(bundleId).push(line);
   }
-  if (groups.size === 0) return { operations: [] };
+  if (groups.size === 0) return { operations };
 
-  const operations = [];
   const now = new Date().toISOString();
 
   for (const [bundleId, bundleLines] of groups) {
@@ -85,8 +130,6 @@ export function run(input) {
     });
     if (result.applied.length === 0) continue;
 
-    // Distribute the discount proportionally across lines, then emit
-    // one update per line with its new per-unit price.
     const totalDiscountCents = toCents(result.totalDiscount.amount);
     const subtotalCents = toCents(result.subtotal.amount);
     if (subtotalCents === 0) continue;

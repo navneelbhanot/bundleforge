@@ -88,7 +88,7 @@
 | M-048 | Per-type config validators (zod, discriminated union) | done (2026-05-05) | `docs/specs/M-048-bundle-validators.md` | 13-type discriminated union; M-049 consumes |
 | M-049 | Bundle service: CRUD | done (2026-05-05) | `docs/specs/M-049-bundle-service.md` | repository layer; un-excluded from tsconfig |
 | M-050 | Bundle service: duplicate | done (2026-05-05) | `docs/sessions/0050-bundle-duplicate.md` | Copies items + pricing rules |
-| M-051 | Bundle service: publish | done (2026-05-05) | `docs/sessions/0051-bundle-publish.md` | status=active; Shopify product sync deferred to slices |
+| M-051 | Bundle service: publish | done (2026-05-06) | `docs/sessions/0051-bundle-publish.md` + `docs/sessions/0160-competitive-audit-closures.md` | productCreate + components metafield landed 2026-05-06; Cart Transform reads it |
 | M-052 | Bundle service: archive + soft delete | done (2026-05-05) | `docs/sessions/0052-bundle-archive.md` | status=archived |
 | M-053 | Bundle routes (8 endpoints) | done (2026-05-05) | `docs/specs/M-053-bundle-routes.md` | un-excluded from tsconfig; mounted at /api/v1/bundles |
 | M-054 | BundleItem service | done (2026-05-05) | `docs/specs/M-054-bundle-item-service.md` | tenant-safe; reorder uses $transaction |
@@ -161,7 +161,7 @@
 | M-097 | Bundle list page | done (2026-05-05) | `frontend/src/pages/BundlesListPage.tsx` | IndexTable + fetch /api/v1/bundles |
 | M-098 | Bundle detail page | done (2026-05-05) | `frontend/src/pages/BundleDetailPage.tsx` | layout + ProductPicker + TypeConfigPanel |
 | M-099 | Visual builder: product picker | done (2026-05-05) | `frontend/src/components/ProductPicker.tsx` | ResourceList over current items |
-| M-100 | Visual builder: type config panels | done (2026-05-05) | `frontend/src/components/TypeConfigPanel.tsx` | 5 type-specific forms; 3 RTL tests |
+| M-100 | Visual builder: type config panels | done (2026-05-06) | `frontend/src/components/TypeConfigPanel.tsx` | All 13 type-specific forms; 11 RTL tests |
 | M-101 | Visual builder: pricing rules editor | done (2026-05-05) | `docs/specs/M-101-108-admin-pages.md` | Polaris IndexTable, RTL test |
 | M-102 | Orders list page + /api/v1/orders | done (2026-05-05) | (same) | paginated list, OrdersListPage |
 | M-103 | Order detail + SKU breakdown | done (2026-05-05) | (same) | OrderDetailPage |
@@ -212,7 +212,7 @@
 
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
-| M-131 | i18n framework | done (2026-05-05) | `docs/specs/M-131-136-i18n.md` | tiny in-house t() with fallback; 7 tests |
+| M-131 | i18n framework | done (2026-05-06) | `docs/specs/M-131-136-i18n.md` | tiny in-house t() with fallback; 7 tests; 15 locales (added ja/zh/ko/nl/pl/sv/da/no/ru on 2026-05-06) |
 | M-132 | English baseline strings | done (2026-05-05) | (same) | en.json |
 | M-133 | Spanish translation | done (2026-05-05) | (same) | es.json |
 | M-134 | French translation | done (2026-05-05) | (same) | fr.json |

@@ -6,15 +6,15 @@
 
 ## Current milestone
 
-**Post-M-155 — operational hardening from first real install.**
+**Post-M-155 — competitive-audit gap closures.**
 
-The 156 planned milestones are still complete in the sense that all
-their code lives in the repo and the unit tests pass. Today's session
-exposed that *no prior milestone had ever been exercised end-to-end
-through a real Shopify install*; many integration-shaped bugs were
-masked by mock-only tests. The build now actually installs on a real
-dev store and the embedded admin loads. See
-`docs/sessions/0157-first-install-deploy-fixes.md`.
+The five priorities from the 2026-05-06 competitive audit are now
+landed: Cart Transform reads `bundleforge.is_bundle` /
+`bundleforge.components` metafields and emits `expand` operations,
+publish() writes those metafields, AI suggestions surface as a
+first-class admin page, M-100 visual builder covers all 13 bundle
+types, i18n ships in 15 locales, and the trust-story doc is live.
+See `docs/sessions/0160-competitive-audit-closures.md`.
 
 ## Exact next action
 
@@ -48,15 +48,14 @@ Operational, still user-owned (unchanged from before today):
 
 Future code work (post-launch backlog):
 
-- **Real Shopify product sync on publish()** — current `publish()`
-  in `src/services/bundles/index.ts:248` only sets `status=active` in
-  the DB; it does NOT create a Shopify product. POS visibility, theme
-  app blocks finding the bundle by product handle, and order/refund
-  webhooks resolving the bundle line — all depend on this. This is
-  the largest remaining real-engineering gap.
-- **POS integration** — depends on the publish-creates-product gap
-  above. Once a real product exists, ensure it's published to the
-  POS sales channel via `productPublish` + the POS publication ID.
+- **Real Shopify product sync on publish()** — DONE 2026-05-06.
+  publish() now calls productCreate via `defaultCreateShopifyProduct`
+  in `src/routes/bundles.ts` and persists the GID + legacy id, with a
+  components JSON metafield the Cart Transform reads at checkout.
+- **POS integration** — once a Shopify product exists per bundle (now
+  true), publish to the POS sales channel via `productPublish` + the
+  POS publication ID. Code change is small; deferred until a beta
+  merchant actually uses POS.
 - **Trial-warning emails** — needed to back the §5 "Billing
   transparency" claim. Needs SMTP wiring + a cron worker job.
 - **Prisma v6 → v7** — requires `prisma.config.ts` + adapter rewiring.
@@ -86,6 +85,21 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Competitive-audit gap closures** (2026-05-06 late). Cart Transform
+  Function now reads `bundleforge.is_bundle` and
+  `bundleforge.components` product metafields and emits an `expand`
+  operation that swaps a bundle product line for one line per
+  component variant. publish() in `src/services/bundles/index.ts`
+  passes items + pricing rules through to the Shopify productCreate
+  hook so `defaultCreateShopifyProduct` writes the components JSON
+  metafield (schemaVersion 1). New `AiSuggestionsPage` admin page
+  consumes `/api/v1/ai/suggested-bundles` and pre-fills the create
+  flow with the AI-recommended SKU pair. M-100 TypeConfigPanel now
+  has dedicated read-only display for all 13 bundle types (8 added:
+  bogo, bxgy, volume, gift, mystery, sample, subscription, custom).
+  i18n ships 9 new locales (ja, zh, ko, nl, pl, sv, da, no, ru) for
+  15 total. `docs/help/why-bundleforge.md` published as the trust
+  story for the App Store listing.
 - **Visual UI revamp + sidebar nav fix** (2026-05-06 evening).
   Card-grid bundle type picker with gradient banners (distinct from
   competitor product-photo aesthetic); fresh-shop dashboard centered
@@ -129,17 +143,17 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **456 / 456 vitest tests passing** when DATABASE_URL points at a
-  real Postgres (CI + dev with `bundleforge_e2e` DB).
+- **467 / 467 vitest tests passing** when DATABASE_URL points at a
+  real Postgres (CI + dev with `bundleforge_e2e` DB). +5 cart-transform
+  expand-path tests, +8 TypeConfigPanel coverage tests since 0159.
 - **454 / 454** when no real DB is available — the bundle CRUD
-  integration test (2 tests) auto-skips via `describe.skipIf`.
-- **5 / 5 Playwright e2e tests passing** (Polaris CSS, authFetch JWT,
-  OnboardingWizard fresh-shop walkthrough, /bundles/new mount, route
-  registration).
+  integration tests auto-skip via `describe.skipIf`.
+- **5 / 5 Playwright e2e tests passing** (unchanged from 0159).
 - CI runs both layers on every push and PR (`.github/workflows/ci.yml`,
   jobs `test` + `e2e`).
 - Typecheck clean (server + frontend).
-- Lint clean (2 pre-existing warnings, no errors).
+- Lint: 5 pre-existing errors (NavMenu namespace + scripts using
+  require) and 14 warnings; no new violations introduced this session.
 
 ## Working branch
 
