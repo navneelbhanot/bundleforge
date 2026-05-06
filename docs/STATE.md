@@ -36,13 +36,11 @@ bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
 **Code (next session):** No queued roadmap milestone.
+Every admin feature in M-161..M-183 now has its
+storefront / worker side wired up. The behavior-wiring
+backlog (M-167b..M-173d) is empty.
 
-Open candidates if the user picks one:
-- **M-173d** — `pauseWhenComponentBelow` live-stock
-  enforcement on the storefront. Needs per-component
-  Storefront API queries from the browser, or a
-  denormalised inventory feed on the proxy (M-070..M-074
-  inventory engine could feed it). Bigger design task.
+Open operational items:
 - **Migration application** — five `prisma migrate deploy`
   events queued: M-168, M-170, M-172, M-173, M-174.
 - **Beta merchant onboarding** — `docs/onboarding-beta.md`
@@ -115,6 +113,19 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-173d — Storefront pauseWhenComponentBelow**
+  (2026-05-07). Closes the M-173 chain (admin → CTF →
+  storefront-componentOnly → storefront-pause). New
+  `src/shopify/sessionFromShop.ts` builds an offline
+  `Session` from the Shop row. New `src/shopify/inventory.ts`
+  exposes batched `getVariantInventory` (single
+  `nodes(ids:[...])` GraphQL call) and pure `computePaused`.
+  Proxy `/bundle/:slug` calls the chain only when
+  `pauseWhenComponentBelow > 0` and adds a `paused: boolean`
+  to the response — fail-open on any error. Web component
+  hides or shows a "currently unavailable" placeholder
+  when `paused === true`. 781/781 vitest pass (+12 cases).
+  `docs/sessions/0192-173d-pause-when-low.md`.
 - **Behavior wiring round 2 — M-164b + M-172c + M-173c**
   (2026-05-07).
   - **M-164b** — settings PUT writes
@@ -608,11 +619,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **769 / 769 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 metafields helper + +4 settings PUT
-  cart-default-mode cases + +12 storefront eligibility cases
-  since the M-167b..M-173b batch.
-- **619 / 619** when no real DB is available — the bundle CRUD
+- **781 / 781 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +9 inventory helper cases + +3
+  sessionFromShop cases since M-172c/M-173c.
+- **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

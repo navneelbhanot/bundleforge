@@ -200,6 +200,21 @@ class BundleforgeBundle extends HTMLElement {
         return;
       }
 
+      // M-173d: paused = any component below the merchant's
+      // pauseWhenComponentBelow threshold. Computed server-
+      // side by the proxy so we don't leak component variant
+      // GIDs to the client. Hide or show a "currently
+      // unavailable" placeholder on data-on-ineligible.
+      if (bundle.paused === true) {
+        const mode = this.getAttribute("data-on-ineligible") || "hide";
+        if (mode === "placeholder") {
+          this.innerHTML = `<p class="bundleforge-paused">This bundle is temporarily unavailable.</p>`;
+        } else {
+          this.style.display = "none";
+        }
+        return;
+      }
+
       const display = applyDisplaySettings(bundle.displaySettings);
       this.innerHTML = "";
       // Apply colorPreset class on the wrapper itself.

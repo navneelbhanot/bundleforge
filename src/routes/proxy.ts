@@ -13,12 +13,20 @@ import {
 } from "express";
 
 import { prisma } from "../config/database";
+import { logger } from "../config/logger";
 import { NotFoundError, UnauthorizedError } from "../middleware/errorHandler";
 import {
   validateCart,
   type BundleSnapshot,
   type CartLine,
 } from "../services/bundles/validateCart";
+import {
+  computePaused,
+  getVariantInventory,
+} from "../shopify/inventory";
+import { loadOfflineSessionFromShop } from "../shopify/sessionFromShop";
+
+const proxyLog = logger.child({ module: "proxy" });
 
 export interface BundleLookup {
   bundle: {
@@ -99,11 +107,67 @@ export function resolveDisplaySettings(
 
 export interface ProxyDeps {
   source?: BundleLookup;
+  /**
+   * Storefront pause check (M-173d). Producer accepts the
+   * shop domain + the bundle's inventoryRules + items and
+   * returns `paused: boolean`. DI seam so tests can stub
+   * without hitting Shopify; production wires the default
+   * implementation that loads an offline session and
+   * fetches per-variant inventory.
+   */
+  computePaused?: (input: {
+    shopDomain: string;
+    inventoryRules: unknown;
+    items: Array<{ shopifyVariantGid: string | null }>;
+  }) => Promise<boolean>;
+}
+
+async function defaultComputePaused(input: {
+  shopDomain: string;
+  inventoryRules: unknown;
+  items: Array<{ shopifyVariantGid: string | null }>;
+}): Promise<boolean> {
+  const rules =
+    input.inventoryRules &&
+    typeof input.inventoryRules === "object" &&
+    !Array.isArray(input.inventoryRules)
+      ? (input.inventoryRules as { pauseWhenComponentBelow?: number | null })
+      : null;
+  const threshold =
+    rules && typeof rules.pauseWhenComponentBelow === "number"
+      ? rules.pauseWhenComponentBelow
+      : 0;
+  if (threshold <= 0) return false;
+
+  const variantGids = input.items
+    .map((it) => it.shopifyVariantGid)
+    .filter((g): g is string => typeof g === "string" && g.length > 0);
+  if (variantGids.length === 0) return false;
+
+  try {
+    const session = await loadOfflineSessionFromShop(input.shopDomain);
+    if (!session) {
+      proxyLog.warn(
+        { shopDomain: input.shopDomain },
+        "no offline session for shop; pause check fails-open",
+      );
+      return false;
+    }
+    const inventory = await getVariantInventory(session, variantGids);
+    return computePaused(rules, input.items, inventory);
+  } catch (err) {
+    proxyLog.warn(
+      { err, shopDomain: input.shopDomain },
+      "pause check failed; falling back to paused=false",
+    );
+    return false;
+  }
 }
 
 export function installProxyRoutes(deps: ProxyDeps = {}): Router {
   const router = Router();
   const source = deps.source ?? (prisma as unknown as BundleLookup);
+  const computePausedImpl = deps.computePaused ?? defaultComputePaused;
 
   router.get(
     "/bundle/:slug",
@@ -161,12 +225,24 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
         );
         const { shop: _shop, ...payload } = bundle;
         void _shop;
+        // M-173d: compute paused if pauseWhenComponentBelow > 0.
+        // Defaults to false on any error (fail-open).
+        const items = Array.isArray(
+          (payload as { items?: unknown }).items,
+        )
+          ? ((payload as { items: Array<{ shopifyVariantGid: string | null }> }).items)
+          : [];
+        const paused = await computePausedImpl({
+          shopDomain: req.shopifyShopDomain,
+          inventoryRules: payload.inventoryRules,
+          items,
+        });
         res.set("Cache-Control", "public, max-age=60");
         // eligibility + inventoryRules already on `payload`
         // (passed through from the select). The web component
         // reads them for storefront-side enforcement
-        // (M-172c, M-173c).
-        res.json({ ...payload, displaySettings: resolved });
+        // (M-172c, M-173c). `paused` is M-173d.
+        res.json({ ...payload, displaySettings: resolved, paused });
       } catch (err) {
         next(err);
       }
