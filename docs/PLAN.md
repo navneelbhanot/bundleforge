@@ -260,33 +260,37 @@
 
 ### Phase R2 — Bundle Detail richness
 
+> Renumbered 2026-05-06: the original roadmap started Phase R2 at
+> M-168, but M-167's mid-spec split into M-168 (API & webhooks)
+> shifted every Phase R2-R4 slot by 1.
+
 | ID | Title | Status |
 |----|-------|--------|
-| M-168 | Detail shell tab refactor | pending |
-| M-169 | Schedule tab | pending |
-| M-170 | Display tab | pending |
-| M-171 | Customers tab | pending |
-| M-172 | Inventory tab | pending |
-| M-173 | Performance + Activity log | pending |
-| M-174 | Advanced tab | pending |
+| M-169 | Detail shell tab refactor | done (2026-05-06) — `docs/specs/M-169-bundle-detail-tab-shell.md` |
+| M-170 | Schedule tab | pending |
+| M-171 | Display tab | pending |
+| M-172 | Customers tab | pending |
+| M-173 | Inventory tab | pending |
+| M-174 | Performance + Activity log | pending |
+| M-175 | Advanced tab | pending |
 
 ### Phase R3 — Bundle List richness
 
 | ID | Title | Status |
 |----|-------|--------|
-| M-175 | IndexFilters + saved views | pending |
-| M-176 | Bulk actions | pending |
-| M-177 | Sort + view modes | pending |
-| M-178 | Templates / Presets gallery | pending |
+| M-176 | IndexFilters + saved views | pending |
+| M-177 | Bulk actions | pending |
+| M-178 | Sort + view modes | pending |
+| M-179 | Templates / Presets gallery | pending |
 
 ### Phase R4 — Cross-cutting polish
 
 | ID | Title | Status |
 |----|-------|--------|
-| M-179 | Global cmd+k search | pending |
-| M-180 | In-app help drawer | pending |
-| M-181 | Unified toast / confirm / skeleton | pending |
-| M-182 | Empty-state illustrations | pending |
+| M-180 | Global cmd+k search | pending |
+| M-181 | In-app help drawer | pending |
+| M-182 | Unified toast / confirm / skeleton | pending |
+| M-183 | Empty-state illustrations | pending |
 
 ---
 

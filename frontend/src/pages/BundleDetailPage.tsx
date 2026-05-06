@@ -6,7 +6,7 @@
  * live storefront preview side-by-side. Title + description are
  * editable inline; saving any of those fires PUT /api/v1/bundles/:id.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Badge,
@@ -20,6 +20,7 @@ import {
   InlineStack,
   Layout,
   Page,
+  Tabs,
   Text,
   TextField,
   Toast,
@@ -84,6 +85,64 @@ function statusTone(status: string): "success" | "info" | "warning" | "attention
   return "info";
 }
 
+interface TabSpec {
+  id: string;
+  hash: string;
+  content: string;
+  status: "ready" | "deferred";
+  /** Milestone that ships this tab. */
+  milestone?: string;
+}
+
+const TABS: TabSpec[] = [
+  { id: "setup", hash: "setup", content: "Setup", status: "ready" },
+  { id: "schedule", hash: "schedule", content: "Schedule", status: "deferred", milestone: "M-170" },
+  { id: "display", hash: "display", content: "Display", status: "deferred", milestone: "M-171" },
+  { id: "customers", hash: "customers", content: "Customers", status: "deferred", milestone: "M-172" },
+  { id: "inventory", hash: "inventory", content: "Inventory", status: "deferred", milestone: "M-173" },
+  { id: "performance", hash: "performance", content: "Performance", status: "deferred", milestone: "M-174" },
+  { id: "activity", hash: "activity", content: "Activity", status: "deferred", milestone: "M-174" },
+  { id: "advanced", hash: "advanced", content: "Advanced", status: "deferred", milestone: "M-175" },
+];
+
+function readHashTab(): number {
+  if (typeof window === "undefined") return 0;
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) return 0;
+  const idx = TABS.findIndex((t) => t.hash === hash);
+  return idx >= 0 ? idx : 0;
+}
+
+function writeHashTab(idx: number): void {
+  if (typeof window === "undefined") return;
+  const hash = TABS[idx]?.hash ?? "setup";
+  if (window.location.hash !== `#${hash}`) {
+    window.history.replaceState(null, "", `#${hash}`);
+  }
+}
+
+interface PlaceholderTabProps {
+  tab: TabSpec;
+}
+
+function PlaceholderTab({ tab }: PlaceholderTabProps): JSX.Element {
+  return (
+    <Card>
+      <BlockStack gap="200">
+        <Text as="h2" variant="headingMd">
+          {tab.content}
+        </Text>
+        <Text as="p" tone="subdued">
+          This tab is being built in {tab.milestone ?? "a future milestone"}.
+          See <code>docs/plans/rich-admin-ui-roadmap.md</code> for the
+          full plan. Setup, status, and the live preview keep
+          working — only this tab&apos;s content is queued up.
+        </Text>
+      </BlockStack>
+    </Card>
+  );
+}
+
 export function BundleDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const [bundle, setBundle] = useState<BundleDetail | null>(null);
@@ -98,6 +157,31 @@ export function BundleDetailPage(): JSX.Element {
   const [busy, setBusy] = useState(false);
   const [pickerBusy, setPickerBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [tabIndex, setTabIndex] = useState<number>(readHashTab());
+
+  useEffect(() => {
+    function onHash(): void {
+      setTabIndex(readHashTab());
+    }
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  function selectTab(idx: number): void {
+    setTabIndex(idx);
+    writeHashTab(idx);
+  }
+
+  const polarisTabs = useMemo(
+    () =>
+      TABS.map((t) => ({
+        id: t.id,
+        content: t.content,
+        accessibilityLabel: t.content,
+        panelID: `panel-bundle-${t.id}`,
+      })),
+    [],
+  );
 
   function hydrate(b: BundleDetail): void {
     setBundle(b);
@@ -273,8 +357,30 @@ export function BundleDetailPage(): JSX.Element {
         <BlockStack gap="400">
           {error && <Banner tone="critical">{error}</Banner>}
 
+          <Tabs
+            tabs={polarisTabs}
+            selected={tabIndex}
+            onSelect={selectTab}
+            fitted={false}
+          />
+
           <Layout>
             <Layout.Section>
+              {/* Setup-tab form is always mounted (just hidden when
+                  another tab is active) so that switching tabs never
+                  discards in-flight title/description/items/rules
+                  edits. Placeholder tabs render outside this block so
+                  the form's React state stays alive in the DOM. */}
+              {TABS[tabIndex].id !== "setup" && (
+                <Box paddingBlockEnd="400">
+                  <PlaceholderTab tab={TABS[tabIndex]} />
+                </Box>
+              )}
+              <div
+                style={{
+                  display: TABS[tabIndex].id === "setup" ? "block" : "none",
+                }}
+              >
               <BlockStack gap="400">
                 {/* Details — title + description, savable independently. */}
                 <Card>
@@ -428,6 +534,7 @@ export function BundleDetailPage(): JSX.Element {
                     editor lands for all 13 types). */}
                 <TypeConfigPanel type={bundle.type} config={bundle.config} />
               </BlockStack>
+              </div>
             </Layout.Section>
 
             <Layout.Section variant="oneThird">

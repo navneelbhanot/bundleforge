@@ -6,43 +6,40 @@
 
 ## Current milestone
 
-**Phase R1 — rich Settings page COMPLETE.**
+**Phase R2 in progress — Bundle Detail richness.**
 
-M-161..M-168 all landed 2026-05-06. All 10 settings tabs are
-fully built. M-168 added `/api/v1/api-tokens` and
-`/api/v1/outbound-webhooks` CRUD routes, scrypt-based token
-hashing (no new deps), AES-256-encrypted webhook HMAC secrets,
-Polaris IndexTable + Add modal UI for both. Token plaintext and
-webhook HMAC secret are returned **exactly once** at create —
-the merchant must copy them before closing the dialog.
+Phase R1 (M-161..M-168) closed 2026-05-06 with all 10 Settings
+tabs built. **Phase R2 numbering note:** original roadmap had
+R2 starting at M-168, but M-167's split into M-168 shifted
+every R2-R4 slot by 1. Phase R2 now runs M-169..M-175. PLAN.md
+renumbered.
 
-A migration file (`prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`)
-was created in source but **NOT applied**. Per CLAUDE.md §5 the
-user reviews and applies migrations on the next deploy via
-`prisma migrate deploy` — the route tests use mocked clients so
-the rest of the suite is unaffected.
+M-169 (Detail shell tab refactor) landed 2026-05-06. The Bundle
+Detail page is now an 8-tab shell (Setup, Schedule, Display,
+Customers, Inventory, Performance, Activity, Advanced) with hash
+routing. Setup tab is visually identical to the previous
+scrolling form; the other 7 render placeholder cards. Form
+state survives tab switches via display:none toggle (DOM stays
+mounted). Sidebar (Status / Quick stats / Live Preview) persists
+across all tabs.
 
-Phase R2 (Bundle Detail richness — M-169..M-175) is the next
-roadmap section. Roadmap:
-`docs/plans/rich-admin-ui-roadmap.md`.
+Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (next session, before Phase R2):**
+**User action required (still pending from M-168):**
 Apply the M-168 migration on the production database. Either via
 `prisma migrate deploy` from a CI shell or by running the SQL in
 `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/migration.sql`
-directly. The migration creates two empty tables — no data
-backfill — so it's safe to apply during normal traffic.
+directly. Two empty tables, no backfill — safe during normal
+traffic.
 
-**Code (next session):** Phase R2 starts with M-169 — Bundle
-Detail tab refactor. Spec first:
-`docs/specs/M-169-bundle-detail-tab-shell.md`. Polaris Tabs in
-the existing BundleDetailPage with 8 tabs (Setup, Schedule,
-Display, Customers, Inventory, Performance, Activity, Advanced).
-The current scrolling form goes under "Setup" — visual parity
-with today's surface, then subsequent milestones populate the
-others.
+**Code (next session):** Run M-170 — Schedule tab content. Spec
+first: `docs/specs/M-170-bundle-detail-schedule.md`. Roadmap:
+start date / end date / recurring (daily/weekly/monthly) /
+timezone (default from shop) / auto-archive vs auto-pause on
+end. Server side extends `Bundle.startsAt` / `Bundle.endsAt`
+(already exist) plus a new `recurringRule` JSON field.
 
 Other open threads (mostly user-owned):
 
@@ -111,6 +108,18 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-169 — Bundle Detail tab shell refactor** (2026-05-06 late,
+  Phase R2 start). The 500-line single-scroll BundleDetailPage
+  is now an 8-tab shell (Setup, Schedule, Display, Customers,
+  Inventory, Performance, Activity, Advanced) with hash routing.
+  Setup tab is visually identical to today's surface; other 7
+  tabs render a `PlaceholderTab` Card pointing at their
+  follow-on milestone. Form state preservation: the Setup tab's
+  4 cards stay mounted with `display: none` when another tab is
+  active, so switching tabs never discards in-flight title /
+  description / items / pricing-rules edits. Sidebar (Status +
+  Quick stats + Live Preview) persists on every tab.
+  `docs/sessions/0169-bundle-detail-tab-shell.md`.
 - **M-168 — Settings · API & webhooks tab** (2026-05-06 late,
   closes Phase R1). Two new Prisma models (ApiToken,
   OutboundWebhook) with a migration file ready for the next
@@ -286,9 +295,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **565 / 565 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 tokenHash util + +7 apiTokens route + +11
-  outboundWebhooks route cases since the bundle-tagging hotfix.
+- **570 / 570 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +5 BundleDetailPage tab-shell cases since
+  M-168.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
