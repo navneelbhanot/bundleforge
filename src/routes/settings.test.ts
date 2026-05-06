@@ -287,6 +287,140 @@ describe("PUT /settings", () => {
     });
   });
 
+  it("round-trips a full inventory patch", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        inventory: {
+          lowStockThreshold: 10,
+          oversellPolicy: "allow_to_zero",
+          auditRetentionDays: 90,
+          snapshotFrequency: "every_6h",
+          lowStockAlertEnabled: true,
+        },
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.inventory).toMatchObject({
+      lowStockThreshold: 10,
+      oversellPolicy: "allow_to_zero",
+      auditRetentionDays: 90,
+      snapshotFrequency: "every_6h",
+      lowStockAlertEnabled: true,
+    });
+  });
+
+  it("rejects an unknown inventory.oversellPolicy enum value", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ inventory: { oversellPolicy: "weird" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects auditRetentionDays below the 7-day floor", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ inventory: { auditRetentionDays: 5 } });
+    expect(res.status).toBe(400);
+  });
+
+  it("round-trips a pricing patch with negative B2B markup", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {},
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        pricing: {
+          roundingRule: "ninety_nine",
+          currencyFormatterOverride: "{amount} {currency}",
+          b2bMarkupPercent: -10,
+          defaultDiscountType: "percentage",
+        },
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.pricing).toMatchObject({
+      roundingRule: "ninety_nine",
+      b2bMarkupPercent: -10,
+      defaultDiscountType: "percentage",
+    });
+  });
+
+  it("rejects an unknown pricing.roundingRule enum value", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ pricing: { roundingRule: "weird" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("deep-merges inventory — threshold save doesn't drop oversellPolicy", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {
+            inventory: {
+              oversellPolicy: "prevent",
+              snapshotFrequency: "daily",
+            },
+          },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ inventory: { lowStockThreshold: 5 } });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.inventory).toEqual({
+      oversellPolicy: "prevent",
+      snapshotFrequency: "daily",
+      lowStockThreshold: 5,
+    });
+  });
+
   it("persists top-level safetyLock and general.brandColor in the same patch", async () => {
     const updateSpy = vi.fn().mockImplementation(({ data }) =>
       Promise.resolve({ id: "s", settings: data.settings }),

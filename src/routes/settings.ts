@@ -57,6 +57,41 @@ const DisplayPatch = z
   })
   .strict();
 
+const InventoryPatch = z
+  .object({
+    lowStockThreshold: z.coerce.number().int().min(0).max(100000).optional(),
+    oversellPolicy: z
+      .enum(["prevent", "allow_negative", "allow_to_zero"])
+      .optional(),
+    auditRetentionDays: z.coerce.number().int().min(7).max(3650).optional(),
+    snapshotFrequency: z
+      .enum(["hourly", "every_6h", "daily", "weekly"])
+      .optional(),
+    lowStockAlertEnabled: z.boolean().optional(),
+  })
+  .strict();
+
+const PricingPatch = z
+  .object({
+    roundingRule: z
+      .enum(["nearest_cent", "ninety_nine", "ninety_five"])
+      .optional(),
+    currencyFormatterOverride: z.string().max(120).optional(),
+    b2bMarkupPercent: z.coerce.number().min(-100).max(1000).optional(),
+    defaultDiscountType: z
+      .enum([
+        "percentage",
+        "flat_discount",
+        "fixed",
+        "tiered",
+        "volume",
+        "bogo",
+        "custom",
+      ])
+      .optional(),
+  })
+  .strict();
+
 const PatchSchema = z
   .object({
     safetyLock: z.boolean().optional(),
@@ -68,6 +103,8 @@ const PatchSchema = z
       .optional(),
     general: GeneralPatch.optional(),
     display: DisplayPatch.optional(),
+    inventory: InventoryPatch.optional(),
+    pricing: PricingPatch.optional(),
   })
   .strict();
 
@@ -184,6 +221,8 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         ...settings,
         general: buildGeneral(row),
         display: isObject(settings.display) ? settings.display : {},
+        inventory: isObject(settings.inventory) ? settings.inventory : {},
+        pricing: isObject(settings.pricing) ? settings.pricing : {},
       });
     } catch (err) {
       next(err);
@@ -217,6 +256,8 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         }),
         general: mergeSubobject(prev.general, patch.general),
         display: mergeSubobject(prev.display, patch.display),
+        inventory: mergeSubobject(prev.inventory, patch.inventory),
+        pricing: mergeSubobject(prev.pricing, patch.pricing),
       };
 
       const updated = await client.shop.update({
@@ -234,6 +275,12 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         }),
         display: isObject(updatedSettings.display)
           ? updatedSettings.display
+          : {},
+        inventory: isObject(updatedSettings.inventory)
+          ? updatedSettings.inventory
+          : {},
+        pricing: isObject(updatedSettings.pricing)
+          ? updatedSettings.pricing
           : {},
       });
     } catch (err) {

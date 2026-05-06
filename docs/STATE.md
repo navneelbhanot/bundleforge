@@ -8,21 +8,25 @@
 
 **Phase R1 — rich Settings page in progress.**
 
-M-161 (shell + General) and M-162 (Display) landed 2026-05-06. The
-SettingsPage now has 2 of 10 tabs fully built. Display tab covers
-layout, color preset, image preference, Add-to-cart copy, sold-out
-behavior, and a custom-CSS textarea with a soft brace-mismatch
-warning. Remaining R1 milestones (M-163..M-167) still placeholder.
-Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
+M-161 (shell + General), M-162 (Display), and M-163 (Inventory +
+Pricing) all landed 2026-05-06. The SettingsPage now has 4 of 10
+tabs fully built (General, Display, Inventory, Pricing). The
+existing safetyLock toggle was re-surfaced on the Inventory tab
+without changing where it lives in the data shape (still
+top-level), so the existing webhook handler keeps working
+unchanged. Remaining R1 milestones (M-164..M-167) still
+placeholder. Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-163 — Inventory + Pricing tab. Spec
-first: `docs/specs/M-163-settings-inventory-pricing.md`. Roadmap
-specifies threshold, oversell policy, audit retention, snapshot
-frequency for Inventory; rounding rule, currency formatter override,
-B2B markup default for Pricing. Existing safetyLock toggle should
-re-surface on the Inventory tab as part of this milestone.
+**Code (next session):** Run M-164 — Cart & Checkout tab. Spec
+first: `docs/specs/M-164-settings-cart-checkout.md`. Roadmap
+specifies: default cart mode (bundle-as-product vs components-as-
+attributes — informs the Cart Transform Function path),
+atomic-checkout enforcement toggle, abandonment behavior. The
+M-160 commit added Cart Transform expansion (metafield-driven);
+this tab gives merchants the toggle that picks which mode is
+default for new bundles.
 
 Other open threads (mostly user-owned):
 
@@ -91,6 +95,19 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-163 — Settings · Inventory + Pricing tabs** (2026-05-06
+  late). Two tabs in one milestone (each was small enough that
+  splitting would have created an empty session). Inventory tab
+  has Stock guards card (safetyLock re-surfaced, low-stock
+  threshold, oversell policy, low-stock alert toggle) and Audit
+  & snapshots card (retention days 7..3650, snapshot frequency).
+  Pricing tab has Rounding & formatting card (rule + currency
+  formatter override) and Defaults for new bundles card
+  (default discount type + B2B markup -100..1000%). Server adds
+  `settings.inventory` and `settings.pricing` Zod-validated
+  subobjects. safetyLock stays at top-level for backwards
+  compat with the existing webhook handler.
+  `docs/sessions/0163-settings-inventory-pricing.md`.
 - **M-162 — Settings · Display tab** (2026-05-06 late). Display
   tab in SettingsPage now ships fully built: Layout/visual style
   card (layout grid/list/carousel + colorPreset enum), Imagery &
@@ -174,9 +191,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **488 / 488 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +4 settings-route + +3 SettingsPage Display cases
-  since 0161.
+- **498 / 498 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 settings-route + +4 SettingsPage cases since
+  0162.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

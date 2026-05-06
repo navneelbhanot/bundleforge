@@ -17,6 +17,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   InlineStack,
   Layout,
   Page,
@@ -48,12 +49,51 @@ interface DisplayBlock {
   cssOverride?: string;
 }
 
+interface InventoryBlock {
+  lowStockThreshold?: number;
+  oversellPolicy?: "prevent" | "allow_negative" | "allow_to_zero";
+  auditRetentionDays?: number;
+  snapshotFrequency?: "hourly" | "every_6h" | "daily" | "weekly";
+  lowStockAlertEnabled?: boolean;
+}
+
+interface PricingBlock {
+  roundingRule?: "nearest_cent" | "ninety_nine" | "ninety_five";
+  currencyFormatterOverride?: string;
+  b2bMarkupPercent?: number;
+  defaultDiscountType?:
+    | "percentage"
+    | "flat_discount"
+    | "fixed"
+    | "tiered"
+    | "volume"
+    | "bogo"
+    | "custom";
+}
+
 interface SettingsPayload {
   safetyLock?: boolean;
   notifications?: { email?: boolean; inApp?: boolean };
   general: GeneralBlock;
   display: DisplayBlock;
+  inventory: InventoryBlock;
+  pricing: PricingBlock;
 }
+
+const INVENTORY_DEFAULTS: Required<InventoryBlock> = {
+  lowStockThreshold: 5,
+  oversellPolicy: "prevent",
+  auditRetentionDays: 365,
+  snapshotFrequency: "daily",
+  lowStockAlertEnabled: true,
+};
+
+const PRICING_DEFAULTS: Required<PricingBlock> = {
+  roundingRule: "nearest_cent",
+  currencyFormatterOverride: "",
+  b2bMarkupPercent: 0,
+  defaultDiscountType: "percentage",
+};
 
 const DISPLAY_DEFAULTS: Required<DisplayBlock> = {
   layout: "grid",
@@ -76,8 +116,8 @@ interface TabSpec {
 const TABS: TabSpec[] = [
   { id: "general", hash: "general", content: "General", status: "ready" },
   { id: "display", hash: "display", content: "Display", status: "ready" },
-  { id: "inventory", hash: "inventory", content: "Inventory", status: "deferred", milestone: "M-163" },
-  { id: "pricing", hash: "pricing", content: "Pricing", status: "deferred", milestone: "M-163" },
+  { id: "inventory", hash: "inventory", content: "Inventory", status: "ready" },
+  { id: "pricing", hash: "pricing", content: "Pricing", status: "ready" },
   { id: "cart", hash: "cart", content: "Cart & checkout", status: "deferred", milestone: "M-164" },
   { id: "notifications", hash: "notifications", content: "Notifications", status: "deferred", milestone: "M-165" },
   { id: "integrations", hash: "integrations", content: "Integrations", status: "deferred", milestone: "M-166" },
@@ -612,6 +652,302 @@ function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
 
 // ---------------- /Display tab cards ----------------
 
+// ---------------- Inventory tab cards (M-163) ----------------
+
+const OVERSELL_OPTIONS = [
+  { label: "Prevent — block sale when any component is OOS", value: "prevent" },
+  { label: "Allow to zero — sell down to 0 then block", value: "allow_to_zero" },
+  { label: "Allow negative — never block (caveat: risk of refunds)", value: "allow_negative" },
+] as const;
+
+const SNAPSHOT_OPTIONS = [
+  { label: "Hourly", value: "hourly" },
+  { label: "Every 6 hours", value: "every_6h" },
+  { label: "Daily (default)", value: "daily" },
+  { label: "Weekly", value: "weekly" },
+] as const;
+
+interface StockGuardsCardProps {
+  initialSafetyLock: boolean;
+  initial: Pick<InventoryBlock, "lowStockThreshold" | "oversellPolicy" | "lowStockAlertEnabled">;
+  busy: boolean;
+  onSaveInventory: (
+    patch: Pick<InventoryBlock, "lowStockThreshold" | "oversellPolicy" | "lowStockAlertEnabled">,
+  ) => Promise<void>;
+  onSaveSafetyLock: (next: boolean) => Promise<void>;
+}
+
+function StockGuardsCard({
+  initialSafetyLock,
+  initial,
+  busy,
+  onSaveInventory,
+  onSaveSafetyLock,
+}: StockGuardsCardProps): JSX.Element {
+  const [safetyLock, setSafetyLock] = useState<boolean>(initialSafetyLock);
+  const [threshold, setThreshold] = useState<string>(
+    String(initial.lowStockThreshold ?? INVENTORY_DEFAULTS.lowStockThreshold),
+  );
+  const [policy, setPolicy] = useState<InventoryBlock["oversellPolicy"]>(
+    initial.oversellPolicy ?? INVENTORY_DEFAULTS.oversellPolicy,
+  );
+  const [alert, setAlert] = useState<boolean>(
+    initial.lowStockAlertEnabled ?? INVENTORY_DEFAULTS.lowStockAlertEnabled,
+  );
+  const thresholdNum = Number(threshold);
+  const thresholdValid =
+    Number.isInteger(thresholdNum) && thresholdNum >= 0 && thresholdNum <= 100000;
+  const dirtyInventory =
+    String(initial.lowStockThreshold ?? INVENTORY_DEFAULTS.lowStockThreshold) !==
+      threshold ||
+    (initial.oversellPolicy ?? INVENTORY_DEFAULTS.oversellPolicy) !== policy ||
+    (initial.lowStockAlertEnabled ?? INVENTORY_DEFAULTS.lowStockAlertEnabled) !== alert;
+
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Stock guards
+        </Text>
+        <Checkbox
+          label="Safety lock — require manual approval before pushing changes to Shopify"
+          checked={safetyLock}
+          onChange={(checked) => {
+            setSafetyLock(checked);
+            void onSaveSafetyLock(checked);
+          }}
+          disabled={busy}
+        />
+        <TextField
+          label="Low-stock threshold (units)"
+          type="number"
+          min={0}
+          value={threshold}
+          onChange={setThreshold}
+          autoComplete="off"
+          helpText="When any component drops at or below this number, BundleForge marks the bundle low-stock for the alert + storefront badge."
+          error={!thresholdValid ? "0 to 100000" : undefined}
+        />
+        <Select
+          label="Oversell policy"
+          options={OVERSELL_OPTIONS as unknown as { label: string; value: string }[]}
+          value={policy ?? INVENTORY_DEFAULTS.oversellPolicy}
+          onChange={(v) => setPolicy(v as InventoryBlock["oversellPolicy"])}
+        />
+        <Checkbox
+          label="Email me when a bundle goes low-stock"
+          checked={alert}
+          onChange={setAlert}
+          helpText="Email channel + recipients are configured in M-165 (Notifications). Until then enabling this is a no-op."
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirtyInventory && thresholdValid}
+          onSave={() =>
+            onSaveInventory({
+              lowStockThreshold: thresholdNum,
+              oversellPolicy: policy,
+              lowStockAlertEnabled: alert,
+            })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface AuditCardProps {
+  initial: Pick<InventoryBlock, "auditRetentionDays" | "snapshotFrequency">;
+  busy: boolean;
+  onSave: (
+    patch: Pick<InventoryBlock, "auditRetentionDays" | "snapshotFrequency">,
+  ) => Promise<void>;
+}
+
+function AuditCard({ initial, busy, onSave }: AuditCardProps): JSX.Element {
+  const [days, setDays] = useState<string>(
+    String(initial.auditRetentionDays ?? INVENTORY_DEFAULTS.auditRetentionDays),
+  );
+  const [freq, setFreq] = useState<InventoryBlock["snapshotFrequency"]>(
+    initial.snapshotFrequency ?? INVENTORY_DEFAULTS.snapshotFrequency,
+  );
+  const daysNum = Number(days);
+  const daysValid =
+    Number.isInteger(daysNum) && daysNum >= 7 && daysNum <= 3650;
+  const dirty =
+    String(initial.auditRetentionDays ?? INVENTORY_DEFAULTS.auditRetentionDays) !==
+      days ||
+    (initial.snapshotFrequency ?? INVENTORY_DEFAULTS.snapshotFrequency) !== freq;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Audit &amp; snapshots
+        </Text>
+        <TextField
+          label="Audit log retention (days)"
+          type="number"
+          min={7}
+          max={3650}
+          value={days}
+          onChange={setDays}
+          autoComplete="off"
+          error={!daysValid ? "Must be 7 to 3650" : undefined}
+          helpText="ADR-0003 enforces immutability via a Postgres BEFORE-UPDATE trigger. Retention only governs eventual pruning by the audit-pruner cron job (separate ticket)."
+        />
+        <Select
+          label="Snapshot frequency"
+          options={SNAPSHOT_OPTIONS as unknown as { label: string; value: string }[]}
+          value={freq ?? INVENTORY_DEFAULTS.snapshotFrequency}
+          onChange={(v) => setFreq(v as InventoryBlock["snapshotFrequency"])}
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty && daysValid}
+          onSave={() =>
+            onSave({ auditRetentionDays: daysNum, snapshotFrequency: freq })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Inventory tab cards ----------------
+
+// ---------------- Pricing tab cards (M-163) ----------------
+
+const ROUNDING_OPTIONS = [
+  { label: "Nearest cent (no rounding)", value: "nearest_cent" },
+  { label: "End in .99", value: "ninety_nine" },
+  { label: "End in .95", value: "ninety_five" },
+] as const;
+
+const DISCOUNT_TYPE_OPTIONS = [
+  { label: "Percentage off", value: "percentage" },
+  { label: "Flat amount off", value: "flat_discount" },
+  { label: "Fixed bundle price", value: "fixed" },
+  { label: "Tiered (per quantity)", value: "tiered" },
+  { label: "Volume", value: "volume" },
+  { label: "BOGO", value: "bogo" },
+  { label: "Custom", value: "custom" },
+] as const;
+
+interface RoundingCardProps {
+  initial: Pick<PricingBlock, "roundingRule" | "currencyFormatterOverride">;
+  busy: boolean;
+  onSave: (
+    patch: Pick<PricingBlock, "roundingRule" | "currencyFormatterOverride">,
+  ) => Promise<void>;
+}
+
+function RoundingCard({ initial, busy, onSave }: RoundingCardProps): JSX.Element {
+  const [rule, setRule] = useState<PricingBlock["roundingRule"]>(
+    initial.roundingRule ?? PRICING_DEFAULTS.roundingRule,
+  );
+  const [fmt, setFmt] = useState<string>(
+    initial.currencyFormatterOverride ??
+      PRICING_DEFAULTS.currencyFormatterOverride,
+  );
+  const dirty =
+    (initial.roundingRule ?? PRICING_DEFAULTS.roundingRule) !== rule ||
+    (initial.currencyFormatterOverride ??
+      PRICING_DEFAULTS.currencyFormatterOverride) !== fmt;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Rounding &amp; formatting
+        </Text>
+        <Select
+          label="Rounding rule"
+          options={ROUNDING_OPTIONS as unknown as { label: string; value: string }[]}
+          value={rule ?? PRICING_DEFAULTS.roundingRule}
+          onChange={(v) => setRule(v as PricingBlock["roundingRule"])}
+        />
+        <TextField
+          label="Currency formatter override"
+          value={fmt}
+          onChange={setFmt}
+          autoComplete="off"
+          maxLength={120}
+          helpText="Use {amount} and {currency} placeholders, e.g. '{amount} {currency}' or '{currency}{amount}'. Leave blank to use Shopify's locale-aware formatter."
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() =>
+            onSave({ roundingRule: rule, currencyFormatterOverride: fmt })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+interface PricingDefaultsCardProps {
+  initial: Pick<PricingBlock, "defaultDiscountType" | "b2bMarkupPercent">;
+  busy: boolean;
+  onSave: (
+    patch: Pick<PricingBlock, "defaultDiscountType" | "b2bMarkupPercent">,
+  ) => Promise<void>;
+}
+
+function PricingDefaultsCard({
+  initial,
+  busy,
+  onSave,
+}: PricingDefaultsCardProps): JSX.Element {
+  const [type, setType] = useState<PricingBlock["defaultDiscountType"]>(
+    initial.defaultDiscountType ?? PRICING_DEFAULTS.defaultDiscountType,
+  );
+  const [markup, setMarkup] = useState<string>(
+    String(initial.b2bMarkupPercent ?? PRICING_DEFAULTS.b2bMarkupPercent),
+  );
+  const markupNum = Number(markup);
+  const markupValid =
+    Number.isFinite(markupNum) && markupNum >= -100 && markupNum <= 1000;
+  const dirty =
+    (initial.defaultDiscountType ?? PRICING_DEFAULTS.defaultDiscountType) !== type ||
+    String(initial.b2bMarkupPercent ?? PRICING_DEFAULTS.b2bMarkupPercent) !== markup;
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Defaults for new bundles
+        </Text>
+        <Select
+          label="Default discount type"
+          options={
+            DISCOUNT_TYPE_OPTIONS as unknown as { label: string; value: string }[]
+          }
+          value={type ?? PRICING_DEFAULTS.defaultDiscountType}
+          onChange={(v) => setType(v as PricingBlock["defaultDiscountType"])}
+          helpText="Pre-fills the rule type when a merchant adds the first pricing rule on a new bundle."
+        />
+        <TextField
+          label="B2B markup (%)"
+          type="number"
+          value={markup}
+          onChange={setMarkup}
+          autoComplete="off"
+          error={!markupValid ? "Range: -100 to 1000" : undefined}
+          helpText="Applied on top of the bundle subtotal for customers tagged b2b. Negatives are allowed (volume discount). Wiring at checkout lands post-R1."
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty && markupValid}
+          onSave={() =>
+            onSave({ defaultDiscountType: type, b2bMarkupPercent: markupNum })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Pricing tab cards ----------------
+
 interface PlaceholderTabProps {
   tab: TabSpec;
 }
@@ -664,7 +1000,7 @@ export function SettingsPage(): JSX.Element {
   }
 
   async function patchSubobject(
-    key: "general" | "display",
+    key: "general" | "display" | "inventory" | "pricing",
     patch: Record<string, unknown>,
   ): Promise<void> {
     setSaving(true);
@@ -691,6 +1027,31 @@ export function SettingsPage(): JSX.Element {
     patchSubobject("general", patch);
   const patchDisplay = (patch: Record<string, unknown>) =>
     patchSubobject("display", patch);
+  const patchInventory = (patch: Record<string, unknown>) =>
+    patchSubobject("inventory", patch);
+  const patchPricing = (patch: Record<string, unknown>) =>
+    patchSubobject("pricing", patch);
+
+  async function patchSafetyLock(next: boolean): Promise<void> {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/v1/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ safetyLock: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const merged = (await res.json()) as SettingsPayload;
+      setState(merged);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2400);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const polarisTabs = useMemo(
     () =>
@@ -760,6 +1121,55 @@ export function SettingsPage(): JSX.Element {
                   }}
                   busy={saving}
                   onSave={patchGeneral}
+                />
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "inventory" ? (
+          <Layout>
+            <Layout.Section>
+              <BlockStack gap="400">
+                <StockGuardsCard
+                  initialSafetyLock={state.safetyLock === true}
+                  initial={{
+                    lowStockThreshold: state.inventory.lowStockThreshold,
+                    oversellPolicy: state.inventory.oversellPolicy,
+                    lowStockAlertEnabled: state.inventory.lowStockAlertEnabled,
+                  }}
+                  busy={saving}
+                  onSaveInventory={patchInventory}
+                  onSaveSafetyLock={patchSafetyLock}
+                />
+                <AuditCard
+                  initial={{
+                    auditRetentionDays: state.inventory.auditRetentionDays,
+                    snapshotFrequency: state.inventory.snapshotFrequency,
+                  }}
+                  busy={saving}
+                  onSave={patchInventory}
+                />
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "pricing" ? (
+          <Layout>
+            <Layout.Section>
+              <BlockStack gap="400">
+                <RoundingCard
+                  initial={{
+                    roundingRule: state.pricing.roundingRule,
+                    currencyFormatterOverride: state.pricing.currencyFormatterOverride,
+                  }}
+                  busy={saving}
+                  onSave={patchPricing}
+                />
+                <PricingDefaultsCard
+                  initial={{
+                    defaultDiscountType: state.pricing.defaultDiscountType,
+                    b2bMarkupPercent: state.pricing.b2bMarkupPercent,
+                  }}
+                  busy={saving}
+                  onSave={patchPricing}
                 />
               </BlockStack>
             </Layout.Section>

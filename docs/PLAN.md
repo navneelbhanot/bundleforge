@@ -251,7 +251,7 @@
 |----|-------|--------|------|-------|
 | M-161 | Settings shell + General tab | done (2026-05-06) | `docs/specs/M-161-settings-shell-general.md` | 10-tab shell with hash routing; General tab with Shop/Brand/Defaults cards; deep-merged settings.general subobject |
 | M-162 | Display tab | done (2026-05-06) | `docs/specs/M-162-settings-display-tab.md` | 3 cards: Layout/visual style, Imagery & copy, Custom CSS. Server: settings.display deep-merge. Theme-block consumption deferred to M-162b. |
-| M-163 | Inventory + Pricing tab | pending | — | Threshold, oversell, rounding, B2B markup |
+| M-163 | Inventory + Pricing tabs | done (2026-05-06) | `docs/specs/M-163-settings-inventory-pricing.md` | 4 cards across 2 tabs. Inventory: stock guards (safetyLock + threshold + oversell + alert) + audit retention/snapshots. Pricing: rounding/formatting + defaults for new bundles (discount type + B2B markup). |
 | M-164 | Cart & Checkout tab | pending | — | Bundle-as-product vs components mode toggle |
 | M-165 | Notifications & alerts tab | pending | — | Email/Slack/Teams + alert rules |
 | M-166 | Integrations tab | pending | — | Status badges + per-adapter drawers |
