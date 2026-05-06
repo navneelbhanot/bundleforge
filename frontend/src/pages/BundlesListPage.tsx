@@ -11,7 +11,7 @@
  * whole array back; the client owns ordering.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BlockStack,
   Box,
@@ -512,6 +512,27 @@ export function BundlesListPage(): JSX.Element {
       setToast(`Could not load templates: ${(e as Error).message}`);
     }
   }, [templates.length]);
+
+  // The ⌘K command palette (M-180) navigates to /?openTemplates=1
+  // when the merchant picks the Browse-templates action from any
+  // route. Read the param on mount, open the modal, then strip
+  // the param so a refresh doesn't re-open it.
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("openTemplates") === "1") {
+      void openTemplates();
+      params.delete("openTemplates");
+      const next = params.toString();
+      navigate(
+        `${location.pathname}${next.length > 0 ? `?${next}` : ""}`,
+        { replace: true },
+      );
+    }
+    // Only run on first mount — once we've consumed the param
+    // we never re-open from it. (Intentional empty deps; the
+    // closure captures the initial location.search.)
+  }, []);
 
   const handleUseTemplate = useCallback(
     async (templateId: string): Promise<void> => {

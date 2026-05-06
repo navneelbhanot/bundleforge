@@ -6,19 +6,18 @@
 
 ## Current milestone
 
-**Phase R3 closed — Bundle List richness complete.**
+**Phase R4 in progress — cross-cutting polish.**
 
-M-176..M-179 all landed 2026-05-06. The bundle list now
-ships full IndexFilters chrome (debounced search, status +
-type chip filters, saved views), bulk actions, sort + view
-modes + true pagination, and a curated 6-template "Browse
-templates" gallery. Templates carry type + config + pricing
-rules but no items — the merchant adds their own SKUs after
-the one-click instantiate.
+M-180 landed 2026-05-06. A global ⌘K (Ctrl-K elsewhere)
+command palette is now mounted in the App shell and reachable
+from every route. Three result sections: Bundles (debounced
+search), Pages (admin nav targets), Actions (Create bundle,
+Browse templates). Browse-templates from any route is
+accomplished via a `?openTemplates=1` query param the
+BundlesListPage consumes on mount.
 
-Phase R4 next: cross-cutting polish (cmd+k search, in-app
-help drawer, unified toast/confirm/skeleton patterns,
-empty-state illustrations — M-180..M-183).
+M-181..M-183 remaining: in-app help drawer, unified
+toast/confirm/skeleton patterns, empty-state illustrations.
 
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
@@ -36,18 +35,14 @@ tables, M-170/M-172/M-173 each add a single JSON column to
 bundles defaulting to `{}`. Apply via `prisma migrate deploy`
 from a CI shell.
 
-**Code (next session):** Run M-180 — global cmd+k search
-(Phase R4 start). Spec first:
-`docs/specs/M-180-global-cmdk-search.md`. A modal search
-palette triggered by ⌘K / Ctrl-K that lets the merchant jump
-to any bundle by title, navigate to the main admin pages
-(Bundles, Orders, Inventory, Analytics, Settings, Billing),
-and trigger common actions (Create bundle, Browse templates).
-Search uses the existing `/api/v1/bundles?search=` endpoint
-for bundles + a small static action registry for everything
-else. New `frontend/src/components/CommandPalette.tsx`
-mounted globally inside the App shell. Sizing: medium —
-sets the pattern for M-181 help drawer.
+**Code (next session):** Run M-181 — in-app help drawer.
+Spec first: `docs/specs/M-181-help-drawer.md`. A right-side
+Polaris `Sheet` triggered by a "Help" button in the App
+shell (or `?` keystroke) showing context-aware help: a
+search box over the existing `docs/help/` markdown files +
+a "What's new in BundleForge" section pulling from the
+session log latest. Uses the same global-mount pattern as
+M-180's CommandPalette. Sizing: medium.
 
 Other open threads (mostly user-owned):
 
@@ -116,6 +111,25 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-180 — Global ⌘K command palette** (2026-05-06 late,
+  **Phase R4 start**). New
+  `frontend/src/components/CommandPalette.tsx` mounted in
+  the App shell. Polaris Modal triggered by ⌘K (Mac) /
+  Ctrl-K (others) with three result sections: **Bundles**
+  (debounced 250ms against `/api/v1/bundles?search=`),
+  **Pages** (9 admin nav targets, substring-filtered),
+  **Actions** (Create bundle, Browse templates). Empty
+  query: Pages + Actions only, no API hit. Keyboard nav:
+  ↑/↓ wraps through the flat list, Enter activates, Esc
+  closes. The keyboard handler attaches to `window` rather
+  than a wrapper element to keep the JSX free of static-
+  element a11y warnings; an `isInsideTextField()` guard
+  prevents the open hotkey from hijacking ⌘K when the
+  merchant is inside an input. Browse-templates from any
+  route navigates to `/?openTemplates=1`, which
+  BundlesListPage reads on mount and strips so a refresh
+  doesn't re-open the modal.
+  `docs/sessions/0180-global-cmdk-search.md`.
 - **M-179 — Bundle list · templates / preset gallery**
   (2026-05-06 late). **Closes Phase R3.** New
   `src/services/bundles/templates.ts` registry seeds 6
@@ -469,11 +483,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **676 / 676 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 templates registry cases + +3 server
-  template-route cases + +3 TemplatesModal UI cases + +1
-  BundlesListPage UI case since M-178.
-- **526 / 526** when no real DB is available — the bundle CRUD
+- **680 / 680 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +4 CommandPalette UI cases since M-179.
+- **530 / 530** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.

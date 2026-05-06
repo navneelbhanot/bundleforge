@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import { AppBridgeProvider } from "./AppBridgeProvider";
+import { CommandPalette } from "./components/CommandPalette";
 import { NavMenu } from "./components/NavMenu";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { BundleCreatePage } from "./pages/BundleCreatePage";
@@ -131,6 +132,7 @@ function Shell(): JSX.Element {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/billing" element={<BillingPage />} />
       </Routes>
+      <CommandPalette />
     </Page>
   );
 }

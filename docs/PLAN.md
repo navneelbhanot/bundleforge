@@ -287,7 +287,7 @@
 
 | ID | Title | Status |
 |----|-------|--------|
-| M-180 | Global cmd+k search | pending |
+| M-180 | Global cmd+k search | done (2026-05-06) — `docs/specs/M-180-global-cmdk-search.md` |
 | M-181 | In-app help drawer | pending |
 | M-182 | Unified toast / confirm / skeleton | pending |
 | M-183 | Empty-state illustrations | pending |
