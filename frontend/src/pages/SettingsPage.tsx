@@ -31,6 +31,7 @@ import {
   TextField,
 } from "@shopify/polaris";
 
+import { BillingPanel } from "../components/BillingPanel";
 import { IntegrationsTab } from "../components/IntegrationsTab";
 import { PageLoading } from "../components/PageLoading";
 
@@ -90,6 +91,12 @@ interface NotificationRule {
   channels?: NotificationChannel[];
 }
 
+interface LocalizationBlock {
+  enabledLocales?: string[];
+  fallbackLocale?: string;
+  machineTranslateMissing?: boolean;
+}
+
 interface NotificationsBlock {
   email?: boolean;
   inApp?: boolean;
@@ -113,7 +120,20 @@ interface SettingsPayload {
   inventory: InventoryBlock;
   pricing: PricingBlock;
   cart: CartBlock;
+  localization: LocalizationBlock;
 }
+
+const SUPPORTED_LOCALE_LIST: string[] = [
+  "en", "es", "fr", "de", "it", "pt",
+  "ja", "zh", "ko", "nl", "pl", "sv",
+  "da", "no", "ru",
+];
+
+const LOCALIZATION_DEFAULTS: Required<LocalizationBlock> = {
+  enabledLocales: SUPPORTED_LOCALE_LIST,
+  fallbackLocale: "en",
+  machineTranslateMissing: false,
+};
 
 const CART_DEFAULTS: Required<CartBlock> = {
   defaultMode: "bundle_as_product",
@@ -163,9 +183,9 @@ const TABS: TabSpec[] = [
   { id: "cart", hash: "cart", content: "Cart & checkout", status: "ready" },
   { id: "notifications", hash: "notifications", content: "Notifications", status: "ready" },
   { id: "integrations", hash: "integrations", content: "Integrations", status: "ready" },
-  { id: "api", hash: "api", content: "API & webhooks", status: "deferred", milestone: "M-167" },
-  { id: "localization", hash: "localization", content: "Localization", status: "deferred", milestone: "M-167" },
-  { id: "billing", hash: "billing", content: "Billing", status: "deferred", milestone: "M-167" },
+  { id: "api", hash: "api", content: "API & webhooks", status: "deferred", milestone: "M-168" },
+  { id: "localization", hash: "localization", content: "Localization", status: "ready" },
+  { id: "billing", hash: "billing", content: "Billing", status: "ready" },
 ];
 
 const SUPPORTED_LOCALES = [
@@ -1476,6 +1496,89 @@ function AlertRulesCard({
 
 // ---------------- /Notifications tab cards ----------------
 
+// ---------------- Localization tab card (M-167) ----------------
+
+interface LocalizationCardProps {
+  initial: LocalizationBlock;
+  busy: boolean;
+  onSave: (patch: LocalizationBlock) => Promise<void>;
+}
+
+function LocalizationCard({ initial, busy, onSave }: LocalizationCardProps): JSX.Element {
+  const initEnabled = initial.enabledLocales ?? LOCALIZATION_DEFAULTS.enabledLocales;
+  const initFallback = initial.fallbackLocale ?? LOCALIZATION_DEFAULTS.fallbackLocale;
+  const initMt =
+    initial.machineTranslateMissing ?? LOCALIZATION_DEFAULTS.machineTranslateMissing;
+
+  const [enabled, setEnabled] = useState<string[]>(initEnabled);
+  const [fallback, setFallback] = useState<string>(initFallback);
+  const [mt, setMt] = useState<boolean>(initMt);
+
+  const dirty =
+    JSON.stringify(initEnabled) !== JSON.stringify(enabled) ||
+    initFallback !== fallback ||
+    initMt !== mt;
+
+  // The fallback must be one of the enabled locales — silently
+  // promote it if the merchant disabled the current fallback.
+  const fallbackInEnabled = enabled.includes(fallback);
+
+  return (
+    <Card>
+      <BlockStack gap="300">
+        <Text as="h2" variant="headingMd">
+          Localization
+        </Text>
+        <Text as="p" tone="subdued">
+          Choose which of the 15 supported locales the storefront and
+          admin emails are allowed to use. Disabled locales fall back
+          to your fallback locale below.
+        </Text>
+        <ChoiceList
+          title="Enabled locales"
+          allowMultiple
+          choices={SUPPORTED_LOCALE_LIST.map((l) => ({
+            label: l,
+            value: l,
+          }))}
+          selected={enabled}
+          onChange={(next) => setEnabled(next)}
+        />
+        <Select
+          label="Fallback locale"
+          options={SUPPORTED_LOCALE_LIST.map((l) => ({ label: l, value: l }))}
+          value={fallback}
+          onChange={setFallback}
+          helpText={
+            !fallbackInEnabled
+              ? "Heads-up: this fallback isn't in the enabled list. The storefront will still use it for missing translations, but you should normally include it."
+              : undefined
+          }
+        />
+        <Checkbox
+          label="Machine-translate missing strings"
+          checked={mt}
+          onChange={setMt}
+          helpText="When a string isn't translated, route the source string through the i18n.t() lookup chain. Server-side wiring to a translation service lands in a follow-on ticket; until then this is a passthrough."
+        />
+        <CardSaveBar
+          busy={busy}
+          dirty={dirty}
+          onSave={() =>
+            onSave({
+              enabledLocales: enabled,
+              fallbackLocale: fallback,
+              machineTranslateMissing: mt,
+            })
+          }
+        />
+      </BlockStack>
+    </Card>
+  );
+}
+
+// ---------------- /Localization tab card ----------------
+
 interface PlaceholderTabProps {
   tab: TabSpec;
 }
@@ -1534,7 +1637,8 @@ export function SettingsPage(): JSX.Element {
       | "inventory"
       | "pricing"
       | "cart"
-      | "notifications",
+      | "notifications"
+      | "localization",
     patch: Record<string, unknown>,
   ): Promise<void> {
     setSaving(true);
@@ -1569,6 +1673,8 @@ export function SettingsPage(): JSX.Element {
     patchSubobject("cart", patch);
   const patchNotifications = (patch: Record<string, unknown>) =>
     patchSubobject("notifications", patch);
+  const patchLocalization = (patch: Record<string, unknown>) =>
+    patchSubobject("localization", patch);
 
   async function patchSafetyLock(next: boolean): Promise<void> {
     setSaving(true);
@@ -1715,9 +1821,25 @@ export function SettingsPage(): JSX.Element {
         ) : activeTab.id === "integrations" ? (
           <Layout>
             <Layout.Section>
-              <IntegrationsTab />
+              <IntegrationsTab
+                shopifyDomain={state.general.shopifyDomain}
+              />
             </Layout.Section>
           </Layout>
+        ) : activeTab.id === "localization" ? (
+          <Layout>
+            <Layout.Section>
+              <LocalizationCard
+                initial={state.localization}
+                busy={saving}
+                onSave={(patch) =>
+                  patchLocalization(patch as Record<string, unknown>)
+                }
+              />
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "billing" ? (
+          <BillingPanel />
         ) : activeTab.id === "notifications" ? (
           <Layout>
             <Layout.Section>

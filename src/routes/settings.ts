@@ -25,6 +25,7 @@ import {
 import { z } from "zod";
 
 import { prisma } from "../config/database";
+import { SUPPORTED_LOCALES } from "../i18n";
 import {
   NotFoundError,
   UnauthorizedError,
@@ -92,6 +93,18 @@ const PricingPatch = z
   })
   .strict();
 
+const LocaleEnum = z.enum(
+  SUPPORTED_LOCALES as unknown as [string, ...string[]],
+);
+
+const LocalizationPatch = z
+  .object({
+    enabledLocales: z.array(LocaleEnum).optional(),
+    fallbackLocale: LocaleEnum.optional(),
+    machineTranslateMissing: z.boolean().optional(),
+  })
+  .strict();
+
 const CartPatch = z
   .object({
     defaultMode: z
@@ -145,6 +158,7 @@ const PatchSchema = z
     inventory: InventoryPatch.optional(),
     pricing: PricingPatch.optional(),
     cart: CartPatch.optional(),
+    localization: LocalizationPatch.optional(),
   })
   .strict();
 
@@ -264,6 +278,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         inventory: isObject(settings.inventory) ? settings.inventory : {},
         pricing: isObject(settings.pricing) ? settings.pricing : {},
         cart: isObject(settings.cart) ? settings.cart : {},
+        localization: isObject(settings.localization)
+          ? settings.localization
+          : {},
       });
     } catch (err) {
       next(err);
@@ -312,6 +329,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         inventory: mergeSubobject(prev.inventory, patch.inventory),
         pricing: mergeSubobject(prev.pricing, patch.pricing),
         cart: mergeSubobject(prev.cart, patch.cart),
+        localization: mergeSubobject(prev.localization, patch.localization),
       };
 
       const updated = await client.shop.update({
@@ -337,6 +355,9 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
           ? updatedSettings.pricing
           : {},
         cart: isObject(updatedSettings.cart) ? updatedSettings.cart : {},
+        localization: isObject(updatedSettings.localization)
+          ? updatedSettings.localization
+          : {},
       });
     } catch (err) {
       next(err);

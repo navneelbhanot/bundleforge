@@ -652,6 +652,76 @@ describe("PUT /settings", () => {
     });
   });
 
+  it("round-trips a localization patch", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({
+        localization: {
+          enabledLocales: ["en", "fr", "de", "ja"],
+          fallbackLocale: "en",
+          machineTranslateMissing: true,
+        },
+      });
+    expect(res.status, res.text).toBe(200);
+    expect(res.body.localization).toMatchObject({
+      enabledLocales: ["en", "fr", "de", "ja"],
+      fallbackLocale: "en",
+      machineTranslateMissing: true,
+    });
+  });
+
+  it("rejects an unsupported locale in localization.fallbackLocale", async () => {
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({ ...SHOP_BASE, settings: {} }),
+        update: vi.fn(),
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ localization: { fallbackLocale: "klingon" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("deep-merges localization — fallback save doesn't drop enabledLocales", async () => {
+    const updateSpy = vi.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ id: "s", settings: data.settings }),
+    );
+    const client: SettingsClient = {
+      shop: {
+        findUnique: vi.fn().mockResolvedValue({
+          ...SHOP_BASE,
+          settings: {
+            localization: {
+              enabledLocales: ["en", "es", "fr"],
+              machineTranslateMissing: false,
+            },
+          },
+        }),
+        update: updateSpy,
+      },
+    };
+    const res = await request(buildApp(client))
+      .put("/settings")
+      .send({ localization: { fallbackLocale: "es" } });
+    expect(res.status).toBe(200);
+    const writtenSettings = updateSpy.mock.calls[0][0].data.settings;
+    expect(writtenSettings.localization).toEqual({
+      enabledLocales: ["en", "es", "fr"],
+      machineTranslateMissing: false,
+      fallbackLocale: "es",
+    });
+  });
+
   it("persists top-level safetyLock and general.brandColor in the same patch", async () => {
     const updateSpy = vi.fn().mockImplementation(({ data }) =>
       Promise.resolve({ id: "s", settings: data.settings }),

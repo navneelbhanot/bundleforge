@@ -178,13 +178,38 @@ describe("IntegrationsTab", () => {
     });
   });
 
-  it("feed-only integrations show the M-167 wire-up note instead of Configure", async () => {
+  it("feed-only integrations show the feed URL surface when shopifyDomain is supplied", async () => {
+    render(
+      wrap(
+        <IntegrationsTab shopifyDomain="devstore.myshopify.com" />,
+      ),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Google Merchant", level: 3 }),
+      ).toBeTruthy(),
+    );
+    // The feed URL TextField is read-only and labelled hidden — find by displayValue.
+    const feedInput =
+      Array.from(document.querySelectorAll<HTMLInputElement>("input")).find(
+        (i) => i.value.includes("/api/feeds/google-merchant?shop="),
+      ) ?? null;
+    expect(feedInput).toBeTruthy();
+    expect(feedInput!.value).toContain("devstore.myshopify.com");
+    // Copy button visible.
+    expect(
+      Array.from(document.querySelectorAll("button"))
+        .map((b) => b.textContent?.trim()),
+    ).toContain("Copy URL");
+  });
+
+  it("feed-only integrations show the missing-domain hint when shopifyDomain is null", async () => {
     render(wrap(<IntegrationsTab />));
     await waitFor(() =>
       expect(
         screen.getByRole("heading", { name: "Google Merchant", level: 3 }),
       ).toBeTruthy(),
     );
-    expect(screen.getByText(/Feed URL surfaces in M-167/i)).toBeTruthy();
+    expect(screen.getByText(/needs your Shopify domain/i)).toBeTruthy();
   });
 });

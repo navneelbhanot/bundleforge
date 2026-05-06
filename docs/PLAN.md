@@ -255,7 +255,8 @@
 | M-164 | Cart & Checkout tab | done (2026-05-06) | `docs/specs/M-164-settings-cart-checkout.md` | 2 cards: Cart mode (bundle_as_product / components_as_attributes), Checkout protections (atomic enforcement, abandonment, line-note template). Cart Transform Function reads optional shop metafield + branches; M-164b will write the metafield from the admin save action. |
 | M-165 | Notifications & alerts tab | done (2026-05-06) | `docs/specs/M-165-settings-notifications.md` | 3 cards: Channels (recipients, Slack/Teams URLs, in-app), Email channel (master toggle), Alert rules (5 rules × 4 channels each). Schema upgrade preserves backwards compat with the existing email/inApp toggles. |
 | M-166 | Integrations tab | done (2026-05-06) | `docs/specs/M-166-settings-integrations.md` | New `/api/v1/integrations` route with GET/PUT/POST-test/DELETE; AES-256 encrypted credentials; one Card + Configure modal per known adapter (ShipStation, Recharge, Bold, Klaviyo, Amazon, Google Merchant). |
-| M-167 | API tokens + webhooks + Localization + Billing tabs | pending | — | Tokens, webhooks, locale gating, plan + usage |
+| M-167 | Localization + Billing tabs + GM feed URL | done (2026-05-06) | `docs/specs/M-167-settings-api-localization-billing.md` | Re-scoped mid-spec — API & webhooks split into M-168. Localization tab (3 controls), Billing tab (extracted shared BillingPanel), Google Merchant feed URL surfaced on Integrations tab. |
+| M-168 | API tokens + outbound webhooks tab | pending | — | Two new Prisma models (ApiToken, OutboundWebhook) + migrations, two new CRUD routes, frontend tables + Add modals. Split out from M-167 mid-spec because the schema work is its own milestone. Closes Phase R1. |
 
 ### Phase R2 — Bundle Detail richness
 

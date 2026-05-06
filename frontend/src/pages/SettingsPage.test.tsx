@@ -27,6 +27,7 @@ const BASE_PAYLOAD = {
   inventory: {} as Record<string, unknown>,
   pricing: {} as Record<string, unknown>,
   cart: {} as Record<string, unknown>,
+  localization: {} as Record<string, unknown>,
 };
 
 interface FetchResponse {
@@ -217,7 +218,7 @@ describe("SettingsPage", () => {
     expect(putCall).toBeUndefined();
   });
 
-  it("non-built tabs render the placeholder pointing at their milestone", async () => {
+  it("non-built API tab points at M-168 (re-scoped from M-167)", async () => {
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "/settings#api");
     }
@@ -225,7 +226,7 @@ describe("SettingsPage", () => {
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-167/)).toBeTruthy();
+    expect(screen.getByText(/M-168/)).toBeTruthy();
   });
 
   it("Display tab renders three editable cards", async () => {
@@ -694,6 +695,116 @@ describe("SettingsPage", () => {
       );
       expect(body.notifications.recipients).toContain("ops@example.com");
     });
+  });
+
+  it("Localization tab renders the Localization card", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#localization");
+    }
+    render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Localization", level: 2 }),
+      ).toBeTruthy(),
+    );
+  });
+
+  it("Localization PATCH sends the localization subobject", async () => {
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#localization");
+    }
+    const fetchSpy = vi.fn(
+      mockFetch(async (_input, init) => {
+        if (!init || init.method === undefined || init.method === "GET") {
+          return { ok: true, status: 200, json: async () => BASE_PAYLOAD };
+        }
+        const body = JSON.parse((init.body as string) ?? "{}") as {
+          localization?: Record<string, unknown>;
+        };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ...BASE_PAYLOAD,
+            localization: { ...BASE_PAYLOAD.localization, ...(body.localization ?? {}) },
+          }),
+        };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { container } = render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Localization", level: 2 }),
+      ).toBeTruthy(),
+    );
+
+    // Toggle the machine-translate checkbox.
+    const mtCheckbox = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    ).at(-1)!;
+    fireEvent.click(mtCheckbox);
+
+    const saveBtn = (
+      Array.from(container.querySelectorAll("button")) as HTMLButtonElement[]
+    ).find((b) => b.textContent?.trim() === "Save")!;
+    saveBtn.click();
+
+    await waitFor(() => {
+      const putCall = fetchSpy.mock.calls.find((c) => {
+        const init = c[1] as RequestInit | undefined;
+        if (!init || init.method !== "PUT") return false;
+        const body = JSON.parse((init.body as string) ?? "{}");
+        return body.localization !== undefined;
+      });
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(
+        ((putCall![1] as RequestInit).body as string) ?? "{}",
+      );
+      expect(body.localization.machineTranslateMissing).toBe(true);
+    });
+  });
+
+  it("Billing tab renders the BillingPanel inside the settings shell", async () => {
+    // BillingPanel does its own fetches to /api/v1/billing and
+    // /api/v1/billing/plans. Add stubs that resolve them.
+    const fetchSpy = vi.fn(
+      mockFetch(async (input) => {
+        if (input.includes("/api/v1/billing/plans")) {
+          return { ok: true, status: 200, json: async () => [] };
+        }
+        if (input.includes("/api/v1/billing")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              plan: "starter",
+              caps: {
+                maxBundles: 5,
+                maxOrdersPerMonth: 100,
+                monthlyPriceUsd: 0,
+                annualPriceUsd: 0,
+                trialDays: 0,
+              },
+              subscription: null,
+            }),
+          };
+        }
+        return { ok: true, status: 200, json: async () => BASE_PAYLOAD };
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/settings#billing");
+    }
+    render(wrap(<SettingsPage />));
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Current plan/i),
+      ).toBeTruthy(),
+    );
   });
 
   it("Custom CSS card flags mismatched braces", async () => {

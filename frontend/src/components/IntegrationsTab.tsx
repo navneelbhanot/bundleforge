@@ -236,11 +236,67 @@ function nonEmptyCredentials(
 
 interface IntegrationRowProps {
   vm: IntegrationViewModel;
+  shopifyDomain: string | null;
   onChanged: (next: IntegrationViewModel) => void;
 }
 
-function IntegrationRow({ vm, onChanged }: IntegrationRowProps): JSX.Element {
+function feedUrlFor(type: string, shopifyDomain: string | null): string | null {
+  if (type !== "google_merchant" || !shopifyDomain) return null;
+  if (typeof window === "undefined") {
+    return `/api/feeds/google-merchant?shop=${encodeURIComponent(shopifyDomain)}`;
+  }
+  return `${window.location.origin}/api/feeds/google-merchant?shop=${encodeURIComponent(shopifyDomain)}`;
+}
+
+function FeedUrlSurface({ url }: { url: string }): JSX.Element {
+  const [copied, setCopied] = useState(false);
+  async function copy(): Promise<void> {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else if (typeof window !== "undefined") {
+        // Fallback for jsdom / older browsers — select and copy
+        // through a temporary textarea.
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand?.("copy");
+        } catch {
+          // ignore
+        }
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore — UI just won't flash "copied"
+    }
+  }
+  return (
+    <BlockStack gap="200">
+      <TextField
+        label="Feed URL"
+        value={url}
+        autoComplete="off"
+        readOnly
+        labelHidden
+      />
+      <InlineStack gap="200">
+        <Button onClick={copy}>{copied ? "Copied" : "Copy URL"}</Button>
+      </InlineStack>
+    </BlockStack>
+  );
+}
+
+function IntegrationRow({
+  vm,
+  shopifyDomain,
+  onChanged,
+}: IntegrationRowProps): JSX.Element {
   const [open, setOpen] = useState(false);
+  const feedUrl = feedUrlFor(vm.type, shopifyDomain);
   return (
     <Card>
       <BlockStack gap="200">
@@ -254,7 +310,7 @@ function IntegrationRow({ vm, onChanged }: IntegrationRowProps): JSX.Element {
             </InlineStack>
             <Text as="p" tone="subdued" variant="bodySm">
               {vm.kind === "feed"
-                ? "Feed-based integration. Wire-up lands in M-167."
+                ? "Feed-based integration. Paste the URL on the right into Google Merchant Center."
                 : vm.expectedCredKeys.length === 0
                   ? "No credentials required."
                   : `Needs: ${vm.expectedCredKeys.join(", ")}`}
@@ -266,9 +322,15 @@ function IntegrationRow({ vm, onChanged }: IntegrationRowProps): JSX.Element {
             )}
           </BlockStack>
           {vm.kind === "feed" ? (
-            <Text as="p" tone="subdued">
-              Feed URL surfaces in M-167.
-            </Text>
+            feedUrl ? (
+              <Box minWidth="320px">
+                <FeedUrlSurface url={feedUrl} />
+              </Box>
+            ) : (
+              <Text as="p" tone="subdued">
+                Feed URL needs your Shopify domain.
+              </Text>
+            )
           ) : (
             <Button onClick={() => setOpen(true)}>Configure</Button>
           )}
@@ -286,7 +348,13 @@ function IntegrationRow({ vm, onChanged }: IntegrationRowProps): JSX.Element {
   );
 }
 
-export function IntegrationsTab(): JSX.Element {
+interface IntegrationsTabProps {
+  /** From settings.general.shopifyDomain — used to build the
+   * Google Merchant feed URL. Optional in tests. */
+  shopifyDomain?: string | null;
+}
+
+export function IntegrationsTab({ shopifyDomain = null }: IntegrationsTabProps = {}): JSX.Element {
   const [rows, setRows] = useState<IntegrationViewModel[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -340,7 +408,12 @@ export function IntegrationsTab(): JSX.Element {
         {/* Reserved for a future "Add custom integration" CTA. */}
       </ButtonGroup>
       {rows.map((vm) => (
-        <IntegrationRow key={vm.type} vm={vm} onChanged={updateOne} />
+        <IntegrationRow
+          key={vm.type}
+          vm={vm}
+          shopifyDomain={shopifyDomain}
+          onChanged={updateOne}
+        />
       ))}
     </BlockStack>
   );

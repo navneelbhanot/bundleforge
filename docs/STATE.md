@@ -6,27 +6,27 @@
 
 ## Current milestone
 
-**Phase R1 — rich Settings page in progress.**
+**Phase R1 — rich Settings page nearly done.**
 
-M-161..M-166 all landed 2026-05-06. The SettingsPage now has 7 of
-10 tabs fully built. M-166 added a brand-new
-`/api/v1/integrations` route (GET/PUT/POST-test/DELETE) with
-AES-256 encrypted credentials and a per-row Configure modal that
-includes a "Test connection" button calling the adapter's
-`ping()`. Remaining R1 milestone: M-167 (API & webhooks +
-Localization + Billing — three thin tabs in one milestone).
+M-161..M-167 all landed 2026-05-06. The SettingsPage now has 9
+of 10 tabs fully built. M-167 was re-scoped mid-spec — the
+original draft folded API & webhooks in too, but two new Prisma
+models (ApiToken, OutboundWebhook) + migrations + two CRUD routes
+is its own milestone per CLAUDE.md §4. So M-167 shipped:
+Localization tab, Billing tab (extracted shared `BillingPanel`),
+and the Google Merchant feed URL surfaced on the Integrations
+tab (deferred from M-166). API & webhooks split into M-168 to
+close Phase R1.
 Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-167 — API & webhooks +
-Localization + Billing tabs in one milestone (3 thin tabs).
-Spec first: `docs/specs/M-167-settings-api-localization-billing.md`.
-Roadmap specifies: API tab with per-shop API token CRUD + custom
-webhook subscriptions; Localization tab with enabled-locales
-multi-select + fallback-locale select + machine-translate toggle;
-Billing tab folding into / linking the existing BillingPage.
-Closes Phase R1.
+**Code (next session):** Run M-168 — API & webhooks tab. Spec
+first: `docs/specs/M-168-settings-api-webhooks.md`. Roadmap (kept
+from M-167's superseded draft): two new Prisma models
+(`ApiToken`, `OutboundWebhook`) with migrations, two new CRUD
+routes (`/api/v1/api-tokens`, `/api/v1/outbound-webhooks`), token
+hashing, frontend tables + Add modals. Closes Phase R1.
 
 Other open threads (mostly user-owned):
 
@@ -95,6 +95,21 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-167 — Settings · Localization + Billing + GM feed URL**
+  (2026-05-06 late). Re-scoped mid-spec from "API & webhooks +
+  Localization + Billing in one milestone" to just the three
+  small surfaces — the API & webhooks side was its own
+  milestone of work (two new Prisma models + migrations) and
+  deferred to M-168. Localization tab covers enabled locales
+  (15 options), fallback locale, and a machine-translate
+  toggle. Billing tab is an organizational move: extracted the
+  inner content of `BillingPage.tsx` into a shared
+  `BillingPanel` component used both by the standalone
+  `/billing` route and the Settings tab. Google Merchant
+  feed URL (deferred from M-166) now renders on the
+  Integrations tab as a read-only TextField + Copy button when
+  the shop's Shopify domain is known.
+  `docs/sessions/0167-settings-localization-billing.md`.
 - **M-166 — Settings · Integrations tab** (2026-05-06 late).
   New `/api/v1/integrations` route exposes the adapter registry
   with GET (list all known types joined with shop's persisted
@@ -233,9 +248,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **531 / 531 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +11 integrations-route, +4 IntegrationsTab cases
-  since 0165.
+- **538 / 538 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +3 settings-route, +3 SettingsPage, +1
+  IntegrationsTab cases since 0166.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
