@@ -23,26 +23,19 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User action required (five migrations queued):**
-1. M-168: `prisma/migrations/20260506160000_api_tokens_and_outbound_webhooks/`
-2. M-170: `prisma/migrations/20260506180000_bundle_schedule_settings/`
-3. M-172: `prisma/migrations/20260506200000_bundle_eligibility/`
-4. M-173: `prisma/migrations/20260506220000_bundle_inventory_rules/`
-5. M-174: `prisma/migrations/20260506240000_bundle_activity_log/`
-
-All five safe during normal traffic — M-168/M-174 create new
-tables, M-170/M-172/M-173 each add a single JSON column to
-bundles defaulting to `{}`. Apply via `prisma migrate deploy`
-from a CI shell.
-
 **Code (next session):** No queued roadmap milestone.
 Every admin feature in M-161..M-183 now has its
 storefront / worker side wired up. The behavior-wiring
 backlog (M-167b..M-173d) is empty.
 
+**Note on migrations going forward:** Railway's `start:web`
+script (`scripts/start-web.cjs`) runs `prisma migrate deploy`
+before booting the server, so any new migration committed
+on this branch auto-applies on the next deploy. Manual
+`prisma migrate deploy` is only needed when applying out-of-
+band (e.g. before a deploy lands or against a non-Railway DB).
+
 Open operational items:
-- **Migration application** — five `prisma migrate deploy`
-  events queued: M-168, M-170, M-172, M-173, M-174.
 - **Beta merchant onboarding** — `docs/onboarding-beta.md`
   is ready; ops question, not code.
 
@@ -113,6 +106,23 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **Prisma 6.18.x pin + prod migrations applied**
+  (2026-05-07). `prisma`, `@prisma/client`, and
+  `@prisma/adapter-pg` pinned from `^6.19.3` to `~6.18.0`
+  in `package.json`. Prisma 6.19's bundled PSL bumped to
+  7.1.1 which rejects `url = env("DATABASE_URL")` in
+  `schema.prisma` — the v7 enforcement landed inside a
+  6.x line. Pin keeps `npm install` deterministically on
+  6.18.0 until we do the proper v7 migration
+  (`prisma.config.ts` + driver adapter rewiring). All
+  five queued migrations (M-168, M-170, M-172, M-173,
+  M-174) verified applied on prod via
+  `npx prisma@6.18.0 migrate status` against
+  `DATABASE_PUBLIC_URL` from Railway's `Postgres-cbqK`
+  service. They'd auto-applied via `start:web` on the
+  last deploy. 781/781 vitest pass, typecheck clean,
+  lint baseline unchanged (6 errors / 16 warnings).
+  `docs/sessions/0193-prisma-6.18-pin-prod-migrations.md`.
 - **M-173d — Storefront pauseWhenComponentBelow**
   (2026-05-07). Closes the M-173 chain (admin → CTF →
   storefront-componentOnly → storefront-pause). New
