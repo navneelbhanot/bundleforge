@@ -10,7 +10,7 @@
  * the Display tab; pushing a tab updates window.location.hash so the
  * URL is shareable / bookmarkable.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Badge,
   Banner,
@@ -25,7 +25,6 @@ import {
   Modal,
   Page,
   Select,
-  Tabs,
   Tag,
   Text,
   TextField,
@@ -35,6 +34,7 @@ import { ApiWebhooksTab } from "../components/ApiWebhooksTab";
 import { BillingPanel } from "../components/BillingPanel";
 import { IntegrationsTab } from "../components/IntegrationsTab";
 import { PageLoading } from "../components/PageLoading";
+import { SettingsSidebar } from "../components/settings/SettingsSidebar";
 
 interface GeneralBlock {
   name: string;
@@ -1752,17 +1752,6 @@ export function SettingsPage(): JSX.Element {
     }
   }
 
-  const polarisTabs = useMemo(
-    () =>
-      TABS.map((t) => ({
-        id: t.id,
-        content: t.content,
-        accessibilityLabel: t.content,
-        panelID: `panel-${t.id}`,
-      })),
-    [],
-  );
-
   if (error && !state) {
     return (
       <Page title="Settings">
@@ -1792,17 +1781,17 @@ export function SettingsPage(): JSX.Element {
           </Banner>
         )}
 
-        <Tabs
-          tabs={polarisTabs}
-          selected={tabIndex}
-          onSelect={selectTab}
-          fitted={false}
-        />
-
-        {activeTab.id === "general" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+        <Layout>
+          <Layout.Section variant="oneThird">
+            <SettingsSidebar
+              tabs={TABS}
+              activeIndex={tabIndex}
+              onSelect={selectTab}
+            />
+          </Layout.Section>
+          <Layout.Section>
+            {activeTab.id === "general" ? (
+          <BlockStack gap="400">
                 <ShopCard general={state.general} />
                 <BrandCard
                   initial={{
@@ -1821,13 +1810,9 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchGeneral}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
+          </BlockStack>
         ) : activeTab.id === "inventory" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+          <BlockStack gap="400">
                 <StockGuardsCard
                   initialSafetyLock={state.safetyLock === true}
                   initial={{
@@ -1847,13 +1832,9 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchInventory}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
+          </BlockStack>
         ) : activeTab.id === "pricing" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+          <BlockStack gap="400">
                 <RoundingCard
                   initial={{
                     roundingRule: state.pricing.roundingRule,
@@ -1870,41 +1851,23 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchPricing}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
+          </BlockStack>
         ) : activeTab.id === "integrations" ? (
-          <Layout>
-            <Layout.Section>
-              <IntegrationsTab
-                shopifyDomain={state.general.shopifyDomain}
-              />
-            </Layout.Section>
-          </Layout>
+          <IntegrationsTab shopifyDomain={state.general.shopifyDomain} />
         ) : activeTab.id === "localization" ? (
-          <Layout>
-            <Layout.Section>
-              <LocalizationCard
-                initial={state.localization}
-                busy={saving}
-                onSave={(patch) =>
-                  patchLocalization(patch as Record<string, unknown>)
-                }
-              />
-            </Layout.Section>
-          </Layout>
+          <LocalizationCard
+            initial={state.localization}
+            busy={saving}
+            onSave={(patch) =>
+              patchLocalization(patch as Record<string, unknown>)
+            }
+          />
         ) : activeTab.id === "billing" ? (
           <BillingPanel />
         ) : activeTab.id === "api" ? (
-          <Layout>
-            <Layout.Section>
-              <ApiWebhooksTab />
-            </Layout.Section>
-          </Layout>
+          <ApiWebhooksTab />
         ) : activeTab.id === "notifications" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+          <BlockStack gap="400">
                 <ChannelsCard
                   initial={{
                     recipients: state.notifications.recipients,
@@ -1928,13 +1891,9 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchNotifications}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
+          </BlockStack>
         ) : activeTab.id === "cart" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+          <BlockStack gap="400">
                 <CartModeCard
                   initial={{ defaultMode: state.cart.defaultMode }}
                   busy={saving}
@@ -1949,13 +1908,9 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchCart}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
+          </BlockStack>
         ) : activeTab.id === "display" ? (
-          <Layout>
-            <Layout.Section>
-              <BlockStack gap="400">
+          <BlockStack gap="400">
                 <LayoutCard
                   initial={{
                     layout: state.display.layout,
@@ -1978,12 +1933,12 @@ export function SettingsPage(): JSX.Element {
                   busy={saving}
                   onSave={patchDisplay}
                 />
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
-        ) : (
-          <PlaceholderTab tab={activeTab} />
-        )}
+          </BlockStack>
+            ) : (
+              <PlaceholderTab tab={activeTab} />
+            )}
+          </Layout.Section>
+        </Layout>
       </BlockStack>
     </Page>
   );

@@ -6,8 +6,9 @@
 
 ## Current milestone
 
-**Phase R5 in progress.** M-184 done (Dashboard widgets);
-M-185 (Settings two-pane left sidebar) is next.
+**Phase R5 closed.** M-184 (Dashboard widgets on app home)
+and M-185 (Settings two-pane left sidebar) both shipped on
+2026-05-07.
 
 Phase R4 closed earlier in the session. M-180..M-183
 closed the rich-admin-ui roadmap (23 milestones,
@@ -22,12 +23,9 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Execute **M-185** —
-refactor `frontend/src/pages/SettingsPage.tsx` to use a
-Polaris `<Layout>` two-pane structure (vertical section
-list on the left, active section's cards on the right)
-replacing today's horizontal `<Tabs>` row. Spec:
-`docs/specs/M-185-settings-left-sidebar.md`.
+**Code (next session):** No queued roadmap milestone.
+Phase R5 closed; the rich-admin-ui work that started at
+M-161 is now complete. Open backlog items below.
 
 **Note on migrations going forward:** Railway's `start:web`
 script (`scripts/start-web.cjs`) runs `prisma migrate deploy`
@@ -107,6 +105,22 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-185 — Settings two-pane left sidebar** (2026-05-07).
+  Phase R5 close. SettingsPage's horizontal Polaris
+  `<Tabs>` row replaced with a `<Layout>` two-pane: a
+  new `SettingsSidebar` component (vertical button list,
+  primary variant for active section) on the left in a
+  `Layout.Section variant="oneThird"`, the active section's
+  cards on the right. The 9 inner `<Layout><Layout.Section>`
+  wrappers around each tab's body were stripped (now just
+  `<BlockStack gap="400">` or the bare component) so the
+  outer Layout is the only one. Hash routing
+  (`#general`, `#display`, etc.) and all 10 section bodies
+  are unchanged — every existing SettingsPage test still
+  passes. `polarisTabs` useMemo and `Tabs` import removed.
+  792/792 vitest pass (+3 SettingsSidebar). Typecheck
+  clean. Lint baseline unchanged.
+  `docs/sessions/0195-185-settings-left-sidebar.md`.
 - **M-184 — Dashboard widgets on app home** (2026-05-07).
   Phase R5 start. New `DashboardPage` at `/`; the existing
   `BundlesListPage` moves to `/bundles`. Composes seven
@@ -650,9 +664,8 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **789 / 789 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 activity-route cases + +3 DashboardPage
-  cases since M-184.
+- **792 / 792 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +3 SettingsSidebar cases since M-185.
 - **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

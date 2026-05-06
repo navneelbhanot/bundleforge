@@ -68,9 +68,9 @@ describe("DashboardPage (M-184)", () => {
     );
     renderPage();
     await waitFor(() => {
-      expect(screen.getByText(/No bundles yet/i)).toBeInTheDocument();
+      expect(screen.getByText(/No bundles yet/i)).toBeTruthy();
     });
-    expect(screen.getByRole("button", { name: /Create your first bundle/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Create your first bundle/i })).toBeTruthy();
   });
 
   it("renders the seven widget cards when bundles exist", async () => {
@@ -104,14 +104,14 @@ describe("DashboardPage (M-184)", () => {
     renderPage();
     // Wait for fetches to resolve and the seven cards to render.
     await waitFor(() => {
-      expect(screen.getByText(/Revenue snapshot/i)).toBeInTheDocument();
+      expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
-    expect(screen.getByText(/Bundle status/i)).toBeInTheDocument();
-    expect(screen.getByText(/Recent bundles/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inventory health/i)).toBeInTheDocument();
-    expect(screen.getByText(/Recent orders/i)).toBeInTheDocument();
-    expect(screen.getByText(/AI bundle suggestions/i)).toBeInTheDocument();
-    expect(screen.getByText(/Recent activity/i)).toBeInTheDocument();
+    expect(screen.getByText(/Bundle status/i)).toBeTruthy();
+    expect(screen.getByText(/Recent bundles/i)).toBeTruthy();
+    expect(screen.getByText(/Inventory health/i)).toBeTruthy();
+    expect(screen.getByText(/Recent orders/i)).toBeTruthy();
+    expect(screen.getByText(/AI bundle suggestions/i)).toBeTruthy();
+    expect(screen.getByText(/Recent activity/i)).toBeTruthy();
   });
 
   it("isolates one widget's failure from the others", async () => {
@@ -140,12 +140,12 @@ describe("DashboardPage (M-184)", () => {
     renderPage();
     // Inventory widget shows error, the other widgets still render their titles.
     await waitFor(() => {
-      expect(screen.getByText(/Revenue snapshot/i)).toBeInTheDocument();
+      expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
     await waitFor(() => {
-      expect(screen.getByText(/Couldn't load: HTTP 500/i)).toBeInTheDocument();
+      expect(screen.getByText(/Couldn't load: HTTP 500/i)).toBeTruthy();
     });
     // Other widgets are still present.
-    expect(screen.getByText(/Recent activity/i)).toBeInTheDocument();
+    expect(screen.getByText(/Recent activity/i)).toBeTruthy();
   });
 });
