@@ -6,10 +6,9 @@
  * card persists independently via the page-level onSave handler so
  * a Save on one doesn't disturb in-flight edits on another.
  *
- * Storefront wiring already honors startsAt/endsAt
- * (validateCart.ts). The recurringRule + endBehavior fields persist
- * today; the cron worker that reads endBehavior at endsAt-passes
- * lands in M-170b.
+ * Storefront wiring honors startsAt/endsAt (validateCart.ts) and
+ * the schedule sweep cron (src/jobs/workers/scheduleSweep.ts) reads
+ * endBehavior at endsAt-passes to auto-archive or auto-pause.
  */
 import { useState } from "react";
 import {
@@ -427,9 +426,9 @@ function EndBehaviorCard({
           End behavior
         </Text>
         <Text as="p" tone="subdued">
-          What happens at the end of the window. The cron worker
-          that runs this lands in M-170b — until then this setting
-          persists but doesn&apos;t fire.
+          What happens at the end of the window. The schedule sweep
+          worker checks every five minutes and applies this when
+          the end time passes.
         </Text>
         <ChoiceList
           title="When the window ends"

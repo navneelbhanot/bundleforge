@@ -377,15 +377,6 @@ export function CustomersTab(props: CustomersTabProps): JSX.Element {
   const { eligibility, busy, onSave } = props;
   return (
     <BlockStack gap="400">
-      <Banner tone="info" title="Storefront enforcement wires up in M-172b">
-        <p>
-          Eligibility config persists today. The Cart Transform
-          Function and theme blocks honor it once M-172b lands —
-          merchants can set their rules now and BundleForge starts
-          enforcing the moment the storefront-side worker is
-          deployed.
-        </p>
-      </Banner>
       <TagsCard
         initialAllow={eligibility.customerTagsAllow ?? []}
         initialDeny={eligibility.customerTagsDeny ?? []}

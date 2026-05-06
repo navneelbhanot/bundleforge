@@ -1132,16 +1132,6 @@ function CartModeCard({ initial, busy, onSave }: CartModeCardProps): JSX.Element
           value={mode ?? CART_DEFAULTS.defaultMode}
           onChange={(v) => setMode(v as CartBlock["defaultMode"])}
         />
-        <Banner tone="info">
-          <p>
-            Saving here persists the merchant preference. The Cart
-            Transform Function reads it from the
-            <code> bundleforge.cart_default_mode </code>
-            shop metafield (write of that metafield from this admin
-            lands in M-164b — until then the function falls back to
-            today&apos;s default behaviour, no regression).
-          </p>
-        </Banner>
         <CardSaveBar
           busy={busy}
           dirty={dirty}

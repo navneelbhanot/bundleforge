@@ -312,15 +312,6 @@ export function InventoryTab(props: InventoryTabProps): JSX.Element {
   const { inventoryRules, shopDefaults, busy, onSave } = props;
   return (
     <BlockStack gap="400">
-      <Banner tone="info" title="Storefront enforcement wires up in M-173b">
-        <p>
-          Inventory rules persist today. The Cart Transform Function
-          honors <code>pauseWhenComponentBelow</code> and theme blocks
-          honor <code>componentOnlyMode</code> once M-173b lands —
-          merchants can set their rules now and BundleForge starts
-          enforcing the moment the storefront-side worker is deployed.
-        </p>
-      </Banner>
       <ThresholdsCard
         initialLowStock={
           typeof inventoryRules.lowStockThreshold === "number"
