@@ -238,6 +238,57 @@
 | M-149 | OpenAPI documentation generated | done (2026-05-05) | (same) | `docs/openapi.yaml` + `npm run docs:openapi` |
 | M-150 | Privacy policy + ToS templates committed | done (2026-05-05) | `docs/specs/M-150-155-launch.md` | `legal/privacy-policy.md` + `legal/terms-of-service.md` (templates) |
 
+## Phase R — Rich Admin UI (M-161+, post-launch)
+
+> Roadmap: `docs/plans/rich-admin-ui-roadmap.md`. 22 milestones in
+> 4 independent phases (Settings depth / Bundle Detail richness /
+> Bundle List richness / Cross-cutting polish). Status updated as
+> each lands.
+
+### Phase R1 — Settings depth
+
+| ID | Title | Status | Spec | Notes |
+|----|-------|--------|------|-------|
+| M-161 | Settings shell + General tab | done (2026-05-06) | `docs/specs/M-161-settings-shell-general.md` | 10-tab shell with hash routing; General tab with Shop/Brand/Defaults cards; deep-merged settings.general subobject |
+| M-162 | Display tab | pending | — | Per-shop theme block defaults + CSS override |
+| M-163 | Inventory + Pricing tab | pending | — | Threshold, oversell, rounding, B2B markup |
+| M-164 | Cart & Checkout tab | pending | — | Bundle-as-product vs components mode toggle |
+| M-165 | Notifications & alerts tab | pending | — | Email/Slack/Teams + alert rules |
+| M-166 | Integrations tab | pending | — | Status badges + per-adapter drawers |
+| M-167 | API tokens + webhooks + Localization + Billing tabs | pending | — | Tokens, webhooks, locale gating, plan + usage |
+
+### Phase R2 — Bundle Detail richness
+
+| ID | Title | Status |
+|----|-------|--------|
+| M-168 | Detail shell tab refactor | pending |
+| M-169 | Schedule tab | pending |
+| M-170 | Display tab | pending |
+| M-171 | Customers tab | pending |
+| M-172 | Inventory tab | pending |
+| M-173 | Performance + Activity log | pending |
+| M-174 | Advanced tab | pending |
+
+### Phase R3 — Bundle List richness
+
+| ID | Title | Status |
+|----|-------|--------|
+| M-175 | IndexFilters + saved views | pending |
+| M-176 | Bulk actions | pending |
+| M-177 | Sort + view modes | pending |
+| M-178 | Templates / Presets gallery | pending |
+
+### Phase R4 — Cross-cutting polish
+
+| ID | Title | Status |
+|----|-------|--------|
+| M-179 | Global cmd+k search | pending |
+| M-180 | In-app help drawer | pending |
+| M-181 | Unified toast / confirm / skeleton | pending |
+| M-182 | Empty-state illustrations | pending |
+
+---
+
 ## Phase O — Beta + Launch (M-151 to M-155)
 
 | ID | Title | Status | Spec | Notes |

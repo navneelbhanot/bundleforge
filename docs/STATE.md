@@ -6,19 +6,24 @@
 
 ## Current milestone
 
-**Post-M-155 — competitive-audit gap closures.**
+**Phase R1 — rich Settings page in progress.**
 
-The five priorities from the 2026-05-06 competitive audit are now
-landed: Cart Transform reads `bundleforge.is_bundle` /
-`bundleforge.components` metafields and emits `expand` operations,
-publish() writes those metafields, AI suggestions surface as a
-first-class admin page, M-100 visual builder covers all 13 bundle
-types, i18n ships in 15 locales, and the trust-story doc is live.
-See `docs/sessions/0160-competitive-audit-closures.md`.
+M-161 (settings shell + General tab) landed 2026-05-06. The 107-line
+2-toggle SettingsPage was replaced with a 10-tab shell with hash
+routing; General tab ships fully built (Shop / Brand / Defaults
+cards). Remaining R1 milestones (M-162..M-167) are unstarted but
+have placeholder tabs already wired so the surface is visible.
+Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-Mixed code + user-owned. In rough order:
+**Code (next session):** Run M-162 — Display defaults tab in
+SettingsPage. Spec: write `docs/specs/M-162-settings-display-tab.md`
+first per CLAUDE.md §3.2. Existing tab placeholder
+(`PlaceholderTab`) shows where to slot the new content; pattern
+mirrors M-161's General tab cards.
+
+Other open threads (mostly user-owned):
 
 1. **User**: confirm in the Shopify admin that bundle CRUD works
    end-to-end on `devstore-2u6u4fcc.myshopify.com` — create, edit,
@@ -85,6 +90,21 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-161 — Settings shell + General tab** (2026-05-06 late). The
+  107-line two-toggle SettingsPage was replaced with a 10-tab shell
+  (General, Display, Inventory, Pricing, Cart & checkout,
+  Notifications, Integrations, API & webhooks, Localization,
+  Billing) with hash-routed navigation. General tab ships fully
+  built (Shop card read-only from session, Brand card with hex color
+  + logo URL, Defaults card with currency/locale/timezone). Server
+  schema namespaces options under `settings.general` and deep-merges
+  on PATCH so per-card Save buttons don't wipe each other.
+  `docs/sessions/0161-settings-shell-general.md`.
+- **Editable PricingRulesEditor** (2026-05-06 late). Replaced the
+  read-only IndexTable with one Card per rule containing real
+  Select / TextField / Checkbox controls. Add now defaults to a
+  percentage rule at 10. Empty state with EmptyState. Tests grew
+  from 2 to 6.
 - **Competitive-audit gap closures** (2026-05-06 late). Cart Transform
   Function now reads `bundleforge.is_bundle` and
   `bundleforge.components` product metafields and emits an `expand`
@@ -143,17 +163,15 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **467 / 467 vitest tests passing** when DATABASE_URL points at a
-  real Postgres (CI + dev with `bundleforge_e2e` DB). +5 cart-transform
-  expand-path tests, +8 TypeConfigPanel coverage tests since 0159.
+- **481 / 481 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +7 settings-route, +5 SettingsPage, +4 PricingRules
+  cases since 0160.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
-- **5 / 5 Playwright e2e tests passing** (unchanged from 0159).
-- CI runs both layers on every push and PR (`.github/workflows/ci.yml`,
-  jobs `test` + `e2e`).
+- **5 / 5 Playwright e2e tests passing** (unchanged).
+- CI runs both layers on every push and PR.
 - Typecheck clean (server + frontend).
-- Lint: 5 pre-existing errors (NavMenu namespace + scripts using
-  require) and 14 warnings; no new violations introduced this session.
+- Lint: 5 pre-existing errors only; no new violations.
 
 ## Working branch
 
