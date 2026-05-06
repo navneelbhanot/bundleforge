@@ -10,7 +10,7 @@
  * the Display tab; pushing a tab updates window.location.hash so the
  * URL is shareable / bookmarkable.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Badge,
   Banner,
@@ -354,6 +354,8 @@ function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
   const [color, setColor] = useState(initial.brandColor ?? "#1f5fa6");
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const colorValid = /^#[0-9a-fA-F]{6}$/.test(color);
   const logoValid =
@@ -376,6 +378,41 @@ function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
       brandColor: color,
       logoUrl: logoUrl.length > 0 ? logoUrl : undefined,
     });
+  }
+
+  async function uploadFile(file: File): Promise<void> {
+    setUploading(true);
+    setError(null);
+    try {
+      const buf = await file.arrayBuffer();
+      // Build a base64 string. atob/btoa is iffy for binary;
+      // walk the bytes and use String.fromCharCode + btoa.
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 1) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const dataBase64 = btoa(binary);
+      const res = await fetch("/api/v1/settings/logo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: file.name,
+          mimeType: file.type || "image/png",
+          dataBase64,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Upload failed: ${res.status} ${text}`);
+      }
+      const body = (await res.json()) as { url: string };
+      setLogoUrl(body.url);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -420,9 +457,36 @@ function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
           value={logoUrl}
           onChange={setLogoUrl}
           autoComplete="off"
-          placeholder="https://cdn.example.com/logo.png"
-          helpText='Direct logo upload via Shopify Files lands in M-167. For now paste a public URL.'
+          placeholder="https://cdn.shopify.com/.../logo.png"
+          helpText='Upload a file or paste a public URL. Uploads land in your Shopify Files.'
         />
+        <InlineStack gap="200" blockAlign="center">
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || busy}
+            loading={uploading}
+          >
+            Upload logo
+          </Button>
+          {uploading && (
+            <Text as="span" tone="subdued" variant="bodySm">
+              Uploading…
+            </Text>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void uploadFile(file);
+              // Reset so picking the same file again triggers
+              // change.
+              e.target.value = "";
+            }}
+          />
+        </InlineStack>
         {logoUrl && logoValid && (
           <Box>
             <Text as="p" tone="subdued" variant="bodySm">
