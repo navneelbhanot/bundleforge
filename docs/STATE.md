@@ -8,26 +8,25 @@
 
 **Phase R1 — rich Settings page in progress.**
 
-M-161..M-165 all landed 2026-05-06. The SettingsPage now has 6 of
-10 tabs fully built (General, Display, Inventory, Pricing,
-Cart & checkout, Notifications). The notifications schema was
-upgraded from two booleans to a structured tree (recipients,
-Slack/Teams webhooks, per-rule channel subscriptions) without
-losing backwards compat — the existing webhook handler and the
-`settings.notifications.email` toggle keep working. Remaining R1
-milestones: M-166 (Integrations), M-167 (API + Localization +
-Billing). Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
+M-161..M-166 all landed 2026-05-06. The SettingsPage now has 7 of
+10 tabs fully built. M-166 added a brand-new
+`/api/v1/integrations` route (GET/PUT/POST-test/DELETE) with
+AES-256 encrypted credentials and a per-row Configure modal that
+includes a "Test connection" button calling the adapter's
+`ping()`. Remaining R1 milestone: M-167 (API & webhooks +
+Localization + Billing — three thin tabs in one milestone).
+Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**Code (next session):** Run M-166 — Integrations tab. Spec
-first: `docs/specs/M-166-settings-integrations.md`. Roadmap
-specifies status row per integration (Crisp, ShipStation,
-Recharge, Bold, Klaviyo, Google Merchant, Amazon) with a
-"Configure" drawer per row + a Test connection button. Adapter
-files already exist under `src/services/integrations/`; this
-milestone is mostly UI binding the existing adapters' config
-shapes.
+**Code (next session):** Run M-167 — API & webhooks +
+Localization + Billing tabs in one milestone (3 thin tabs).
+Spec first: `docs/specs/M-167-settings-api-localization-billing.md`.
+Roadmap specifies: API tab with per-shop API token CRUD + custom
+webhook subscriptions; Localization tab with enabled-locales
+multi-select + fallback-locale select + machine-translate toggle;
+Billing tab folding into / linking the existing BillingPage.
+Closes Phase R1.
 
 Other open threads (mostly user-owned):
 
@@ -96,6 +95,20 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-166 — Settings · Integrations tab** (2026-05-06 late).
+  New `/api/v1/integrations` route exposes the adapter registry
+  with GET (list all known types joined with shop's persisted
+  state, never returns credential values), PUT /:type
+  (AES-256-encrypts and persists), POST /:type/test (calls
+  adapter.ping() without persisting), DELETE /:type (soft-disable
+  + clear creds, keeps row for `lastSyncedAt` history).
+  Frontend: new `IntegrationsTab.tsx` component renders one Card
+  per known adapter (ShipStation, Recharge, Bold, Klaviyo,
+  Amazon, Google Merchant) with status badge + Configure modal.
+  Modal has masked TextFields per credential key, Test
+  connection / Save / Disconnect actions, and "leave blank to
+  keep" behavior so partial updates work.
+  `docs/sessions/0166-settings-integrations.md`.
 - **M-165 — Settings · Notifications & alerts tab** (2026-05-06
   late). Three cards: Channels (Polaris Tag chips for email
   recipients with Add input + remove, Slack and Teams webhook
@@ -220,9 +233,9 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **516 / 516 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 settings-route, +3 SettingsPage cases since
-  0164.
+- **531 / 531 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +11 integrations-route, +4 IntegrationsTab cases
+  since 0165.
 - **454 / 454** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

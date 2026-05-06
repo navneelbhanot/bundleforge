@@ -254,7 +254,7 @@
 | M-163 | Inventory + Pricing tabs | done (2026-05-06) | `docs/specs/M-163-settings-inventory-pricing.md` | 4 cards across 2 tabs. Inventory: stock guards (safetyLock + threshold + oversell + alert) + audit retention/snapshots. Pricing: rounding/formatting + defaults for new bundles (discount type + B2B markup). |
 | M-164 | Cart & Checkout tab | done (2026-05-06) | `docs/specs/M-164-settings-cart-checkout.md` | 2 cards: Cart mode (bundle_as_product / components_as_attributes), Checkout protections (atomic enforcement, abandonment, line-note template). Cart Transform Function reads optional shop metafield + branches; M-164b will write the metafield from the admin save action. |
 | M-165 | Notifications & alerts tab | done (2026-05-06) | `docs/specs/M-165-settings-notifications.md` | 3 cards: Channels (recipients, Slack/Teams URLs, in-app), Email channel (master toggle), Alert rules (5 rules × 4 channels each). Schema upgrade preserves backwards compat with the existing email/inApp toggles. |
-| M-166 | Integrations tab | pending | — | Status badges + per-adapter drawers |
+| M-166 | Integrations tab | done (2026-05-06) | `docs/specs/M-166-settings-integrations.md` | New `/api/v1/integrations` route with GET/PUT/POST-test/DELETE; AES-256 encrypted credentials; one Card + Configure modal per known adapter (ShipStation, Recharge, Bold, Klaviyo, Amazon, Google Merchant). |
 | M-167 | API tokens + webhooks + Localization + Billing tabs | pending | — | Tokens, webhooks, locale gating, plan + usage |
 
 ### Phase R2 — Bundle Detail richness

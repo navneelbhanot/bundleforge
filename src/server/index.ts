@@ -70,6 +70,7 @@ import { billingRoutes } from "../routes/billing";
 import { bundleRoutes } from "../routes/bundles";
 import { inventoryRoutes } from "../routes/inventory";
 import { ordersRoutes } from "../routes/orders";
+import { integrationsRoutes } from "../routes/integrations";
 import { settingsRoutes } from "../routes/settings";
 
 const HEALTH_TIMEOUT_MS = 1000;
@@ -221,6 +222,7 @@ export function createApp(): Express {
   app.use("/api/v1/inventory", inventoryRoutes);
   app.use("/api/v1/analytics", analyticsRoutes);
   app.use("/api/v1/settings", settingsRoutes);
+  app.use("/api/v1/integrations", integrationsRoutes);
   app.use("/api/v1/billing", billingRoutes);
   app.use("/api/v1/ai", aiRoutes);
   app.use("/api/v1/gdpr", gdprRoutes);

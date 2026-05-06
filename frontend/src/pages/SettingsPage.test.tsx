@@ -219,13 +219,13 @@ describe("SettingsPage", () => {
 
   it("non-built tabs render the placeholder pointing at their milestone", async () => {
     if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "/settings#integrations");
+      window.history.replaceState(null, "", "/settings#api");
     }
     render(wrap(<SettingsPage />));
     await waitFor(() =>
       expect(screen.getByText(/being built in/i)).toBeTruthy(),
     );
-    expect(screen.getByText(/M-166/)).toBeTruthy();
+    expect(screen.getByText(/M-167/)).toBeTruthy();
   });
 
   it("Display tab renders three editable cards", async () => {

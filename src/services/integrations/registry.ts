@@ -40,6 +40,62 @@ registerAdapter(rechargeAdapter);
 registerAdapter(boldAdapter);
 registerAdapter(klaviyoAdapter);
 
+/**
+ * Lightweight description of every integration the merchant can
+ * configure — used by the admin Settings page to render rows
+ * without hard-coding the list. `expectedCredKeys` is the set of
+ * credential keys the adapter's `ping()` and `pushOrder()`
+ * actually read; the UI shows one TextField per key.
+ */
+export interface KnownAdapterDescriptor {
+  type: IntegrationType;
+  label: string;
+  /** Push-based adapters expect credentials. Feed-only adapters don't. */
+  kind: "push" | "feed";
+  expectedCredKeys: string[];
+}
+
+export function listKnownAdapters(): KnownAdapterDescriptor[] {
+  return [
+    {
+      type: "shipstation",
+      label: "ShipStation",
+      kind: "push",
+      expectedCredKeys: ["apiKey", "apiSecret"],
+    },
+    {
+      type: "recharge",
+      label: "Recharge",
+      kind: "push",
+      expectedCredKeys: ["accessToken"],
+    },
+    {
+      type: "bold",
+      label: "Bold",
+      kind: "push",
+      expectedCredKeys: ["apiKey", "shopId"],
+    },
+    {
+      type: "klaviyo",
+      label: "Klaviyo",
+      kind: "push",
+      expectedCredKeys: ["privateKey"],
+    },
+    {
+      type: "amazon",
+      label: "Amazon",
+      kind: "push",
+      expectedCredKeys: ["endpoint"],
+    },
+    {
+      type: "google_merchant",
+      label: "Google Merchant",
+      kind: "feed",
+      expectedCredKeys: [],
+    },
+  ];
+}
+
 export interface IntegrationRow {
   id: string;
   type: string;

@@ -12,6 +12,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import {
+  Badge,
   Banner,
   BlockStack,
   Box,
@@ -21,6 +22,7 @@ import {
   ChoiceList,
   InlineStack,
   Layout,
+  Modal,
   Page,
   Select,
   Tabs,
@@ -29,6 +31,7 @@ import {
   TextField,
 } from "@shopify/polaris";
 
+import { IntegrationsTab } from "../components/IntegrationsTab";
 import { PageLoading } from "../components/PageLoading";
 
 interface GeneralBlock {
@@ -159,7 +162,7 @@ const TABS: TabSpec[] = [
   { id: "pricing", hash: "pricing", content: "Pricing", status: "ready" },
   { id: "cart", hash: "cart", content: "Cart & checkout", status: "ready" },
   { id: "notifications", hash: "notifications", content: "Notifications", status: "ready" },
-  { id: "integrations", hash: "integrations", content: "Integrations", status: "deferred", milestone: "M-166" },
+  { id: "integrations", hash: "integrations", content: "Integrations", status: "ready" },
   { id: "api", hash: "api", content: "API & webhooks", status: "deferred", milestone: "M-167" },
   { id: "localization", hash: "localization", content: "Localization", status: "deferred", milestone: "M-167" },
   { id: "billing", hash: "billing", content: "Billing", status: "deferred", milestone: "M-167" },
@@ -1707,6 +1710,12 @@ export function SettingsPage(): JSX.Element {
                   onSave={patchPricing}
                 />
               </BlockStack>
+            </Layout.Section>
+          </Layout>
+        ) : activeTab.id === "integrations" ? (
+          <Layout>
+            <Layout.Section>
+              <IntegrationsTab />
             </Layout.Section>
           </Layout>
         ) : activeTab.id === "notifications" ? (
