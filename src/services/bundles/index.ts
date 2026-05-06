@@ -27,6 +27,7 @@ import {
   bundleActivityRepo,
   type BundleActivityAction,
 } from "./activityRepo";
+import { dispatchOutboundEvent } from "../outboundWebhooks/dispatcher";
 import { logger } from "../../config/logger";
 import { BUNDLE_TYPES, validateBundleConfig, type BundleType } from "./validators";
 
@@ -883,18 +884,41 @@ export class BundleService {
       include: { items: true, pricingRules: true },
     });
     await logActivity(shopId, id, "published", "Bundle published");
+    await dispatchOutboundEvent({
+      shopId,
+      event: "bundle.published",
+      payload: {
+        id: existing.id,
+        title: existing.title,
+        slug: existing.slug,
+        shopifyProductGid,
+      },
+    });
     return result;
   }
 
   /** M-052 — archive: removes from storefront without soft-deleting. */
   async archive(shopId: string, id: string): Promise<unknown> {
-    await this.getById(shopId, id);
+    const existing = (await this.getById(shopId, id)) as {
+      id: string;
+      title: string;
+      slug: string;
+    };
     const result = await bundleRepo.update({
       where: { id },
       data: { status: "archived" },
       include: { items: true, pricingRules: true },
     });
     await logActivity(shopId, id, "archived", "Bundle archived");
+    await dispatchOutboundEvent({
+      shopId,
+      event: "bundle.archived",
+      payload: {
+        id: existing.id,
+        title: existing.title,
+        slug: existing.slug,
+      },
+    });
     return result;
   }
 
