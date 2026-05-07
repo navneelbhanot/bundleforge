@@ -11,8 +11,16 @@
 # starts in <100 ms, and avoids dual-tsconfig complexity.
 
 [build]
-builder = "NIXPACKS"
-buildCommand = "npm ci --include=dev && npm run build"
+# Switched from NIXPACKS → DOCKERFILE on 2026-05-07 (session 0206).
+# Nixpacks's auto-detection silently dropped Node from the build
+# image — `npm: command not found` at the npm ci step. Our
+# Dockerfile is explicit (node:20-alpine, COPY scripts/ before
+# postinstall, npm ci with extension recursion) and has been the
+# working build for all `shopify app deploy` rounds; using it here
+# unifies the path. The `buildCommand` field is ignored for
+# DOCKERFILE builds — the Dockerfile's RUN steps define the build.
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "npm run start:web"
@@ -25,19 +33,21 @@ restartPolicyMaxRetries = 5
 # Per-service overrides. Use these by creating two Railway services pointed at
 # this repo and selecting the appropriate config in the dashboard.
 #
+# Both services use the same Dockerfile (which produces a single
+# image with all the deps + the built frontend); the per-service
+# difference is purely the start command, set as a Railway-level
+# override on the service.
+#
 # Web:
-#   buildCommand: (default — installs deps + builds frontend SPA)
-#   startCommand: npm run start:web
+#   startCommand: npm run start:web   (Dockerfile CMD default)
 #   (start-web.cjs runs `prisma migrate deploy` inline before booting the
 #    server. Avoid `npm run release && npm run start:web` — the `&&` chain
 #    swallowed the second half on Railway and masked the actual boot path.)
 #
 # Worker:
-#   buildCommand: npm ci --include=dev && npm run build:server
-#   startCommand: npm run start:worker
-#   (no healthcheck — workers don't expose HTTP)
+#   startCommand: npm run start:worker  (override Dockerfile CMD)
+#   healthcheck: disable (workers don't expose HTTP)
 #
 # Webhooks worker (optional, can run inline with start:worker):
-#   buildCommand: npm ci --include=dev && npm run build:server
 #   startCommand: npm run start:webhooks-worker
 # ─────────────────────────────────────────────────────────────────────────────
