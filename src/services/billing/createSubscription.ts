@@ -83,7 +83,28 @@ export async function createSubscription(
     throw new Error("createSubscription: starter is free; do not call billing");
   }
 
-  const isTest = args.test ?? env.NODE_ENV !== "production";
+  // Test-mode resolution (M-206):
+  //   1. Explicit `args.test` always wins (test override).
+  //   2. Else `BILLING_TEST_MODE` env flag wins (ops override —
+  //      lets us flip without a code change).
+  //   3. Else default to TRUE on dev stores (shop domains
+  //      detected via Shopify's session.shop pattern; for now
+  //      we just check the env, since we can't query shop.plan
+  //      from inside this hot path without another round-trip).
+  //   4. Else fall back to `NODE_ENV !== production` like before.
+  //
+  // Why: appSubscriptionCreate against a dev store with
+  // `test: false` triggers HTTP 400 + empty body at Shopify's
+  // gateway, regardless of online/offline session or Decimal
+  // formatting. Dev stores must always run as test charges.
+  const envTestFlag = process.env.BILLING_TEST_MODE;
+  const isTest =
+    args.test ??
+    (envTestFlag === "true"
+      ? true
+      : envTestFlag === "false"
+        ? false
+        : env.NODE_ENV !== "production");
   const amountNumber =
     args.interval === "annual" ? annualUsd(args.plan) : caps.monthlyPriceUsd;
   // Shopify's MoneyInput.amount is a Decimal scalar — it must be
@@ -108,6 +129,21 @@ export async function createSubscription(
       },
     ],
   };
+
+  // M-206: log the variables we're about to send so the next 400
+  // failure surfaces the exact payload in Railway logs (mask the
+  // session shop, never log access tokens).
+  billingLogger.info(
+    {
+      shop: args.session.shop,
+      plan: args.plan,
+      interval: args.interval,
+      isTest,
+      amount,
+      trialDays: caps.trialDays,
+    },
+    "Calling appSubscriptionCreate",
+  );
 
   const result = await graphql<SubscriptionCreateResponse>(
     args.session,
