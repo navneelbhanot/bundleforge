@@ -23,7 +23,11 @@ function capturingGraphql(
   response: unknown,
   captured: CapturedCall,
 ): typeof import("../../shopify/graphql").shopifyGraphql {
-  return (async (_session, _query, variables) => {
+  return (async (
+    _session: Session,
+    _query: string,
+    variables?: Record<string, unknown>,
+  ) => {
     captured.variables = variables ?? {};
     return response;
   }) as unknown as typeof import("../../shopify/graphql").shopifyGraphql;

@@ -1,21 +1,24 @@
 /**
- * Shared Billing surface (M-167).
+ * Shared Billing surface (M-167, redesigned in M-204).
  *
  * Inner content for both the standalone /billing route and the
- * Billing tab in /settings#billing. Keeps the data fetching + UI
- * in one place so the two surfaces never drift.
+ * Billing tab in /settings#billing. Holds data fetching + composes
+ * the new plan-comparison grid (PlanCard × 4 + IntervalToggle).
  */
 import { useEffect, useState } from "react";
 import {
   Badge,
   Banner,
   BlockStack,
-  Button,
   Card,
+  Grid,
   InlineStack,
   Layout,
   Text,
 } from "@shopify/polaris";
+
+import { IntervalToggle, type BillingInterval } from "./billing/IntervalToggle";
+import { PlanCard } from "./billing/PlanCard";
 
 interface PlanCaps {
   maxBundles: number | null;
@@ -77,6 +80,12 @@ export function BillingPanel({ data }: BillingPanelProps = {}): JSX.Element {
    */
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /**
+   * Default to annual — it's the discount-favouring choice and
+   * matches the conversion goal. Merchants who want monthly can
+   * still flip the toggle.
+   */
+  const [interval, setInterval] = useState<BillingInterval>("annual");
   const externalData = data;
 
   useEffect(() => {
@@ -204,54 +213,91 @@ export function BillingPanel({ data }: BillingPanelProps = {}): JSX.Element {
           </Banner>
         </Layout.Section>
       ) : null}
+
+      {/* Header row: current-plan summary + interval toggle. */}
+      <Layout.Section>
+        <Card>
+          <InlineStack
+            align="space-between"
+            blockAlign="center"
+            wrap={false}
+            gap="400"
+          >
+            <BlockStack gap="100">
+              <Text as="h2" variant="headingMd">
+                Choose a plan
+              </Text>
+              <InlineStack gap="200" blockAlign="center" wrap={false}>
+                <Text as="span" tone="subdued" variant="bodyMd">
+                  Current plan:
+                </Text>
+                <Badge tone="success">{resolved.state.plan}</Badge>
+                {resolved.state.subscription ? (
+                  <Text as="span" tone="subdued" variant="bodyMd">
+                    {`${resolved.state.subscription.status} · ${resolved.state.subscription.billingInterval}`}
+                  </Text>
+                ) : null}
+              </InlineStack>
+            </BlockStack>
+            <IntervalToggle value={interval} onChange={setInterval} />
+          </InlineStack>
+        </Card>
+      </Layout.Section>
+
+      {/* Plan comparison grid: 4 cards across at lg/xl, 2 across at
+          md, single column on mobile. */}
+      <Layout.Section>
+        <Grid>
+          {resolved.plans.map((p) => (
+            <Grid.Cell
+              key={p.name}
+              columnSpan={{ xs: 6, sm: 6, md: 3, lg: 3, xl: 3 }}
+            >
+              <PlanCard
+                plan={p}
+                currentPlan={resolved.state.plan}
+                interval={interval}
+                busy={busy}
+                onSubscribe={subscribe}
+              />
+            </Grid.Cell>
+          ))}
+        </Grid>
+      </Layout.Section>
+
+      {/* Reassurance / fine print. */}
       <Layout.Section>
         <Card>
           <BlockStack gap="200">
-            <Text as="h2" variant="headingMd">
-              Current plan: {resolved.state.plan}
+            <Text as="h3" variant="headingSm">
+              All plans include
             </Text>
-            {resolved.state.subscription ? (
-              <Badge tone="success">
-                {`${resolved.state.subscription.status} — ${resolved.state.subscription.billingInterval}`}
-              </Badge>
-            ) : (
-              <Badge tone="info">Free</Badge>
-            )}
+            <BlockStack gap="100">
+              <Text as="p" variant="bodyMd">
+                ✓ All bundle types: fixed, multipack, mix &amp; match,
+                build-a-box, volume discounts, BOGO, gift-with-purchase
+              </Text>
+              <Text as="p" variant="bodyMd">
+                ✓ Cart Transform pricing at checkout
+              </Text>
+              <Text as="p" variant="bodyMd">
+                ✓ Checkout Guardian (atomic bundle composition)
+              </Text>
+              <Text as="p" variant="bodyMd">
+                ✓ 14-language storefront i18n
+              </Text>
+              <Text as="p" variant="bodyMd">
+                ✓ App proxy (custom storefront integration)
+              </Text>
+            </BlockStack>
+            <Text as="p" tone="subdued" variant="bodySm">
+              Annual billing is non-refundable after 30 days. See{" "}
+              <a href="/legal/terms-of-service.md">Terms of Service §3.1</a>{" "}
+              for fair-use details on unlimited paid plans.
+            </Text>
           </BlockStack>
         </Card>
       </Layout.Section>
-      {resolved.plans
-        .filter((p) => p.name !== "starter")
-        .map((p) => (
-          <Layout.Section key={p.name}>
-            <Card>
-              <BlockStack gap="200">
-                <Text as="h3" variant="headingMd">
-                  {p.name}
-                </Text>
-                <Text as="p">
-                  ${p.caps.monthlyPriceUsd}/mo &nbsp; or &nbsp; $
-                  {p.caps.annualPriceUsd}/yr
-                </Text>
-                <InlineStack gap="200">
-                  <Button
-                    onClick={() => subscribe(p.name, "monthly")}
-                    disabled={busy}
-                  >
-                    Subscribe monthly
-                  </Button>
-                  <Button
-                    onClick={() => subscribe(p.name, "annual")}
-                    disabled={busy}
-                    variant="primary"
-                  >
-                    Subscribe annual (20% off)
-                  </Button>
-                </InlineStack>
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-        ))}
     </Layout>
   );
 }

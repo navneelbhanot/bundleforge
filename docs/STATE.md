@@ -27,6 +27,17 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
 
+**M-204 closed (2026-05-07, session 0204):** Billing page
+redesigned as a 4-card plan-comparison grid. Each card shows
+plan name, "Most popular"/"Current plan" badge, tagline,
+price (annual or monthly per the new toggle at the top),
+caps line ("5 bundles · 100 orders/mo" / "Unlimited"), trial
+badge, full feature list with checkmarks, and a state-aware
+action button (Subscribe / Upgrade / Downgrade / Current
+plan). Defaults to annual interval. New components at
+`frontend/src/components/billing/{IntervalToggle,PlanCard,
+featureLabels}`. 17 new tests; full suite 891/904.
+
 **M-202 closed (2026-05-07, session 0202):** Resend wired
 for outbound transactional email. New
 `src/services/email/{client,index,notifications,templates/*}`
