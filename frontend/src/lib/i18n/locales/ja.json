@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "BundleForge をセットアップ",
+    "title": "MintBundle をセットアップ",
     "progress": "{{total}} 項目中 {{complete}} 項目完了",
     "dismiss": "リストを閉じる",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "ストアにバンドルブロックを追加",
-      "body": "BundleForge ブロックを商品ページのテンプレートに配置して、訪問者に表示します。",
+      "body": "MintBundle ブロックを商品ページのテンプレートに配置して、訪問者に表示します。",
       "cta": "テーマエディタを開く",
       "markComplete": "完了としてマーク"
     }

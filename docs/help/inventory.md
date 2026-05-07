@@ -21,10 +21,10 @@ Most Shopify bundle apps end up with one of these failure modes:
 - A bug rewrites historical inventory rows; you lose the audit trail
   needed to reconcile a customer dispute or a return.
 
-BundleForge's inventory engine is designed to make all three
+MintBundle's inventory engine is designed to make all three
 impossible:
 
-| Risk | How BundleForge prevents it |
+| Risk | How MintBundle prevents it |
 |---|---|
 | Race conditions between two orders | Every adjustment runs in a Postgres `transaction` with row-level locks |
 | Partial updates | One transaction = all components updated or none |
@@ -57,7 +57,7 @@ availability via the same Inventory Health endpoint
 
 ## Reconciling with Shopify inventory
 
-BundleForge writes to its own `inventory_sync_state` table — not
+MintBundle writes to its own `inventory_sync_state` table — not
 Shopify's inventory directly — for two reasons:
 
 1. **Multi-location**. Shopify's per-location inventory model doesn't
@@ -74,7 +74,7 @@ adapter reads from `inventory_sync_state`, not Shopify directly.
 When a Shopify order is refunded:
 
 1. The `refunds/create` webhook fires.
-2. BundleForge's order processor walks the bundle's components.
+2. MintBundle's order processor walks the bundle's components.
 3. Each component gets an inventory adjustment with `reason: 'refund'`,
    linked back to the original order in the audit log.
 
@@ -86,7 +86,7 @@ processor only re-credits the component(s) actually returned.
 
 - **A bundle won't publish if any component's `inventory_quantity` is
   null** (Shopify's "inventory not tracked" flag). Set up tracking on
-  every SKU you bundle, or BundleForge can't keep books for them.
+  every SKU you bundle, or MintBundle can't keep books for them.
 - **Pre-orders** (Shopify's "Continue selling when out of stock") and
   bundles don't compose well. You can do it, but the audit log will
   show negative deltas — readable, but expect questions.

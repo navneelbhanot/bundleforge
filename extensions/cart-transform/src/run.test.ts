@@ -6,8 +6,8 @@ const baseLine = (id: string, amount: string, qty: number, attrs: Record<string,
   id,
   quantity: qty,
   cost: { amountPerQuantity: { amount, currencyCode: "USD" } },
-  bundleforgeBundleId: attrs.bundleId ? { value: attrs.bundleId } : null,
-  bundleforgeRules: attrs.rules ? { value: attrs.rules } : null,
+  mintbundleBundleId: attrs.bundleId ? { value: attrs.bundleId } : null,
+  mintbundleRules: attrs.rules ? { value: attrs.rules } : null,
 });
 
 describe("Cart Transform Function — run()", () => {
@@ -52,8 +52,8 @@ describe("Cart Transform Function — run()", () => {
       id: "gid://CartLine/parent",
       quantity: 1,
       cost: { amountPerQuantity: { amount: "30.00", currencyCode: "USD" } },
-      bundleforgeBundleId: null,
-      bundleforgeRules: null,
+      mintbundleBundleId: null,
+      mintbundleRules: null,
       merchandise: {
         id: "gid://shopify/ProductVariant/parent",
         product: {
@@ -75,7 +75,7 @@ describe("Cart Transform Function — run()", () => {
       ...overrides,
     });
 
-    it("emits expand op when product has bundleforge.is_bundle + components", () => {
+    it("emits expand op when product has mintbundle.is_bundle + components", () => {
       const out = run({ cart: { lines: [bundleProductLine()] } });
       expect(out.operations).toHaveLength(1);
       const op = out.operations[0] as {

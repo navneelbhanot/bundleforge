@@ -1,5 +1,5 @@
 /**
- * Kaching Bundles → BundleForge importer (M-130).
+ * Kaching Bundles → MintBundle importer (M-130).
  *
  * Kaching's JSON export shape:
  *   {

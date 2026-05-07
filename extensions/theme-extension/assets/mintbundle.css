@@ -1,0 +1,9 @@
+/* MintBundle — base storefront styles. Themes can override. */
+.mintbundle-loading { color: #888; font-style: italic; }
+.mintbundle-error { color: #b00; }
+.mintbundle-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 .5rem; }
+.mintbundle-items { list-style: none; padding: 0; margin: 0; }
+.mintbundle-item { padding: .25rem 0; border-bottom: 1px solid #eee; }
+.mintbundle-mix-cell { display: block; padding: .5rem; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+.mintbundle-mix-cell input { margin-right: .5rem; }
+.mintbundle-bogo-headline { font-weight: 600; margin: 0; }

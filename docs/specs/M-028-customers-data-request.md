@@ -3,7 +3,7 @@
 ## Goal
 
 Acknowledge Shopify's mandatory `customers/data_request` webhook. Since
-BundleForge does not store any customer PII, the handler logs receipt
+MintBundle does not store any customer PII, the handler logs receipt
 and returns. Required for App Store approval.
 
 ## Acceptance

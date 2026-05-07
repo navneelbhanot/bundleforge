@@ -127,7 +127,7 @@
 | M-073 | Inventory: `recomputeBundleStock` (pure) | done (2026-05-05) | (M-070 spec) | min(component / perBundle) |
 | M-074 | Inventory: safety lock workflow | done (2026-05-05) | (M-070 spec) | sync_status='locked', no state mutation |
 | M-075 | Inventory routes | done (2026-05-05) | `docs/specs/M-075-inventory-routes.md` | /audit, /sync, /health |
-| M-076 | Order processor: extract bundle line items | done (2026-05-05) | `docs/specs/M-076-order-processor.md` | `_bundleforge_bundle_id` property marker |
+| M-076 | Order processor: extract bundle line items | done (2026-05-05) | `docs/specs/M-076-order-processor.md` | `_mintbundle_bundle_id` property marker |
 | M-077 | Order processor: SKU breakdown | done (2026-05-05) | `docs/specs/M-077-sku-breakdown.md` | pure helper |
 | M-078 | Webhook handler: `orders/create` | done (2026-05-05) | `docs/specs/M-078-orders-webhooks.md` | persists BundleOrder + applyAdjustment |
 | M-079 | Webhook handler: `orders/cancelled` | done (2026-05-05) | (same) | reverses inventory |
@@ -138,17 +138,17 @@
 | ID | Title | Status | Spec | Notes |
 |----|-------|--------|------|-------|
 | M-081 | Cart Transform Function: scaffold (JS) | done (2026-05-05) | `docs/specs/M-081-cart-transform-function.md` | extension toml + run.graphql + run.js skeleton |
-| M-082 | Cart Transform: read attribute markers | done (2026-05-05) | (same) | `_bundleforge_bundle_id` + `_bundleforge_rules` |
+| M-082 | Cart Transform: read attribute markers | done (2026-05-05) | (same) | `_mintbundle_bundle_id` + `_mintbundle_rules` |
 | M-083 | Cart Transform: apply pricing engine | done (2026-05-05) | (same) | port shares contract with Node engine |
 | M-084 | Cart Transform: cross-runtime parity test | done (2026-05-05) | (same) | every fixture asserted equal across both engines |
 | M-085 | App Proxy: signed bundle config endpoint | done (2026-05-05) | `docs/specs/M-085-app-proxy.md` | timingSafeEqual signature; /api/proxy/bundle/:slug |
 | M-086 | Checkout Guardian: cart-level validator | done (2026-05-05) | `docs/specs/M-086-checkout-guardian.md` | validateCart pure + POST /validate-cart |
 | M-087 | Checkout Guardian: Validation Function (Plus) | done (2026-05-05) | extensions/checkout-validation/ | min/max via cart attributes |
-| M-088 | Theme block: bundle-display | done (2026-05-05) | extensions/theme-extension/ | `<bundleforge-bundle>` web component |
-| M-089 | Theme block: variant selector | done (2026-05-05) | (same) | `<bundleforge-variant-picker>` |
-| M-090 | Theme block: build-a-box stepper | done (2026-05-05) | (same) | `<bundleforge-build-box>` |
-| M-091 | Theme block: mix-match grid | done (2026-05-05) | (same) | `<bundleforge-mix-match>` |
-| M-092 | Theme block: BOGO display | done (2026-05-05) | (same) | `<bundleforge-bogo>` |
+| M-088 | Theme block: bundle-display | done (2026-05-05) | extensions/theme-extension/ | `<mintbundle-bundle>` web component |
+| M-089 | Theme block: variant selector | done (2026-05-05) | (same) | `<mintbundle-variant-picker>` |
+| M-090 | Theme block: build-a-box stepper | done (2026-05-05) | (same) | `<mintbundle-build-box>` |
+| M-091 | Theme block: mix-match grid | done (2026-05-05) | (same) | `<mintbundle-mix-match>` |
+| M-092 | Theme block: BOGO display | done (2026-05-05) | (same) | `<mintbundle-bogo>` |
 | M-093 | Theme i18n strings + locales | done (2026-05-05) | (same) | en + es + fr |
 
 ## Phase I — Admin Frontend (M-094 to M-108)

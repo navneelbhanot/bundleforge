@@ -99,7 +99,7 @@ With defaults:
 - `NODE_ENV` — enum `development | production | test`, default `development`
 - `PORT` — number coerced from string, default `3000`
 - `LOG_LEVEL` — enum `error | warn | info | debug`, default `info`
-- `APP_NAME` — string, default `BundleForge`
+- `APP_NAME` — string, default `MintBundle`
 - `APP_VERSION` — string, default read from `package.json` at build time;
   for now, default `0.1.0`
 

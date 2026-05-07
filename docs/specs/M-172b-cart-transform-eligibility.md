@@ -18,9 +18,9 @@ storefront and CTF treat all bundles the same. M-172b plumbs
 two pieces:
 
 1. **Server**: on `publish()`, write
-   `bundleforge.eligibility` JSON metafield onto the bundle
+   `mintbundle.eligibility` JSON metafield onto the bundle
    product (parallel to the existing
-   `bundleforge.is_bundle` + `bundleforge.components`).
+   `mintbundle.is_bundle` + `mintbundle.components`).
 2. **CTF**: fetch the new metafield + cart's
    `buyerIdentity.customer.tags` +
    `localization.{country,language}.isoCode`. If
@@ -41,7 +41,7 @@ the theme block's job and is not in M-172b.
 
 `src/routes/bundles.ts` `defaultCreateShopifyProduct`:
 - The publish flow already writes 3 metafields. Add a 4th:
-  `bundleforge.eligibility` (JSON) carrying the bundle's
+  `mintbundle.eligibility` (JSON) carrying the bundle's
   resolved `eligibility` object.
 - The bundle service's publish path passes `eligibility`
   through to `onCreateProduct` so the route can serialize
@@ -55,7 +55,7 @@ input object.
 
 `extensions/cart-transform/src/run.graphql`:
 - New product metafield read:
-  `eligibilityMetafield: metafield(namespace: "bundleforge", key: "eligibility") { value }`.
+  `eligibilityMetafield: metafield(namespace: "mintbundle", key: "eligibility") { value }`.
 - New cart-level reads:
   - `buyerIdentity.customer { id, tags }`.
   - `cart.buyerIdentity.email` (already implicit; not
@@ -126,14 +126,14 @@ input object.
 
 - **Theme block hides the bundle widget when not eligible.**
   That's the cleanest UX (don't even show the buy button)
-  but lives in `bundleforge-bundle.js` and the proxy. M-172c
+  but lives in `mintbundle-bundle.js` and the proxy. M-172c
   if/when needed.
 - **Segment GID resolution.** Shopify Functions can't make
   Admin API calls; the merchant's tag list is the
   practical fallback today.
 - **A "you're not eligible" custom message in the cart.**
   Cart Transform can't add user-visible text.
-- **Re-write `bundleforge.eligibility` on update().** Today
+- **Re-write `mintbundle.eligibility` on update().** Today
   it's only written at publish (first product create).
   Editing the eligibility from the admin doesn't propagate
   to the metafield until the merchant un-publishes +

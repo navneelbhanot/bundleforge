@@ -3,13 +3,13 @@ query Input {
     lines {
       id
       quantity
-      bundleforgeBundleId: attribute(key: "_bundleforge_bundle_id") {
+      mintbundleBundleId: attribute(key: "_mintbundle_bundle_id") {
         value
       }
-      bundleforgeMin: attribute(key: "_bundleforge_min_items") {
+      mintbundleMin: attribute(key: "_mintbundle_min_items") {
         value
       }
-      bundleforgeMax: attribute(key: "_bundleforge_max_items") {
+      mintbundleMax: attribute(key: "_mintbundle_max_items") {
         value
       }
     }

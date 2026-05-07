@@ -25,7 +25,7 @@ import {
 
 import { MarkdownView } from "./help/MarkdownView";
 
-export const OPEN_HELP_EVENT = "bundleforge:open-help";
+export const OPEN_HELP_EVENT = "mintbundle:open-help";
 
 interface ArticleMeta {
   id: string;

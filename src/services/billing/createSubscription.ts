@@ -114,7 +114,7 @@ export async function createSubscription(
   const amount = amountNumber.toFixed(2);
 
   const variables = {
-    name: `BundleForge ${args.plan} (${args.interval})`,
+    name: `MintBundle ${args.plan} (${args.interval})`,
     returnUrl: args.returnUrl,
     trialDays: caps.trialDays,
     test: isTest,

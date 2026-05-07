@@ -5,7 +5,7 @@ your storefront in roughly five minutes.
 
 ## 1. Install
 
-From the BundleForge listing on the Shopify App Store, click **Add
+From the MintBundle listing on the Shopify App Store, click **Add
 app** and follow the install prompts. You'll authorize the requested
 scopes, then land in the embedded admin.
 
@@ -13,7 +13,7 @@ If you arrived from a partner-shared install link instead, the URL
 will be:
 
 ```
-https://app.bundleforge.app/api/auth?shop=<your-store>.myshopify.com
+https://app.mintbundle.app/api/auth?shop=<your-store>.myshopify.com
 ```
 
 ## 2. Pick a bundle type
@@ -47,7 +47,7 @@ component sum). For more options see [Pricing rules](pricing.md).
 
 ## 5. Publish
 
-Click **Publish**. BundleForge:
+Click **Publish**. MintBundle:
 
 - Creates a Shopify product for the bundle (so it can be added to
   cart, ordered, and reported on like any product).

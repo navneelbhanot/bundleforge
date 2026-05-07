@@ -46,7 +46,7 @@ import {
   RevenueSnapshotWidget,
 } from "../components/dashboard/widgets";
 
-const FRESH_SHOP_DISMISS_KEY = "bundleforge:onboarding-dismissed";
+const FRESH_SHOP_DISMISS_KEY = "mintbundle:onboarding-dismissed";
 
 function readFreshShopDismissed(): boolean {
   try {
@@ -175,7 +175,7 @@ export function DashboardPage(): JSX.Element {
       // i18n bundle.
       try {
         window.localStorage.setItem(
-          "bundleforge:polaris-locale",
+          "mintbundle:polaris-locale",
           next,
         );
       } catch {

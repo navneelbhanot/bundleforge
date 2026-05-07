@@ -4,7 +4,7 @@
  * Fetches /api/v1/bundles with filters. When there are bundles,
  * renders Polaris IndexFilters + IndexTable wrapped in
  * `BundlesListTable`. When there aren't, shows a "welcome to
- * BundleForge" landing.
+ * MintBundle" landing.
  *
  * Saved views are persisted under `settings.savedViews` and
  * loaded once on mount. Saving/deleting a view PATCHes the
@@ -39,7 +39,7 @@ import { OnboardingWizard } from "../components/OnboardingWizard";
 import { PageLoading } from "../components/PageLoading";
 import { FreshShopDashboard } from "../components/dashboard/FreshShopDashboard";
 
-const ONBOARDING_DISMISSED_KEY = "bundleforge:onboarding-dismissed";
+const ONBOARDING_DISMISSED_KEY = "mintbundle:onboarding-dismissed";
 const PAGE_SIZE = 20; // matches the API's natural page size
 
 const DEFAULT_SORT: BundleSort = { sortBy: "createdAt", sortOrder: "desc" };

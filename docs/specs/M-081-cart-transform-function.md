@@ -8,7 +8,7 @@ Node engine and is verified by the same JSON fixture set.
 
 - **M-081 scaffold** — directory layout, `shopify.extension.toml`,
   empty `run(input)` returning `operations: []`.
-- **M-082 read metafields** — `run` looks up the BundleForge metafield
+- **M-082 read metafields** — `run` looks up the MintBundle metafield
   on each cart line item to find the bundle id.
 - **M-083 apply pricing** — port of the Node engine into a small pure
   module the Function imports and calls.

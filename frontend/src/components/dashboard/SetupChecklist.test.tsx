@@ -60,7 +60,7 @@ describe("SetupChecklist (M-186)", () => {
       dismissed: true,
       onDismiss: vi.fn(),
     });
-    expect(screen.queryByText(/Get set up with BundleForge/i)).toBeNull();
+    expect(screen.queryByText(/Get set up with MintBundle/i)).toBeNull();
   });
 
   it("auto-retires when every step is done", () => {
@@ -69,7 +69,7 @@ describe("SetupChecklist (M-186)", () => {
       dismissed: false,
       onDismiss: vi.fn(),
     });
-    expect(screen.queryByText(/Get set up with BundleForge/i)).toBeNull();
+    expect(screen.queryByText(/Get set up with MintBundle/i)).toBeNull();
   });
 
   it("clicking the dismiss icon-button fires onDismiss", () => {

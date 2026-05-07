@@ -72,7 +72,7 @@ describe("HelpDrawer", () => {
     );
   });
 
-  it("opens via the bundleforge:open-help window event", async () => {
+  it("opens via the mintbundle:open-help window event", async () => {
     const list = vi.fn().mockResolvedValue({ data: ARTICLES });
     const get = vi.fn();
     render(<AppProvider i18n={i18n}><HelpDrawer fetcher={{ list, get }} /></AppProvider>);

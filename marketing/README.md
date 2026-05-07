@@ -1,6 +1,6 @@
-# BundleForge marketing site
+# MintBundle marketing site
 
-Static landing page hosted at `bundleforge.app` (apex). Single HTML
+Static landing page hosted at `mintbundle.app` (apex). Single HTML
 file styled with Tailwind via CDN — no build step. Served in
 production by a 90-line zero-dependency Node http server (`server.cjs`)
 so it can run as a Railway service alongside the app + worker.
@@ -54,13 +54,13 @@ The server picks up `PORT` from the env and falls back to 8080.
 ## Deploy to Railway as its own service
 
 The marketing site runs as a **separate Railway service** in the same
-Railway project as `bundleforge-web` and the worker. It has no DB / Redis
+Railway project as `mintbundle-web` and the worker. It has no DB / Redis
 dependency, so it doesn't need any plugin attachments.
 
 ### One-time service setup
 
 1. **Railway dashboard → your project → New service → GitHub repo**
-2. Pick this repo (`bundleforge`) and the branch you deploy from
+2. Pick this repo (`mintbundle`) and the branch you deploy from
    (`main` for production).
 3. **Settings → Source**:
    - **Root Directory:** `marketing`
@@ -78,14 +78,14 @@ dependency, so it doesn't need any plugin attachments.
 
 Once the first deploy is healthy:
 
-1. **Settings → Networking → Custom Domain → `bundleforge.app`**
+1. **Settings → Networking → Custom Domain → `mintbundle.app`**
 2. Railway shows you the CNAME / ALIAS target.
 3. Add the record at your DNS provider (Cloudflare, Namecheap, etc.).
 4. Wait for cert issuance (a minute or two), then verify
-   `https://bundleforge.app` responds with `200`.
+   `https://mintbundle.app` responds with `200`.
 
-The Shopify embedded app stays at `app.bundleforge.app` (separate
-Railway web service). The marketing site is at `bundleforge.app` apex.
+The Shopify embedded app stays at `app.mintbundle.app` (separate
+Railway web service). The marketing site is at `mintbundle.app` apex.
 They're independent services and can be redeployed without affecting
 each other.
 
@@ -156,7 +156,7 @@ obvious to readers what's awaiting counsel review:
 | Placeholder | Filled? | Source |
 | --- | --- | --- |
 | `effective_date` | ✓ | today's date when script runs |
-| `privacy_email` / `support_email` / `legal_email` | ✓ | `*@bundleforge.app` |
+| `privacy_email` / `support_email` / `legal_email` | ✓ | `*@mintbundle.app` |
 | `hosting_vendor` / `db_vendor` / `redis_vendor` | ✓ | Railway |
 | `operating_entity` | pending | Legal entity once incorporated |
 | `governing_jurisdiction` / `venue` | pending | Counsel decision |

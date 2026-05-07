@@ -121,7 +121,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
         id: "open-help",
         label: "Open help",
         run: () => {
-          window.dispatchEvent(new CustomEvent("bundleforge:open-help"));
+          window.dispatchEvent(new CustomEvent("mintbundle:open-help"));
         },
       },
     ],
@@ -248,7 +248,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
   }, [open, flat, highlight, activate]);
 
   return (
-    <Modal open={open} onClose={close} title="Search BundleForge">
+    <Modal open={open} onClose={close} title="Search MintBundle">
       <Modal.Section>
         <BlockStack gap="300">
           <TextField

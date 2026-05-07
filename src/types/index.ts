@@ -1,5 +1,5 @@
 // =============================================================================
-// BundleForge — Core Type Definitions
+// MintBundle — Core Type Definitions
 // =============================================================================
 
 export type BundleType =

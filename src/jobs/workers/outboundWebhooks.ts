@@ -7,7 +7,7 @@
  *  2. Builds the canonical body (JSON.stringify(payload)).
  *  3. Computes HMAC-SHA256(body, secret) and POSTs to the
  *     webhook URL with the signature in
- *     `X-BundleForge-Signature: sha256=<hex>`.
+ *     `X-MintBundle-Signature: sha256=<hex>`.
  *  4. On 5xx / network error → throws so BullMQ retries.
  *  5. On 4xx → logs and returns; merchant misconfiguration
  *     won't fix itself with retries.
@@ -111,8 +111,8 @@ export async function processOutboundWebhookJob(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-BundleForge-Event": data.event,
-        "X-BundleForge-Signature": `sha256=${signature}`,
+        "X-MintBundle-Event": data.event,
+        "X-MintBundle-Signature": `sha256=${signature}`,
       },
       body,
     });

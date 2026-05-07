@@ -15,13 +15,13 @@ import type { Session } from "@shopify/shopify-api";
 import { shopifyGraphql } from "./graphql";
 
 const SHOP_ID_QUERY = `#graphql
-  query BundleforgeShopId {
+  query MintBundleShopId {
     shop { id }
   }
 `;
 
 const METAFIELDS_SET = `#graphql
-  mutation BundleforgeShopMetafieldSet($metafields: [MetafieldsSetInput!]!) {
+  mutation MintBundleShopMetafieldSet($metafields: [MetafieldsSetInput!]!) {
     metafieldsSet(metafields: $metafields) {
       metafields { id namespace key value type }
       userErrors { field message }

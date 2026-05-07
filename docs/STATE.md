@@ -28,7 +28,7 @@ Railway service for the marketing site. Root Directory:
 `marketing`; Watch Paths: `marketing/**` (so backend
 commits don't redeploy marketing). The service uses
 `marketing/Dockerfile` and `marketing/railway.json` —
-no env vars required. Once green, add `bundleforge.app`
+no env vars required. Once green, add `mintbundle.app`
 as a custom domain. Step-by-step in `marketing/README.md`.
 
 **Code (next session):** No queued roadmap milestone.
@@ -87,7 +87,7 @@ without a DB hit. 853 vitest cases pass; 2 pre-existing
 lint errors unchanged.
 
 **Deploy plumbing (2026-05-07, session 0199):** `npx shopify
-app deploy` now succeeds end-to-end — `bundleforge-3` was
+app deploy` now succeeds end-to-end — `mintbundle-3` was
 released to users. Shopify Functions migrated to the official
 `@shopify/shopify_function@~2.0.0` + `shopify app function build`
 pipeline. Flow extensions split into three dirs
@@ -181,7 +181,7 @@ Future code work (post-launch backlog):
   `react-i18next` + `i18next` with all 15 supported locales.
   New `frontend/src/lib/i18n/` with init module + 15 JSON
   translation files. Initial language is read SYNCHRONOUSLY
-  from `localStorage` (`bundleforge:polaris-locale` — same
+  from `localStorage` (`mintbundle:polaris-locale` — same
   key M-186 polish introduced) so the very first paint is in
   the merchant's chosen language; no fetch race with App
   Bridge. Translations applied to high-leverage surfaces:
@@ -213,7 +213,7 @@ Future code work (post-launch backlog):
   `frontend/src/components/help/MarkdownView.tsx` so both
   surfaces share one implementation). "Talk to us" card with
   Crisp chat trigger (only shown when `window.$crisp` loads —
-  3-second poll) + `mailto:` link to `support@bundleforge.app`
+  3-second poll) + `mailto:` link to `support@mintbundle.app`
   (overridable via `VITE_SUPPORT_EMAIL`). Resources card with
   optional changelog / status / GitHub links — each shown only
   when its env var is set, so dev with no env shows a friendly
@@ -319,7 +319,7 @@ Future code work (post-launch backlog):
 - **Behavior wiring round 2 — M-164b + M-172c + M-173c**
   (2026-05-07).
   - **M-164b** — settings PUT writes
-    `bundleforge.cart_default_mode` shop metafield via
+    `mintbundle.cart_default_mode` shop metafield via
     `metafieldsSet` (two-call: shop GID query → mutation)
     when the Cart & Checkout tab's `defaultMode` changes.
     Best-effort — write failures log but don't block the
@@ -329,7 +329,7 @@ Future code work (post-launch backlog):
     Liquid block passes customer state via data-*
     attributes (id / tags / country / language). New
     `isEligibleStorefront(blob, ctx)` helper in
-    bundleforge-bundle.js mirrors the CTF check **plus**
+    mintbundle-bundle.js mirrors the CTF check **plus**
     tag-based gating (allow takes priority over deny).
     On fail: hides the widget or renders a friendly
     placeholder per the block's
@@ -365,12 +365,12 @@ Future code work (post-launch backlog):
     overrides (only known M-171 keys exposed). Web
     component applies layout / colorPreset CSS classes
     and injects scoped cssOverride.
-  - **M-172b** — CTF reads `bundleforge.eligibility`
+  - **M-172b** — CTF reads `mintbundle.eligibility`
     metafield. Pure `isEligible(blob, ctx)` checks
     requireLogin / markets / locales (tag-based gating
     stays in the theme block). Expand path skips when
     eligibility fails.
-  - **M-173b** — CTF reads `bundleforge.inventory_rules`
+  - **M-173b** — CTF reads `mintbundle.inventory_rules`
     metafield. Pure `inventoryAllowsExpand(rules)` blocks
     expand when `componentOnlyMode === true`. Shipped
     together with M-172b (same publish-flow + CTF
@@ -430,7 +430,7 @@ Future code work (post-launch backlog):
   first open; per-article responses are cached client-side.
   Hotkey: `?` opens the drawer when not inside an input;
   the ⌘K palette's new "Open help" action fires a
-  `bundleforge:open-help` window CustomEvent the drawer
+  `mintbundle:open-help` window CustomEvent the drawer
   listens for so the two components stay decoupled. Tiny
   inline markdown renderer (`MarkdownView`) handles
   headings / lists / fenced code / `**bold**` / `` `code` ``
@@ -578,7 +578,7 @@ Future code work (post-launch backlog):
   back to the shop default at render time. M-173b will wire
   the Cart Transform Function + theme blocks to honor
   `pauseWhenComponentBelow` and `componentOnlyMode` via a new
-  `bundleforge.inventory_rules` product metafield.
+  `mintbundle.inventory_rules` product metafield.
   `docs/sessions/0173-bundle-detail-inventory.md`.
 - **M-172 — Bundle Detail · Customers tab** (2026-05-06 late).
   Per-bundle eligibility surface: tag-based allow/deny chips,
@@ -592,7 +592,7 @@ Future code work (post-launch backlog):
   the deep-merge in update() deletes the key, the storefront
   stops gating that dimension. M-172b will wire the Cart
   Transform Function + theme blocks to read the eligibility
-  blob via a new `bundleforge.eligibility` product metafield.
+  blob via a new `mintbundle.eligibility` product metafield.
   `docs/sessions/0172-bundle-detail-customers.md`.
 - **M-171 — Bundle Detail · Display tab** (2026-05-06 late).
   Per-bundle override layer for the shop-level Display defaults
@@ -651,7 +651,7 @@ Future code work (post-launch backlog):
   before M-168). The `orders/create` webhook handler now calls
   Shopify's `tagsAdd` mutation (additive — never clobbers
   existing tags) to mark every bundle-containing order with
-  `bundleforge`, `bundle`, and `bundle: <title>`. Merchants can
+  `mintbundle`, `bundle`, and `bundle: <title>`. Merchants can
   filter their Shopify Orders list by these tags. Failure to
   tag is logged but never fails the webhook — the BundleOrder
   row is already persisted by then, so a missing tag is a UI
@@ -708,7 +708,7 @@ Future code work (post-launch backlog):
   `{bundle_title}`/`{components_count}` placeholders). Cart
   Transform Function in `extensions/cart-transform/src/run.js`
   now reads an optional shop metafield
-  `bundleforge.cart_default_mode` and skips the expand path
+  `mintbundle.cart_default_mode` and skips the expand path
   when it's `components_as_attributes` — defaults
   fall back to today's behavior so absent metafield = no
   regression. Writing the metafield from admin Save lands in
@@ -752,8 +752,8 @@ Future code work (post-launch backlog):
   percentage rule at 10. Empty state with EmptyState. Tests grew
   from 2 to 6.
 - **Competitive-audit gap closures** (2026-05-06 late). Cart Transform
-  Function now reads `bundleforge.is_bundle` and
-  `bundleforge.components` product metafields and emits an `expand`
+  Function now reads `mintbundle.is_bundle` and
+  `mintbundle.components` product metafields and emits an `expand`
   operation that swaps a bundle product line for one line per
   component variant. publish() in `src/services/bundles/index.ts`
   passes items + pricing rules through to the Shopify productCreate
@@ -764,7 +764,7 @@ Future code work (post-launch backlog):
   has dedicated read-only display for all 13 bundle types (8 added:
   bogo, bxgy, volume, gift, mystery, sample, subscription, custom).
   i18n ships 9 new locales (ja, zh, ko, nl, pl, sv, da, no, ru) for
-  15 total. `docs/help/why-bundleforge.md` published as the trust
+  15 total. `docs/help/why-mintbundle.md` published as the trust
   story for the App Store listing.
 - **Visual UI revamp + sidebar nav fix** (2026-05-06 evening).
   Card-grid bundle type picker with gradient banners (distinct from

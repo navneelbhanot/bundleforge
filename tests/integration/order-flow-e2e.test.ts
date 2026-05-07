@@ -4,7 +4,7 @@
  * What this test verifies:
  *
  *   1. ordersCreate handler picks up the bundle marker
- *      (`_bundleforge_bundle_id`) on a Shopify order line item.
+ *      (`_mintbundle_bundle_id`) on a Shopify order line item.
  *   2. A BundleOrder row is persisted with the right shop FK,
  *      bundle FK, prices, and SKU breakdown.
  *   3. Non-bundle line items are ignored (no BundleOrder row).
@@ -139,7 +139,7 @@ describe.skipIf(
             quantity: 1,
             price: "79.00",
             properties: [
-              { name: "_bundleforge_bundle_id", value: createdBundleId },
+              { name: "_mintbundle_bundle_id", value: createdBundleId },
             ],
           },
         ],
@@ -185,7 +185,7 @@ describe.skipIf(
             quantity: 3,
             price: "237.00",
             properties: [
-              { name: "_bundleforge_bundle_id", value: createdBundleId },
+              { name: "_mintbundle_bundle_id", value: createdBundleId },
             ],
           },
         ],
@@ -253,7 +253,7 @@ describe.skipIf(
             price: "0",
             properties: [
               {
-                name: "_bundleforge_bundle_id",
+                name: "_mintbundle_bundle_id",
                 value: "00000000-0000-0000-0000-000000000000",
               },
             ],

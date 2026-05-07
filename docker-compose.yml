@@ -9,17 +9,17 @@
 services:
   postgres:
     image: postgres:16
-    container_name: bundleforge-postgres
+    container_name: mintbundle-postgres
     environment:
-      POSTGRES_USER: bundleforge
-      POSTGRES_PASSWORD: bundleforge_dev
-      POSTGRES_DB: bundleforge
+      POSTGRES_USER: mintbundle
+      POSTGRES_PASSWORD: mintbundle_dev
+      POSTGRES_DB: mintbundle
     ports:
       - "5432:5432"
     volumes:
-      - bundleforge-pg:/var/lib/postgresql/data
+      - mintbundle-pg:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bundleforge -d bundleforge"]
+      test: ["CMD-SHELL", "pg_isready -U mintbundle -d mintbundle"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -27,11 +27,11 @@ services:
 
   redis:
     image: redis:7
-    container_name: bundleforge-redis
+    container_name: mintbundle-redis
     ports:
       - "6379:6379"
     volumes:
-      - bundleforge-redis:/data
+      - mintbundle-redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -41,7 +41,7 @@ services:
 
   ai-service:
     build: ./ai-service
-    container_name: bundleforge-ai
+    container_name: mintbundle-ai
     environment:
       AI_SERVICE_API_KEY: dev-key
       PORT: "5001"
@@ -55,5 +55,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  bundleforge-pg:
-  bundleforge-redis:
+  mintbundle-pg:
+  mintbundle-redis:

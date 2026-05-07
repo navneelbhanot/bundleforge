@@ -11,7 +11,7 @@
 PRODUCT_PLAN §3.5 documents the dominant complaint about the closest
 competitor (Simple Bundles): inventory randomly resets to zero, products show
 out-of-stock incorrectly, checkout substitutes items. PRODUCT_PLAN §5 makes
-"reliable inventory management" BundleForge's #1 differentiator.
+"reliable inventory management" MintBundle's #1 differentiator.
 
 ARCHITECTURE.md §3.2 prescribes a transactional sync engine with an immutable
 audit log. This ADR formalizes the transactional model, the immutability

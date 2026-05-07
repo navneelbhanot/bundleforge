@@ -61,7 +61,7 @@ const defaultFetcher: FetcherShape = {
 
 const SUPPORT_EMAIL =
   (import.meta.env?.VITE_SUPPORT_EMAIL as string | undefined) ??
-  "support@bundleforge.app";
+  "support@mintbundle.app";
 const STATUS_URL = import.meta.env?.VITE_STATUS_URL as string | undefined;
 const GITHUB_REPO_URL = import.meta.env?.VITE_GITHUB_REPO_URL as
   | string
@@ -237,7 +237,7 @@ export function SupportPage(props: SupportPageProps = {}): JSX.Element {
                       <Button
                         variant={crispReady ? "secondary" : "primary"}
                         fullWidth
-                        url={`mailto:${SUPPORT_EMAIL}?subject=BundleForge%20support%20request`}
+                        url={`mailto:${SUPPORT_EMAIL}?subject=MintBundle%20support%20request`}
                         external
                       >
                         Email support

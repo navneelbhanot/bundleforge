@@ -1,10 +1,10 @@
 {% comment %}
-  BundleForge — BOGO Display (M-092).
+  MintBundle — BOGO Display (M-092).
   Renders the buy-X-get-Y promotion banner + cart-aware progress.
 {% endcomment %}
 {% schema %}
 {
-  "name": "BundleForge BOGO",
+  "name": "MintBundle BOGO",
   "target": "section",
   "settings": [
     { "type": "text", "id": "slug",          "label": "Bundle slug" },
@@ -13,9 +13,9 @@
   ]
 }
 {% endschema %}
-<bundleforge-bogo
+<mintbundle-bogo
   data-slug="{{ block.settings.slug | escape }}"
   data-show-progress="{{ block.settings.show_progress }}">
-  <p class="bundleforge-bogo-headline">{{ block.settings.headline }}</p>
-</bundleforge-bogo>
-<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>
+  <p class="mintbundle-bogo-headline">{{ block.settings.headline }}</p>
+</mintbundle-bogo>
+<script src="{{ 'mintbundle-bundle.js' | asset_url }}" type="module" defer></script>

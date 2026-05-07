@@ -6,7 +6,7 @@ describe("capReachedTemplate", () => {
   const args = {
     shopName: "Acme Co.",
     cap: 100,
-    upgradeUrl: "https://app.bundleforge.app/settings#billing",
+    upgradeUrl: "https://app.mintbundle.app/settings#billing",
   };
 
   it("includes the cap and shop name in the subject", () => {

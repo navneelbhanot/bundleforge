@@ -33,7 +33,7 @@ In-scope:
      warn-log; the app works fine without it (local dev, CI, the
      pre-Resend production state).
    - `EMAIL_FROM` (optional). Default
-     `BundleForge <notifications@mail.bundleforge.app>` — matches
+     `MintBundle <notifications@mail.mintbundle.app>` — matches
      the subdomain split discussed with the user.
 
 2. **Email service:**
@@ -86,7 +86,7 @@ In-scope:
 6. **Ops doc:**
    - `docs/ops/email-setup.md` — step-by-step for the user:
      1. Sign up at resend.com.
-     2. Add `mail.bundleforge.app` as a sending domain.
+     2. Add `mail.mintbundle.app` as a sending domain.
      3. Paste the four DNS records into Cloudflare.
      4. Wait for verify ✓.
      5. Generate API key.
@@ -127,9 +127,9 @@ Out-of-scope (M-203 / future):
   `src/routes/billing.ts` (M-201 banner) and the notifications
   module here. Acceptable for first ship; if it ever drifts,
   promote it to a constant in `src/services/billing/orderCap.ts`.
-- `EMAIL_FROM` defaults to `BundleForge
-  <notifications@mail.bundleforge.app>` — the subdomain isolates
-  the transactional sender reputation from `support@bundleforge.app`
+- `EMAIL_FROM` defaults to `MintBundle
+  <notifications@mail.mintbundle.app>` — the subdomain isolates
+  the transactional sender reputation from `support@mintbundle.app`
   on Workspace.
 - We deliberately do NOT use React Email or MJML for templates
   yet — plain HTML strings are good enough for two short emails.

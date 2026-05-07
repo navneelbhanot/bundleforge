@@ -14,7 +14,7 @@ import { Card, Button, Text, ButtonGroup } from "@shopify/polaris";
 
 const STEPS = [
   {
-    title: "Welcome to BundleForge",
+    title: "Welcome to MintBundle",
     body: "Start creating bundles in three quick steps.",
     cta: "Get started",
   },
@@ -28,7 +28,7 @@ const STEPS = [
   {
     title: "Install the theme block",
     body:
-      "Open the theme editor, add the “BundleForge Bundle” block to a " +
+      "Open the theme editor, add the “MintBundle Bundle” block to a " +
       "product page, and pick the bundle slug.",
     cta: "Done",
   },

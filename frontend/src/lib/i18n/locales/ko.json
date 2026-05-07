@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "BundleForge 설정",
+    "title": "MintBundle 설정",
     "progress": "{{total}}개 중 {{complete}}개 완료",
     "dismiss": "목록 닫기",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "스토어에 번들 블록 추가",
-      "body": "BundleForge 블록을 제품 페이지 템플릿에 추가해 고객이 볼 수 있게 하세요.",
+      "body": "MintBundle 블록을 제품 페이지 템플릿에 추가해 고객이 볼 수 있게 하세요.",
       "cta": "테마 에디터 열기",
       "markComplete": "완료로 표시"
     }

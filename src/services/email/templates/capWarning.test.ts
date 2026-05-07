@@ -7,7 +7,7 @@ describe("capWarningTemplate", () => {
     shopName: "Acme Co.",
     count: 80,
     cap: 100,
-    upgradeUrl: "https://app.bundleforge.app/settings#billing",
+    upgradeUrl: "https://app.mintbundle.app/settings#billing",
   };
 
   it("includes the count and cap in the subject", () => {
@@ -18,8 +18,8 @@ describe("capWarningTemplate", () => {
 
   it("includes the upgrade URL in both html and text bodies", () => {
     const t = capWarningTemplate(args);
-    expect(t.html).toContain("https://app.bundleforge.app/settings#billing");
-    expect(t.text).toContain("https://app.bundleforge.app/settings#billing");
+    expect(t.html).toContain("https://app.mintbundle.app/settings#billing");
+    expect(t.text).toContain("https://app.mintbundle.app/settings#billing");
   });
 
   it("escapes shop names with HTML special characters", () => {

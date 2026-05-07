@@ -12,7 +12,7 @@ import type { Session } from "@shopify/shopify-api";
 import { shopifyGraphql } from "./graphql";
 
 const VARIANT_INVENTORY_QUERY = `#graphql
-  query BundleforgeVariantInventory($ids: [ID!]!) {
+  query MintBundleVariantInventory($ids: [ID!]!) {
     nodes(ids: $ids) {
       ... on ProductVariant {
         id

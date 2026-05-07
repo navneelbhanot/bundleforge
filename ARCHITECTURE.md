@@ -1,4 +1,4 @@
-# BundleForge — Technical Architecture & Database Schema
+# MintBundle — Technical Architecture & Database Schema
 
 > Version 1.0 | March 2026 | Engineering Document
 
@@ -31,7 +31,7 @@
 
 ### 2.1 High-Level Overview
 
-BundleForge follows a **modular monolith** architecture with clearly separated domain modules. Each domain (Bundles, Inventory, Orders, Analytics, Integrations) has its own service layer, repository, and routes, but shares a single database and deployment.
+MintBundle follows a **modular monolith** architecture with clearly separated domain modules. Each domain (Bundles, Inventory, Orders, Analytics, Integrations) has its own service layer, repository, and routes, but shares a single database and deployment.
 
 The one exception is the **AI Recommendation Engine**, which runs as a separate lightweight Python microservice to prevent ML workloads from impacting core app latency.
 
@@ -54,7 +54,7 @@ The one exception is the **AI Recommendation Engine**, which runs as a separate 
 
 #### Flow 1: Merchant Creates a Bundle
 
-1. Merchant opens BundleForge admin -> Polaris React UI renders in Shopify Admin (App Bridge)
+1. Merchant opens MintBundle admin -> Polaris React UI renders in Shopify Admin (App Bridge)
 2. Merchant uses Visual Builder to compose bundle (drag products, set pricing rules)
 3. Frontend sends `POST /api/bundles` to App Server
 4. Bundle Engine validates config, creates records in `bundles`, `bundle_items`, `pricing_rules` tables
@@ -68,7 +68,7 @@ The one exception is the **AI Recommendation Engine**, which runs as a separate 
 2. Shopify Functions (Cart Transform) reads bundle metafields, calculates discounted price
 3. Customer proceeds to checkout -> Checkout Guardian validates bundle integrity
 4. Payment processed by Shopify Checkout
-5. Shopify fires `orders/create` webhook to BundleForge
+5. Shopify fires `orders/create` webhook to MintBundle
 6. Webhook Handler dispatches job to BullMQ order processing queue
 7. Order Processor breaks bundle into individual SKUs (SKU Breakdown)
 8. Inventory Engine atomically decrements component stock (with audit log entry)
@@ -112,7 +112,7 @@ All tables use UUIDs as primary keys. Timestamps use `TIMESTAMPTZ`. Shopify GIDs
 | access_token | TEXT | NOT NULL, ENCRYPTED | Shopify OAuth access token (AES-256 encrypted) |
 | name | TEXT | NOT NULL | Store display name |
 | email | TEXT | NOT NULL | Store owner email |
-| plan_name | TEXT | NOT NULL, DEFAULT 'starter' | BundleForge plan: starter/growth/pro/enterprise |
+| plan_name | TEXT | NOT NULL, DEFAULT 'starter' | MintBundle plan: starter/growth/pro/enterprise |
 | shopify_plan | TEXT | | Shopify plan: basic/shopify/advanced/plus |
 | currency | TEXT | NOT NULL, DEFAULT 'USD' | Store primary currency |
 | timezone | TEXT | NOT NULL, DEFAULT 'UTC' | Store timezone for analytics |

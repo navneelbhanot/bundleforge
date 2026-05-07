@@ -4,7 +4,7 @@ Run through this in order. Anything unchecked blocks submission.
 
 ## Listing
 
-- [ ] App name finalised (`BundleForge — Reliable Product Bundles`)
+- [ ] App name finalised (`MintBundle — Reliable Product Bundles`)
 - [ ] Tagline ≤80 chars (`docs/launch/app-listing.md`)
 - [ ] Short description ≤120 chars
 - [ ] Long description copyedited and ready
@@ -23,8 +23,8 @@ Run through this in order. Anything unchecked blocks submission.
 
 ## Legal
 
-- [ ] Privacy policy live at `https://bundleforge.app/legal/privacy-policy`
-- [ ] Terms of service live at `https://bundleforge.app/legal/terms-of-service`
+- [ ] Privacy policy live at `https://mintbundle.app/legal/privacy-policy`
+- [ ] Terms of service live at `https://mintbundle.app/legal/terms-of-service`
 - [ ] Cookie disclosure (we set none)
 - [ ] EU representative listed (if not EU-based)
 
@@ -65,10 +65,10 @@ Run through this in order. Anything unchecked blocks submission.
 
 ## Support
 
-- [ ] support@bundleforge.app monitored
-- [ ] Help docs live at `bundleforge.app/docs`
+- [ ] support@mintbundle.app monitored
+- [ ] Help docs live at `mintbundle.app/docs`
 - [ ] In-app chat enabled for paid plans
-- [ ] Status page live at `status.bundleforge.app`
+- [ ] Status page live at `status.mintbundle.app`
 
 ## Final sign-off
 

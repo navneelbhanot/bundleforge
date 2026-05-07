@@ -10,7 +10,7 @@
 
 ## Why
 
-A new merchant installs BundleForge, lands on the dashboard, and
+A new merchant installs MintBundle, lands on the dashboard, and
 has no clear runway to "the storefront shows my bundle." Today
 the only nudges are:
 
@@ -27,7 +27,7 @@ storefront page** (so the widget actually renders for shoppers).
 The user shared a competitor screenshot (Bundler) with a 3-step
 checklist + a language selector. We're not copying their visuals
 or phrasing — we're shipping our own three-step persistent
-checklist that maps to BundleForge's actual ship-readiness path.
+checklist that maps to MintBundle's actual ship-readiness path.
 
 ## What ships
 
@@ -66,7 +66,7 @@ three are complete or the merchant dismisses it.
 - *State indicator when complete:* green checkmark + "Added".
 
 **Header actions:**
-- Title "Get set up with BundleForge"
+- Title "Get set up with MintBundle"
 - Subtitle progress: "2 of 3 complete"
 - Dismiss `<Button icon={XIcon} variant="plain">` — PATCH
   `settings.onboarding.dismissedAt = ISO`.

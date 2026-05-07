@@ -18,7 +18,7 @@ export type Logger = PinoLogger;
 function buildLogger(): Logger {
   const options: pino.LoggerOptions = {
     level: env.LOG_LEVEL,
-    base: { service: "bundleforge", version: env.APP_VERSION },
+    base: { service: "mintbundle", version: env.APP_VERSION },
     timestamp: pino.stdTimeFunctions.isoTime,
   };
   if (env.NODE_ENV === "development") {

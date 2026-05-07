@@ -128,8 +128,8 @@ so a bundle with `customerTagsAllow: ["vip"]` and an empty
 
 - **M-172b** — Cart Transform Function + storefront blocks
   consuming the eligibility blob at runtime. The function reads
-  the bundle product's `bundleforge.eligibility` metafield (we
-  already write `bundleforge.components`; eligibility is a
+  the bundle product's `mintbundle.eligibility` metafield (we
+  already write `mintbundle.components`; eligibility is a
   parallel metafield), evaluates against
   `customer.tags`/`customer.id`/`localization.country`/
   `localization.language`, and either expands or hides the

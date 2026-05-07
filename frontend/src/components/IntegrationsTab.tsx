@@ -398,7 +398,7 @@ export function IntegrationsTab({ shopifyDomain = null }: IntegrationsTabProps =
     <BlockStack gap="300">
       <Box paddingBlockEnd="200">
         <Text as="p" tone="subdued">
-          Connect ShipStation, Recharge, and others to push BundleForge
+          Connect ShipStation, Recharge, and others to push MintBundle
           orders to your existing stack. Credentials are AES-256
           encrypted at rest. The Test connection button hits each
           provider&apos;s health endpoint without persisting.

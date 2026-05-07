@@ -952,7 +952,7 @@ describe("PUT /settings cart_default_mode metafield (M-164b)", () => {
     expect(res.status).toBe(200);
     expect(writeShopMetafieldImpl).toHaveBeenCalledTimes(1);
     expect(writeShopMetafieldImpl.mock.calls[0][1]).toEqual({
-      namespace: "bundleforge",
+      namespace: "mintbundle",
       key: "cart_default_mode",
       value: "components_as_attributes",
       type: "single_line_text_field",

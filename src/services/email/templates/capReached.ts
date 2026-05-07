@@ -32,7 +32,7 @@ export function capReachedTemplate(args: CapReachedArgs): EmailTemplate {
   const text =
     `Hi ${shopName},\n` +
     `\n` +
-    `Your shop just hit the ${cap}-order monthly limit on the BundleForge\n` +
+    `Your shop just hit the ${cap}-order monthly limit on the MintBundle\n` +
     `Starter plan. New bundle checkouts on your storefront are now paused\n` +
     `until either:\n` +
     `\n` +
@@ -51,12 +51,12 @@ export function capReachedTemplate(args: CapReachedArgs): EmailTemplate {
     `\n` +
     `Questions? Reply to this email.\n` +
     `\n` +
-    `— The BundleForge team\n`;
+    `— The MintBundle team\n`;
 
   const html =
     `<!DOCTYPE html><html><body style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1f2937;max-width:560px;margin:0 auto;padding:24px">` +
     `<h1 style="font-size:20px;margin:0 0 16px">Hi ${escapeHtml(shopName)},</h1>` +
-    `<p>Your shop just hit the <strong>${cap}-order monthly limit</strong> on the BundleForge Starter plan. New bundle checkouts on your storefront are <strong>now paused</strong> until either:</p>` +
+    `<p>Your shop just hit the <strong>${cap}-order monthly limit</strong> on the MintBundle Starter plan. New bundle checkouts on your storefront are <strong>now paused</strong> until either:</p>` +
     `<ul style="line-height:1.6">` +
     `<li>The 1st of next month, when the counter resets, or</li>` +
     `<li>You upgrade to Growth — which removes the limit immediately.</li>` +
@@ -67,7 +67,7 @@ export function capReachedTemplate(args: CapReachedArgs): EmailTemplate {
     `</p>` +
     `<p style="color:#4b5563;font-size:14px">Growth is $12/month and unlocks unlimited bundle orders, audit trail, live chat support, basic analytics, and AI suggestions.</p>` +
     `<p style="color:#4b5563;font-size:14px">Questions? Just reply to this email.</p>` +
-    `<p style="color:#9ca3af;font-size:12px;margin-top:32px">— The BundleForge team</p>` +
+    `<p style="color:#9ca3af;font-size:12px;margin-top:32px">— The MintBundle team</p>` +
     `</body></html>`;
 
   return { subject, html, text };

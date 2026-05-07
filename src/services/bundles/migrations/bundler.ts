@@ -1,5 +1,5 @@
 /**
- * Bundler.app → BundleForge importer (M-129).
+ * Bundler.app → MintBundle importer (M-129).
  *
  * Bundler exports CSV with one row per bundle. Items are pipe-separated
  * within a single column (Bundler's convention).

@@ -118,7 +118,7 @@ describe("DashboardPage (M-184)", () => {
       expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
     // M-186: setup checklist renders above the widgets.
-    expect(screen.getByText(/Get set up with BundleForge/i)).toBeTruthy();
+    expect(screen.getByText(/Get set up with MintBundle/i)).toBeTruthy();
     expect(screen.getByText(/Add the Bundle block/i)).toBeTruthy();
     // Widgets all present.
     expect(screen.getByText(/Bundle status/i)).toBeTruthy();
@@ -165,6 +165,6 @@ describe("DashboardPage (M-184)", () => {
     await waitFor(() => {
       expect(screen.getByText(/Revenue snapshot/i)).toBeTruthy();
     });
-    expect(screen.queryByText(/Get set up with BundleForge/i)).toBeNull();
+    expect(screen.queryByText(/Get set up with MintBundle/i)).toBeNull();
   });
 });

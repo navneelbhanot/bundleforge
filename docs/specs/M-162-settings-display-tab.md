@@ -79,7 +79,7 @@ PlaceholderTab with three cards:
    soldOutBehavior (hide / disable / show waitlist). One Save.
 
 3. **Custom CSS** — `TextField multiline=10` for cssOverride.
-   Help text explains scope (`#bundleforge-storefront *`) +
+   Help text explains scope (`#mintbundle-storefront *`) +
    warning that bad CSS can break theme blocks. Lightweight
    client-side check: count `{` and `}` to flag mismatched braces.
    One Save.

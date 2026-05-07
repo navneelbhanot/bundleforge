@@ -12,7 +12,7 @@
 
 Today the App Proxy `/bundle/:slug` endpoint returns the
 bundle's per-bundle `displaySettings` object as-is, and the
-storefront Web Component (`<bundleforge-bundle>`) ignores
+storefront Web Component (`<mintbundle-bundle>`) ignores
 it entirely — it just renders a generic title + items list
 regardless of layout/color/copy preferences.
 
@@ -53,20 +53,20 @@ future pass.
 
 ### Web Component
 
-`extensions/theme-extension/assets/bundleforge-bundle.js`:
+`extensions/theme-extension/assets/mintbundle-bundle.js`:
 - Apply `bundle.displaySettings.layout` as
-  `bundleforge-layout-<value>` CSS class on the items list.
+  `mintbundle-layout-<value>` CSS class on the items list.
 - Apply `bundle.displaySettings.colorPreset` as
-  `bundleforge-preset-<value>` CSS class on the wrapper.
+  `mintbundle-preset-<value>` CSS class on the wrapper.
 - Inject `bundle.displaySettings.cssOverride` (when
   present) as a `<style>` tag inside the component, scoped
   via a generated id assigned to the wrapper.
 
-Updated `bundleforge.css` with:
-- `.bundleforge-layout-grid { display: grid; }`
-- `.bundleforge-layout-list { display: block; }`
-- `.bundleforge-layout-carousel` (horizontal scroll).
-- `.bundleforge-preset-brand` / neutral / high-contrast /
+Updated `mintbundle.css` with:
+- `.mintbundle-layout-grid { display: grid; }`
+- `.mintbundle-layout-list { display: block; }`
+- `.mintbundle-layout-carousel` (horizontal scroll).
+- `.mintbundle-preset-brand` / neutral / high-contrast /
   minimal — color-variable hooks.
 
 ### Tests

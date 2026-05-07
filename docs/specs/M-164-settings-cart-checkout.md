@@ -12,7 +12,7 @@
 
 The 2026-05-06 commit landed metafield-driven Cart Transform
 expansion (`extensions/cart-transform/src/run.js` reads
-`bundleforge.is_bundle` + `bundleforge.components` and emits
+`mintbundle.is_bundle` + `mintbundle.components` and emits
 `expand` operations). Today every merchant gets that path by
 default — there's no way to opt back into the older
 attribute-driven path even though it's still in the runtime. This
@@ -66,8 +66,8 @@ attribute-flagged lines). Update the function to:
    the shop's setting metafield (Cart Transform Functions can read
    `cart` metafields via the shop attribute, but here the simplest
    path is per-product: each bundle product already carries
-   `bundleforge.components`. We use a new shop-scoped metafield
-   `bundleforge.cart_default_mode` set when the merchant saves
+   `mintbundle.components`. We use a new shop-scoped metafield
+   `mintbundle.cart_default_mode` set when the merchant saves
    this setting, fetched as a shop metafield in the GraphQL).
 2. If `defaultMode === "components_as_attributes"`, skip the
    expand path entirely (only run update).
@@ -80,7 +80,7 @@ follow-on (M-164b) — without the metafield the function falls
 back to today's behavior, so this is a no-regression change. The
 spec for M-164b is one-shot: when the merchant saves
 `cart.defaultMode` in the admin, also write
-`bundleforge.cart_default_mode` to the shop via Admin GraphQL
+`mintbundle.cart_default_mode` to the shop via Admin GraphQL
 `shopSettingsMutation` or `metafieldsSet` for the shop owner ID.
 
 For this milestone the Cart Transform code change is *just*
@@ -159,7 +159,7 @@ Both cards use the existing `CardSaveBar` per-card pattern with
 ## Out of scope (deferred)
 
 - **M-164b** — actually writing the
-  `bundleforge.cart_default_mode` shop metafield from the admin
+  `mintbundle.cart_default_mode` shop metafield from the admin
   Save action. Until then `cart.defaultMode` persists in
   `settings.cart` and the merchant sees their selection, but the
   Cart Transform Function does not yet read it (no regression —

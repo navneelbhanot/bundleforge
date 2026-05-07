@@ -1,5 +1,5 @@
 /**
- * GDPR customers/redact handler. BundleForge stores no customer PII, so
+ * GDPR customers/redact handler. MintBundle stores no customer PII, so
  * we ack via log.
  *
  * See docs/specs/M-029-customers-redact.md.

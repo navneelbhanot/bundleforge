@@ -1,6 +1,6 @@
 [[extensions]]
 type = "flow_trigger"
-handle = "bundleforge-bundle-low-stock"
+handle = "mintbundle-bundle-low-stock"
 name = "Bundle low stock"
 description = "Fires when a bundle's available quantity falls below the configured threshold"
 
@@ -10,7 +10,7 @@ description = "Fires when a bundle's available quantity falls below the configur
   type = "single_line_text_field"
   key = "bundleId"
   name = "Bundle ID"
-  description = "Internal BundleForge bundle id (UUID)."
+  description = "Internal MintBundle bundle id (UUID)."
 
   [[settings.fields]]
   type = "single_line_text_field"

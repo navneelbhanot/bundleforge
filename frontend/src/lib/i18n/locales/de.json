@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "BundleForge einrichten",
+    "title": "MintBundle einrichten",
     "progress": "{{complete}} von {{total}} erledigt",
     "dismiss": "Liste schließen",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "Bundle-Block zum Shop hinzufügen",
-      "body": "Füge den BundleForge-Block in dein Produktseiten-Template ein, damit Kunden ihn sehen.",
+      "body": "Füge den MintBundle-Block in dein Produktseiten-Template ein, damit Kunden ihn sehen.",
       "cta": "Theme-Editor öffnen",
       "markComplete": "Als erledigt markieren"
     }

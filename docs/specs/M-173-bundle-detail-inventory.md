@@ -144,8 +144,8 @@ Display and M-172 Customers.
 ## Out of scope (deferred)
 
 - **M-173b** — Storefront enforcement: Cart Transform Function
-  reads `bundleforge.inventory_rules` product metafield (parallel
-  to `bundleforge.eligibility`), evaluates against current stock,
+  reads `mintbundle.inventory_rules` product metafield (parallel
+  to `mintbundle.eligibility`), evaluates against current stock,
   and either pauses the bundle or expands components-only.
 - Worker that auto-archives a bundle when it stays below
   `pauseWhenComponentBelow` for >24h — pause-vs-archive policy

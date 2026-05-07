@@ -1,5 +1,5 @@
 {
-  "title": "BundleForge — Queues (BullMQ)",
+  "title": "MintBundle — Queues (BullMQ)",
   "description": "BullMQ queue depth, throughput, and failure rate per queue. Source metrics emitted by the worker via Datadog statsd at queue tick + job completion.",
   "layout_type": "ordered",
   "widgets": [
@@ -9,7 +9,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:bundleforge.queue.depth{*} by {queue}",
+            "q": "sum:mintbundle.queue.depth{*} by {queue}",
             "display_type": "line"
           }
         ]
@@ -21,7 +21,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:bundleforge.queue.completed{*}.as_rate() by {queue}",
+            "q": "sum:mintbundle.queue.completed{*}.as_rate() by {queue}",
             "display_type": "bars"
           }
         ]
@@ -34,7 +34,7 @@
         "precision": 2,
         "requests": [
           {
-            "q": "100 * sum:bundleforge.queue.failed{*}.as_rate() / (sum:bundleforge.queue.completed{*}.as_rate() + sum:bundleforge.queue.failed{*}.as_rate())",
+            "q": "100 * sum:mintbundle.queue.failed{*}.as_rate() / (sum:mintbundle.queue.completed{*}.as_rate() + sum:mintbundle.queue.failed{*}.as_rate())",
             "aggregator": "avg"
           }
         ]
@@ -46,7 +46,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "p95:bundleforge.queue.duration{*} by {queue}",
+            "q": "p95:mintbundle.queue.duration{*} by {queue}",
             "display_type": "line"
           }
         ]

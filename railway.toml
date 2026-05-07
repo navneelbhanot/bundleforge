@@ -1,4 +1,4 @@
-# BundleForge Railway config.
+# MintBundle Railway config.
 #
 # Two services share this repo: web (Express) and worker (BullMQ).
 # The AI service deploys separately from `ai-service/` (Dockerfile-based).

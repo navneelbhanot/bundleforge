@@ -1,8 +1,8 @@
-# BundleForge
+# MintBundle
 
 **The most reliable Shopify product bundling app.**
 
-BundleForge is a production-ready Shopify product bundling app: 13 bundle
+MintBundle is a production-ready Shopify product bundling app: 13 bundle
 types, cents-exact pricing parity between the storefront, cart, and
 checkout, atomic SKU-accurate inventory, and a complete admin with
 analytics, A/B testing, and integrations.
@@ -71,7 +71,7 @@ analytics, A/B testing, and integrations.
 ## Project structure
 
 ```
-bundleforge/
+mintbundle/
 ├── prisma/
 │   ├── schema.prisma          # 12 models, 5 domains
 │   ├── migrations/
@@ -100,7 +100,7 @@ bundleforge/
 ├── extensions/
 │   ├── cart-transform/        # Shopify Function — pricing parity
 │   ├── checkout-validation/   # Plus-only validation function
-│   ├── theme-extension/       # 5 App Blocks + bundleforge-bundle.js
+│   ├── theme-extension/       # 5 App Blocks + mintbundle-bundle.js
 │   └── flow/                  # 3 Shopify Flow triggers
 ├── ai-service/                # Python recommender + tests + Dockerfile
 ├── frontend/                  # Vite + React 18 + Polaris admin
@@ -139,8 +139,8 @@ bundleforge/
 ### Setup
 
 ```bash
-git clone https://github.com/navneelbhanot/bundleforge.git
-cd bundleforge
+git clone https://github.com/navneelbhanot/mintbundle.git
+cd mintbundle
 npm install
 cp .env.example .env             # fill in SHOPIFY_API_KEY/SECRET, DATABASE_URL,
                                  # REDIS_URL, ENCRYPTION_KEY (32 hex bytes)

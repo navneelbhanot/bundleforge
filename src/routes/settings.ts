@@ -423,7 +423,7 @@ export function installSettingsRoutes(deps: SettingsDeps = {}): Router {
         if (session) {
           try {
             await writeMetafield(session, {
-              namespace: "bundleforge",
+              namespace: "mintbundle",
               key: "cart_default_mode",
               value: patch.cart.defaultMode,
               type: "single_line_text_field",

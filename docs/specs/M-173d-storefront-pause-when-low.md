@@ -66,8 +66,8 @@ New `src/shopify/inventory.ts`:
 
 ### Web component
 
-`extensions/theme-extension/assets/bundleforge-bundle.js`:
-- `BundleforgeBundle.connectedCallback`: after the
+`extensions/theme-extension/assets/mintbundle-bundle.js`:
+- `MintBundleBundle.connectedCallback`: after the
   componentOnlyMode check, if `bundle.paused === true`,
   hide the widget (or render a "currently out of stock"
   placeholder when `data-on-ineligible="placeholder"` —

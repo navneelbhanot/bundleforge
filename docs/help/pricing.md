@@ -1,10 +1,10 @@
 # Pricing rules
 
-How BundleForge computes the price your customer sees and pays.
+How MintBundle computes the price your customer sees and pays.
 
 ## How it works (one paragraph)
 
-When a customer adds a bundle to cart, BundleForge runs **the same
+When a customer adds a bundle to cart, MintBundle runs **the same
 pricing engine** in two places:
 
 1. **Server-side** for admin previews, order processing, and analytics.
@@ -93,7 +93,7 @@ Multiple conditions on the same rule are AND'd.
 
 Three places to verify a bundle prices correctly:
 
-1. **Admin preview** — the bundle detail page in BundleForge.
+1. **Admin preview** — the bundle detail page in MintBundle.
 2. **Live cart on storefront** — what the customer sees.
 3. **Shopify checkout total**.
 

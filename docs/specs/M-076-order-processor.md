@@ -8,7 +8,7 @@ payload and returns the subset of line items that look like bundles
 shopifyProductGid).
 
 For now we use a heuristic: line items whose `properties[]` carry a
-`_bundleforge_bundle_id` key are considered bundle parents. (M-051's
+`_mintbundle_bundle_id` key are considered bundle parents. (M-051's
 publish step is what writes that property.)
 
 ## Files

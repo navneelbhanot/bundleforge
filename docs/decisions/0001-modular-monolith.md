@@ -8,7 +8,7 @@
 
 ## Context
 
-BundleForge spans many domains: bundles, inventory, orders, analytics, billing,
+MintBundle spans many domains: bundles, inventory, orders, analytics, billing,
 integrations, AI. ARCHITECTURE.md §2.1 prescribes a modular monolith with one
 microservice carve-out for the AI recommender. This ADR formalizes that choice
 so subsequent sessions do not relitigate it.

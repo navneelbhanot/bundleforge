@@ -1,8 +1,8 @@
 {
-  "name": "bundleforge-marketing",
+  "name": "mintbundle-marketing",
   "private": true,
   "version": "1.0.0",
-  "description": "Static marketing site for bundleforge.app, served by a tiny Node http server for Railway.",
+  "description": "Static marketing site for mintbundle.app, served by a tiny Node http server for Railway.",
   "engines": {
     "node": ">=20.0.0"
   },

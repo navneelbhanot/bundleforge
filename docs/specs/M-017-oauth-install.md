@@ -7,7 +7,7 @@ mounts the OAuth begin route on the server, and is unit-tested.
 
 ## Why
 
-Without OAuth, no shop can install BundleForge. This is the entry point
+Without OAuth, no shop can install MintBundle. This is the entry point
 for every later Shopify-touching milestone.
 
 ## Out of scope

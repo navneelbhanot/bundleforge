@@ -62,7 +62,7 @@ GET /api/v1/help/articles/:id
   - `storefront` → "Operations"
   - `troubleshooting` → "Troubleshooting"
   - `faq` → "Reference"
-  - `why-bundleforge` → "Reference"
+  - `why-mintbundle` → "Reference"
   - `README` → "Reference"
 
 These two routes mount under the same `/api/v1` prefix as
@@ -107,7 +107,7 @@ Mount: in `App.tsx` `Shell`, alongside `<CommandPalette />`.
 Help action in CommandPalette:
 - Add `{ id: "open-help", label: "Open help", run: ... }`
   to the action registry. The action calls a window-level
-  custom event `bundleforge:open-help` that the HelpDrawer
+  custom event `mintbundle:open-help` that the HelpDrawer
   listens for. Cross-component pub/sub via `window` keeps
   the components decoupled.
 

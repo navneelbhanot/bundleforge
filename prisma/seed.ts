@@ -7,14 +7,14 @@ async function main() {
 
   // Create a test shop for development
   const shop = await prisma.shop.upsert({
-    where: { shopifyDomain: "bundleforge-dev.myshopify.com" },
+    where: { shopifyDomain: "mintbundle-dev.myshopify.com" },
     update: {},
     create: {
-      shopifyDomain: "bundleforge-dev.myshopify.com",
+      shopifyDomain: "mintbundle-dev.myshopify.com",
       shopifyGid: "gid://shopify/Shop/1",
       accessToken: "dev_token_placeholder",
-      name: "BundleForge Dev Store",
-      email: "dev@bundleforge.io",
+      name: "MintBundle Dev Store",
+      email: "dev@mintbundle.io",
       planName: "enterprise",
       shopifyPlan: "development",
       currency: "USD",

@@ -25,7 +25,7 @@ const CATEGORY_MAP: Record<string, string> = {
   storefront: "Operations",
   troubleshooting: "Troubleshooting",
   faq: "Reference",
-  "why-bundleforge": "Reference",
+  "why-mintbundle": "Reference",
   README: "Reference",
 };
 

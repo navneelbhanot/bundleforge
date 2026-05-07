@@ -89,7 +89,7 @@ export function installFeedRoutes(deps: FeedDeps = {}): Router {
           // The feed still validates; merchants can override via metafields
           // before Google ingests.
           priceUsd: 0,
-          url: `https://${shopDomain}/apps/bundleforge/bundle/${r.slug}`,
+          url: `https://${shopDomain}/apps/mintbundle/bundle/${r.slug}`,
         }));
         const xml = buildGoogleMerchantFeed(shop.name, bundles);
         res.set("Content-Type", "application/xml; charset=utf-8");

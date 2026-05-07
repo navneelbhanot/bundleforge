@@ -1,5 +1,5 @@
 /**
- * GDPR customers/data_request handler. BundleForge stores no customer
+ * GDPR customers/data_request handler. MintBundle stores no customer
  * PII, so we acknowledge by logging and returning.
  *
  * See docs/specs/M-028-customers-data-request.md.

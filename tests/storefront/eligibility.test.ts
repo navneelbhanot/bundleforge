@@ -2,7 +2,7 @@
  * Storefront eligibility tests (M-172c).
  *
  * Tests the helper exported from
- * `extensions/theme-extension/assets/bundleforge-bundle.js`.
+ * `extensions/theme-extension/assets/mintbundle-bundle.js`.
  * The module guards `customElements.define` and stubs
  * `HTMLElement` so it loads cleanly in node.
  */
@@ -13,7 +13,7 @@ import { describe, it, expect } from "vitest";
 // file lives in `tests/storefront/` and imports the module
 // at runtime.
 const modulePath =
-  "../../extensions/theme-extension/assets/bundleforge-bundle.js";
+  "../../extensions/theme-extension/assets/mintbundle-bundle.js";
 
 describe("isEligibleStorefront (M-172c)", () => {
   const ctxAnon = {

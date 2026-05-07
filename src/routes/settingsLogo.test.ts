@@ -64,7 +64,7 @@ function happyDeps(overrides: Partial<SettingsLogoDeps> = {}): SettingsLogoDeps 
         },
       };
     }
-    if (query.includes("BundleforgeFile(")) {
+    if (query.includes("MintBundleFile(")) {
       return {
         node: {
           id: "gid://shopify/MediaImage/999",

@@ -1,5 +1,5 @@
 /**
- * Simple Bundles → BundleForge importer (M-128).
+ * Simple Bundles → MintBundle importer (M-128).
  *
  * Input shape (Simple Bundles JSON export):
  *   {

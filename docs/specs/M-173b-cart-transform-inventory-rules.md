@@ -36,8 +36,8 @@ they're informational metadata in the metafield for now.
 ### Server
 
 - `defaultCreateShopifyProduct` in `src/routes/bundles.ts`
-  writes `bundleforge.inventory_rules` JSON on publish
-  (alongside the M-172b `bundleforge.eligibility` write).
+  writes `mintbundle.inventory_rules` JSON on publish
+  (alongside the M-172b `mintbundle.eligibility` write).
 - `BundleService.publish` callback contract carries
   `inventoryRules: Record<string, unknown>` to the route.
 

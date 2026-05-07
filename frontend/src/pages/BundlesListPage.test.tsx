@@ -48,7 +48,7 @@ function renderPage() {
 beforeEach(() => {
   // Stub localStorage so the wizard-dismissed flag doesn't leak.
   try {
-    window.localStorage.removeItem("bundleforge:onboarding-dismissed");
+    window.localStorage.removeItem("mintbundle:onboarding-dismissed");
   } catch {
     /* noop */
   }

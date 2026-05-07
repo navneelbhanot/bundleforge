@@ -407,7 +407,7 @@ function CreateWebhookModal({
                 value={url}
                 onChange={setUrl}
                 autoComplete="off"
-                placeholder="https://example.com/webhooks/bundleforge"
+                placeholder="https://example.com/webhooks/mintbundle"
                 error={url.length > 0 && !urlValid ? "Must be http(s)://" : undefined}
               />
               <ChoiceList
@@ -424,7 +424,7 @@ function CreateWebhookModal({
               <BlockStack gap="200">
                 <Text as="p">
                   Sign incoming POSTs with this secret to verify they came
-                  from BundleForge. This is the only time the secret is
+                  from MintBundle. This is the only time the secret is
                   shown.
                 </Text>
                 <TextField
@@ -494,7 +494,7 @@ function WebhooksCard({
         <Text as="p" tone="subdued">
           We POST to the URLs below when a subscribed event fires. Sign
           incoming requests with the HMAC secret you copied at creation
-          to verify they came from BundleForge.
+          to verify they came from MintBundle.
         </Text>
         {error && (
           <Banner tone="critical" title="Couldn't delete" onDismiss={() => setError(null)}>

@@ -5,14 +5,14 @@ Six screenshots, 1600×900 PNG, exported with the demo data from
 
 ## 1 — Dashboard (analytics overview)
 
-- Page: `/admin/apps/bundleforge`
+- Page: `/admin/apps/mintbundle`
 - Show: top KPIs (total revenue, orders, top bundles), trend chart for
   the last 30 days, top-3 bundles by revenue.
 - Caption: **"See what's working at a glance."**
 
 ## 2 — Bundle detail
 
-- Page: `/admin/apps/bundleforge/bundles/<id>` for "Build Your Own Box".
+- Page: `/admin/apps/mintbundle/bundles/<id>` for "Build Your Own Box".
 - Show: items grid, pricing rules editor with two stackable rules
   expanded, the live Polaris price preview.
 - Caption: **"Bundles, mix-and-match, BOGO, volume — all in one
@@ -21,19 +21,19 @@ Six screenshots, 1600×900 PNG, exported with the demo data from
 ## 3 — Storefront block (the real value-prop)
 
 - Capture the *storefront* product page (not the admin) with the
-  `bundleforge-bundle` block rendered: image grid + add-to-cart with
+  `mintbundle-bundle` block rendered: image grid + add-to-cart with
   discount badge.
 - Caption: **"Your theme, your brand — our pricing engine."**
 
 ## 4 — Inventory health
 
-- Page: `/admin/apps/bundleforge/inventory/health`
+- Page: `/admin/apps/mintbundle/inventory/health`
 - Show: a few SKUs with computed bundle stock + drift column.
 - Caption: **"Inventory accurate to the SKU. No more overselling."**
 
 ## 5 — A/B testing
 
-- Page: `/admin/apps/bundleforge/abtests`
+- Page: `/admin/apps/mintbundle/abtests`
 - Show: a completed test with significance badge ("99.2% confident — B
   wins"), conversion delta, recommendation.
 - Caption: **"Test pricing variants with built-in significance

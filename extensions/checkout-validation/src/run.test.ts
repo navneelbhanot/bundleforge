@@ -11,9 +11,9 @@ const line = (
 ) => ({
   id,
   quantity: qty,
-  bundleforgeBundleId: bundleId ? { value: bundleId } : null,
-  bundleforgeMin: min !== null ? { value: String(min) } : null,
-  bundleforgeMax: max !== null ? { value: String(max) } : null,
+  mintbundleBundleId: bundleId ? { value: bundleId } : null,
+  mintbundleMin: min !== null ? { value: String(min) } : null,
+  mintbundleMax: max !== null ? { value: String(max) } : null,
 });
 
 describe("Checkout Validation Function — run()", () => {

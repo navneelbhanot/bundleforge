@@ -10,7 +10,7 @@ const validEnv = (): NodeJS.ProcessEnv => ({
   SHOPIFY_API_SECRET: "s",
   SHOPIFY_SCOPES: "read_products,write_products",
   SHOPIFY_APP_URL: "https://example.com",
-  DATABASE_URL: "postgres://user:pass@localhost:5432/bundleforge",
+  DATABASE_URL: "postgres://user:pass@localhost:5432/mintbundle",
   REDIS_URL: "redis://localhost:6379",
   ENCRYPTION_KEY: "a".repeat(64),
 });
@@ -22,7 +22,7 @@ describe("loadEnv", () => {
     expect(env.NODE_ENV).toBe("development");
     expect(env.PORT).toBe(3000);
     expect(env.LOG_LEVEL).toBe("info");
-    expect(env.APP_NAME).toBe("BundleForge");
+    expect(env.APP_NAME).toBe("MintBundle");
     expect(env.APP_VERSION).toBe("0.1.0");
     expect(env.SHOPIFY_AUTH_CALLBACK_PATH).toBe("/api/auth/callback");
   });

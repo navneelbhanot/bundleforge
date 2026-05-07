@@ -1,5 +1,5 @@
 {
-  "title": "BundleForge — HTTP",
+  "title": "MintBundle — HTTP",
   "description": "Express HTTP ingress: request rate, status-code distribution, and latency by route. Driven by pino-http logs forwarded through Datadog's log-to-metric pipeline.",
   "layout_type": "ordered",
   "widgets": [
@@ -9,7 +9,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:bundleforge.http.requests{*}.as_rate() by {route}",
+            "q": "sum:mintbundle.http.requests{*}.as_rate() by {route}",
             "display_type": "bars"
           }
         ]
@@ -22,7 +22,7 @@
         "precision": 2,
         "requests": [
           {
-            "q": "100 * sum:bundleforge.http.requests{status:5xx}.as_rate() / sum:bundleforge.http.requests{*}.as_rate()",
+            "q": "100 * sum:mintbundle.http.requests{status:5xx}.as_rate() / sum:mintbundle.http.requests{*}.as_rate()",
             "aggregator": "avg"
           }
         ]
@@ -33,9 +33,9 @@
         "title": "Latency P50/P95/P99 (ms)",
         "type": "timeseries",
         "requests": [
-          { "q": "p50:bundleforge.http.duration{*}", "display_type": "line" },
-          { "q": "p95:bundleforge.http.duration{*}", "display_type": "line" },
-          { "q": "p99:bundleforge.http.duration{*}", "display_type": "line" }
+          { "q": "p50:mintbundle.http.duration{*}", "display_type": "line" },
+          { "q": "p95:mintbundle.http.duration{*}", "display_type": "line" },
+          { "q": "p99:mintbundle.http.duration{*}", "display_type": "line" }
         ]
       }
     },
@@ -43,7 +43,7 @@
       "definition": {
         "title": "429 rate-limited / hour",
         "type": "query_value",
-        "requests": [{ "q": "sum:bundleforge.http.requests{status:429}.as_count()" }]
+        "requests": [{ "q": "sum:mintbundle.http.requests{status:429}.as_count()" }]
       }
     }
   ],

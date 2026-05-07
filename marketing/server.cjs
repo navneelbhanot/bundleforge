@@ -1,4 +1,4 @@
-// Tiny zero-dependency static file server for the BundleForge marketing site.
+// Tiny zero-dependency static file server for the MintBundle marketing site.
 //
 // Why CJS + plain Node http: Railway gives the service a Node 20 runtime by
 // default; pulling in Express/serve just to map a single index.html would
@@ -51,10 +51,10 @@ function notFound(res) {
   send(
     res,
     404,
-    `<!doctype html><meta charset="utf-8"><title>Not found · BundleForge</title>
+    `<!doctype html><meta charset="utf-8"><title>Not found · MintBundle</title>
      <body style="font-family:Inter,system-ui,sans-serif;padding:4rem;text-align:center;color:#1e293b">
      <h1 style="font-size:2rem">Page not found</h1>
-     <p><a href="/" style="color:#1f5fa6">Back to bundleforge.app</a></p>`,
+     <p><a href="/" style="color:#1f5fa6">Back to mintbundle.app</a></p>`,
     { "Content-Type": "text/html; charset=utf-8" },
   );
 }
@@ -114,7 +114,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   // eslint-disable-next-line no-console
-  console.log(`bundleforge-marketing listening on :${PORT}`);
+  console.log(`mintbundle-marketing listening on :${PORT}`);
 });
 
 function shutdown(signal) {

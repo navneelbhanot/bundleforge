@@ -1,6 +1,6 @@
-# BundleForge — Merchant Help
+# MintBundle — Merchant Help
 
-Practical, no-fluff documentation for merchants using BundleForge.
+Practical, no-fluff documentation for merchants using MintBundle.
 
 > **Not finding your question?** [docs/help/troubleshooting.md](troubleshooting.md)
 > covers the most common issues. If that doesn't help, contact support

@@ -1,4 +1,4 @@
-# CLAUDE.md — BundleForge Session Protocol
+# CLAUDE.md — MintBundle Session Protocol
 
 > Read this file in full at the start of every session. It is the operating
 > manual for any Claude Code session working on this repo.
@@ -7,7 +7,7 @@
 
 ## 1. What this project is
 
-BundleForge is a Shopify product bundling app being built end-to-end by Claude
+MintBundle is a Shopify product bundling app being built end-to-end by Claude
 Code in **sequential, single-threaded sessions**. There is no human team writing
 code. Every session must therefore be able to pick up exactly where the previous
 session left off, with zero ambiguity, by reading the repo.

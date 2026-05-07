@@ -36,7 +36,7 @@ import type { WebhookHandler } from "../handlers";
  * clobber tags the merchant or other apps set.
  */
 const TAGS_ADD_MUTATION = `#graphql
-  mutation BundleforgeTagsAdd($id: ID!, $tags: [String!]!) {
+  mutation MintBundleTagsAdd($id: ID!, $tags: [String!]!) {
     tagsAdd(id: $id, tags: $tags) {
       node { id }
       userErrors { field message }
@@ -161,7 +161,7 @@ export function ordersCreateHandler(
         return;
       }
       // Tag list:
-      //  - "bundleforge"      → app-wide filter
+      //  - "mintbundle"      → app-wide filter
       //  - "bundle"           → simpler filter for ops
       //  - "bundle: <title>"  → human-readable per-bundle marker
       // Shopify tags are case-insensitive and trimmed; we cap the
@@ -172,7 +172,7 @@ export function ordersCreateHandler(
         TAGS_ADD_MUTATION,
         {
           id: orderGid,
-          tags: ["bundleforge", "bundle", titleTag],
+          tags: ["mintbundle", "bundle", titleTag],
         },
       );
       const userErrors = data.tagsAdd?.userErrors ?? [];

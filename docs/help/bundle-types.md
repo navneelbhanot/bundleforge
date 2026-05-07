@@ -1,6 +1,6 @@
 # Bundle types
 
-BundleForge supports 13 bundle types. Each maps to a specific buying
+MintBundle supports 13 bundle types. Each maps to a specific buying
 behavior; pick the one that matches what you want the customer to do.
 
 > **Tip:** start with **Fixed** or **Mix & match** if you're new.

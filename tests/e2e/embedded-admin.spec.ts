@@ -60,7 +60,7 @@ async function stubShopifyAndApi(
   if (opts.clearWizardDismissed) {
     await page.addInitScript(() => {
       try {
-        window.localStorage.removeItem("bundleforge:onboarding-dismissed");
+        window.localStorage.removeItem("mintbundle:onboarding-dismissed");
       } catch {
         // localStorage unavailable — fine, wizard appears by default
       }
@@ -218,7 +218,7 @@ test("OnboardingWizard tour walks through 3 steps and routes to /bundles/new", a
 
   // Step 1: welcome.
   await expect(
-    page.getByRole("heading", { name: /Welcome to BundleForge/i }),
+    page.getByRole("heading", { name: /Welcome to MintBundle/i }),
   ).toBeVisible();
   await page.getByRole("button", { name: /Get started/i }).click();
 

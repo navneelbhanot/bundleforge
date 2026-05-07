@@ -1,8 +1,8 @@
 /**
- * BundleForge — storefront Web Components.
+ * MintBundle — storefront Web Components.
  *
  * Each custom element fetches the bundle config from the App Proxy
- * (/apps/bundleforge/bundle/<slug>) and renders accordingly.
+ * (/apps/mintbundle/bundle/<slug>) and renders accordingly.
  *
  * Built without a framework so it ships as a single static asset
  * (no build step needed at the theme-extension level). Tested
@@ -16,7 +16,7 @@ if (typeof globalThis.HTMLElement === "undefined") {
   globalThis.HTMLElement = class {};
 }
 
-const PROXY_BASE = "/apps/bundleforge/bundle";
+const PROXY_BASE = "/apps/mintbundle/bundle";
 
 async function fetchBundle(slug) {
   const res = await fetch(`${PROXY_BASE}/${encodeURIComponent(slug)}`);
@@ -35,7 +35,7 @@ const ALLOWED_PRESETS = new Set([
 let scopeCounter = 0;
 function nextScopeId() {
   scopeCounter += 1;
-  return `bundleforge-scope-${scopeCounter}`;
+  return `mintbundle-scope-${scopeCounter}`;
 }
 
 /**
@@ -49,7 +49,7 @@ function nextScopeId() {
  * admin Banner copy).
  *
  * @param {object | null} eligibility — parsed blob from
- *   /apps/bundleforge/bundle/:slug.
+ *   /apps/mintbundle/bundle/:slug.
  * @param {{customerId: string, customerTags: string[],
  *          country: string, language: string}} ctx
  * @returns {boolean}
@@ -135,10 +135,10 @@ export function applyDisplaySettings(settings) {
     scopeId: "",
   };
   if (typeof s.colorPreset === "string" && ALLOWED_PRESETS.has(s.colorPreset)) {
-    out.wrapperClass = `bundleforge-preset-${s.colorPreset}`;
+    out.wrapperClass = `mintbundle-preset-${s.colorPreset}`;
   }
   if (typeof s.layout === "string" && ALLOWED_LAYOUTS.has(s.layout)) {
-    out.listClass = `bundleforge-layout-${s.layout}`;
+    out.listClass = `mintbundle-layout-${s.layout}`;
   }
   if (typeof s.cssOverride === "string" && s.cssOverride.trim().length > 0) {
     out.scopeId = nextScopeId();
@@ -165,7 +165,7 @@ function el(tag, props = {}, children = []) {
   return node;
 }
 
-class BundleforgeBundle extends HTMLElement {
+class MintBundleBundle extends HTMLElement {
   async connectedCallback() {
     const slug = this.getAttribute("data-slug");
     if (!slug) return;
@@ -179,7 +179,7 @@ class BundleforgeBundle extends HTMLElement {
       if (!isEligibleStorefront(bundle.eligibility, ctx)) {
         const mode = this.getAttribute("data-on-ineligible") || "hide";
         if (mode === "placeholder") {
-          this.innerHTML = `<p class="bundleforge-ineligible">This bundle isn't available in your region.</p>`;
+          this.innerHTML = `<p class="mintbundle-ineligible">This bundle isn't available in your region.</p>`;
         } else {
           this.style.display = "none";
         }
@@ -189,7 +189,7 @@ class BundleforgeBundle extends HTMLElement {
       // M-173c: storefront-side inventory rule check. When
       // componentOnlyMode is on, the merchant has chosen to
       // render components individually elsewhere; the
-      // <bundleforge-bundle> widget should hide so it doesn't
+      // <mintbundle-bundle> widget should hide so it doesn't
       // duplicate the cart line.
       if (
         bundle.inventoryRules &&
@@ -208,7 +208,7 @@ class BundleforgeBundle extends HTMLElement {
       if (bundle.paused === true) {
         const mode = this.getAttribute("data-on-ineligible") || "hide";
         if (mode === "placeholder") {
-          this.innerHTML = `<p class="bundleforge-paused">This bundle is temporarily unavailable.</p>`;
+          this.innerHTML = `<p class="mintbundle-paused">This bundle is temporarily unavailable.</p>`;
         } else {
           this.style.display = "none";
         }
@@ -229,31 +229,31 @@ class BundleforgeBundle extends HTMLElement {
         this.appendChild(style);
       }
       this.appendChild(
-        el("h3", { class: "bundleforge-title" }, [bundle.title]),
+        el("h3", { class: "mintbundle-title" }, [bundle.title]),
       );
       const listClass = display.listClass
-        ? `bundleforge-items ${display.listClass}`
-        : "bundleforge-items";
+        ? `mintbundle-items ${display.listClass}`
+        : "mintbundle-items";
       const list = el("ul", { class: listClass });
       for (const item of bundle.items ?? []) {
         list.appendChild(
-          el("li", { class: "bundleforge-item" }, [
+          el("li", { class: "mintbundle-item" }, [
             `${item.title} × ${item.quantity}`,
           ]),
         );
       }
       this.appendChild(list);
       this.dispatchEvent(
-        new CustomEvent("bundleforge:loaded", { detail: bundle, bubbles: true }),
+        new CustomEvent("mintbundle:loaded", { detail: bundle, bubbles: true }),
       );
     } catch (err) {
-      this.innerHTML = `<p class="bundleforge-error">Could not load bundle.</p>`;
-      console.error("BundleForge:", err);
+      this.innerHTML = `<p class="mintbundle-error">Could not load bundle.</p>`;
+      console.error("MintBundle:", err);
     }
   }
 }
 
-class BundleforgeVariantPicker extends HTMLElement {
+class MintBundleVariantPicker extends HTMLElement {
   async connectedCallback() {
     const slug = this.getAttribute("data-slug");
     const idx = parseInt(this.getAttribute("data-item-index") || "0", 10);
@@ -261,21 +261,21 @@ class BundleforgeVariantPicker extends HTMLElement {
     const bundle = await fetchBundle(slug);
     const item = (bundle.items ?? [])[idx];
     if (!item) return;
-    const select = el("select", { class: "bundleforge-variant" });
+    const select = el("select", { class: "mintbundle-variant" });
     select.appendChild(el("option", { value: item.shopifyVariantGid || "" }, [item.title]));
     this.innerHTML = "";
     this.appendChild(select);
   }
 }
 
-class BundleforgeBuildBox extends HTMLElement {
+class MintBundleBuildBox extends HTMLElement {
   async connectedCallback() {
     const slug = this.getAttribute("data-slug");
     if (!slug) return;
     const bundle = await fetchBundle(slug);
     const steps = (bundle.config && bundle.config.steps) || [];
     this.innerHTML = "";
-    const wrap = el("div", { class: "bundleforge-build-box" });
+    const wrap = el("div", { class: "mintbundle-build-box" });
     let stepIdx = 0;
     const renderStep = () => {
       wrap.innerHTML = "";
@@ -298,7 +298,7 @@ class BundleforgeBuildBox extends HTMLElement {
   }
 }
 
-class BundleforgeMixMatch extends HTMLElement {
+class MintBundleMixMatch extends HTMLElement {
   async connectedCallback() {
     const slug = this.getAttribute("data-slug");
     const cols = parseInt(this.getAttribute("data-columns") || "3", 10);
@@ -306,12 +306,12 @@ class BundleforgeMixMatch extends HTMLElement {
     const bundle = await fetchBundle(slug);
     this.innerHTML = "";
     const grid = el("div", {
-      class: "bundleforge-mix-grid",
+      class: "mintbundle-mix-grid",
       style: `display:grid;grid-template-columns:repeat(${cols},1fr);gap:1rem;`,
     });
     for (const item of bundle.items ?? []) {
       grid.appendChild(
-        el("label", { class: "bundleforge-mix-cell" }, [
+        el("label", { class: "mintbundle-mix-cell" }, [
           el("input", { type: "checkbox", value: item.shopifyVariantGid || "" }),
           ` ${item.title}`,
         ]),
@@ -321,19 +321,19 @@ class BundleforgeMixMatch extends HTMLElement {
   }
 }
 
-class BundleforgeBogo extends HTMLElement {
+class MintBundleBogo extends HTMLElement {
   async connectedCallback() {
     const slug = this.getAttribute("data-slug");
     const showProgress = this.getAttribute("data-show-progress") === "true";
     if (!slug) return;
     const bundle = await fetchBundle(slug);
-    const headlineEl = this.querySelector(".bundleforge-bogo-headline");
+    const headlineEl = this.querySelector(".mintbundle-bogo-headline");
     if (showProgress && bundle.items?.length) {
       const progress = el("progress", { value: "0", max: String(bundle.items.length) });
       this.appendChild(progress);
     }
     if (!headlineEl) {
-      this.appendChild(el("p", { class: "bundleforge-bogo-headline" }, [bundle.title]));
+      this.appendChild(el("p", { class: "mintbundle-bogo-headline" }, [bundle.title]));
     }
   }
 }
@@ -342,9 +342,9 @@ class BundleforgeBogo extends HTMLElement {
 // in a Node test runtime (where customElements is undefined).
 // At browser load time this branch always runs.
 if (typeof customElements !== "undefined" && customElements.define) {
-  customElements.define("bundleforge-bundle", BundleforgeBundle);
-  customElements.define("bundleforge-variant-picker", BundleforgeVariantPicker);
-  customElements.define("bundleforge-build-box", BundleforgeBuildBox);
-  customElements.define("bundleforge-mix-match", BundleforgeMixMatch);
-  customElements.define("bundleforge-bogo", BundleforgeBogo);
+  customElements.define("mintbundle-bundle", MintBundleBundle);
+  customElements.define("mintbundle-variant-picker", MintBundleVariantPicker);
+  customElements.define("mintbundle-build-box", MintBundleBuildBox);
+  customElements.define("mintbundle-mix-match", MintBundleMixMatch);
+  customElements.define("mintbundle-bogo", MintBundleBogo);
 }

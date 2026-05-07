@@ -2,7 +2,7 @@
 
 > Behavior wiring for M-164. The Cart & Checkout tab
 > persists `settings.cart.defaultMode`; the Cart Transform
-> Function already reads `bundleforge.cart_default_mode`
+> Function already reads `mintbundle.cart_default_mode`
 > shop metafield. M-164b plumbs the admin save action
 > through to that metafield so the CTF actually sees the
 > merchant's choice.

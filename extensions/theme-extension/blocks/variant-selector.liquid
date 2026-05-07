@@ -1,10 +1,10 @@
 {% comment %}
-  BundleForge — Variant Selector Block (M-089).
-  Renders <bundleforge-variant-picker> for a single bundle item.
+  MintBundle — Variant Selector Block (M-089).
+  Renders <mintbundle-variant-picker> for a single bundle item.
 {% endcomment %}
 {% schema %}
 {
-  "name": "BundleForge Variant Picker",
+  "name": "MintBundle Variant Picker",
   "target": "section",
   "settings": [
     { "type": "text", "id": "slug",      "label": "Bundle slug" },
@@ -12,8 +12,8 @@
   ]
 }
 {% endschema %}
-<bundleforge-variant-picker
+<mintbundle-variant-picker
   data-slug="{{ block.settings.slug | escape }}"
   data-item-index="{{ block.settings.item_index }}">
-</bundleforge-variant-picker>
-<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>
+</mintbundle-variant-picker>
+<script src="{{ 'mintbundle-bundle.js' | asset_url }}" type="module" defer></script>

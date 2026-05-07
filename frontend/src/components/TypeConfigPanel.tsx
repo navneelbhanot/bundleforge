@@ -314,7 +314,7 @@ export function TypeConfigPanel({ type, config }: TypeConfigPanelProps): JSX.Ele
             value={asString(config.sellingPlanGroupId)}
             onChange={noop}
             autoComplete="off"
-            helpText="Created in Shopify Admin → Apps → BundleForge → Subscriptions."
+            helpText="Created in Shopify Admin → Apps → MintBundle → Subscriptions."
           />
         </Section>
       );

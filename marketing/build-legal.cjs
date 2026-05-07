@@ -35,9 +35,9 @@ const EFFECTIVE_DATE = new Date().toISOString().slice(0, 10);
 
 const FILLED = {
   effective_date: EFFECTIVE_DATE,
-  privacy_email: "privacy@bundleforge.app",
-  support_email: "support@bundleforge.app",
-  legal_email: "legal@bundleforge.app",
+  privacy_email: "privacy@mintbundle.app",
+  support_email: "support@mintbundle.app",
+  legal_email: "legal@mintbundle.app",
   hosting_vendor: "Railway",
   db_vendor: "Railway (managed Postgres 16)",
   redis_vendor: "Railway (managed Redis 7)",
@@ -246,8 +246,8 @@ function pageTemplate({ title, slug, body }) {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${escapeHtml(title)} · BundleForge</title>
-<meta name="description" content="${escapeHtml(title)} for the BundleForge Shopify app." />
+<title>${escapeHtml(title)} · MintBundle</title>
+<meta name="description" content="${escapeHtml(title)} for the MintBundle Shopify app." />
 <meta name="theme-color" content="#000000" />
 <meta name="robots" content="index,follow" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -380,7 +380,7 @@ function pageTemplate({ title, slug, body }) {
   <div class="inner">
     <a href="/" class="brand">
       <span class="stripe"></span>
-      <span>BundleForge</span>
+      <span>MintBundle</span>
     </a>
     <a href="/" class="nav-back">← Back to home</a>
   </div>
@@ -398,8 +398,8 @@ function pageTemplate({ title, slug, body }) {
     <a href="/">Home</a>
     <a href="/privacy">Privacy</a>
     <a href="/terms">Terms</a>
-    <a href="mailto:support@bundleforge.app">Contact</a>
-    <p class="meta" style="margin-top:24px">© 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.</p>
+    <a href="mailto:support@mintbundle.app">Contact</a>
+    <p class="meta" style="margin-top:24px">© 2026 MintBundle. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.</p>
   </div>
 </footer>
 

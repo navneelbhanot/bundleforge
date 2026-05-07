@@ -1,9 +1,9 @@
 {% comment %}
-  BundleForge — Bundle Display Block (M-088 + M-172c).
+  MintBundle — Bundle Display Block (M-088 + M-172c).
 
   Renders a bundle widget on the product page. The widget is a custom
-  element (`<bundleforge-bundle>`) that fetches the bundle config from
-  the App Proxy at /apps/bundleforge/bundle/<slug>.
+  element (`<mintbundle-bundle>`) that fetches the bundle config from
+  the App Proxy at /apps/mintbundle/bundle/<slug>.
 
   M-172c: customer state (id, tags, country, language) is passed via
   data-* attributes so the web component can run eligibility checks
@@ -13,7 +13,7 @@
 
 {% schema %}
 {
-  "name": "BundleForge Bundle",
+  "name": "MintBundle Bundle",
   "target": "section",
   "settings": [
     { "type": "text",     "id": "slug",                "label": "Bundle slug" },
@@ -36,7 +36,7 @@
 }
 {% endschema %}
 
-<bundleforge-bundle
+<mintbundle-bundle
   data-slug="{{ block.settings.slug | escape }}"
   data-shop="{{ shop.permanent_domain }}"
   data-product-id="{{ product.id }}"
@@ -48,8 +48,8 @@
   data-customer-tags="{{ customer.tags | join: ',' | escape }}"
   data-country="{{ localization.country.iso_code }}"
   data-language="{{ localization.language.iso_code }}">
-  <p class="bundleforge-loading">Loading bundle…</p>
-</bundleforge-bundle>
+  <p class="mintbundle-loading">Loading bundle…</p>
+</mintbundle-bundle>
 
-<script src="{{ 'bundleforge-bundle.js' | asset_url }}" type="module" defer></script>
-<link rel="stylesheet" href="{{ 'bundleforge.css' | asset_url }}">
+<script src="{{ 'mintbundle-bundle.js' | asset_url }}" type="module" defer></script>
+<link rel="stylesheet" href="{{ 'mintbundle.css' | asset_url }}">

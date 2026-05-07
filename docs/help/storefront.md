@@ -4,7 +4,7 @@ How bundles render on your store's public pages.
 
 ## The integration model
 
-BundleForge ships as a **Theme App Extension** — a set of drop-in
+MintBundle ships as a **Theme App Extension** — a set of drop-in
 blocks for Online Store 2.0 themes (Dawn, Ride, Sense, Studio, etc.).
 **No Liquid edits are required** for OS 2.0 themes; the blocks appear
 in your theme editor's Add block dropdown.
@@ -26,7 +26,7 @@ For older "Vintage" themes, see [below](#vintage-themes).
 1. Online store → Themes → **Customize** on the active theme.
 2. Open the page where you want the bundle (Product, Collection,
    Home, custom).
-3. **Add block** → "BundleForge" section → pick the matching block.
+3. **Add block** → "MintBundle" section → pick the matching block.
 4. In the block settings:
    - Pick the bundle by title.
    - Choose layout options (columns, image style, button copy).
@@ -67,21 +67,21 @@ Some advanced theme integrations need to query bundle data directly
 from Liquid. The App Proxy is mounted at:
 
 ```
-https://<your-store>.myshopify.com/apps/bundleforge/<path>
+https://<your-store>.myshopify.com/apps/mintbundle/<path>
 ```
 
 Routes available under the proxy (HMAC-verified by Shopify):
 
 ```
-POST /apps/bundleforge/bundles/<slug>/price
+POST /apps/mintbundle/bundles/<slug>/price
 ```
 
 Use this to compute a price for a specific item-quantity composition
 without an actual cart.
 
-The proxy's authoritative URL is `/api/proxy` on the BundleForge
+The proxy's authoritative URL is `/api/proxy` on the MintBundle
 server; Shopify forwards requests with a signed `signature` query
-that BundleForge verifies before responding.
+that MintBundle verifies before responding.
 
 ## Subscriptions
 
@@ -100,11 +100,11 @@ For themes that aren't OS 2.0 (no Theme App Extension support), drop
 this snippet into the page template where you want the bundle:
 
 ```liquid
-{% include 'bundleforge-bundle' with id: 'your-bundle-slug' %}
+{% include 'mintbundle-bundle' with id: 'your-bundle-slug' %}
 ```
 
-This requires a one-time `bundleforge-bundle.liquid` snippet to be
-copied into your theme. BundleForge's onboarding wizard will offer
+This requires a one-time `mintbundle-bundle.liquid` snippet to be
+copied into your theme. MintBundle's onboarding wizard will offer
 this for legacy themes during install.
 
 ## Multi-language storefronts

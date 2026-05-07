@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "Kom igång med BundleForge",
+    "title": "Kom igång med MintBundle",
     "progress": "{{complete}} av {{total}} klara",
     "dismiss": "Stäng listan",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "Lägg till paketblocket i din butik",
-      "body": "Placera BundleForge-blocket i din produktsidesmall så att kunder ser det.",
+      "body": "Placera MintBundle-blocket i din produktsidesmall så att kunder ser det.",
       "cta": "Öppna temaredigeraren",
       "markComplete": "Markera som klart"
     }

@@ -73,7 +73,7 @@ npm run db:seed
 
 Default credentials in `docker-compose.yml`:
 
-- Postgres: `postgres://bundleforge:bundleforge_dev@localhost:5432/bundleforge`
+- Postgres: `postgres://mintbundle:mintbundle_dev@localhost:5432/mintbundle`
 - Redis: `redis://localhost:6379`
 
 Update your `.env` to match if you changed defaults.
@@ -173,7 +173,7 @@ logged. Findings + fixes:
   was logging only. **Fix**: same pattern, includes queue tag. ✅
 - `src/webhooks/index.ts` HMAC verifier — failures already log + return
   401; not captured (intentional: HMAC failures are mostly attack
-  noise, surfaced via the `bundleforge.webhook.hmac_failed` Datadog
+  noise, surfaced via the `mintbundle.webhook.hmac_failed` Datadog
   metric instead). ✅
 - Storefront/App-Proxy 401s — same rationale as HMAC. ✅
 

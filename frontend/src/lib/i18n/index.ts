@@ -7,7 +7,7 @@
  * recognisable English-ish text rather than "undefined").
  *
  * Initial language is read SYNCHRONOUSLY from localStorage (the
- * same `bundleforge:polaris-locale` key M-186 uses) so the very
+ * same `mintbundle:polaris-locale` key M-186 uses) so the very
  * first paint is in the merchant's chosen language — no fetch
  * race with App Bridge's session-token handshake.
  *
@@ -35,7 +35,7 @@ import da from "./locales/da.json";
 import no from "./locales/no.json";
 import ru from "./locales/ru.json";
 
-const LOCALE_CACHE_KEY = "bundleforge:polaris-locale";
+const LOCALE_CACHE_KEY = "mintbundle:polaris-locale";
 
 function readCachedLocale(): string {
   try {

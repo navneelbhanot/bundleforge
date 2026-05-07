@@ -1,6 +1,6 @@
 # Datadog dashboards (M-143)
 
-Four dashboards covering BundleForge's observability surface:
+Four dashboards covering MintBundle's observability surface:
 
 | File | What it shows |
 | --- | --- |
@@ -27,11 +27,11 @@ The dashboards reference the following metric namespaces; emit them from
 the worker (`src/jobs/worker.ts` + `src/services/inventory/index.ts`) using
 your statsd or `dogstatsd-js` client:
 
-- `bundleforge.queue.{depth,completed,failed,duration}` — tagged `queue`
-- `bundleforge.webhook.{accepted,lag_ms,hmac_failed,handler_error}` — tagged `topic`
-- `bundleforge.inventory.{applied,recompute_ms,audit_write}` — tagged `shop`
-- `bundleforge.http.{requests,duration}` — tagged `route`, `status`
-- `bundleforge.shopify.retry` — tagged `api`
+- `mintbundle.queue.{depth,completed,failed,duration}` — tagged `queue`
+- `mintbundle.webhook.{accepted,lag_ms,hmac_failed,handler_error}` — tagged `topic`
+- `mintbundle.inventory.{applied,recompute_ms,audit_write}` — tagged `shop`
+- `mintbundle.http.{requests,duration}` — tagged `route`, `status`
+- `mintbundle.shopify.retry` — tagged `api`
 
 If you're using log-to-metric instead of direct statsd, add the
 extraction rule in **Logs → Generate Metrics**; pino-http emits

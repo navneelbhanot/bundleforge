@@ -2,7 +2,7 @@
 
 ## App name
 
-**BundleForge — Reliable Product Bundles**
+**MintBundle — Reliable Product Bundles**
 
 ## Tagline (≤80 chars)
 
@@ -19,7 +19,7 @@ Fixed, mix-and-match, BOGO, volume, build-a-box and 8 more bundle types
 > 600-1500 words; below is the canonical version. Update the numbers
 > before each launch refresh.
 
-BundleForge is the bundling app Shopify merchants choose when they need
+MintBundle is the bundling app Shopify merchants choose when they need
 the math to be right. We compute pricing the same way in your theme,
 your cart, and at checkout — so the price the shopper sees is the
 price they pay. Every time.
@@ -35,7 +35,7 @@ price they pay. Every time.
 - **Multipacks, gift, mystery, sample, subscription, wholesale,
   custom** — eight more types out of the box.
 
-### Why merchants choose BundleForge
+### Why merchants choose MintBundle
 
 - **Pricing parity, not drift.** The same engine runs server-side and
   in Shopify's Cart Transform Function. Cents-exact, banker's-rounded.
@@ -78,8 +78,8 @@ Paid plans include a 14-day trial. Annual billing saves 20%.
 
 ### Support
 
-- Docs: https://bundleforge.app/docs
-- Email: support@bundleforge.app
+- Docs: https://mintbundle.app/docs
+- Email: support@mintbundle.app
 - In-app chat for paid plans.
 
 ### Privacy + GDPR
@@ -112,7 +112,7 @@ Merchant, Shopify Flow.
 
 ## Required URLs
 
-- Privacy: https://bundleforge.app/legal/privacy-policy
-- Terms: https://bundleforge.app/legal/terms-of-service
-- Support: support@bundleforge.app
-- Docs: https://bundleforge.app/docs
+- Privacy: https://mintbundle.app/legal/privacy-policy
+- Terms: https://mintbundle.app/legal/terms-of-service
+- Support: support@mintbundle.app
+- Docs: https://mintbundle.app/docs

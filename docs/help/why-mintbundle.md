@@ -1,4 +1,4 @@
-# Why BundleForge
+# Why MintBundle
 
 A short, honest answer to "why pick this app over the seven other
 bundle apps on the Shopify App Store?" Backed by tests in this repo
@@ -14,7 +14,7 @@ sees one price in the cart and a different one at checkout. That
 mismatch is the #1 complaint in negative reviews of native Shopify
 Bundles ("validation rule mismatches", "incompatibility with X").
 
-BundleForge runs **the same pricing function** on the server (for
+MintBundle runs **the same pricing function** on the server (for
 the admin and the order processor) AND inside Shopify's Cart
 Transform Function (for the live cart and checkout). Both call the
 same pure module. A test asserts they agree on every commit.
@@ -31,7 +31,7 @@ Most bundle apps maintain inventory state in the application code.
 That means a bug, a misconfigured admin user, or a CSV import can
 silently rewrite history.
 
-BundleForge writes every inventory adjustment to
+MintBundle writes every inventory adjustment to
 `inventory_audit_log`, then enforces immutability at the **Postgres
 trigger level**: a `BEFORE UPDATE` trigger raises an exception on
 any UPDATE. There is no in-app code path that can rewrite history
@@ -47,7 +47,7 @@ is the source of truth and it cannot have been tampered with.
 ### 3. A/B testing with a real significance calculator
 
 Three bundle-app categories advertise A/B testing in their listing
-copy. Of those, BundleForge is the only one publishing **what test
+copy. Of those, MintBundle is the only one publishing **what test
 of significance is being computed and how**.
 
 Two-proportion z-test, normal CDF, p-value reported, winner declared
@@ -73,7 +73,7 @@ you're being told a colour, not a result.
 
 ## Where we honestly trade off
 
-| Axis | BundleForge | Competitor leader |
+| Axis | MintBundle | Competitor leader |
 |---|---|---|
 | Bundle type breadth (configurable in admin) | 13 declared, 13 fully editable in admin | Simple Bundles ~15 |
 | Multi-language (admin + theme) | 15 locales (en, es, fr, de, it, pt, ja, zh, ko, nl, pl, sv, da, no, ru) | Bundler 16+, Shopify Bundles 19 |

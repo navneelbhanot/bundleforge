@@ -1,8 +1,8 @@
 {
-  "name": "@bundleforge/cart-transform",
+  "name": "@mintbundle/cart-transform",
   "version": "1.0.0",
   "private": true,
-  "description": "Cart-Transform Function — applies BundleForge bundle pricing at checkout.",
+  "description": "Cart-Transform Function — applies MintBundle bundle pricing at checkout.",
   "license": "UNLICENSED",
   "scripts": {
     "build": "shopify app function build",

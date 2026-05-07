@@ -1,4 +1,4 @@
-# Deploying BundleForge to Railway
+# Deploying MintBundle to Railway
 
 End-to-end recipe. Assumes a Railway account, the `railway` CLI, and a
 Shopify Partners app already exists.
@@ -19,8 +19,8 @@ One Railway project with five resources:
 
 ```bash
 railway login
-railway init bundleforge
-cd bundleforge
+railway init mintbundle
+cd mintbundle
 
 # Provision plugins
 railway add postgresql
@@ -32,7 +32,7 @@ the project automatically.
 
 ## Web service
 
-1. **New Service → Deploy from GitHub repo** → select `navneelbhanot/bundleforge`.
+1. **New Service → Deploy from GitHub repo** → select `navneelbhanot/mintbundle`.
 2. Use the defaults from `railway.toml`. Specifically:
    - **Build command**: `npm ci --include=dev && npm run build`
      (installs deps including `tsx`, runs `prisma generate`, builds the
@@ -87,10 +87,10 @@ workers from the same Node process by composing them in
 
 Once Railway has issued the `web` service URL:
 
-1. **Partners → Apps → BundleForge → Configuration**:
+1. **Partners → Apps → MintBundle → Configuration**:
    - **App URL**: `https://<web>.up.railway.app/`
    - **Allowed redirection URLs**: add `https://<web>.up.railway.app/api/auth/callback`
-   - **App Proxy**: subpath `apps/bundleforge`, target
+   - **App Proxy**: subpath `apps/mintbundle`, target
      `https://<web>.up.railway.app/api/proxy`
 2. **Webhooks → Compliance**:
    - `customers/data_request` → `https://<web>.up.railway.app/api/webhooks`
@@ -121,7 +121,7 @@ not granular. Run our hourly logical backups to S3 in addition:
 ```bash
 # In a Railway cron or external scheduler
 DATABASE_URL=$DATABASE_URL ./scripts/backup.sh /tmp/bf-backups
-aws s3 sync /tmp/bf-backups s3://bundleforge-backups/
+aws s3 sync /tmp/bf-backups s3://mintbundle-backups/
 ```
 
 See `scripts/backup.sh` and `docs/runbook-incidents.md` for details.

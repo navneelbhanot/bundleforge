@@ -1,6 +1,6 @@
 # Beta merchant onboarding (M-152)
 
-A beta merchant should be able to install BundleForge, see populated demo
+A beta merchant should be able to install MintBundle, see populated demo
 data, ship their first real bundle, and reach the storefront in
 **under 30 minutes**. This document is the script we walk them through.
 
@@ -23,7 +23,7 @@ data, ship their first real bundle, and reach the storefront in
    - `read_inventory`, `write_inventory`
    - `read_themes`, `write_themes` *(for the theme-extension block)*
    - `read_locales`
-3. Approves; lands on the BundleForge admin home with the
+3. Approves; lands on the MintBundle admin home with the
    `OnboardingWizard`.
 
 ## Step 2 — Demo data (≈30 sec)
@@ -53,7 +53,7 @@ Walk them through the bundle wizard:
 ## Step 4 — Theme block (≈5 min)
 
 1. From the bundle detail page, click **"Add to theme"**.
-2. Theme editor opens with the `bundleforge-bundle` block selected.
+2. Theme editor opens with the `mintbundle-bundle` block selected.
 3. Drag onto the product page template; preview.
 4. Save the theme.
 
@@ -62,7 +62,7 @@ Walk them through the bundle wizard:
 1. From the merchant's storefront, add the bundle to cart.
 2. Check the price reflects the 10% discount.
 3. Place a test order using a Bogus Gateway / draft order.
-4. Confirm the order shows up in the BundleForge admin's Orders page
+4. Confirm the order shows up in the MintBundle admin's Orders page
    with correct attribution and SKU breakdown.
 
 ## Step 6 — Activate (≈30 sec)
@@ -77,7 +77,7 @@ Walk them through the bundle wizard:
 | Block doesn't render in theme editor | Theme version <2024 (Online Store 2.0 required) | Upgrade or pick a different template |
 | Storefront price doesn't discount | Cart Transform disabled (Plus-only flow on non-Plus) | Use the Volume rule type instead — works on every plan |
 | Inventory shows "drift" | First sync after install hasn't completed | Wait 60s; trigger manual sync via `Inventory → Resync` |
-| 401 from `/api/proxy/*` | App Proxy not enabled in Partners | Enable App Proxy with subpath `apps/bundleforge` |
+| 401 from `/api/proxy/*` | App Proxy not enabled in Partners | Enable App Proxy with subpath `apps/mintbundle` |
 | Theme block crashes with "fetch failed" | Storefront ad-blocker | Add the App Proxy domain to the allowlist |
 
 ## Follow-up call (D+7)

@@ -10,7 +10,7 @@ Shopify App Proxy URL configured in `shopify.app.toml`.
 ## Why
 
 Storefront JS cannot read DB rows directly. App Proxy is the standard
-pattern: the storefront hits `/apps/bundleforge/bundle/<slug>` →
+pattern: the storefront hits `/apps/mintbundle/bundle/<slug>` →
 Shopify forwards to our `/api/proxy/...` with a signed query string
 containing the shop domain.
 

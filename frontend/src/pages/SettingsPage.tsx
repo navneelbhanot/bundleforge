@@ -412,7 +412,7 @@ function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
         </Text>
         <Text as="p" tone="subdued">
           Used as the accent color for badges and buttons rendered by
-          BundleForge in the storefront and admin emails.
+          MintBundle in the storefront and admin emails.
         </Text>
         {error && (
           <Banner tone="critical" title={t("settingsPage.brandSaveError")}>
@@ -738,7 +738,7 @@ function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
           {t("settingsPage.cssCard")}
         </Text>
         <Text as="p" tone="subdued">
-          Scoped under <code>#bundleforge-storefront *</code>. Bad
+          Scoped under <code>#mintbundle-storefront *</code>. Bad
           rules can break theme blocks — preview on a dev store
           before saving on production.
         </Text>
@@ -846,7 +846,7 @@ function StockGuardsCard({
           value={threshold}
           onChange={setThreshold}
           autoComplete="off"
-          helpText="When any component drops at or below this number, BundleForge marks the bundle low-stock for the alert + storefront badge."
+          helpText="When any component drops at or below this number, MintBundle marks the bundle low-stock for the alert + storefront badge."
           error={!thresholdValid ? "0 to 100000" : undefined}
         />
         <Select
@@ -1118,7 +1118,7 @@ function CartModeCard({ initial, busy, onSave }: CartModeCardProps): JSX.Element
         <Text as="p" tone="subdued">
           Picks which Cart Transform path runs at checkout.
           <strong> Bundle-as-product</strong> means a single product
-          line that BundleForge expands into components at cart time
+          line that MintBundle expands into components at cart time
           — best for inventory tracking and 3PL routing.
           <strong> Components-as-attributes</strong> places components
           directly on the cart with line attributes — best when your
@@ -1353,7 +1353,7 @@ function ChannelsCard({ initial, busy, onSave }: ChannelsCardProps): JSX.Element
         <Text as="p" tone="subdued">
           Where alerts are sent. The Email channel uses these
           recipients; the in-app channel surfaces inside the
-          BundleForge admin.
+          MintBundle admin.
         </Text>
         {error && (
           <Banner tone="critical" title={t("settingsPage.channelsSaveError")}>

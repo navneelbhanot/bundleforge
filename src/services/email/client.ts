@@ -32,10 +32,10 @@ export function resetResendClientForTesting(): void {
 /**
  * Default From header. Subdomain isolates transactional sender
  * reputation from the human Workspace inbox at
- * support@bundleforge.app. Override via `EMAIL_FROM` env.
+ * support@mintbundle.app. Override via `EMAIL_FROM` env.
  */
 export const DEFAULT_FROM =
-  "BundleForge <notifications@mail.bundleforge.app>";
+  "MintBundle <notifications@mail.mintbundle.app>";
 
 export function fromAddress(): string {
   return env.EMAIL_FROM ?? DEFAULT_FROM;

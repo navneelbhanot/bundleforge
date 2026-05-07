@@ -1,5 +1,5 @@
 /**
- * Shopify Bundles → BundleForge importer (M-127).
+ * Shopify Bundles → MintBundle importer (M-127).
  *
  * Input shape (Admin API products of `productType: "Bundle"`):
  *   {

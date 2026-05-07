@@ -13,7 +13,7 @@ function makeGraphql(
   setResponse: unknown,
 ): WriteShopMetafieldDeps["shopifyGraphqlImpl"] {
   return vi.fn(async (_session, query) => {
-    if (query.includes("BundleforgeShopId")) {
+    if (query.includes("MintBundleShopId")) {
       return shopId ? { shop: { id: shopId } } : { shop: null };
     }
     if (query.includes("metafieldsSet")) {
@@ -32,7 +32,7 @@ describe("writeShopMetafield (M-164b)", () => {
           metafields: [
             {
               id: "gid://shopify/Metafield/999",
-              namespace: "bundleforge",
+              namespace: "mintbundle",
               key: "cart_default_mode",
               value: "components_as_attributes",
               type: "single_line_text_field",
@@ -45,7 +45,7 @@ describe("writeShopMetafield (M-164b)", () => {
     const out = await writeShopMetafield(
       SESSION,
       {
-        namespace: "bundleforge",
+        namespace: "mintbundle",
         key: "cart_default_mode",
         value: "components_as_attributes",
         type: "single_line_text_field",
@@ -63,7 +63,7 @@ describe("writeShopMetafield (M-164b)", () => {
       writeShopMetafield(
         SESSION,
         {
-          namespace: "bundleforge",
+          namespace: "mintbundle",
           key: "cart_default_mode",
           value: "x",
           type: "single_line_text_field",
@@ -87,7 +87,7 @@ describe("writeShopMetafield (M-164b)", () => {
       writeShopMetafield(
         SESSION,
         {
-          namespace: "bundleforge",
+          namespace: "mintbundle",
           key: "cart_default_mode",
           value: "x",
           type: "single_line_text_field",
@@ -108,7 +108,7 @@ describe("writeShopMetafield (M-164b)", () => {
       writeShopMetafield(
         SESSION,
         {
-          namespace: "bundleforge",
+          namespace: "mintbundle",
           key: "cart_default_mode",
           value: "x",
           type: "single_line_text_field",

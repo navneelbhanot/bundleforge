@@ -87,8 +87,8 @@ describe("run() — expand-path with eligibility (M-172b/173b)", () => {
       id: opts.id ?? "gid://shopify/CartLine/1",
       quantity: 1,
       cost: { amountPerQuantity: { amount: "20", currencyCode: "USD" } },
-      bundleforgeBundleId: null,
-      bundleforgeRules: null,
+      mintbundleBundleId: null,
+      mintbundleRules: null,
       merchandise: {
         id: "gid://shopify/ProductVariant/100",
         product: {

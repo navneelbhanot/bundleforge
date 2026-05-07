@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://bundleforge.io/schemas/pricing-contract-v1.json",
-  "title": "BundleForge Pricing Contract v1",
+  "$id": "https://mintbundle.io/schemas/pricing-contract-v1.json",
+  "title": "MintBundle Pricing Contract v1",
   "type": "object",
   "definitions": {
     "MoneyAmount": {

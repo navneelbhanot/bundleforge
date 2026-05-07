@@ -1,5 +1,5 @@
 {
-  "name": "@bundleforge/checkout-validation",
+  "name": "@mintbundle/checkout-validation",
   "version": "1.0.0",
   "private": true,
   "description": "Checkout-Validation Function — enforces atomic bundle composition at checkout (Plus only).",

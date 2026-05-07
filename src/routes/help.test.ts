@@ -18,7 +18,7 @@ function buildApp(helpDir: string): Express {
 }
 
 function makeDir(): string {
-  const d = mkdtempSync(join(tmpdir(), "bundleforge-help-"));
+  const d = mkdtempSync(join(tmpdir(), "mintbundle-help-"));
   return d;
 }
 

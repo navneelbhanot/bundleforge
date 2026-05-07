@@ -2,8 +2,8 @@ api_version = "2026-04"
 
 [[extensions]]
 type = "function"
-name = "BundleForge Cart Transform"
-handle = "bundleforge-cart-transform"
+name = "MintBundle Cart Transform"
+handle = "mintbundle-cart-transform"
 description = "Applies bundle pricing at checkout"
 
   [[extensions.targeting]]

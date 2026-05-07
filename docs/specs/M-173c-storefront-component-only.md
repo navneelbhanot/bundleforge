@@ -1,7 +1,7 @@
 # M-173c — Storefront-side inventory rules (component-only)
 
 > Companion to M-173b (CTF-side). M-173c hides the
-> `<bundleforge-bundle>` widget on the storefront when
+> `<mintbundle-bundle>` widget on the storefront when
 > `inventoryRules.componentOnlyMode === true` so the
 > merchant's "render components individually" choice
 > doesn't accidentally render twice.
@@ -19,7 +19,7 @@
 components individually on the storefront, not as a single
 widget." If the merchant configures their theme to render
 the components elsewhere (a separate section, a custom
-block) but leaves the `<bundleforge-bundle>` block on the
+block) but leaves the `<mintbundle-bundle>` block on the
 page, the page would render both — the bundle widget AND
 the per-component cards. Hiding the bundle widget at the
 web component layer fixes that without touching theme
@@ -35,7 +35,7 @@ templates.
 
 ### Web component
 
-- `BundleforgeBundle.connectedCallback` checks
+- `MintBundleBundle.connectedCallback` checks
   `bundle.inventoryRules?.componentOnlyMode === true` and
   hides the widget (`style.display = "none"`).
 
@@ -55,7 +55,7 @@ templates.
 
 - [x] Compiles, lints clean, all vitest pass.
 - [x] When `inventoryRules.componentOnlyMode === true`, the
-  storefront `<bundleforge-bundle>` widget hides.
+  storefront `<mintbundle-bundle>` widget hides.
 - [x] No new third-party deps.
 
 ## Out of scope (M-173d)
@@ -65,4 +65,4 @@ templates.
   Storefront API or a denormalised inventory feed. The
   proxy could pre-compute "is this bundle currently
   paused?" but only if we maintain component-level stock
-  state on the BundleForge side. M-173d's design.
+  state on the MintBundle side. M-173d's design.

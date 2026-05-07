@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "Get set up with BundleForge",
+    "title": "Get set up with MintBundle",
     "progress": "{{complete}} of {{total}} complete",
     "dismiss": "Dismiss checklist",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "Add the Bundle block to your storefront",
-      "body": "Drop the BundleForge block into your product page template so shoppers see it.",
+      "body": "Drop the MintBundle block into your product page template so shoppers see it.",
       "cta": "Open theme editor",
       "markComplete": "Mark complete"
     }
@@ -151,7 +151,7 @@
     "email": "Email",
     "domain": "Domain",
     "brand": "Brand",
-    "brandSubtitle": "Used as the accent color for badges and buttons rendered by BundleForge in the storefront and admin emails.",
+    "brandSubtitle": "Used as the accent color for badges and buttons rendered by MintBundle in the storefront and admin emails.",
     "brandSaveError": "Couldn't save brand",
     "brandColor": "Brand color (hex)",
     "logoUrl": "Logo URL",
@@ -175,7 +175,7 @@
     "auditSnapshots": "Audit & snapshots",
     "safetyLock": "Safety lock — require manual approval before pushing changes to Shopify",
     "lowStockThreshold": "Low-stock threshold (units)",
-    "lowStockHelp": "When any component drops at or below this number, BundleForge marks the bundle low-stock for the alert + storefront badge.",
+    "lowStockHelp": "When any component drops at or below this number, MintBundle marks the bundle low-stock for the alert + storefront badge.",
     "oversellPolicy": "Oversell policy",
     "lowStockAlert": "Email me when a bundle goes low-stock",
     "auditRetention": "Audit log retention (days)",

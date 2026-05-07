@@ -63,7 +63,7 @@ describe("processOutboundWebhookJob (M-168b)", () => {
     const expected = createHmac("sha256", "secret-plain")
       .update(body)
       .digest("hex");
-    expect(captured.headers!["X-BundleForge-Signature"]).toBe(`sha256=${expected}`);
+    expect(captured.headers!["X-MintBundle-Signature"]).toBe(`sha256=${expected}`);
   });
 
   it("on 200 success: increments lastFiredAt + resets failCount", async () => {

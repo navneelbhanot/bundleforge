@@ -49,7 +49,7 @@ const FALLBACK_I18N: PolarisI18n = {
   Polaris: { Common: { cancel: "Cancel", save: "Save" } },
 };
 
-const LOCALE_CACHE_KEY = "bundleforge:polaris-locale";
+const LOCALE_CACHE_KEY = "mintbundle:polaris-locale";
 
 interface SettingsLocaleResp {
   localization?: { fallbackLocale?: string };

@@ -64,9 +64,9 @@ export const envSchema = z
     // sending subdomain needs.
     RESEND_API_KEY: z.string().min(1).optional(),
     // Optional override for the From: header on transactional
-    // email. Defaults to a `notifications@mail.bundleforge.app`
+    // email. Defaults to a `notifications@mail.mintbundle.app`
     // sender — separate from the human Workspace inbox at
-    // support@bundleforge.app to isolate sender reputation.
+    // support@mintbundle.app to isolate sender reputation.
     EMAIL_FROM: z.string().min(1).optional(),
 
     NODE_ENV: z
@@ -74,7 +74,7 @@ export const envSchema = z
       .default("development"),
     PORT: z.coerce.number().int().positive().default(3000),
     LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
-    APP_NAME: z.string().min(1).default("BundleForge"),
+    APP_NAME: z.string().min(1).default("MintBundle"),
     APP_VERSION: z.string().min(1).default("0.1.0"),
   })
   .superRefine((data, ctx) => {

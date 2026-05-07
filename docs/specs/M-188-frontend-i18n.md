@@ -31,7 +31,7 @@ that milestone.
    - 15 supported locales matching `frontend/src/lib/locales.ts`.
    - English as the source-of-truth + fallback.
    - Synchronous initial language read from `localStorage` (the
-     same `bundleforge:polaris-locale` key M-186 polish
+     same `mintbundle:polaris-locale` key M-186 polish
      introduced) so the very first paint is in the chosen
      language.
    - `react-i18next` provider wrapping the App tree.

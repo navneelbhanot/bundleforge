@@ -52,7 +52,7 @@ describe("logger", () => {
   it("emits info but not debug when level=info", () => {
     const { sink, out } = capture();
     const log = pino(
-      { level: "info", base: { service: "bundleforge", version: "0.0.1" } },
+      { level: "info", base: { service: "mintbundle", version: "0.0.1" } },
       sink,
     );
     log.info("hello");
@@ -64,7 +64,7 @@ describe("logger", () => {
   it("emits debug when level=debug", () => {
     const { sink, out } = capture();
     const log = pino(
-      { level: "debug", base: { service: "bundleforge", version: "0.0.1" } },
+      { level: "debug", base: { service: "mintbundle", version: "0.0.1" } },
       sink,
     );
     log.debug("dbg");
@@ -77,14 +77,14 @@ describe("logger", () => {
     const log = pino(
       {
         level: "info",
-        base: { service: "bundleforge", version: "1.2.3" },
+        base: { service: "mintbundle", version: "1.2.3" },
         timestamp: pino.stdTimeFunctions.isoTime,
       },
       sink,
     );
     log.info("hi");
     const line = out.parsed[0];
-    expect(line.service).toBe("bundleforge");
+    expect(line.service).toBe("mintbundle");
     expect(line.version).toBe("1.2.3");
     expect(line.level).toBe(30); // pino numeric level for info
     expect(typeof line.time).toBe("string");
@@ -93,7 +93,7 @@ describe("logger", () => {
 
   it("child(bindings) attaches bindings to subsequent lines", () => {
     const { sink, out } = capture();
-    const log = pino({ level: "info", base: { service: "bundleforge" } }, sink);
+    const log = pino({ level: "info", base: { service: "mintbundle" } }, sink);
     const child = log.child({ module: "bundles", bundleId: "b-1" });
     child.info("created");
     expect(out.parsed[0].module).toBe("bundles");

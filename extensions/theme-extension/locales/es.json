@@ -1,5 +1,5 @@
 {
-  "bundleforge": {
+  "mintbundle": {
     "loading": "Cargando paquete…",
     "error": "No se pudo cargar el paquete.",
     "save_amount": "Ahorra {{ amount }}",

@@ -291,7 +291,7 @@ function CssCard({ bundle, shop, busy, onSave }: CssCardProps): JSX.Element {
         <Text as="p" tone="subdued">
           Per-bundle CSS layers ON TOP of the shop-level CSS from
           Settings → Display. Scoped under{" "}
-          <code>#bundleforge-storefront [data-bundle-id=&quot;&lt;id&gt;&quot;]</code>.
+          <code>#mintbundle-storefront [data-bundle-id=&quot;&lt;id&gt;&quot;]</code>.
           Leave blank to apply only the shop CSS.
         </Text>
         <TextField

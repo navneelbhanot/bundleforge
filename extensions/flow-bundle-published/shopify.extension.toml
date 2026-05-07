@@ -1,6 +1,6 @@
 [[extensions]]
 type = "flow_trigger"
-handle = "bundleforge-bundle-published"
+handle = "mintbundle-bundle-published"
 name = "Bundle published"
 description = "Fires when a merchant publishes a bundle"
 
@@ -10,7 +10,7 @@ description = "Fires when a merchant publishes a bundle"
   type = "single_line_text_field"
   key = "bundleId"
   name = "Bundle ID"
-  description = "Internal BundleForge bundle id (UUID)."
+  description = "Internal MintBundle bundle id (UUID)."
 
   [[settings.fields]]
   type = "single_line_text_field"

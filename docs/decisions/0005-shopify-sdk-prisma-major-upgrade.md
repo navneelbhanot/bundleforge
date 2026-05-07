@@ -6,7 +6,7 @@
 
 ## Context
 
-BundleForge shipped on:
+MintBundle shipped on:
 - `@shopify/shopify-api` ^11
 - `@shopify/shopify-app-express` ^5
 - `@shopify/shopify-app-session-storage-prisma` ^5

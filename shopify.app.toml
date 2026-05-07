@@ -1,13 +1,13 @@
-name = "BundleForge"
+name = "MintBundle"
 client_id = "59b24b4db1e954a95e3f82df96e713bb"
-application_url = "https://app.bundleforge.app"
+application_url = "https://app.mintbundle.app"
 embedded = true
 
 [access_scopes]
 scopes = "read_products,write_products,read_orders,write_orders,read_inventory,write_inventory,read_customers,read_themes,write_cart_transforms,read_locations,read_publications,write_publications"
 
 [auth]
-redirect_urls = [ "https://app.bundleforge.app/api/auth/callback" ]
+redirect_urls = [ "https://app.mintbundle.app/api/auth/callback" ]
 
 [webhooks]
 api_version = "2026-04"
@@ -21,8 +21,8 @@ api_version = "2026-04"
   uri = "/api/webhooks"
 
 [app_proxy]
-url = "https://app.bundleforge.app/api/proxy"
-subpath = "bundleforge"
+url = "https://app.mintbundle.app/api/proxy"
+subpath = "mintbundle"
 prefix = "apps"
 
 [pos]

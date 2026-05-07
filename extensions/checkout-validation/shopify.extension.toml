@@ -2,8 +2,8 @@ api_version = "2026-04"
 
 [[extensions]]
 type = "function"
-name = "BundleForge Checkout Validation"
-handle = "bundleforge-checkout-validation"
+name = "MintBundle Checkout Validation"
+handle = "mintbundle-checkout-validation"
 description = "Validates bundle composition at checkout (Plus only)"
 
   [[extensions.targeting]]

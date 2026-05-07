@@ -2,7 +2,7 @@
 
 Three services share this repo:
 
-- **bundleforge** (web) — already configured by `railway.toml`.
+- **mintbundle** (web) — already configured by `railway.toml`.
 - **outstanding-nourishment** (worker) — needs manual fix (below).
 - **AI Service** (Python) — needs manual fix (below).
 
@@ -17,7 +17,7 @@ second copy of the web server, BullMQ jobs never drain).
 
 **Fix:**
 
-1. Open the [BundleForge project on Railway](https://railway.com/project/abafb5b5-a883-487c-b666-130c5a49ffa2).
+1. Open the [MintBundle project on Railway](https://railway.com/project/abafb5b5-a883-487c-b666-130c5a49ffa2).
 2. Click the **outstanding-nourishment** service.
 3. Settings → Deploy → **Custom Start Command**.
 4. Set to:
@@ -32,7 +32,7 @@ BullMQ worker boot output (`Worker registered for queue …`).
 ## AI Service
 
 The AI service deploys from `ai-service/` (Python, separate Dockerfile)
-— it does **not** share BundleForge's Node code. The current state
+— it does **not** share MintBundle's Node code. The current state
 shows `startCommand: npm run start:web` which is wrong for a Python
 service.
 
@@ -61,7 +61,7 @@ To enable the Crisp widget in the embedded admin:
    sufficient for the smoke-test stage).
 2. Settings → Website Settings → Setup Instructions → copy the
    **Website ID** (a UUID).
-3. In Railway, on the **bundleforge** web service:
+3. In Railway, on the **mintbundle** web service:
    Settings → Variables → Add → `CRISP_WEBSITE_ID = <the UUID>`.
 4. Save. The next deploy injects the value into `index.html`'s meta
    tag and the SPA lazy-loads the Crisp widget on boot.

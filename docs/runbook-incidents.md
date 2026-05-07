@@ -1,6 +1,6 @@
 # Incident response runbook (M-144)
 
-This is the living playbook for production incidents on BundleForge. Pair
+This is the living playbook for production incidents on MintBundle. Pair
 with the Datadog dashboards (`monitoring/datadog/`) and Sentry project.
 
 ## Severity definitions
@@ -29,8 +29,8 @@ business hours.
 | Source | Channel | Auto-page? |
 | --- | --- | --- |
 | Datadog monitors (sev1) | PagerDuty → primary | yes |
-| Datadog monitors (sev2) | Slack `#bundleforge-alerts` | no, but acked |
-| Sentry (new prod issue) | Slack `#bundleforge-errors` | only on issue volume threshold |
+| Datadog monitors (sev2) | Slack `#mintbundle-alerts` | no, but acked |
+| Sentry (new prod issue) | Slack `#mintbundle-errors` | only on issue volume threshold |
 | Shopify partner webhook (mandatory ones) | logged + Sentry capture | no — handled by code |
 | `/health` failure (external probe) | PagerDuty → primary | yes |
 
@@ -73,7 +73,7 @@ errors; `/health` reports `redis: false`.
 
 ### 3. Queue backed up
 
-**Signals**: `bundleforge.queue.depth` > 10k; webhook lag P95 climbing.
+**Signals**: `mintbundle.queue.depth` > 10k; webhook lag P95 climbing.
 
 1. Identify which queue: `webhooks`, `sync`, `analytics`, `ai`.
 2. Inspect the worker logs for repeated handler errors. If a poison
@@ -87,7 +87,7 @@ errors; `/health` reports `redis: false`.
 
 ### 4. Shopify rate limit exhaustion
 
-**Signals**: 429s from `myshopify.com`; `bundleforge.shopify.retry`
+**Signals**: 429s from `myshopify.com`; `mintbundle.shopify.retry`
 spiking on the inventory dashboard.
 
 1. The Shopify client wrapper backs off automatically using `Retry-After`.
@@ -99,7 +99,7 @@ spiking on the inventory dashboard.
 
 ### 5. HMAC failures spike
 
-**Signals**: `bundleforge.webhook.hmac_failed` count > 10/hr; or repeated
+**Signals**: `mintbundle.webhook.hmac_failed` count > 10/hr; or repeated
 401s on `/api/proxy/*`.
 
 1. **Likely cause #1**: Shopify rotated the app secret. Verify

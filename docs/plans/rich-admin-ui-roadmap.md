@@ -164,7 +164,7 @@ detail shell with one tab per concern.
 - Date range picker.
 
 ### M-174 — Advanced tab
-- Custom metafields editor (add / remove `bundleforge.<key>` JSON
+- Custom metafields editor (add / remove `mintbundle.<key>` JSON
   metafields written to the Shopify product on publish).
 - SEO override (handle, meta title, meta description, social card).
 - Per-bundle GA4 event names.

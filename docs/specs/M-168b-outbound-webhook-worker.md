@@ -3,7 +3,7 @@
 > Behavior wiring for M-168. The Settings API & webhooks tab
 > already lets merchants configure outbound webhook
 > subscriptions; M-168b ships the worker that actually
-> POSTs to the configured URLs when BundleForge events
+> POSTs to the configured URLs when MintBundle events
 > happen.
 
 ---

@@ -43,7 +43,7 @@ only").
 
 ### Web component (JS)
 
-- `extensions/theme-extension/assets/bundleforge-bundle.js`:
+- `extensions/theme-extension/assets/mintbundle-bundle.js`:
   - New pure `isEligibleStorefront(eligibility, ctx)`
     helper. Mirrors the CTF `isEligible` *plus* tag-based
     gating that the CTF can't do:
@@ -55,7 +55,7 @@ only").
       reject if customer has any deny tag.
     - All other rules (requireLogin / markets / locales)
       stay the same as the CTF version.
-  - `BundleforgeBundle.connectedCallback` reads the
+  - `MintBundleBundle.connectedCallback` reads the
     customer state from `data-*` attributes, evaluates
     eligibility against `bundle.eligibility`, and:
     - On **fail**: render an unobtrusive "This bundle
@@ -77,13 +77,13 @@ only").
   - Tag deny only + customer has it → reject.
   - All checks pass with full context.
 
-  Actually the helper lives in `bundleforge-bundle.js`
+  Actually the helper lives in `mintbundle-bundle.js`
   which the test file can't import (vitest excludes
   `extensions/theme-extension`). So instead:
   
   Add a parallel JS module
   `extensions/theme-extension/eligibility.mjs` that the
-  block-side bundleforge-bundle.js imports. Tests import
+  block-side mintbundle-bundle.js imports. Tests import
   it directly via `extensions/theme-extension/eligibility.test.ts`.
   
   But vitest excludes that whole directory. Plan B: put
@@ -102,7 +102,7 @@ only").
   
   Plan: put a small ESM helper file in
   `extensions/theme-extension/assets/eligibility.mjs`
-  that bundleforge-bundle.js imports. The test loads it
+  that mintbundle-bundle.js imports. The test loads it
   directly via dynamic import in `tests/storefront/`.
   vitest's `tests/**/*.test.ts` glob picks it up.
 

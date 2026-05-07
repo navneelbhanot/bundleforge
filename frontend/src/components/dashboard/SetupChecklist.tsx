@@ -1,7 +1,7 @@
 /**
  * Dashboard onboarding checklist (M-186).
  *
- * Three steps that map to BundleForge's actual ship-readiness
+ * Three steps that map to MintBundle's actual ship-readiness
  * journey: create → publish → add the storefront block. Steps 1
  * and 2 are auto-detected from bundle counts; step 3 is manual
  * mark-complete.

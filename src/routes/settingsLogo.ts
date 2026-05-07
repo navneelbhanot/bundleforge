@@ -50,7 +50,7 @@ const LogoBody = z
   .strict();
 
 const STAGED_UPLOADS_CREATE = `#graphql
-  mutation BundleforgeStagedUpload($input: [StagedUploadInput!]!) {
+  mutation MintBundleStagedUpload($input: [StagedUploadInput!]!) {
     stagedUploadsCreate(input: $input) {
       stagedTargets {
         url
@@ -63,7 +63,7 @@ const STAGED_UPLOADS_CREATE = `#graphql
 `;
 
 const FILE_CREATE = `#graphql
-  mutation BundleforgeFileCreate($files: [FileCreateInput!]!) {
+  mutation MintBundleFileCreate($files: [FileCreateInput!]!) {
     fileCreate(files: $files) {
       files {
         id
@@ -79,7 +79,7 @@ const FILE_CREATE = `#graphql
 `;
 
 const FILE_QUERY = `#graphql
-  query BundleforgeFile($id: ID!) {
+  query MintBundleFile($id: ID!) {
     node(id: $id) {
       ... on MediaImage {
         id

@@ -34,14 +34,14 @@ the trial without being charged.
 
 ### Can I migrate from another bundle app?
 
-Yes — BundleForge ships importers for Simple Bundles, Bundler,
+Yes — MintBundle ships importers for Simple Bundles, Bundler,
 Kaching, and Shopify Bundles. From Settings → Migrations, paste a
-CSV export from your old app and BundleForge maps it to native
+CSV export from your old app and MintBundle maps it to native
 bundles.
 
 ## Inventory & orders
 
-### Does BundleForge support multi-location inventory?
+### Does MintBundle support multi-location inventory?
 
 Yes. Each bundle's components can come from any location Shopify
 exposes. The Inventory Health page shows per-location breakdowns.
@@ -75,7 +75,7 @@ foreign key to the original order.
 
 ## Storefront
 
-### Will my customers see "BundleForge" anywhere?
+### Will my customers see "MintBundle" anywhere?
 
 No. The bundle is a normal Shopify product; the storefront branding
 is your theme's. The cart label, checkout, and order confirmation all
@@ -87,7 +87,7 @@ Online Store 2.0 themes (Dawn, Ride, Sense, Studio, Refresh, etc.)
 work out of the box — drop in the theme app block, no code edits.
 
 Vintage themes need a one-time Liquid include (`{% include
-'bundleforge-bundle' %}`); BundleForge's onboarding wizard offers to
+'mintbundle-bundle' %}`); MintBundle's onboarding wizard offers to
 add it for you during install.
 
 ### What about a headless / Hydrogen storefront?
@@ -105,14 +105,14 @@ integrations directory.
 
 ## Privacy & compliance
 
-### Is BundleForge GDPR-compliant?
+### Is MintBundle GDPR-compliant?
 
 Yes. The three mandatory Shopify GDPR webhooks (`customers/data_request`,
 `customers/redact`, `shop/redact`) are wired up. There's also an
 admin-initiated GDPR data export (`POST /api/v1/gdpr/export`) and
 a shop deletion endpoint that cascades cleanly.
 
-### What data does BundleForge store?
+### What data does MintBundle store?
 
 - **Shop data**: domain, name, email, plan, encrypted access token.
 - **Bundles**: titles, types, items, pricing rules, configs.

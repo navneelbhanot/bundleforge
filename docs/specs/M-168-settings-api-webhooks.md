@@ -10,7 +10,7 @@
 ## Why
 
 Two related capabilities the merchant needs to integrate
-BundleForge with their own stack:
+MintBundle with their own stack:
 
 1. **Per-shop API tokens** — Hydrogen storefronts, agency tools,
    one-off scripts. Issued from the admin, sent as
@@ -146,7 +146,7 @@ Flip the API & webhooks TabSpec from `"deferred"` → `"ready"`.
 Both cards include a Banner explaining that **delivery itself is
 deferred to M-168b** (worker job emitting POSTs when events fire);
 the configuration surface persists today so merchants can prepare
-their endpoints and BundleForge can start firing as soon as the
+their endpoints and MintBundle can start firing as soon as the
 worker lands.
 
 ### Tests

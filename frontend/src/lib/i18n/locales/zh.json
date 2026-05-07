@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "设置 BundleForge",
+    "title": "设置 MintBundle",
     "progress": "已完成 {{complete}} / {{total}}",
     "dismiss": "关闭清单",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "将套装区块添加到店铺",
-      "body": "在产品页面模板中放置 BundleForge 区块,让顾客看到它。",
+      "body": "在产品页面模板中放置 MintBundle 区块,让顾客看到它。",
       "cta": "打开主题编辑器",
       "markComplete": "标记为已完成"
     }

@@ -1,7 +1,7 @@
 {
-  "name": "bundleforge",
+  "name": "mintbundle",
   "version": "0.1.0",
-  "description": "BundleForge — The most reliable Shopify product bundling app",
+  "description": "MintBundle — The most reliable Shopify product bundling app",
   "private": true,
   "scripts": {
     "dev": "shopify app dev",

@@ -46,12 +46,12 @@ there.
      detected via `window.$crisp`; otherwise hidden). Click →
      `window.$crisp.push(["do", "chat:open"])`.
    - "Email support" Button → `mailto:` link to a configurable
-     address (default `support@bundleforge.app`).
+     address (default `support@mintbundle.app`).
    - Text: "Average response under one business day. If your
      issue is on a live order, mention the order number."
 4. **Resources card** — small list of links:
    - "Changelog" (placeholder anchor — `/changelog` doesn't exist
-     yet; the link goes to `https://bundleforge.app/changelog` as
+     yet; the link goes to `https://mintbundle.app/changelog` as
      external) — *if and only if* the merchant has a Shopify
      domain available; otherwise just shown as plain text.
    - "Status page" — same pattern, external link to a public
@@ -119,7 +119,7 @@ Optional new env vars (read by the frontend via Vite's
 `import.meta.env` and the same meta-tag substitution pattern
 used for Crisp):
 
-- `VITE_SUPPORT_EMAIL` — default `support@bundleforge.app`.
+- `VITE_SUPPORT_EMAIL` — default `support@mintbundle.app`.
 - `VITE_STATUS_URL` — optional; resources card shows the link
   when set.
 - `VITE_GITHUB_REPO_URL` — optional; same pattern.
@@ -144,7 +144,7 @@ used for Crisp):
 - [ ] Top-bar tabs include "Help" at the end; clicking it
       activates the same selection logic as the other tabs.
 - [ ] Contact card "Email support" Button is a valid `mailto:`
-      anchor pointing to `support@bundleforge.app` (or the env
+      anchor pointing to `support@mintbundle.app` (or the env
       override).
 - [ ] Contact card "Live chat" Button is shown only when
       `window.$crisp` exists; clicking it opens the chat.

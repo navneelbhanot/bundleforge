@@ -1,14 +1,14 @@
-# BundleForge — Privacy Policy
+# MintBundle — Privacy Policy
 
 **Effective date:** {{effective_date}}
-**Operator:** {{operating_entity}} ("we", "us", "BundleForge")
+**Operator:** {{operating_entity}} ("we", "us", "MintBundle")
 **Contact:** {{privacy_email}}
 
 > Template — fill in placeholders before publishing.
 
 ## 1. Scope
 
-This policy applies to merchants who install the BundleForge Shopify app
+This policy applies to merchants who install the MintBundle Shopify app
 ("the App") and to data flowing through the App. End-shoppers transact
 through the merchant's Shopify storefront, not directly with us.
 
@@ -20,7 +20,7 @@ the Shopify Admin API and webhooks:
 - **Shop metadata**: shop domain, shop GID, currency, timezone, locale,
   primary email, plan name.
 - **Products + variants**: SKUs, titles, prices, inventory levels.
-- **Orders involving a BundleForge bundle**: order ID, line items, total,
+- **Orders involving a MintBundle bundle**: order ID, line items, total,
   currency, customer locale (no PII beyond what is required to process
   inventory and reporting).
 - **App-Bridge session tokens**: short-lived JWTs to authenticate admin

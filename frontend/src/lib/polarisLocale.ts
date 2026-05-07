@@ -103,7 +103,7 @@ export async function loadPolarisLocale(
  * AppLanguageSelect when the merchant picks a new locale.
  * App.tsx listens for this and swaps the matching Polaris pack.
  */
-export const LOCALE_CHANGED_EVENT = "bundleforge:locale-changed";
+export const LOCALE_CHANGED_EVENT = "mintbundle:locale-changed";
 
 export interface LocaleChangedDetail {
   locale: string;

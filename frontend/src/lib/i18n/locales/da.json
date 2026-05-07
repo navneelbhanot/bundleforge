@@ -57,7 +57,7 @@
     }
   },
   "checklist": {
-    "title": "Kom i gang med BundleForge",
+    "title": "Kom i gang med MintBundle",
     "progress": "{{complete}} af {{total}} fuldført",
     "dismiss": "Luk listen",
     "createBundle": {
@@ -72,7 +72,7 @@
     },
     "addBlock": {
       "title": "Tilføj pakkeblokken til din butik",
-      "body": "Placer BundleForge-blokken i din produktsideskabelon, så kunder kan se den.",
+      "body": "Placer MintBundle-blokken i din produktsideskabelon, så kunder kan se den.",
       "cta": "Åbn temaeditor",
       "markComplete": "Marker som fuldført"
     }

@@ -41,7 +41,7 @@ Final timeline. Owners are roles, not people; assign before D-7.
 - [ ] **Eng**: backup-restore drill repeated; RTO < 30 min recorded.
 - [ ] **Founder**: confirm App Store review passed (or expected pass
       window).
-- [ ] **Founder**: status page live at `status.bundleforge.app`.
+- [ ] **Founder**: status page live at `status.mintbundle.app`.
 
 ## D-day (launch) — runbook
 

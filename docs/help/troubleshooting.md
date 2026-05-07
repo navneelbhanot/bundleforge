@@ -19,7 +19,7 @@ require OS 2.0 templates.
 the right bundle.
 
 **Fix:**
-1. In BundleForge admin, open the bundle and verify status is
+1. In MintBundle admin, open the bundle and verify status is
    **active** (not draft or archived).
 2. In the theme editor, click the block and confirm the **Bundle**
    dropdown is set to the right bundle.
@@ -49,7 +49,7 @@ If still wrong, see [Pricing → Cart and checkout disagree](#cart-and-checkout-
 behind the server's pricing engine.
 
 **Fix:**
-1. In the BundleForge admin, **Settings → Pricing** has a "Re-deploy
+1. In the MintBundle admin, **Settings → Pricing** has a "Re-deploy
    Cart Transform" button. Click it.
 2. Wait ~30 seconds (Shopify's function deploy is async).
 3. Reload your storefront and try again.
@@ -90,7 +90,7 @@ one operates on the result of the previous. See
 ### A bundle won't publish — "Component SKU has tracking disabled"
 
 **Cause:** Shopify product variant has "Inventory not tracked" set.
-BundleForge can't decrement what Shopify isn't counting.
+MintBundle can't decrement what Shopify isn't counting.
 
 **Fix:** In Shopify admin → Products → that variant → enable
 **Track quantity**. Re-attempt publish.
@@ -102,11 +102,11 @@ bundle is configured for. The bundle is only as available as its
 scarcest component.
 
 **Fix:**
-1. Open **Inventory → Health** in BundleForge admin.
+1. Open **Inventory → Health** in MintBundle admin.
 2. The bundle row shows which component is the bottleneck.
 3. Restock that SKU, or remove it from the bundle and re-publish.
 
-### Inventory drift — Shopify and BundleForge disagree on stock
+### Inventory drift — Shopify and MintBundle disagree on stock
 
 **Cause:** Manual edit to Shopify inventory outside the
 `inventoryLevels` API (e.g. CSV import, third-party tool that
@@ -114,7 +114,7 @@ bypasses webhooks).
 
 **Fix:**
 1. **Inventory → Health** has a **Reconcile from Shopify** button.
-2. Click it; BundleForge re-reads Shopify's current inventory and
+2. Click it; MintBundle re-reads Shopify's current inventory and
    writes a reconciliation entry to the audit log.
 3. Future writes resume normally.
 
@@ -123,7 +123,7 @@ bypasses webhooks).
 ### "App couldn't be loaded — issue with browser cookies"
 
 **Cause:** The browser is blocking third-party cookies and the embed
-headers aren't right. This was a real bug in BundleForge before
+headers aren't right. This was a real bug in MintBundle before
 session 0157 (fixed by dropping `Cross-Origin-Opener-Policy:
 same-origin`).
 
@@ -159,10 +159,10 @@ likely an API response shape mismatch — check the browser console.
 it's failing.
 
 **Fix:**
-1. Open the BundleForge admin → **Settings → Webhooks**. The status
+1. Open the MintBundle admin → **Settings → Webhooks**. The status
    shows whether webhooks are reaching us.
 2. If they aren't: in Shopify Partners dashboard → your app →
-   Webhooks, verify the URL is your live BundleForge URL.
+   Webhooks, verify the URL is your live MintBundle URL.
 3. If webhooks are reaching us but failing, check the worker logs
    (`outstanding-nourishment` service on Railway, or `npm run start:worker`
    locally).

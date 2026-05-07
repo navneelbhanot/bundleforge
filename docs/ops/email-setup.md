@@ -1,14 +1,14 @@
 # Email setup — Workspace + Resend
 
-BundleForge uses two providers for email, on the same domain but
+MintBundle uses two providers for email, on the same domain but
 deliberately separated:
 
 | Channel | Provider | Address | Purpose |
 | --- | --- | --- | --- |
-| Inbound merchant ↔ human | Google Workspace | `support@bundleforge.app` | Replies, support conversations |
-| Outbound app → merchant | Resend | `notifications@mail.bundleforge.app` | Cap warnings, trial-ending notices, etc. |
+| Inbound merchant ↔ human | Google Workspace | `support@mintbundle.app` | Replies, support conversations |
+| Outbound app → merchant | Resend | `notifications@mail.mintbundle.app` | Cap warnings, trial-ending notices, etc. |
 
-Splitting onto a subdomain (`mail.bundleforge.app`) isolates the
+Splitting onto a subdomain (`mail.mintbundle.app`) isolates the
 transactional sender reputation from the human inbox. If a
 templated email ever gets flagged as spam by a few recipients,
 `support@` deliverability is unaffected.
@@ -20,14 +20,14 @@ is already done (you confirmed earlier in the M-202 conversation).
 
 ## Prerequisites
 
-- Domain `bundleforge.app` is on Cloudflare DNS. (Verified during
-  the deploy fix in session 0199 — `app.bundleforge.app` resolves
+- Domain `mintbundle.app` is on Cloudflare DNS. (Verified during
+  the deploy fix in session 0199 — `app.mintbundle.app` resolves
   via Cloudflare → Railway.)
-- Workspace MX + DKIM records already published; `support@bundleforge.app`
+- Workspace MX + DKIM records already published; `support@mintbundle.app`
   receives mail.
 - You have admin access to Cloudflare Dashboard → DNS for
-  `bundleforge.app`.
-- You have Railway access for the BundleForge production service so
+  `mintbundle.app`.
+- You have Railway access for the MintBundle production service so
   you can add an env var.
 
 ---
@@ -35,7 +35,7 @@ is already done (you confirmed earlier in the M-202 conversation).
 ## 1. Sign up for Resend
 
 1. Go to [https://resend.com](https://resend.com).
-2. Sign up using your `support@bundleforge.app` (or personal) Workspace
+2. Sign up using your `support@mintbundle.app` (or personal) Workspace
    email — there's no separate Resend account verification cost.
 3. The free tier allows 3,000 emails/month and 100/day. That's
    enough for the first ~12 months at our projected volume.
@@ -45,7 +45,7 @@ is already done (you confirmed earlier in the M-202 conversation).
 ## 2. Add the sending subdomain
 
 1. In Resend's dashboard, click **Domains** → **Add Domain**.
-2. Enter `mail.bundleforge.app` (NOT the bare `bundleforge.app` — we
+2. Enter `mail.mintbundle.app` (NOT the bare `mintbundle.app` — we
    want the subdomain to keep the sender reputation isolated).
 3. Region: pick **us-east-1** (closest to Railway's primary region).
 4. Resend will display **four DNS records** to add. Keep that page
@@ -55,7 +55,7 @@ is already done (you confirmed earlier in the M-202 conversation).
 
 ## 3. Paste the DNS records into Cloudflare
 
-In Cloudflare Dashboard → `bundleforge.app` → **DNS**, click
+In Cloudflare Dashboard → `mintbundle.app` → **DNS**, click
 **Add record** for each of the four:
 
 | Type | Name | Value | Proxy |
@@ -81,8 +81,8 @@ each record flip to ✓ as Cloudflare propagates (typically 5–30 min,
 sometimes faster).
 
 When all four are ✓ the domain shows **Verified**. Resend will let you
-send from `anything@mail.bundleforge.app` — we use
-`notifications@mail.bundleforge.app` per the default in
+send from `anything@mail.mintbundle.app` — we use
+`notifications@mail.mintbundle.app` per the default in
 `src/services/email/client.ts`.
 
 ---
@@ -90,8 +90,8 @@ send from `anything@mail.bundleforge.app` — we use
 ## 5. Generate an API key
 
 1. In Resend, **API Keys** → **Create API Key**.
-2. Name: `bundleforge-production`. Permission: **Sending access**.
-   Domain: **mail.bundleforge.app**.
+2. Name: `mintbundle-production`. Permission: **Sending access**.
+   Domain: **mail.mintbundle.app**.
 3. Copy the value (it starts with `re_`). **You can't see it again
    after this page closes.**
 
@@ -99,7 +99,7 @@ send from `anything@mail.bundleforge.app` — we use
 
 ## 6. Add the key to Railway
 
-In Railway → BundleForge service → **Variables** → **+ New Variable**:
+In Railway → MintBundle service → **Variables** → **+ New Variable**:
 
 ```
 RESEND_API_KEY = re_…
@@ -108,7 +108,7 @@ RESEND_API_KEY = re_…
 (Optional, only if you want to override the default From header:)
 
 ```
-EMAIL_FROM = BundleForge <notifications@mail.bundleforge.app>
+EMAIL_FROM = MintBundle <notifications@mail.mintbundle.app>
 ```
 
 Save. Railway redeploys. Wait for the health check to flip green.
@@ -122,7 +122,7 @@ Two options:
 **Option A — Resend dashboard:**
 
 1. Resend → **Logs** → **Send test email**.
-2. From: `notifications@mail.bundleforge.app`.
+2. From: `notifications@mail.mintbundle.app`.
 3. To: your personal email.
 4. Confirm the email lands (check spam if it doesn't appear in
    inbox within 30 sec).
@@ -139,7 +139,7 @@ Two options:
    `maybeNotifyCapStatus`, which sends the cap-warning email to the
    shop's `email` field.
 3. Check that inbox. Verify the email arrived from
-   `notifications@mail.bundleforge.app`, the subject contains
+   `notifications@mail.mintbundle.app`, the subject contains
    "80 of 100", and the **Upgrade to Growth** button links to your
    embedded admin's `/settings#billing`.
 
@@ -164,7 +164,7 @@ Two options:
 
 **Resend dashboard shows "Pending" for >1 hour.**
 Check Cloudflare proxy status — make sure all four records are
-"DNS only" (grey cloud). Run `dig TXT _dmarc.mail.bundleforge.app +short`
+"DNS only" (grey cloud). Run `dig TXT _dmarc.mail.mintbundle.app +short`
 from your terminal and confirm the value matches what Resend wants.
 
 **Email lands in Promotions / Spam tab.**

@@ -117,7 +117,7 @@ In `BundleDetailPage.tsx`:
   override layer at storefront render time. Today's blocks read
   `shop.settings.display.*` only; M-171b extends them to read
   `bundle.displaySettings.* ?? shop.settings.display.*`. Most of
-  the work is in the Liquid template + the bundleforge-bundle.js
+  the work is in the Liquid template + the mintbundle-bundle.js
   asset.
 - Per-bundle layout previews in the Live Preview sidebar — the
   preview already takes pricing rules; extending it to react to

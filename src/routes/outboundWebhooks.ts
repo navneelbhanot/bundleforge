@@ -1,7 +1,7 @@
 /**
  * /api/v1/outbound-webhooks routes (M-168).
  *
- * Per-shop subscriptions to events fired by BundleForge. The
+ * Per-shop subscriptions to events fired by MintBundle. The
  * worker that emits the actual HTTP POSTs lives in M-168b — this
  * route ships the configuration surface and the secret rotation
  * model.

@@ -1,4 +1,4 @@
-# BundleForge — Competitive Analysis & Strategic Product Plan
+# MintBundle — Competitive Analysis & Strategic Product Plan
 
 > Analysis of 8 Competing Apps | March 2026 | Version 2.0
 >
@@ -15,11 +15,11 @@
 
 ## 1. Executive Summary
 
-This document presents a comprehensive competitive analysis of the entire Shopify product bundling app ecosystem, covering the 8 most significant competitors. After examining over 12,000 combined reviews, feature sets, pricing models, strengths and weaknesses, we present a complete strategic plan for BundleForge to enter the market and capture meaningful market share within 12 months of launch.
+This document presents a comprehensive competitive analysis of the entire Shopify product bundling app ecosystem, covering the 8 most significant competitors. After examining over 12,000 combined reviews, feature sets, pricing models, strengths and weaknesses, we present a complete strategic plan for MintBundle to enter the market and capture meaningful market share within 12 months of launch.
 
-The Shopify bundle app market is mature but fragmented, with no single app excelling in all areas simultaneously. Every competitor has exploitable weaknesses, from inventory reliability bugs (Simple Bundles), to limited bundle types (Shopify Bundles), to pricing complexity (BOGOS), to learning curve issues (Bundler). BundleForge's strategy is to combine the best elements from each competitor while eliminating the weaknesses uncovered in their negative reviews.
+The Shopify bundle app market is mature but fragmented, with no single app excelling in all areas simultaneously. Every competitor has exploitable weaknesses, from inventory reliability bugs (Simple Bundles), to limited bundle types (Shopify Bundles), to pricing complexity (BOGOS), to learning curve issues (Bundler). MintBundle's strategy is to combine the best elements from each competitor while eliminating the weaknesses uncovered in their negative reviews.
 
-**Key Finding:** The single biggest unmet need in this market is reliable inventory management combined with intuitive UX. No current app delivers both at an enterprise grade. This is BundleForge's primary competitive positioning.
+**Key Finding:** The single biggest unmet need in this market is reliable inventory management combined with intuitive UX. No current app delivers both at an enterprise grade. This is MintBundle's primary competitive positioning.
 
 ---
 
@@ -65,7 +65,7 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - No subscription bundle integration in their bundle app (requires separate Kaching Subscriptions app)
 - Primarily focused on volume discounts/quantity breaks, less suited for complex multi-product bundling
 
-**BundleForge Opportunity:** Offer variant-level pricing, native 3PL/WMS integration, and full discount stacking support as direct differentiators.
+**MintBundle Opportunity:** Offer variant-level pricing, native 3PL/WMS integration, and full discount stacking support as direct differentiators.
 
 ---
 
@@ -91,7 +91,7 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - No dedicated inventory sync engine or SKU breakdown for fulfillment
 - Complex setup for advanced campaigns can overwhelm new merchants
 
-**BundleForge Opportunity:** Position as a dedicated bundling specialist (not a Swiss-army-knife), with flat-rate pricing that doesn't penalize growth, and a focused, clean UX.
+**MintBundle Opportunity:** Position as a dedicated bundling specialist (not a Swiss-army-knife), with flat-rate pricing that doesn't penalize growth, and a focused, clean UX.
 
 ---
 
@@ -118,7 +118,7 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - No POS integration
 - Limited analytics compared to Kaching and BOGOS
 
-**BundleForge Opportunity:** Match Bundler's affordability at the low end while providing automatic product inclusion rules, AI suggestions, and the advanced features Bundler lacks.
+**MintBundle Opportunity:** Match Bundler's affordability at the low end while providing automatic product inclusion rules, AI suggestions, and the advanced features Bundler lacks.
 
 ---
 
@@ -145,7 +145,7 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - Some confusion around free trial and initial setup process
 - No dedicated inventory sync/SKU breakdown for 3PL integration
 
-**BundleForge Opportunity:** Match AI capabilities while adding enterprise-grade inventory sync and better UI/UX polish. Use flat-rate pricing instead of order caps.
+**MintBundle Opportunity:** Match AI capabilities while adding enterprise-grade inventory sync and better UI/UX polish. Use flat-rate pricing instead of order caps.
 
 ---
 
@@ -175,7 +175,7 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - App described as "not intuitive" and "complicated" by long-term users
 - Inventory messed up end-of-year reporting; caused extra sales tax payment
 
-**BundleForge Opportunity:** This is the direct competitor to beat. Match their fulfillment integration while fixing every bug and UX issue cataloged in negative reviews.
+**MintBundle Opportunity:** This is the direct competitor to beat. Match their fulfillment integration while fixing every bug and UX issue cataloged in negative reviews.
 
 ---
 
@@ -199,13 +199,13 @@ The Shopify bundle app market is mature but fragmented, with no single app excel
 - Inconsistent front-end/back-end synchronization (per user reviews)
 - Lowest rating among all competitors (3.9) despite being free
 
-**BundleForge Opportunity:** Every merchant who outgrows Shopify Bundles is a potential BundleForge customer. The free-to-paid upgrade path is our biggest acquisition funnel.
+**MintBundle Opportunity:** Every merchant who outgrows Shopify Bundles is a potential MintBundle customer. The free-to-paid upgrade path is our biggest acquisition funnel.
 
 ---
 
 ## 4. Comparative Feature Matrix
 
-| Feature | Kaching | BOGOS | Bundler | Fast B. | Simple B. | Shopify | BundleForge |
+| Feature | Kaching | BOGOS | Bundler | Fast B. | Simple B. | Shopify | MintBundle |
 |---|---|---|---|---|---|---|---|
 | Mix & Match | Yes | Yes | Yes | Yes | Yes | No | **Yes** |
 | Volume Discounts | Yes | Yes | Yes | Yes | Yes | No | **Yes** |
@@ -241,7 +241,7 @@ One row remains **Roadmap**:
   the DB; once it creates a real Shopify product, POS publication
   is one `productPublish` mutation away. Tracked in `docs/STATE.md`.
 
-**Updated insight:** BundleForge leads on inventory reliability,
+**Updated insight:** MintBundle leads on inventory reliability,
 multi-language coverage, audit-trail integrity, and now also has
 Hydrogen-friendly read APIs and live chat in-app. POS is the one
 remaining feature-matrix gap, and it's gated on the larger product-
@@ -253,7 +253,7 @@ sync milestone.
 
 After analyzing all negative reviews (1-2 star) across all 8 competitors, 7 universal pain point categories were identified:
 
-| Pain Point Category | Affected Apps | BundleForge Solution |
+| Pain Point Category | Affected Apps | MintBundle Solution |
 |---|---|---|
 | Inventory Bugs | Simple Bundles, Shopify Bundles, Bundles.app | Transactional sync engine with atomic operations, rollback, and audit logging |
 | Checkout Failures | Simple Bundles, BOGO+ | Checkout Guardian: pre-validates bundle composition before payment processing |
@@ -269,11 +269,11 @@ After analyzing all negative reviews (1-2 star) across all 8 competitors, 7 univ
 
 ### Positioning Statement
 
-BundleForge is the reliable, intuitive, all-in-one Shopify product bundling solution for merchants who need enterprise-grade inventory management, flexible bundle creation, and world-class support, without enterprise-grade pricing.
+MintBundle is the reliable, intuitive, all-in-one Shopify product bundling solution for merchants who need enterprise-grade inventory management, flexible bundle creation, and world-class support, without enterprise-grade pricing.
 
 ### Competitive Positioning Map
 
-BundleForge occupies the upper-right quadrant: high feature depth AND high reliability/UX quality. No current competitor sits in this quadrant.
+MintBundle occupies the upper-right quadrant: high feature depth AND high reliability/UX quality. No current competitor sits in this quadrant.
 
 - **Kaching:** High UX, Medium Feature Depth (missing 3PL, headless, subscriptions)
 - **BOGOS:** High Feature Depth, Medium UX (complexity overwhelms, too many features)
@@ -282,13 +282,13 @@ BundleForge occupies the upper-right quadrant: high feature depth AND high relia
 - **Fast Bundle:** High Feature Depth, High UX, CLOSEST COMPETITOR (but no 3PL, order-capped)
 - **Shopify Bundles:** Low Feature Depth, High UX (limited to basic fixed bundles)
 
-**BundleForge Target:** High Feature Depth + High UX + High Reliability = Unique market position.
+**MintBundle Target:** High Feature Depth + High UX + High Reliability = Unique market position.
 
 ---
 
 ## 7. Pricing Strategy
 
-| BundleForge Plan | Price | Beats These Competitors | What Merchants Get |
+| MintBundle Plan | Price | Beats These Competitors | What Merchants Get |
 |---|---|---|---|
 | Starter | FREE | Shopify Bundles, Bundler Free | 5 bundles, 100 orders/mo, all bundle types, visual builder, multilingual, Checkout Guardian |
 | Growth | $12/mo | Kaching ($14.99), Simple ($14) | Unlimited bundles, AI suggestions, live chat, analytics, POS 1 location, inventory audit trail |
@@ -316,7 +316,7 @@ BundleForge occupies the upper-right quadrant: high feature depth AND high relia
 1. **Shopify App Store SEO** -- optimize for: "product bundles", "mix and match", "bundle inventory sync", "3PL bundles"
 2. **Migration tool** -- free one-click migration from Simple Bundles, Bundler, and Shopify Bundles
 3. **Beta program** -- recruit 50 merchants for free beta, seed 15+ genuine reviews pre-launch
-4. **YouTube comparison videos** -- "BundleForge vs Simple Bundles", "BundleForge vs Kaching"
+4. **YouTube comparison videos** -- "MintBundle vs Simple Bundles", "MintBundle vs Kaching"
 5. **Shopify Agency partnerships** -- connect with top agencies for referral relationships
 6. **Reddit/Community** -- engage in r/shopify, r/ecommerce with helpful, non-promotional content
 7. **Google Ads** -- target "Shopify bundle app", "best Shopify bundle app 2026" keywords
@@ -399,15 +399,15 @@ BundleForge occupies the upper-right quadrant: high feature depth AND high relia
 
 The Shopify bundle app market presents a clear opportunity for a new entrant that combines the fulfillment excellence of Simple Bundles, the UX polish of Kaching, the AI capabilities of Fast Bundle, and the promotional versatility of BOGOS, while fixing the inventory bugs, support gaps, language barriers, and pricing frustrations that plague every existing competitor.
 
-BundleForge is positioned to capture this opportunity by being the first app to deliver enterprise-grade reliability with consumer-grade simplicity, all at a flat-rate price that never penalizes merchant growth.
+MintBundle is positioned to capture this opportunity by being the first app to deliver enterprise-grade reliability with consumer-grade simplicity, all at a flat-rate price that never penalizes merchant growth.
 
 ### Immediate Next Steps
 
-1. Finalize the BundleForge technical architecture and database schema
+1. Finalize the MintBundle technical architecture and database schema
 2. Set up Shopify Partner Account and development store
 3. Begin Phase 1 development: core architecture, OAuth, Billing API, bundle CRUD
 4. Start building the beta merchant waiting list (target: 50 merchants)
-5. Register domains: bundleforge.io, bundleforge.app
+5. Register domains: mintbundle.io, mintbundle.app
 6. Design brand identity: logo, icon, color palette, marketing assets
 7. Draft App Store listing content: screenshots, description, privacy policy
 8. Begin content marketing: blog posts, YouTube tutorials, comparison articles

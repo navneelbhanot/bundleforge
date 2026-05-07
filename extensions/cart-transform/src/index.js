@@ -4,8 +4,8 @@
  * Two paths run side-by-side:
  *
  *  1. Expand path (metafield-driven). When a cart line's variant
- *     belongs to a product flagged with `bundleforge.is_bundle = true`
- *     and carries a `bundleforge.components` JSON metafield, we emit
+ *     belongs to a product flagged with `mintbundle.is_bundle = true`
+ *     and carries a `mintbundle.components` JSON metafield, we emit
  *     an `expand` operation that swaps the bundle line for one line
  *     per component (variantId + quantity from the metafield). The
  *     bundle product's price is preserved as the parent — Shopify
@@ -13,7 +13,7 @@
  *
  *  2. Update path (attribute-driven). Existing flow for storefronts
  *     that already place component variants in the cart with
- *     `_bundleforge_bundle_id` line attributes — we group, run the
+ *     `_mintbundle_bundle_id` line attributes — we group, run the
  *     shared pricing engine, and emit `update` operations to override
  *     per-unit prices.
  *
@@ -24,13 +24,13 @@
 import { computeBundlePrice, toCents, fromCents } from "./pricing.js";
 
 function bundleIdOf(line) {
-  return line && line.bundleforgeBundleId ? line.bundleforgeBundleId.value : null;
+  return line && line.mintbundleBundleId ? line.mintbundleBundleId.value : null;
 }
 
 function rulesOf(line) {
-  if (!line || !line.bundleforgeRules || !line.bundleforgeRules.value) return [];
+  if (!line || !line.mintbundleRules || !line.mintbundleRules.value) return [];
   try {
-    const parsed = JSON.parse(line.bundleforgeRules.value);
+    const parsed = JSON.parse(line.mintbundleRules.value);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -196,7 +196,7 @@ function buildExpandOp(line, payload) {
 
 /**
  * Read the shop-level default cart mode from the optional shop
- * metafield `bundleforge.cart_default_mode`. Absent or unrecognized
+ * metafield `mintbundle.cart_default_mode`. Absent or unrecognized
  * values fall through to the default ("bundle_as_product"), which
  * keeps both paths active — matches today's behaviour.
  *

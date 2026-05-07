@@ -9,10 +9,10 @@ query Input {
           currencyCode
         }
       }
-      bundleforgeBundleId: attribute(key: "_bundleforge_bundle_id") {
+      mintbundleBundleId: attribute(key: "_mintbundle_bundle_id") {
         value
       }
-      bundleforgeRules: attribute(key: "_bundleforge_rules") {
+      mintbundleRules: attribute(key: "_mintbundle_rules") {
         value
       }
       merchandise {
@@ -21,25 +21,25 @@ query Input {
           product {
             id
             isBundleMetafield: metafield(
-              namespace: "bundleforge"
+              namespace: "mintbundle"
               key: "is_bundle"
             ) {
               value
             }
             componentsMetafield: metafield(
-              namespace: "bundleforge"
+              namespace: "mintbundle"
               key: "components"
             ) {
               value
             }
             eligibilityMetafield: metafield(
-              namespace: "bundleforge"
+              namespace: "mintbundle"
               key: "eligibility"
             ) {
               value
             }
             inventoryRulesMetafield: metafield(
-              namespace: "bundleforge"
+              namespace: "mintbundle"
               key: "inventory_rules"
             ) {
               value
@@ -65,7 +65,7 @@ query Input {
   }
   shop {
     cartDefaultModeMetafield: metafield(
-      namespace: "bundleforge"
+      namespace: "mintbundle"
       key: "cart_default_mode"
     ) {
       value

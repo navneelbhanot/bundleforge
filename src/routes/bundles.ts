@@ -71,7 +71,7 @@ export interface BundleRouteDeps {
  * cart transform, POS) can resolve back.
  */
 const PRODUCT_CREATE_MUTATION = `#graphql
-  mutation BundleforgeProductCreate($input: ProductInput!) {
+  mutation MintBundleProductCreate($input: ProductInput!) {
     productCreate(input: $input) {
       product {
         id
@@ -117,38 +117,38 @@ const defaultCreateShopifyProduct: NonNullable<
         descriptionHtml: bundle.description ?? "",
         handle: bundle.slug,
         productType: "Bundle",
-        vendor: "BundleForge",
+        vendor: "MintBundle",
         status: "ACTIVE",
-        tags: ["bundleforge", `bundleforge-bundle-${bundle.id}`],
+        tags: ["mintbundle", `mintbundle-bundle-${bundle.id}`],
         metafields: [
           {
-            namespace: "bundleforge",
+            namespace: "mintbundle",
             key: "bundle_id",
             value: bundle.id,
             type: "single_line_text_field",
           },
           {
-            namespace: "bundleforge",
+            namespace: "mintbundle",
             key: "is_bundle",
             value: "true",
             type: "boolean",
           },
           {
-            namespace: "bundleforge",
+            namespace: "mintbundle",
             key: "components",
             value: JSON.stringify(componentsPayload),
             type: "json",
           },
           // M-172b — eligibility blob the Cart Transform Function reads.
           {
-            namespace: "bundleforge",
+            namespace: "mintbundle",
             key: "eligibility",
             value: JSON.stringify(bundle.eligibility ?? {}),
             type: "json",
           },
           // M-173b — per-bundle inventory rules the Cart Transform reads.
           {
-            namespace: "bundleforge",
+            namespace: "mintbundle",
             key: "inventory_rules",
             value: JSON.stringify(bundle.inventoryRules ?? {}),
             type: "json",

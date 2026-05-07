@@ -6,7 +6,7 @@ Replace the Winston-based stub at `src/config/logger.ts` with a Pino logger
 that:
 - Reads level from `env.LOG_LEVEL`.
 - Outputs JSON in production / test, pretty-printed in development.
-- Tags every line with `service: "bundleforge"` and `version: env.APP_VERSION`.
+- Tags every line with `service: "mintbundle"` and `version: env.APP_VERSION`.
 - Exposes `logger` (root) and `child(bindings)` for module-scoped children.
 
 ## Why
@@ -38,7 +38,7 @@ const transport =
 
 export const logger: Logger = pino({
   level: env.LOG_LEVEL,
-  base: { service: "bundleforge", version: env.APP_VERSION },
+  base: { service: "mintbundle", version: env.APP_VERSION },
   timestamp: pino.stdTimeFunctions.isoTime,
   transport,
 });

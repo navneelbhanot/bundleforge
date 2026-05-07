@@ -185,9 +185,9 @@ otherwise noted.
 | Shopify Bundles | 2.7 | 565 | $0 | $0 | 2 (fixed, multipack) | No | No | No | No | Native | 19 | Native |
 | Bundles.app | 4.9 | 307 | $19 | $199 | ~10 (fixed, multipack, mix-match, variant, gift, mystery, sub, wholesale, digital, physical) | No | No | **Yes (3PLs listed)** | No | No | Not claimed | Not claimed |
 | Vitals | 4.9 | 2,615 | $29.99 | $29.99+ | ~7 inside suite (fixed, mix-match, upsell, x-sell, FBT, related, custom) | No (for bundles) | Yes (page/video/ad gen) | No | No | No | 15 | 30+ sections |
-| **BundleForge** | n/a | 0 | $0 | $129 | **13** (verified in `src/services/bundles/validators.ts`) | **Yes** (`src/services/analytics/abTest.ts`) | **Yes** (Python service `ai-service/recommender.py` + Node client) | Adapter exists (ShipStation `src/services/integrations/shipstation.ts`) | Yes — Storefront API at `/api/storefront/v1/...` (`src/routes/storefront.ts`) | **No** (M-051 doesn't publish a real Shopify product, so POS round-trip is broken) | 6 (`src/i18n/locales/{en,es,fr,de,it,pt}.json`) | 5 (`extensions/theme-extension/blocks/`) |
+| **MintBundle** | n/a | 0 | $0 | $129 | **13** (verified in `src/services/bundles/validators.ts`) | **Yes** (`src/services/analytics/abTest.ts`) | **Yes** (Python service `ai-service/recommender.py` + Node client) | Adapter exists (ShipStation `src/services/integrations/shipstation.ts`) | Yes — Storefront API at `/api/storefront/v1/...` (`src/routes/storefront.ts`) | **No** (M-051 doesn't publish a real Shopify product, so POS round-trip is broken) | 6 (`src/i18n/locales/{en,es,fr,de,it,pt}.json`) | 5 (`extensions/theme-extension/blocks/`) |
 
-Source notes per BundleForge cell:
+Source notes per MintBundle cell:
 - Bundle type count: `grep` on `validators.ts` returns 13 literal types (verified above).
 - Pricing: `src/services/billing/plans.ts` defines monthlyPriceUsd 0/12/35/129;
   annual = `Math.round(monthly * 12 * 0.8)` (verified above).
@@ -215,7 +215,7 @@ Source notes per BundleForge cell:
 
 ---
 
-## Where BundleForge wins (verifiable)
+## Where MintBundle wins (verifiable)
 
 1. **Breadth of bundle types in the configurator (13)** beats every paid
    competitor in this set except Bundler (~13) and Simple Bundles (~15) and
@@ -251,7 +251,7 @@ Source notes per BundleForge cell:
    Simple Bundles lists ShipStation + Judge.me). Caveat: `amazon.ts` is a
    stub per known gaps; the rest are real adapters with tests.
 
-## Where BundleForge loses or ties
+## Where MintBundle loses or ties
 
 1. **Zero installs, zero reviews, zero brand.** Every competitor has 307–4,175
    reviews. This is the dominant gap for the first 12 months and no feature
@@ -285,7 +285,7 @@ Source notes per BundleForge cell:
 ## Recommended priorities
 
 Ranked by competitor frequency × estimated merchant pain (high to low). Each
-priority cites which competitors do this well and the BundleForge cost to
+priority cites which competitors do this well and the MintBundle cost to
 close.
 
 1. **Ship M-051 (publish bundle as a real Shopify product) so POS works.**
@@ -302,7 +302,7 @@ close.
    - Cost: 1 milestone. We have the backend; we just don't show it.
 
 3. **Finish M-100: extend admin UI to all 13 bundle types.**
-   - Evidence: BundleForge's main differentiator versus Bundler (its closest
+   - Evidence: MintBundle's main differentiator versus Bundler (its closest
      feature peer at $9.99/mo) is breadth, but only 5 types are configurable
      in the UI. Without this, the 13-type claim doesn't survive a demo.
    - Cost: 1-2 milestones (one per ~4 types).

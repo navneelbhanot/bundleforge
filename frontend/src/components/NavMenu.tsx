@@ -2,7 +2,7 @@
  * App Bridge v4 navigation menu.
  *
  * Renders the merchant's Shopify-native left-sidebar nav (the items
- * that appear nested under "BundleForge" in admin.shopify.com) via
+ * that appear nested under "MintBundle" in admin.shopify.com) via
  * the <ui-nav-menu> web component. The component is registered by
  * the App Bridge CDN script loaded from `index.html`.
  *

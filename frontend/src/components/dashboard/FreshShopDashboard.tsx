@@ -74,7 +74,7 @@ export function FreshShopDashboard({
               No bundles yet — let&apos;s fix that.
             </Text>
             <Text as="p" tone="subdued">
-              BundleForge runs the same pricing engine on the cart, the
+              MintBundle runs the same pricing engine on the cart, the
               checkout, and the audit log so cents agree everywhere.
               Components decrement atomically. Every adjustment is
               recorded and immutable. You publish, customers buy,
@@ -124,7 +124,7 @@ export function FreshShopDashboard({
             When you&apos;re ready
           </Text>
           <Text as="p" tone="subdued">
-            BundleForge installs as a Theme App Extension on Online
+            MintBundle installs as a Theme App Extension on Online
             Store 2.0 themes. No Liquid edits. Five drop-in blocks
             (universal, mix-and-match, BOGO, build-a-box, variant
             selector) cover every bundle type.

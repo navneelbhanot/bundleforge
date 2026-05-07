@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BundleForge — Pricing-parity bundles for Shopify</title>
+<title>MintBundle — Pricing-parity bundles for Shopify</title>
 <meta name="description" content="A Shopify bundle app whose checkout price always matches the cart, whose inventory adjustments cannot be silently rewritten, and whose A/B test results are backed by a published significance calculation." />
 <meta name="theme-color" content="#000000" />
-<meta property="og:title" content="BundleForge — Pricing-parity bundles for Shopify" />
+<meta property="og:title" content="MintBundle — Pricing-parity bundles for Shopify" />
 <meta property="og:description" content="Three guarantees, one Shopify install: cents-exact checkout, immutable inventory audit, and a real A/B significance calculator." />
 <meta property="og:type" content="website" />
 
@@ -176,14 +176,14 @@
   <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16 h-16 flex items-center justify-between">
     <a href="/" class="flex items-center gap-3 font-display wt-500 text-white">
       <span class="accent-stripe rounded-pill w-6 h-6 inline-block"></span>
-      <span class="nav-link">BundleForge</span>
+      <span class="nav-link">MintBundle</span>
     </a>
     <nav class="hidden md:flex items-center gap-8">
       <a href="#why" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Why us</a>
       <a href="#how" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">How it works</a>
       <a href="#pricing" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Pricing</a>
       <a href="#faq" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">FAQ</a>
-      <a href="https://app.bundleforge.app/support" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Help</a>
+      <a href="https://app.mintbundle.app/support" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Help</a>
     </nav>
     <div class="flex items-center gap-3">
       <a href="#install" class="btn btn-primary font-display wt-400">
@@ -255,7 +255,7 @@
         <div class="font-display wt-330 text-neon mb-6" style="font-size:64px;line-height:1.0">03</div>
         <h3 class="font-display wt-500 heading-5 text-white mb-3">Publish to your storefront</h3>
         <p class="body-md wt-400 text-shade-40">
-          Hit publish — BundleForge writes a Shopify product + components metafield, and the Cart Transform Function picks the bundle up at checkout. Cents-exact between cart, checkout, and the order webhook. Done.
+          Hit publish — MintBundle writes a Shopify product + components metafield, and the Cart Transform Function picks the bundle up at checkout. Cents-exact between cart, checkout, and the order webhook. Done.
         </p>
       </article>
     </div>
@@ -278,7 +278,7 @@
           Most bundle apps compute discounts in two places — the cart widget and the actual checkout. When those drift, the customer sees one price in the cart and a different one at checkout.
         </p>
         <p class="body-md wt-400 text-shade-40">
-          BundleForge runs <span class="text-white wt-500">the same pricing function</span> on the server (admin + order processor) and inside Shopify&rsquo;s Cart Transform Function (live cart + checkout). A test asserts they agree on every commit. Cents-exact, by construction.
+          MintBundle runs <span class="text-white wt-500">the same pricing function</span> on the server (admin + order processor) and inside Shopify&rsquo;s Cart Transform Function (live cart + checkout). A test asserts they agree on every commit. Cents-exact, by construction.
         </p>
       </article>
 
@@ -289,7 +289,7 @@
           Most apps maintain inventory state in application code. A bug, a misconfigured admin user, or a CSV import can silently rewrite history.
         </p>
         <p class="body-md wt-400 text-shade-40">
-          BundleForge writes every adjustment to <code class="font-mono text-sm bg-forest text-pistachio px-1.5 py-0.5 rounded">inventory_audit_log</code>, then enforces immutability at the Postgres trigger level. There is no in-app code path that can rewrite history because <span class="text-white wt-500">the database refuses</span>.
+          MintBundle writes every adjustment to <code class="font-mono text-sm bg-forest text-pistachio px-1.5 py-0.5 rounded">inventory_audit_log</code>, then enforces immutability at the Postgres trigger level. There is no in-app code path that can rewrite history because <span class="text-white wt-500">the database refuses</span>.
         </p>
       </article>
 
@@ -300,7 +300,7 @@
           Three competing bundle apps in this category advertise A/B testing. None publish what test of significance is being computed.
         </p>
         <p class="body-md wt-400 text-shade-40">
-          BundleForge uses a <span class="text-white wt-500">two-proportion z-test</span> with normal CDF, p-value reported, winner declared only when significant. Property tests run 200 random inputs through each invariant on every commit.
+          MintBundle uses a <span class="text-white wt-500">two-proportion z-test</span> with normal CDF, p-value reported, winner declared only when significant. Property tests run 200 random inputs through each invariant on every commit.
         </p>
       </article>
     </div>
@@ -442,7 +442,7 @@
     </div>
 
     <p class="caption text-shade-50 mt-10">
-      Need something else? Pro and Enterprise include API tokens + outbound webhooks — wire BundleForge into anything else you run. Adapter source under <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">src/services/integrations/</code>.
+      Need something else? Pro and Enterprise include API tokens + outbound webhooks — wire MintBundle into anything else you run. Adapter source under <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">src/services/integrations/</code>.
     </p>
   </div>
 </section>
@@ -455,7 +455,7 @@
       Free to start. Pay when you scale.
     </h2>
     <p class="body-md wt-400 text-shade-40 max-w-2xl mb-16">
-      Four tiers. All paid plans are unlimited on bundles and bundle orders, with a documented fair-use clause (<a href="https://github.com/navneelbhanot/bundleforge/blob/main/legal/terms-of-service.md#31-fair-use-for-unlimited-paid-plans" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3.1</a>). Annual billing saves 20%.
+      Four tiers. All paid plans are unlimited on bundles and bundle orders, with a documented fair-use clause (<a href="https://github.com/navneelbhanot/mintbundle/blob/main/legal/terms-of-service.md#31-fair-use-for-unlimited-paid-plans" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3.1</a>). Annual billing saves 20%.
     </p>
 
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -576,7 +576,7 @@
           <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
         </summary>
         <p class="body-sm wt-400 text-shade-40 mt-4">
-          Cancel any time from the Billing tab. Monthly plans stop billing at the next cycle. Annual plans are refunded pro-rata for the unused months — see <a href="https://github.com/navneelbhanot/bundleforge/blob/main/legal/terms-of-service.md" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3</a>. Your bundle data stays exportable for 30 days after uninstall.
+          Cancel any time from the Billing tab. Monthly plans stop billing at the next cycle. Annual plans are refunded pro-rata for the unused months — see <a href="https://github.com/navneelbhanot/mintbundle/blob/main/legal/terms-of-service.md" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3</a>. Your bundle data stays exportable for 30 days after uninstall.
         </p>
       </details>
 
@@ -592,7 +592,7 @@
 
       <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
         <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
-          <span>Does BundleForge work with Shopify Plus?</span>
+          <span>Does MintBundle work with Shopify Plus?</span>
           <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
         </summary>
         <p class="body-sm wt-400 text-shade-40 mt-4">
@@ -622,7 +622,7 @@
 
       <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
         <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
-          <span>Is BundleForge GDPR-compliant?</span>
+          <span>Is MintBundle GDPR-compliant?</span>
           <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
         </summary>
         <p class="body-sm wt-400 text-shade-40 mt-4">
@@ -641,7 +641,7 @@
       Every claim above is reproducible.
     </h2>
     <p class="body-large wt-400 text-shade-40 mb-8">
-      Each guarantee on this page maps to a test in the BundleForge repo. <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">git clone</code>, run <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">npm test</code>, and the assertions either pass or they don&rsquo;t. Nothing here relies on you taking our word for it.
+      Each guarantee on this page maps to a test in the MintBundle repo. <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">git clone</code>, run <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">npm test</code>, and the assertions either pass or they don&rsquo;t. Nothing here relies on you taking our word for it.
     </p>
     <p class="caption text-shade-50">
       All vitest + Playwright suites green on the working branch. Pricing-parity, atomic inventory, and significance calculator each have dedicated test files.
@@ -656,9 +656,9 @@
       Get notified when the App Store listing opens.
     </h2>
     <p class="body-md wt-400 text-shade-40 mb-10">
-      BundleForge launches publicly soon. Drop an email and we&rsquo;ll send a one-time install link the day the listing goes live.
+      MintBundle launches publicly soon. Drop an email and we&rsquo;ll send a one-time install link the day the listing goes live.
     </p>
-    <form action="mailto:support@bundleforge.app?subject=Notify%20me%20at%20launch" method="get" class="flex flex-col sm:flex-row gap-3 justify-center max-w-xl mx-auto">
+    <form action="mailto:support@mintbundle.app?subject=Notify%20me%20at%20launch" method="get" class="flex flex-col sm:flex-row gap-3 justify-center max-w-xl mx-auto">
       <label class="sr-only" for="email">Email address</label>
       <input id="email" type="email" name="email" placeholder="you@store.com" required class="input flex-1" />
       <button type="submit" class="btn btn-primary font-display wt-400 justify-center">
@@ -667,7 +667,7 @@
       </button>
     </form>
     <p class="caption text-shade-50 mt-6">
-      Or email us directly at <a href="mailto:support@bundleforge.app" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">support@bundleforge.app</a>.
+      Or email us directly at <a href="mailto:support@mintbundle.app" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">support@mintbundle.app</a>.
     </p>
   </div>
 </section>
@@ -679,7 +679,7 @@
       <div class="col-span-2 md:col-span-1">
         <a href="/" class="flex items-center gap-3 font-display wt-500 text-white mb-3">
           <span class="accent-stripe rounded-pill w-5 h-5 inline-block"></span>
-          <span>BundleForge</span>
+          <span>MintBundle</span>
         </a>
         <p class="caption text-shade-40 max-w-xs">
           Pricing-parity bundles for Shopify. Built sequentially. Tested in the open.
@@ -688,7 +688,7 @@
       <div>
         <p class="label wt-500 text-shade-40 mb-3">Product</p>
         <ul class="space-y-2">
-          <li><a href="#why" class="caption text-shade-30 hover:text-white">Why BundleForge</a></li>
+          <li><a href="#why" class="caption text-shade-30 hover:text-white">Why MintBundle</a></li>
           <li><a href="#types" class="caption text-shade-30 hover:text-white">Bundle types</a></li>
           <li><a href="#pricing" class="caption text-shade-30 hover:text-white">Pricing</a></li>
         </ul>
@@ -696,8 +696,8 @@
       <div>
         <p class="label wt-500 text-shade-40 mb-3">Resources</p>
         <ul class="space-y-2">
-          <li><a href="https://app.bundleforge.app/support" class="caption text-shade-30 hover:text-white">Help centre</a></li>
-          <li><a href="mailto:support@bundleforge.app" class="caption text-shade-30 hover:text-white">Contact us</a></li>
+          <li><a href="https://app.mintbundle.app/support" class="caption text-shade-30 hover:text-white">Help centre</a></li>
+          <li><a href="mailto:support@mintbundle.app" class="caption text-shade-30 hover:text-white">Contact us</a></li>
         </ul>
       </div>
       <div>
@@ -710,7 +710,7 @@
     </div>
     <div class="neon-rule"></div>
     <p class="caption text-shade-50 mt-8">
-      © 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.
+      © 2026 MintBundle. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.
     </p>
   </div>
 </footer>

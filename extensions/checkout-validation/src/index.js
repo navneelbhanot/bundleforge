@@ -17,17 +17,17 @@ export function run(input) {
   const lines = (input && input.cart && input.cart.lines) || [];
   const groups = new Map();
   for (const line of lines) {
-    const idAttr = line.bundleforgeBundleId;
+    const idAttr = line.mintbundleBundleId;
     if (!idAttr || !idAttr.value) continue;
     const id = idAttr.value;
     if (!groups.has(id)) groups.set(id, { lines: [], min: null, max: null });
     const g = groups.get(id);
     g.lines.push(line);
-    if (line.bundleforgeMin && line.bundleforgeMin.value && g.min === null) {
-      g.min = parseInt(line.bundleforgeMin.value, 10);
+    if (line.mintbundleMin && line.mintbundleMin.value && g.min === null) {
+      g.min = parseInt(line.mintbundleMin.value, 10);
     }
-    if (line.bundleforgeMax && line.bundleforgeMax.value && g.max === null) {
-      g.max = parseInt(line.bundleforgeMax.value, 10);
+    if (line.mintbundleMax && line.mintbundleMax.value && g.max === null) {
+      g.max = parseInt(line.mintbundleMax.value, 10);
     }
   }
 

@@ -1,7 +1,7 @@
 /**
  * Pulls bundle-bearing line items out of a Shopify order webhook
  * payload. The marker is a properties[] entry with name
- * `_bundleforge_bundle_id`.
+ * `_mintbundle_bundle_id`.
  *
  * See docs/specs/M-076-order-processor.md.
  */
@@ -26,7 +26,7 @@ export interface ShopifyOrderPayload {
   line_items?: ShopifyOrderLineItem[];
 }
 
-export const BUNDLE_PROP = "_bundleforge_bundle_id";
+export const BUNDLE_PROP = "_mintbundle_bundle_id";
 
 export interface ExtractedBundleLine {
   bundleId: string;

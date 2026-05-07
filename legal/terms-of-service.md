@@ -1,13 +1,13 @@
-# BundleForge — Terms of Service
+# MintBundle — Terms of Service
 
 **Effective date:** {{effective_date}}
-**Operator:** {{operating_entity}} ("we", "us", "BundleForge")
+**Operator:** {{operating_entity}} ("we", "us", "MintBundle")
 
 > Template — fill in placeholders before publishing.
 
 ## 1. Service
 
-BundleForge is a Shopify app providing product bundling, dynamic pricing,
+MintBundle is a Shopify app providing product bundling, dynamic pricing,
 inventory synchronization, analytics, and integration with third-party
 fulfillment, marketing, and subscription services. The service is offered
 on a SaaS basis, billed monthly or annually via Shopify's billing
