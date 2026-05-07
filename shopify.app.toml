@@ -12,13 +12,11 @@ redirect_urls = [ "https://app.bundleforge.app/api/auth/callback" ]
 [webhooks]
 api_version = "2025-01"
 
-  [webhooks.subscriptions]
-
-  [[webhooks.subscriptions.compliance]]
-  topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  [[webhooks.subscriptions]]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
   uri = "/api/webhooks"
 
-  [[webhooks.subscriptions.privacy]]
+  [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/api/webhooks"
 
