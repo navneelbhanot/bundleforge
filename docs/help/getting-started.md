@@ -13,7 +13,7 @@ If you arrived from a partner-shared install link instead, the URL
 will be:
 
 ```
-https://bundleforge-production-37f5.up.railway.app/api/auth?shop=<your-store>.myshopify.com
+https://app.bundleforge.app/api/auth?shop=<your-store>.myshopify.com
 ```
 
 ## 2. Pick a bundle type
