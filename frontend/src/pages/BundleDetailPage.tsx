@@ -381,10 +381,34 @@ export function BundleDetailPage(): JSX.Element {
   }
 
   async function statusAction(path: "publish" | "archive"): Promise<void> {
-    if (!id) return;
+    if (!id || !bundle) return;
     setBusy(true);
     setError(null);
     try {
+      // Auto-persist any unsaved items / pricing rules before
+      // publishing, so the merchant doesn't have to remember the
+      // separate Save buttons inside the Items + Pricing cards.
+      // Without this the server sees the previously-saved (often
+      // empty) items list and rejects the publish with the
+      // "Add at least one component" guard.
+      if (path === "publish") {
+        const itemsChanged =
+          JSON.stringify(items.map((it) => ({
+            shopifyProductGid: it.shopifyProductGid,
+            shopifyVariantGid: it.shopifyVariantGid ?? null,
+            quantity: it.quantity,
+          }))) !==
+          JSON.stringify(
+            (bundle.items ?? []).map((it) => ({
+              shopifyProductGid: it.shopifyProductGid,
+              shopifyVariantGid: it.shopifyVariantGid ?? null,
+              quantity: it.quantity,
+            })),
+          );
+        if (itemsChanged) {
+          await save({ items } as Partial<BundleDetail>);
+        }
+      }
       const res = await fetch(`/api/v1/bundles/${id}/${path}`, {
         method: "POST",
       });
