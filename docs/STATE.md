@@ -27,6 +27,19 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
 
+**Deploy plumbing (2026-05-07, session 0199):** `npx shopify
+app deploy` now succeeds end-to-end — `bundleforge-3` was
+released to users. Shopify Functions migrated to the official
+`@shopify/shopify_function@~2.0.0` + `shopify app function build`
+pipeline. Flow extensions split into three dirs
+(`extensions/flow-{force-inventory-sync,bundle-published,
+bundle-low-stock}`) with GraphQL SDL schemas and camelCase
+field keys. Per-extension dependency install is wired through
+the root `postinstall` (`scripts/install-extensions.cjs`).
+Dockerfile copies `scripts/` before `npm ci` so Railway builds
+don't trip on the postinstall hook. See session log for full
+detail.
+
 **Note on migrations going forward:** Railway's `start:web`
 script (`scripts/start-web.cjs`) runs `prisma migrate deploy`
 before booting the server, so any new migration committed
