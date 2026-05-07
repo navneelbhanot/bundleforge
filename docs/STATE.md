@@ -23,6 +23,14 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
+**User (Railway dashboard, next session):** Create a new
+Railway service for the marketing site. Root Directory:
+`marketing`; Watch Paths: `marketing/**` (so backend
+commits don't redeploy marketing). The service uses
+`marketing/Dockerfile` and `marketing/railway.json` —
+no env vars required. Once green, add `bundleforge.app`
+as a custom domain. Step-by-step in `marketing/README.md`.
+
 **Code (next session):** No queued roadmap milestone.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
@@ -37,6 +45,15 @@ action button (Subscribe / Upgrade / Downgrade / Current
 plan). Defaults to annual interval. New components at
 `frontend/src/components/billing/{IntervalToggle,PlanCard,
 featureLabels}`. 17 new tests; full suite 891/904.
+
+**Marketing site Railway-ready (2026-05-07, session 0203):**
+`marketing/` now ships with `server.cjs` (zero-dep Node
+http static server), `Dockerfile`, `railway.json`, and a
+rewritten `README.md` covering one-time service setup.
+Pricing in `marketing/index.html` synced to live
+`PLAN_CAPS` — four tiers ($0 / $12 / $35 / $129) with
+correct caps and feature bullets. Closes the same drift
+the legal/ToS commit `7859370` fixed elsewhere.
 
 **M-202 closed (2026-05-07, session 0202):** Resend wired
 for outbound transactional email. New
@@ -792,20 +809,30 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **822 / 822 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +6 i18n cases since M-188 (cumulative since the
-  session start: +5 SupportPage, +3 SetupChecklist polish, +6
-  i18n).
-- **631 / 631** when no real DB is available — the bundle CRUD
-  integration tests auto-skip via `describe.skipIf`.
+- **873 passed / 13 skipped vitest** (no DB — bundle CRUD
+  integration tests auto-skip via `describe.skipIf`).
+  When DATABASE_URL points at a real Postgres the integration
+  tests run too. Count up from 822 since session 0198: M-200/
+  M-201/M-202 added cases.
+- **One environmental flake:**
+  `tests/property/webhook.throughput.test.ts` "acks 100
+  webhooks quickly" hangs ~once when 137 test files race for
+  ephemeral ports under macOS. Passes in 122 ms in isolation
+  (`npx vitest run tests/property/webhook.throughput.test.ts`).
+  Fix candidates: `pool: forks` for that file, or
+  `--no-file-parallelism`. Not caused by current work.
 - **5 / 5 Playwright e2e tests passing** (unchanged).
 - CI runs both layers on every push and PR.
-- Typecheck clean (server + frontend).
-- Lint: 6 pre-existing errors / 16 warnings — net-down 1
-  warning from baseline (M-182 cleaned up a stale
-  `readDismissed` helper while migrating).
+- Typecheck clean (server + frontend) — session 0203 fixed
+  three TS7006 implicit-any errors in
+  `src/services/billing/createSubscription.test.ts:26`
+  (`capturingGraphql` arrow-fn params lacked types and the
+  surrounding cast didn't backflow contextual typing).
+- Lint: 2 pre-existing errors / 18 warnings — improved from
+  6 / 16 over M-201..M-202 without STATE.md being updated.
+  Reconciled in session 0203.
 
 ## Working branch
 
-`claude/objective-sinoussi-77ae86` (today's worktree). Main is
+`claude/gallant-murdock-6987fe` (current worktree). Main is
 fast-forwarded through every commit; CI runs against main.
