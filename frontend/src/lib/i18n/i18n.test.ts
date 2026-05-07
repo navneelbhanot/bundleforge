@@ -27,10 +27,16 @@ describe("i18n init (M-188)", () => {
     expect(i18n.t("settings.cart")).toBe("Warenkorb & Checkout");
   });
 
-  it("falls back to English when key is missing in the active locale", async () => {
-    await i18n.changeLanguage("ja"); // ja.json is a stub copy of en.json
-    // The stub has English values, so EN is what we get back.
-    expect(i18n.t("nav.dashboard")).toBe("Dashboard");
+  it("loads Japanese translations correctly", async () => {
+    await i18n.changeLanguage("ja");
+    expect(i18n.t("nav.dashboard")).toBe("ダッシュボード");
+    expect(i18n.t("actions.save")).toBe("保存");
+  });
+
+  it("loads Russian translations correctly", async () => {
+    await i18n.changeLanguage("ru");
+    expect(i18n.t("nav.settings")).toBe("Настройки");
+    expect(i18n.t("status.active")).toBe("Активный");
   });
 
   it("returns the key string for a missing key (graceful fallback)", async () => {
