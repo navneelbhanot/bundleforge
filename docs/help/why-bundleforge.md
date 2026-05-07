@@ -75,8 +75,8 @@ you're being told a colour, not a result.
 
 | Axis | BundleForge | Competitor leader |
 |---|---|---|
-| Bundle type breadth (configurable in admin) | 13 declared, 9 fully editable in admin | Simple Bundles ~15 |
-| Multi-language (admin + theme) | 6 locales (en, es, fr, de, it, pt) | Bundler 16+, Shopify Bundles 19 |
+| Bundle type breadth (configurable in admin) | 13 declared, 13 fully editable in admin | Simple Bundles ~15 |
+| Multi-language (admin + theme) | 15 locales (en, es, fr, de, it, pt, ja, zh, ko, nl, pl, sv, da, no, ru) | Bundler 16+, Shopify Bundles 19 |
 | Support — installed base + reviews | 0 installs, 0 reviews | Kaching 4,175 reviews, 5.0★ |
 | Live chat in-app | Crisp wired (env-gated) | Most competitors offer this |
 | 3PL/WMS workflow depth | ShipStation adapter; Amazon stub | Simple Bundles is the category leader |
