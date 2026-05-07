@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "bundles": "Paquetes",
+    "orders": "Pedidos",
+    "inventory": "Inventario",
+    "audit": "Auditoría",
+    "analytics": "Analítica",
+    "ai": "Sugerencias de IA",
+    "abtests": "A/B",
+    "settings": "Configuración",
+    "billing": "Facturación",
+    "support": "Ayuda"
+  },
+  "settings": {
+    "general": "General",
+    "display": "Apariencia",
+    "inventory": "Inventario",
+    "pricing": "Precios",
+    "cart": "Carrito y pago",
+    "notifications": "Notificaciones",
+    "integrations": "Integraciones",
+    "api": "API y webhooks",
+    "localization": "Localización",
+    "billing": "Facturación"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "createBundle": "Crear paquete",
+    "browseBundles": "Ver paquetes",
+    "appLanguage": "Idioma de la app",
+    "savingLanguage": "Idioma guardado — actualizando…",
+    "languageSaveError": "No se pudo guardar el idioma",
+    "widgets": {
+      "revenueSnapshot": "Resumen de ingresos",
+      "totalRevenue": "Ingresos totales",
+      "totalOrders": "Pedidos totales",
+      "topBundle": "Paquete principal",
+      "viewAnalytics": "Ver analítica →",
+      "bundleStatus": "Estado de paquetes",
+      "active": "Activo",
+      "draft": "Borrador",
+      "archived": "Archivado",
+      "viewAll": "Ver todo →",
+      "recentBundles": "Paquetes recientes",
+      "inventoryHealth": "Estado del inventario",
+      "synced": "Sincronizado",
+      "pending": "Pendiente",
+      "error": "Error",
+      "locked": "Bloqueado",
+      "recentOrders": "Pedidos recientes",
+      "aiSuggestions": "Sugerencias de paquetes IA",
+      "recentActivity": "Actividad reciente",
+      "loading": "Cargando…",
+      "nothingYet": "Nada todavía.",
+      "couldntLoad": "No se pudo cargar: {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "Configura BundleForge",
+    "progress": "{{complete}} de {{total}} completado",
+    "dismiss": "Cerrar la lista",
+    "createBundle": {
+      "title": "Crea tu primer paquete",
+      "body": "Elige un tipo de paquete, añade componentes y define el precio.",
+      "cta": "Crear paquete"
+    },
+    "publishBundle": {
+      "title": "Publica un paquete",
+      "body": "Los borradores no se venden. Cambia el estado de un paquete a Activo para mostrarlo en tu tienda.",
+      "cta": "Ver paquetes"
+    },
+    "addBlock": {
+      "title": "Añade el bloque de paquete a tu tienda",
+      "body": "Inserta el bloque BundleForge en tu plantilla de página de producto para que los compradores lo vean.",
+      "cta": "Abrir el editor de tema",
+      "markComplete": "Marcar como hecho"
+    }
+  },
+  "bundles": {
+    "title": "Paquetes",
+    "createBundle": "Crear paquete",
+    "browseTemplates": "Ver plantillas",
+    "search": "Buscar por título…",
+    "view": {
+      "all": "Todos",
+      "table": "Tabla",
+      "compact": "Compacto",
+      "cards": "Tarjetas"
+    },
+    "viewTooltips": {
+      "table": "Tabla estándar con columnas ordenables",
+      "compact": "Lista densa — título, tipo, estado y editar en una línea",
+      "cards": "Cuadrícula de tarjetas — ideal para explorar visualmente"
+    },
+    "savedViewsHint": "Sugerencia: filtra o busca y luego haz clic en <strong>+</strong> junto a las pestañas para guardar una vista.",
+    "noMatches": "Ningún paquete coincide con los filtros actuales.",
+    "freshShop": {
+      "heading": "Aún no hay paquetes — vamos a arreglarlo.",
+      "createFirst": "Crea tu primer paquete",
+      "browseTemplates": "Ver plantillas",
+      "tour": "Tour de 30 segundos",
+      "explore": "Explorar por mi cuenta"
+    }
+  },
+  "support": {
+    "title": "Ayuda",
+    "subtitle": "Consulta nuestra biblioteca de ayuda, escríbenos o abre un chat. Respuesta media en menos de un día laboral.",
+    "search": "Buscar en los artículos…",
+    "talkToUs": "Contáctanos",
+    "talkToUsBody": "Respuesta media en menos de un día laboral. Si tu problema es de un pedido en curso, indica el número de pedido para encontrarlo rápido.",
+    "openChat": "Abrir chat en vivo",
+    "emailSupport": "Enviar correo",
+    "resources": "Recursos",
+    "changelog": "Registro de cambios →",
+    "statusPage": "Estado del sistema →",
+    "githubIssues": "Reportar un problema en GitHub →"
+  },
+  "status": {
+    "active": "Activo",
+    "draft": "Borrador",
+    "archived": "Archivado",
+    "paused": "Pausado"
+  },
+  "actions": {
+    "create": "Crear",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "archive": "Archivar",
+    "publish": "Publicar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "moveToDraft": "Pasar a borrador",
+    "back": "Atrás",
+    "browse": "Explorar",
+    "select": "Seleccionar",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "noResults": "Sin resultados"
+  }
+}

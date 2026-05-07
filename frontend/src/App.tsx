@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppProvider, Tabs, Page, Box } from "@shopify/polaris";
+
+// Initialise i18next before anything imports useTranslation. The
+// side-effect import does the work; we don't reference the
+// exported instance here.
+import "./lib/i18n";
 import {
   BrowserRouter,
   Routes,
@@ -126,29 +132,30 @@ function usePolarisI18n(): PolarisI18n {
 
 interface NavTab {
   id: string;
-  content: string;
+  /** i18n key under `nav.<key>` for the tab's display label. */
+  i18nKey: string;
   path: string;
   /** Sub-paths that should keep this tab selected. */
   prefixes?: string[];
 }
 
 const NAV_TABS: NavTab[] = [
-  { id: "dashboard", content: "Dashboard", path: "/" },
-  { id: "bundles", content: "Bundles", path: "/bundles", prefixes: ["/bundles"] },
-  { id: "orders", content: "Orders", path: "/orders" },
+  { id: "dashboard", i18nKey: "dashboard", path: "/" },
+  { id: "bundles", i18nKey: "bundles", path: "/bundles", prefixes: ["/bundles"] },
+  { id: "orders", i18nKey: "orders", path: "/orders" },
   {
     id: "inventory",
-    content: "Inventory",
+    i18nKey: "inventory",
     path: "/inventory",
     prefixes: ["/inventory"],
   },
-  { id: "audit", content: "Audit", path: "/inventory/audit" },
-  { id: "analytics", content: "Analytics", path: "/analytics" },
-  { id: "ai", content: "AI suggestions", path: "/ai-suggestions" },
-  { id: "abtests", content: "A/B", path: "/ab-tests" },
-  { id: "settings", content: "Settings", path: "/settings" },
-  { id: "billing", content: "Billing", path: "/billing" },
-  { id: "support", content: "Help", path: "/support" },
+  { id: "audit", i18nKey: "audit", path: "/inventory/audit" },
+  { id: "analytics", i18nKey: "analytics", path: "/analytics" },
+  { id: "ai", i18nKey: "ai", path: "/ai-suggestions" },
+  { id: "abtests", i18nKey: "abtests", path: "/ab-tests" },
+  { id: "settings", i18nKey: "settings", path: "/settings" },
+  { id: "billing", i18nKey: "billing", path: "/billing" },
+  { id: "support", i18nKey: "support", path: "/support" },
 ];
 
 function pickSelected(pathname: string): number {
@@ -176,16 +183,20 @@ function pickSelected(pathname: string): number {
 function InAppTabs(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const selected = pickSelected(location.pathname);
   return (
     <Box paddingBlockEnd="200">
       <Tabs
-        tabs={NAV_TABS.map((t) => ({
-          id: t.id,
-          content: t.content,
-          accessibilityLabel: t.content,
-          panelID: `panel-${t.id}`,
-        }))}
+        tabs={NAV_TABS.map((tab) => {
+          const label = t(`nav.${tab.i18nKey}`);
+          return {
+            id: tab.id,
+            content: label,
+            accessibilityLabel: label,
+            panelID: `panel-${tab.id}`,
+          };
+        })}
         selected={selected}
         onSelect={(i) => navigate(NAV_TABS[i].path)}
       />

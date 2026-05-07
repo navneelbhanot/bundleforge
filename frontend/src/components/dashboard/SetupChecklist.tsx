@@ -21,6 +21,7 @@ import {
   ProgressBar,
   Text,
 } from "@shopify/polaris";
+import { useTranslation } from "react-i18next";
 
 export interface ChecklistStep {
   id: "create" | "publish" | "block";
@@ -123,6 +124,7 @@ export function SetupChecklist({
   onDismiss,
   busy,
 }: SetupChecklistProps): JSX.Element | null {
+  const { t } = useTranslation();
   const total = steps.length;
   const complete = steps.filter((s) => s.done).length;
   // Auto-retire when everything is done — no extra dismiss click needed.
@@ -134,16 +136,16 @@ export function SetupChecklist({
         <InlineStack align="space-between" blockAlign="center">
           <BlockStack gap="100">
             <Text as="h2" variant="headingMd">
-              Get set up with BundleForge
+              {t("checklist.title")}
             </Text>
             <Text as="p" tone="subdued" variant="bodySm">
-              {complete} of {total} complete
+              {t("checklist.progress", { complete, total })}
             </Text>
           </BlockStack>
           <Button
             icon={XIcon}
             variant="tertiary"
-            accessibilityLabel="Dismiss checklist"
+            accessibilityLabel={t("checklist.dismiss")}
             onClick={onDismiss}
             disabled={busy}
           />

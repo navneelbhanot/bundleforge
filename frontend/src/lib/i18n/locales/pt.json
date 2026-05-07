@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "bundles": "Combos",
+    "orders": "Pedidos",
+    "inventory": "Estoque",
+    "audit": "Auditoria",
+    "analytics": "Análises",
+    "ai": "Sugestões de IA",
+    "abtests": "A/B",
+    "settings": "Configurações",
+    "billing": "Faturamento",
+    "support": "Ajuda"
+  },
+  "settings": {
+    "general": "Geral",
+    "display": "Exibição",
+    "inventory": "Estoque",
+    "pricing": "Preços",
+    "cart": "Carrinho e checkout",
+    "notifications": "Notificações",
+    "integrations": "Integrações",
+    "api": "API e webhooks",
+    "localization": "Localização",
+    "billing": "Faturamento"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "createBundle": "Criar combo",
+    "browseBundles": "Ver combos",
+    "appLanguage": "Idioma do app",
+    "savingLanguage": "Idioma salvo — atualizando…",
+    "languageSaveError": "Não foi possível salvar o idioma",
+    "widgets": {
+      "revenueSnapshot": "Resumo de receita",
+      "totalRevenue": "Receita total",
+      "totalOrders": "Pedidos totais",
+      "topBundle": "Combo principal",
+      "viewAnalytics": "Ver análises →",
+      "bundleStatus": "Status dos combos",
+      "active": "Ativo",
+      "draft": "Rascunho",
+      "archived": "Arquivado",
+      "viewAll": "Ver tudo →",
+      "recentBundles": "Combos recentes",
+      "inventoryHealth": "Estado do estoque",
+      "synced": "Sincronizado",
+      "pending": "Pendente",
+      "error": "Erro",
+      "locked": "Bloqueado",
+      "recentOrders": "Pedidos recentes",
+      "aiSuggestions": "Sugestões de combos IA",
+      "recentActivity": "Atividade recente",
+      "loading": "Carregando…",
+      "nothingYet": "Nada ainda.",
+      "couldntLoad": "Não foi possível carregar: {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "Configure o BundleForge",
+    "progress": "{{complete}} de {{total}} concluídos",
+    "dismiss": "Fechar a lista",
+    "createBundle": {
+      "title": "Crie seu primeiro combo",
+      "body": "Escolha um tipo de combo, adicione componentes e defina o preço.",
+      "cta": "Criar combo"
+    },
+    "publishBundle": {
+      "title": "Publique um combo",
+      "body": "Rascunhos não vendem. Mude o status de um combo para Ativo para mostrá-lo na sua loja.",
+      "cta": "Ver combos"
+    },
+    "addBlock": {
+      "title": "Adicione o bloco Combo à sua loja",
+      "body": "Coloque o bloco BundleForge no seu modelo de página de produto.",
+      "cta": "Abrir editor de tema",
+      "markComplete": "Marcar como concluído"
+    }
+  },
+  "bundles": {
+    "title": "Combos",
+    "createBundle": "Criar combo",
+    "browseTemplates": "Ver modelos",
+    "search": "Buscar por título…",
+    "view": {
+      "all": "Todos",
+      "table": "Tabela",
+      "compact": "Compacto",
+      "cards": "Cartões"
+    },
+    "viewTooltips": {
+      "table": "Tabela padrão com colunas classificáveis",
+      "compact": "Lista densa — título, tipo, status e editar em uma linha",
+      "cards": "Grade de cartões — ideal para navegar visualmente"
+    },
+    "savedViewsHint": "Dica: filtre ou pesquise e depois clique em <strong>+</strong> ao lado das abas para salvar uma visualização.",
+    "noMatches": "Nenhum combo corresponde aos filtros atuais.",
+    "freshShop": {
+      "heading": "Sem combos ainda — vamos resolver.",
+      "createFirst": "Crie seu primeiro combo",
+      "browseTemplates": "Ver modelos",
+      "tour": "Tour de 30 segundos",
+      "explore": "Vou explorar sozinho"
+    }
+  },
+  "support": {
+    "title": "Ajuda",
+    "subtitle": "Consulte nossa biblioteca de ajuda, escreva-nos ou abra um chat. Resposta média em até um dia útil.",
+    "search": "Buscar nos artigos…",
+    "talkToUs": "Fale conosco",
+    "talkToUsBody": "Resposta média em até um dia útil. Se o problema é num pedido em andamento, mencione o número do pedido.",
+    "openChat": "Abrir chat ao vivo",
+    "emailSupport": "Enviar e-mail",
+    "resources": "Recursos",
+    "changelog": "Changelog →",
+    "statusPage": "Status do sistema →",
+    "githubIssues": "Reportar um problema no GitHub →"
+  },
+  "status": {
+    "active": "Ativo",
+    "draft": "Rascunho",
+    "archived": "Arquivado",
+    "paused": "Pausado"
+  },
+  "actions": {
+    "create": "Criar",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "archive": "Arquivar",
+    "publish": "Publicar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "moveToDraft": "Mover para rascunho",
+    "back": "Voltar",
+    "browse": "Explorar",
+    "select": "Selecionar",
+    "selectAll": "Selecionar tudo",
+    "deselectAll": "Limpar seleção"
+  },
+  "common": {
+    "loading": "Carregando…",
+    "noResults": "Sem resultados"
+  }
+}

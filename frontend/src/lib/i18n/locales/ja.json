@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "bundles": "Bundles",
+    "orders": "Orders",
+    "inventory": "Inventory",
+    "audit": "Audit",
+    "analytics": "Analytics",
+    "ai": "AI suggestions",
+    "abtests": "A/B",
+    "settings": "Settings",
+    "billing": "Billing",
+    "support": "Help"
+  },
+  "settings": {
+    "general": "General",
+    "display": "Display",
+    "inventory": "Inventory",
+    "pricing": "Pricing",
+    "cart": "Cart & checkout",
+    "notifications": "Notifications",
+    "integrations": "Integrations",
+    "api": "API & webhooks",
+    "localization": "Localization",
+    "billing": "Billing"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "createBundle": "Create bundle",
+    "browseBundles": "Browse bundles",
+    "appLanguage": "App language",
+    "savingLanguage": "Language saved — refreshing…",
+    "languageSaveError": "Couldn't save language",
+    "widgets": {
+      "revenueSnapshot": "Revenue snapshot",
+      "totalRevenue": "Total revenue",
+      "totalOrders": "Total orders",
+      "topBundle": "Top bundle",
+      "viewAnalytics": "View analytics →",
+      "bundleStatus": "Bundle status",
+      "active": "Active",
+      "draft": "Draft",
+      "archived": "Archived",
+      "viewAll": "View all →",
+      "recentBundles": "Recent bundles",
+      "inventoryHealth": "Inventory health",
+      "synced": "Synced",
+      "pending": "Pending",
+      "error": "Error",
+      "locked": "Locked",
+      "recentOrders": "Recent orders",
+      "aiSuggestions": "AI bundle suggestions",
+      "recentActivity": "Recent activity",
+      "loading": "Loading…",
+      "nothingYet": "Nothing yet.",
+      "couldntLoad": "Couldn't load: {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "Get set up with BundleForge",
+    "progress": "{{complete}} of {{total}} complete",
+    "dismiss": "Dismiss checklist",
+    "createBundle": {
+      "title": "Create your first bundle",
+      "body": "Pick a bundle type, add components, set pricing.",
+      "cta": "Create bundle"
+    },
+    "publishBundle": {
+      "title": "Publish a bundle",
+      "body": "Drafts don't sell. Set a bundle's status to Active to start showing it on your storefront.",
+      "cta": "Browse bundles"
+    },
+    "addBlock": {
+      "title": "Add the Bundle block to your storefront",
+      "body": "Drop the BundleForge block into your product page template so shoppers see it.",
+      "cta": "Open theme editor",
+      "markComplete": "Mark complete"
+    }
+  },
+  "bundles": {
+    "title": "Bundles",
+    "createBundle": "Create bundle",
+    "browseTemplates": "Browse templates",
+    "search": "Search bundles by title…",
+    "view": {
+      "all": "All",
+      "table": "Table",
+      "compact": "Compact",
+      "cards": "Cards"
+    },
+    "viewTooltips": {
+      "table": "Standard table with sortable columns",
+      "compact": "Dense list — title, type, status, edit on one line",
+      "cards": "Card grid — best for browsing visually"
+    },
+    "savedViewsHint": "Tip: filter or search, then click <strong>+</strong> next to the tabs above to save it as a view.",
+    "noMatches": "No bundles match the current filters.",
+    "freshShop": {
+      "heading": "No bundles yet — let's fix that.",
+      "createFirst": "Create your first bundle",
+      "browseTemplates": "Browse templates",
+      "tour": "Take the 30-second tour",
+      "explore": "I'll explore on my own"
+    }
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Browse our help library, message us, or open a chat. Average response under one business day.",
+    "search": "Search help articles…",
+    "talkToUs": "Talk to us",
+    "talkToUsBody": "Average response under one business day. If your issue is on a live order, mention the order number so we can find it fast.",
+    "openChat": "Open live chat",
+    "emailSupport": "Email support",
+    "resources": "Resources",
+    "changelog": "Changelog →",
+    "statusPage": "System status →",
+    "githubIssues": "Report an issue on GitHub →"
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft",
+    "archived": "Archived",
+    "paused": "Paused"
+  },
+  "actions": {
+    "create": "Create",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "archive": "Archive",
+    "publish": "Publish",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "moveToDraft": "Move to draft",
+    "back": "Back",
+    "browse": "Browse",
+    "select": "Select",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all"
+  },
+  "common": {
+    "loading": "Loading…",
+    "noResults": "No results"
+  },
+  "__needsTranslation": true
+}

@@ -18,6 +18,7 @@
  * BundlesListPage moved to /bundles.
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { BlockStack, Frame, Grid, InlineStack, Page } from "@shopify/polaris";
@@ -93,6 +94,7 @@ function themeEditorBlockUrl(domain: string | undefined): string | undefined {
 
 export function DashboardPage(): JSX.Element {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { show: showToast } = useToasts();
   const [bundleTotal, setBundleTotal] = useState<number | null>(null);
   const [activeTotal, setActiveTotal] = useState<number | null>(null);
@@ -209,7 +211,7 @@ export function DashboardPage(): JSX.Element {
 
   if (error) {
     return (
-      <Page title="Dashboard">
+      <Page title={t("dashboard.title")}>
         <BlockStack gap="400">
           <p style={{ color: "var(--p-color-text-critical)" }}>
             Couldn&apos;t load: {error}
@@ -220,14 +222,14 @@ export function DashboardPage(): JSX.Element {
   }
 
   if (bundleTotal === null || activeTotal === null || settings === null) {
-    return <PageLoading title="Dashboard" variant="stats" />;
+    return <PageLoading title={t("dashboard.title")} variant="stats" />;
   }
 
   // Fresh shop branch — same logic as BundlesListPage uses.
   if (bundleTotal === 0 && !freshShopDismissed) {
     if (showWizard) {
       return (
-        <Page title="Dashboard">
+        <Page title={t("dashboard.title")}>
           <OnboardingWizard
             onComplete={() => navigate("/bundles/new")}
             onDismiss={() => setShowWizard(false)}
@@ -237,7 +239,7 @@ export function DashboardPage(): JSX.Element {
     }
     return (
       <Frame>
-        <Page title="Dashboard">
+        <Page title={t("dashboard.title")}>
           <FreshShopDashboard
             onCreate={() => navigate("/bundles/new")}
             onTour={() => setShowWizard(true)}
@@ -257,28 +259,38 @@ export function DashboardPage(): JSX.Element {
   const checklistSteps: ChecklistStep[] = [
     {
       id: "create",
-      title: "Create your first bundle",
-      body: "Pick a bundle type, add components, set pricing.",
+      title: t("checklist.createBundle.title"),
+      body: t("checklist.createBundle.body"),
       done: bundleTotal > 0,
-      primary: { label: "Create bundle", url: "/bundles/new" },
+      primary: {
+        label: t("checklist.createBundle.cta"),
+        url: "/bundles/new",
+      },
     },
     {
       id: "publish",
-      title: "Publish a bundle",
-      body: "Drafts don't sell. Set a bundle's status to Active to start showing it on your storefront.",
+      title: t("checklist.publishBundle.title"),
+      body: t("checklist.publishBundle.body"),
       done: activeTotal > 0,
-      primary: { label: "Browse bundles", url: "/bundles" },
+      primary: {
+        label: t("checklist.publishBundle.cta"),
+        url: "/bundles",
+      },
     },
     {
       id: "block",
-      title: "Add the Bundle block to your storefront",
-      body: "Drop the BundleForge block into your product page template so shoppers see it.",
+      title: t("checklist.addBlock.title"),
+      body: t("checklist.addBlock.body"),
       done: Boolean(onboarding.blockAddedAt),
       primary: editorUrl
-        ? { label: "Open theme editor", url: editorUrl, external: true }
+        ? {
+            label: t("checklist.addBlock.cta"),
+            url: editorUrl,
+            external: true,
+          }
         : undefined,
       secondary: {
-        label: "Mark complete",
+        label: t("checklist.addBlock.markComplete"),
         onClick: () => void handleMarkBlockComplete(),
       },
     },
@@ -287,9 +299,14 @@ export function DashboardPage(): JSX.Element {
   return (
     <Frame>
       <Page
-        title="Dashboard"
-        primaryAction={{ content: "Create bundle", url: "/bundles/new" }}
-        secondaryActions={[{ content: "Browse bundles", url: "/bundles" }]}
+        title={t("dashboard.title")}
+        primaryAction={{
+          content: t("dashboard.createBundle"),
+          url: "/bundles/new",
+        }}
+        secondaryActions={[
+          { content: t("dashboard.browseBundles"), url: "/bundles" },
+        ]}
       >
         <BlockStack gap="500">
           <InlineStack align="end" blockAlign="center">

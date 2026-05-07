@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "dashboard": "Pannello",
+    "bundles": "Bundle",
+    "orders": "Ordini",
+    "inventory": "Inventario",
+    "audit": "Audit",
+    "analytics": "Analisi",
+    "ai": "Suggerimenti IA",
+    "abtests": "A/B",
+    "settings": "Impostazioni",
+    "billing": "Fatturazione",
+    "support": "Aiuto"
+  },
+  "settings": {
+    "general": "Generale",
+    "display": "Visualizzazione",
+    "inventory": "Inventario",
+    "pricing": "Prezzi",
+    "cart": "Carrello e checkout",
+    "notifications": "Notifiche",
+    "integrations": "Integrazioni",
+    "api": "API e webhook",
+    "localization": "Localizzazione",
+    "billing": "Fatturazione"
+  },
+  "dashboard": {
+    "title": "Pannello",
+    "createBundle": "Crea bundle",
+    "browseBundles": "Sfoglia i bundle",
+    "appLanguage": "Lingua dell'app",
+    "savingLanguage": "Lingua salvata — aggiornamento…",
+    "languageSaveError": "Impossibile salvare la lingua",
+    "widgets": {
+      "revenueSnapshot": "Riepilogo ricavi",
+      "totalRevenue": "Ricavi totali",
+      "totalOrders": "Ordini totali",
+      "topBundle": "Bundle principale",
+      "viewAnalytics": "Vedi analisi →",
+      "bundleStatus": "Stato dei bundle",
+      "active": "Attivo",
+      "draft": "Bozza",
+      "archived": "Archiviato",
+      "viewAll": "Vedi tutto →",
+      "recentBundles": "Bundle recenti",
+      "inventoryHealth": "Stato inventario",
+      "synced": "Sincronizzato",
+      "pending": "In attesa",
+      "error": "Errore",
+      "locked": "Bloccato",
+      "recentOrders": "Ordini recenti",
+      "aiSuggestions": "Suggerimenti bundle IA",
+      "recentActivity": "Attività recente",
+      "loading": "Caricamento…",
+      "nothingYet": "Ancora niente.",
+      "couldntLoad": "Impossibile caricare: {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "Configura BundleForge",
+    "progress": "{{complete}} di {{total}} completati",
+    "dismiss": "Chiudi la lista",
+    "createBundle": {
+      "title": "Crea il tuo primo bundle",
+      "body": "Scegli un tipo di bundle, aggiungi componenti, imposta il prezzo.",
+      "cta": "Crea bundle"
+    },
+    "publishBundle": {
+      "title": "Pubblica un bundle",
+      "body": "Le bozze non vendono. Imposta lo stato di un bundle su Attivo per mostrarlo nel tuo store.",
+      "cta": "Sfoglia i bundle"
+    },
+    "addBlock": {
+      "title": "Aggiungi il blocco Bundle al tuo store",
+      "body": "Inserisci il blocco BundleForge nel template della pagina prodotto.",
+      "cta": "Apri editor del tema",
+      "markComplete": "Segna come fatto"
+    }
+  },
+  "bundles": {
+    "title": "Bundle",
+    "createBundle": "Crea bundle",
+    "browseTemplates": "Sfoglia i modelli",
+    "search": "Cerca per titolo…",
+    "view": {
+      "all": "Tutti",
+      "table": "Tabella",
+      "compact": "Compatto",
+      "cards": "Schede"
+    },
+    "viewTooltips": {
+      "table": "Tabella standard con colonne ordinabili",
+      "compact": "Lista densa — titolo, tipo, stato e modifica su una riga",
+      "cards": "Griglia di schede — ideale per sfogliare visivamente"
+    },
+    "savedViewsHint": "Suggerimento: filtra o cerca, poi clicca <strong>+</strong> accanto alle tab per salvare una vista.",
+    "noMatches": "Nessun bundle corrisponde ai filtri attuali.",
+    "freshShop": {
+      "heading": "Ancora nessun bundle — risolviamolo.",
+      "createFirst": "Crea il tuo primo bundle",
+      "browseTemplates": "Sfoglia i modelli",
+      "tour": "Tour di 30 secondi",
+      "explore": "Esploro da solo"
+    }
+  },
+  "support": {
+    "title": "Aiuto",
+    "subtitle": "Sfoglia la nostra libreria di aiuto, scrivici o apri una chat. Risposta media entro un giorno lavorativo.",
+    "search": "Cerca negli articoli…",
+    "talkToUs": "Contattaci",
+    "talkToUsBody": "Risposta media entro un giorno lavorativo. Se il problema riguarda un ordine in corso, indica il numero d'ordine.",
+    "openChat": "Apri chat dal vivo",
+    "emailSupport": "Invia email",
+    "resources": "Risorse",
+    "changelog": "Changelog →",
+    "statusPage": "Stato del sistema →",
+    "githubIssues": "Segnala un problema su GitHub →"
+  },
+  "status": {
+    "active": "Attivo",
+    "draft": "Bozza",
+    "archived": "Archiviato",
+    "paused": "In pausa"
+  },
+  "actions": {
+    "create": "Crea",
+    "save": "Salva",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "archive": "Archivia",
+    "publish": "Pubblica",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "moveToDraft": "Sposta in bozza",
+    "back": "Indietro",
+    "browse": "Sfoglia",
+    "select": "Seleziona",
+    "selectAll": "Seleziona tutto",
+    "deselectAll": "Deseleziona tutto"
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "noResults": "Nessun risultato"
+  }
+}

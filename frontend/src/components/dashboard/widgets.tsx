@@ -9,6 +9,7 @@
  * a future visual-regression layer can pin layouts.
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Badge,
@@ -75,6 +76,7 @@ function WidgetCard({
   empty?: boolean;
   children: React.ReactNode;
 }): JSX.Element {
+  const { t } = useTranslation();
   return (
     <Card>
       <BlockStack gap="200">
@@ -83,18 +85,18 @@ function WidgetCard({
         </Text>
         {loading ? (
           <InlineStack gap="200" blockAlign="center">
-            <Spinner accessibilityLabel="Loading" size="small" />
+            <Spinner accessibilityLabel={t("dashboard.widgets.loading")} size="small" />
             <Text as="p" tone="subdued">
-              Loading…
+              {t("dashboard.widgets.loading")}
             </Text>
           </InlineStack>
         ) : error ? (
           <Text as="p" tone="critical">
-            Couldn&apos;t load: {error}
+            {t("dashboard.widgets.couldntLoad", { message: error })}
           </Text>
         ) : empty ? (
           <Text as="p" tone="subdued">
-            Nothing yet.
+            {t("dashboard.widgets.nothingYet")}
           </Text>
         ) : (
           children
@@ -132,12 +134,13 @@ interface AnalyticsOverview {
 }
 
 export function RevenueSnapshotWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<AnalyticsOverview>(
     "/api/v1/analytics/overview",
   );
   return (
     <WidgetCard
-      title="Revenue snapshot"
+      title={t("dashboard.widgets.revenueSnapshot")}
       loading={loading}
       error={error}
     >
@@ -194,12 +197,13 @@ interface BundlesListResp {
 }
 
 export function RecentBundlesWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<BundlesListResp>(
     "/api/v1/bundles?sortBy=updatedAt&sortOrder=desc&limit=5",
   );
   return (
     <WidgetCard
-      title="Recent bundles"
+      title={t("dashboard.widgets.recentBundles")}
       loading={loading}
       error={error}
       empty={data?.data.length === 0}
@@ -236,6 +240,7 @@ export function RecentBundlesWidget(): JSX.Element {
 // =============================================================================
 
 export function BundleCountsWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<BundlesListResp>(
     "/api/v1/bundles?limit=100",
   );
@@ -244,7 +249,7 @@ export function BundleCountsWidget(): JSX.Element {
   const archived = data?.data.filter((b) => b.status === "archived").length ?? 0;
   return (
     <WidgetCard
-      title="Bundle status"
+      title={t("dashboard.widgets.bundleStatus")}
       loading={loading}
       error={error}
     >
@@ -293,12 +298,13 @@ interface InventoryHealth {
 }
 
 export function InventoryHealthWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<InventoryHealth>(
     "/api/v1/inventory/health",
   );
   return (
     <WidgetCard
-      title="Inventory health"
+      title={t("dashboard.widgets.inventoryHealth")}
       loading={loading}
       error={error}
     >
@@ -363,6 +369,7 @@ interface OrdersResp {
 }
 
 export function RecentOrdersWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<OrdersResp>(
     "/api/v1/orders?limit=5",
   );
@@ -370,7 +377,7 @@ export function RecentOrdersWidget(): JSX.Element {
   const list = rows ?? [];
   return (
     <WidgetCard
-      title="Recent orders"
+      title={t("dashboard.widgets.recentOrders")}
       loading={loading}
       error={error}
       empty={list.length === 0}
@@ -417,12 +424,13 @@ interface AiResp {
 }
 
 export function AiSuggestionsWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<AiResp>(
     "/api/v1/ai/suggested-bundles?topN=3",
   );
   return (
     <WidgetCard
-      title="AI bundle suggestions"
+      title={t("dashboard.widgets.aiSuggestions")}
       loading={loading}
       error={error}
       empty={data?.pairs.length === 0}
@@ -470,12 +478,13 @@ interface ActivityResp {
 }
 
 export function RecentActivityWidget(): JSX.Element {
+  const { t } = useTranslation();
   const { data, error, loading } = useFetch<ActivityResp>(
     "/api/v1/activity?limit=5",
   );
   return (
     <WidgetCard
-      title="Recent activity"
+      title={t("dashboard.widgets.recentActivity")}
       loading={loading}
       error={error}
       empty={data?.data.length === 0}

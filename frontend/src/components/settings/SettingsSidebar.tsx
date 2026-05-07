@@ -33,9 +33,13 @@ import {
   SettingsIcon,
 } from "@shopify/polaris-icons";
 import { BlockStack, Box, Icon, InlineStack, Text } from "@shopify/polaris";
+import { useTranslation } from "react-i18next";
 
 export interface SidebarTab {
   id: string;
+  /** Default English label — overridden by i18n.t("settings.<id>")
+   *  if present in the active locale. Kept on the type so existing
+   *  call sites (and tests) don't break. */
   content: string;
 }
 
@@ -125,6 +129,7 @@ export function SettingsSidebar({
   activeIndex,
   onSelect,
 }: SettingsSidebarProps): JSX.Element {
+  const { t } = useTranslation();
   return (
     <Box
       padding="100"
@@ -134,15 +139,22 @@ export function SettingsSidebar({
       background="bg-surface"
     >
       <BlockStack gap="025">
-        {tabs.map((tab, idx) => (
-          <SidebarItem
-            key={tab.id}
-            active={idx === activeIndex}
-            icon={ICONS[tab.id] ?? SettingsIcon}
-            label={tab.content}
-            onClick={() => onSelect(idx)}
-          />
-        ))}
+        {tabs.map((tab, idx) => {
+          // Prefer the translated label (`settings.<id>`); fall back
+          // to the prop-supplied content if no translation exists.
+          const translated = t(`settings.${tab.id}`, {
+            defaultValue: tab.content,
+          });
+          return (
+            <SidebarItem
+              key={tab.id}
+              active={idx === activeIndex}
+              icon={ICONS[tab.id] ?? SettingsIcon}
+              label={translated}
+              onClick={() => onSelect(idx)}
+            />
+          );
+        })}
       </BlockStack>
     </Box>
   );

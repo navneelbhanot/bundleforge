@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "bundles": "Bundles",
+    "orders": "Commandes",
+    "inventory": "Inventaire",
+    "audit": "Audit",
+    "analytics": "Analytique",
+    "ai": "Suggestions IA",
+    "abtests": "A/B",
+    "settings": "Paramètres",
+    "billing": "Facturation",
+    "support": "Aide"
+  },
+  "settings": {
+    "general": "Général",
+    "display": "Affichage",
+    "inventory": "Inventaire",
+    "pricing": "Tarification",
+    "cart": "Panier et paiement",
+    "notifications": "Notifications",
+    "integrations": "Intégrations",
+    "api": "API et webhooks",
+    "localization": "Localisation",
+    "billing": "Facturation"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "createBundle": "Créer un bundle",
+    "browseBundles": "Parcourir les bundles",
+    "appLanguage": "Langue de l'app",
+    "savingLanguage": "Langue enregistrée — actualisation…",
+    "languageSaveError": "Impossible d'enregistrer la langue",
+    "widgets": {
+      "revenueSnapshot": "Aperçu des revenus",
+      "totalRevenue": "Revenu total",
+      "totalOrders": "Commandes totales",
+      "topBundle": "Bundle phare",
+      "viewAnalytics": "Voir l'analytique →",
+      "bundleStatus": "Statut des bundles",
+      "active": "Actif",
+      "draft": "Brouillon",
+      "archived": "Archivé",
+      "viewAll": "Tout voir →",
+      "recentBundles": "Bundles récents",
+      "inventoryHealth": "État de l'inventaire",
+      "synced": "Synchronisé",
+      "pending": "En attente",
+      "error": "Erreur",
+      "locked": "Verrouillé",
+      "recentOrders": "Commandes récentes",
+      "aiSuggestions": "Suggestions de bundles IA",
+      "recentActivity": "Activité récente",
+      "loading": "Chargement…",
+      "nothingYet": "Rien pour l'instant.",
+      "couldntLoad": "Échec du chargement : {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "Configurez BundleForge",
+    "progress": "{{complete}} sur {{total}} terminé",
+    "dismiss": "Fermer la liste",
+    "createBundle": {
+      "title": "Créez votre premier bundle",
+      "body": "Choisissez un type de bundle, ajoutez des composants, définissez le prix.",
+      "cta": "Créer un bundle"
+    },
+    "publishBundle": {
+      "title": "Publiez un bundle",
+      "body": "Les brouillons ne se vendent pas. Passez le statut d'un bundle à Actif pour qu'il apparaisse sur votre boutique.",
+      "cta": "Parcourir les bundles"
+    },
+    "addBlock": {
+      "title": "Ajoutez le bloc Bundle à votre boutique",
+      "body": "Insérez le bloc BundleForge dans votre modèle de page produit pour que les visiteurs le voient.",
+      "cta": "Ouvrir l'éditeur de thème",
+      "markComplete": "Marquer comme terminé"
+    }
+  },
+  "bundles": {
+    "title": "Bundles",
+    "createBundle": "Créer un bundle",
+    "browseTemplates": "Parcourir les modèles",
+    "search": "Rechercher par titre…",
+    "view": {
+      "all": "Tous",
+      "table": "Tableau",
+      "compact": "Compact",
+      "cards": "Cartes"
+    },
+    "viewTooltips": {
+      "table": "Tableau standard avec colonnes triables",
+      "compact": "Liste dense — titre, type, statut, modification sur une ligne",
+      "cards": "Grille de cartes — idéal pour parcourir visuellement"
+    },
+    "savedViewsHint": "Astuce : filtrez ou recherchez, puis cliquez sur <strong>+</strong> à côté des onglets ci-dessus pour enregistrer une vue.",
+    "noMatches": "Aucun bundle ne correspond aux filtres actuels.",
+    "freshShop": {
+      "heading": "Pas encore de bundle — créons-en un.",
+      "createFirst": "Créer votre premier bundle",
+      "browseTemplates": "Parcourir les modèles",
+      "tour": "Visite guidée de 30 secondes",
+      "explore": "Je préfère explorer seul"
+    }
+  },
+  "support": {
+    "title": "Aide",
+    "subtitle": "Parcourez notre bibliothèque d'aide, écrivez-nous ou ouvrez un chat. Réponse sous un jour ouvré en moyenne.",
+    "search": "Rechercher dans les articles…",
+    "talkToUs": "Contactez-nous",
+    "talkToUsBody": "Réponse sous un jour ouvré en moyenne. En cas de problème sur une commande en cours, indiquez le numéro de commande pour qu'on la retrouve vite.",
+    "openChat": "Ouvrir le chat en direct",
+    "emailSupport": "Envoyer un e-mail",
+    "resources": "Ressources",
+    "changelog": "Journal des modifications →",
+    "statusPage": "État du système →",
+    "githubIssues": "Signaler un problème sur GitHub →"
+  },
+  "status": {
+    "active": "Actif",
+    "draft": "Brouillon",
+    "archived": "Archivé",
+    "paused": "En pause"
+  },
+  "actions": {
+    "create": "Créer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "archive": "Archiver",
+    "publish": "Publier",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "moveToDraft": "Repasser en brouillon",
+    "back": "Retour",
+    "browse": "Parcourir",
+    "select": "Sélectionner",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "noResults": "Aucun résultat"
+  }
+}

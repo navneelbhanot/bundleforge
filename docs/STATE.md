@@ -105,6 +105,34 @@ Future code work (post-launch backlog):
 
 ## Recently completed
 
+- **M-188 — Frontend admin i18n** (2026-05-07). Wired
+  `react-i18next` + `i18next` with all 15 supported locales.
+  New `frontend/src/lib/i18n/` with init module + 15 JSON
+  translation files. Initial language is read SYNCHRONOUSLY
+  from `localStorage` (`bundleforge:polaris-locale` — same
+  key M-186 polish introduced) so the very first paint is in
+  the merchant's chosen language; no fetch race with App
+  Bridge. Translations applied to high-leverage surfaces:
+  top nav (`NavMenu` + `NAV_TABS` in App.tsx),
+  Settings sidebar entries, dashboard page title + actions,
+  all 7 widget titles + loading/empty/error messages,
+  setup checklist (title, progress count with
+  interpolation, all 3 step titles + bodies + CTAs, dismiss
+  aria), `AppLanguageSelect` label. EN is the source of
+  truth (hand-written); ES / FR / DE / IT / PT
+  hand-translated; the other 9 (JA / ZH / KO / NL / PL /
+  SV / DA / NO / RU) ship as English copies with a
+  `__needsTranslation: true` marker — future translation
+  PRs replace JSON values without touching app code.
+  Out-of-scope surfaces (every Settings tab card, Bundle
+  Detail tabs, helpText, banners, toasts, server error
+  messages) stay English; future PRs add `t()` calls
+  mechanically. `setup.frontend.ts` imports the i18n init
+  so component tests get real translations. Bundle grew
+  ~105 KB raw / ~25 KB gzipped (i18next core + 15 locale
+  JSONs eagerly bundled). 822/822 vitest pass (+6 i18n
+  test cases). Typecheck clean. Lint baseline unchanged.
+  `docs/sessions/0198-188-frontend-i18n.md`.
 - **M-187 — Support page** (2026-05-07). New `/support` route
   consolidates merchant-help into one discoverable surface.
   Two-pane layout: article list (search-filtered, grouped by
@@ -709,8 +737,10 @@ Future code work (post-launch backlog):
 
 ## Test status
 
-- **808 / 808 vitest tests passing** when DATABASE_URL points at a
-  real Postgres. +5 SupportPage cases since M-187.
+- **822 / 822 vitest tests passing** when DATABASE_URL points at a
+  real Postgres. +6 i18n cases since M-188 (cumulative since the
+  session start: +5 SupportPage, +3 SetupChecklist polish, +6
+  i18n).
 - **631 / 631** when no real DB is available — the bundle CRUD
   integration tests auto-skip via `describe.skipIf`.
 - **5 / 5 Playwright e2e tests passing** (unchanged).

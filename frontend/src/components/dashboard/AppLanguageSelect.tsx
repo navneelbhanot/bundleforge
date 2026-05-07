@@ -7,6 +7,7 @@
  * one-click shortcut on the dashboard.
  */
 import { InlineStack, Select, Spinner, Text } from "@shopify/polaris";
+import { useTranslation } from "react-i18next";
 
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from "../../lib/locales";
 
@@ -21,6 +22,7 @@ export function AppLanguageSelect({
   busy,
   onChange,
 }: AppLanguageSelectProps): JSX.Element {
+  const { t } = useTranslation();
   const options = SUPPORTED_LOCALES.map((code) => ({
     label: LOCALE_LABELS[code],
     value: code,
@@ -28,7 +30,7 @@ export function AppLanguageSelect({
   return (
     <InlineStack gap="200" blockAlign="center">
       <Text as="span" tone="subdued" variant="bodySm">
-        App language
+        {t("dashboard.appLanguage")}
       </Text>
       <Select
         label=""
@@ -38,7 +40,9 @@ export function AppLanguageSelect({
         onChange={onChange}
         disabled={busy}
       />
-      {busy ? <Spinner accessibilityLabel="Saving" size="small" /> : null}
+      {busy ? (
+        <Spinner accessibilityLabel={t("common.loading")} size="small" />
+      ) : null}
     </InlineStack>
   );
 }

@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "bundles": "Bundles",
+    "orders": "Bestellungen",
+    "inventory": "Bestand",
+    "audit": "Audit",
+    "analytics": "Analyse",
+    "ai": "KI-Vorschläge",
+    "abtests": "A/B",
+    "settings": "Einstellungen",
+    "billing": "Abrechnung",
+    "support": "Hilfe"
+  },
+  "settings": {
+    "general": "Allgemein",
+    "display": "Darstellung",
+    "inventory": "Bestand",
+    "pricing": "Preise",
+    "cart": "Warenkorb & Checkout",
+    "notifications": "Benachrichtigungen",
+    "integrations": "Integrationen",
+    "api": "API & Webhooks",
+    "localization": "Lokalisierung",
+    "billing": "Abrechnung"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "createBundle": "Bundle erstellen",
+    "browseBundles": "Bundles ansehen",
+    "appLanguage": "App-Sprache",
+    "savingLanguage": "Sprache gespeichert — wird neu geladen…",
+    "languageSaveError": "Sprache konnte nicht gespeichert werden",
+    "widgets": {
+      "revenueSnapshot": "Umsatzübersicht",
+      "totalRevenue": "Gesamtumsatz",
+      "totalOrders": "Gesamtbestellungen",
+      "topBundle": "Top-Bundle",
+      "viewAnalytics": "Analyse anzeigen →",
+      "bundleStatus": "Bundle-Status",
+      "active": "Aktiv",
+      "draft": "Entwurf",
+      "archived": "Archiviert",
+      "viewAll": "Alle anzeigen →",
+      "recentBundles": "Aktuelle Bundles",
+      "inventoryHealth": "Bestandsstatus",
+      "synced": "Synchronisiert",
+      "pending": "Ausstehend",
+      "error": "Fehler",
+      "locked": "Gesperrt",
+      "recentOrders": "Aktuelle Bestellungen",
+      "aiSuggestions": "KI-Bundle-Vorschläge",
+      "recentActivity": "Letzte Aktivität",
+      "loading": "Wird geladen…",
+      "nothingYet": "Noch nichts.",
+      "couldntLoad": "Konnte nicht geladen werden: {{message}}"
+    }
+  },
+  "checklist": {
+    "title": "BundleForge einrichten",
+    "progress": "{{complete}} von {{total}} erledigt",
+    "dismiss": "Liste schließen",
+    "createBundle": {
+      "title": "Erstelle dein erstes Bundle",
+      "body": "Wähle einen Bundle-Typ, füge Komponenten hinzu und lege den Preis fest.",
+      "cta": "Bundle erstellen"
+    },
+    "publishBundle": {
+      "title": "Veröffentliche ein Bundle",
+      "body": "Entwürfe verkaufen sich nicht. Setze den Status auf Aktiv, damit das Bundle im Shop sichtbar wird.",
+      "cta": "Bundles ansehen"
+    },
+    "addBlock": {
+      "title": "Bundle-Block zum Shop hinzufügen",
+      "body": "Füge den BundleForge-Block in dein Produktseiten-Template ein, damit Kunden ihn sehen.",
+      "cta": "Theme-Editor öffnen",
+      "markComplete": "Als erledigt markieren"
+    }
+  },
+  "bundles": {
+    "title": "Bundles",
+    "createBundle": "Bundle erstellen",
+    "browseTemplates": "Vorlagen ansehen",
+    "search": "Nach Titel suchen…",
+    "view": {
+      "all": "Alle",
+      "table": "Tabelle",
+      "compact": "Kompakt",
+      "cards": "Karten"
+    },
+    "viewTooltips": {
+      "table": "Standard-Tabelle mit sortierbaren Spalten",
+      "compact": "Dichte Liste — Titel, Typ, Status, Bearbeiten in einer Zeile",
+      "cards": "Kartenraster — am besten zum visuellen Stöbern"
+    },
+    "savedViewsHint": "Tipp: Filter setzen oder suchen und dann auf <strong>+</strong> neben den Tabs klicken, um eine Ansicht zu speichern.",
+    "noMatches": "Keine Bundles entsprechen den aktuellen Filtern.",
+    "freshShop": {
+      "heading": "Noch keine Bundles — los geht's.",
+      "createFirst": "Erstelle dein erstes Bundle",
+      "browseTemplates": "Vorlagen ansehen",
+      "tour": "30-Sekunden-Tour",
+      "explore": "Ich erkunde selbst"
+    }
+  },
+  "support": {
+    "title": "Hilfe",
+    "subtitle": "Durchstöbere unsere Hilfeartikel, schreib uns oder öffne den Chat. Antwort in der Regel innerhalb eines Werktags.",
+    "search": "Hilfeartikel durchsuchen…",
+    "talkToUs": "Kontakt aufnehmen",
+    "talkToUsBody": "Antwort in der Regel innerhalb eines Werktags. Bei Problemen mit einer laufenden Bestellung gib die Bestellnummer an, damit wir sie schnell finden.",
+    "openChat": "Live-Chat öffnen",
+    "emailSupport": "E-Mail senden",
+    "resources": "Ressourcen",
+    "changelog": "Änderungsprotokoll →",
+    "statusPage": "Systemstatus →",
+    "githubIssues": "Problem auf GitHub melden →"
+  },
+  "status": {
+    "active": "Aktiv",
+    "draft": "Entwurf",
+    "archived": "Archiviert",
+    "paused": "Pausiert"
+  },
+  "actions": {
+    "create": "Erstellen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "archive": "Archivieren",
+    "publish": "Veröffentlichen",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "moveToDraft": "Zurück zu Entwurf",
+    "back": "Zurück",
+    "browse": "Stöbern",
+    "select": "Auswählen",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Auswahl aufheben"
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "noResults": "Keine Ergebnisse"
+  }
+}
