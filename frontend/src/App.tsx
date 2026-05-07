@@ -16,6 +16,7 @@ import { ToastsProvider } from "./components/shell/Toasts";
 import {
   LOCALE_CHANGED_EVENT,
   loadPolarisLocale,
+  loadPolarisLocaleSync,
   type LocaleChangedDetail,
   type PolarisI18n,
 } from "./lib/polarisLocale";
@@ -36,28 +37,62 @@ import { BillingPage } from "./pages/BillingPage";
 
 /**
  * Default Polaris i18n bundle (English) used while the merchant's
- * preferred locale is being fetched. Replaced on mount once
- * `/api/v1/settings` returns the chosen language. Also re-loaded
- * whenever the dashboard's AppLanguageSelect dispatches a
- * `bundleforge:locale-changed` window event.
+ * preferred locale is being read from localStorage / fetched.
  */
 const FALLBACK_I18N: PolarisI18n = {
   Polaris: { Common: { cancel: "Cancel", save: "Save" } },
 };
 
+const LOCALE_CACHE_KEY = "bundleforge:polaris-locale";
+
 interface SettingsLocaleResp {
   localization?: { fallbackLocale?: string };
 }
 
+function readCachedLocale(): string | null {
+  try {
+    return window.localStorage.getItem(LOCALE_CACHE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedLocale(locale: string): void {
+  try {
+    window.localStorage.setItem(LOCALE_CACHE_KEY, locale);
+  } catch {
+    // private mode / disabled — silently fall through.
+  }
+}
+
 function usePolarisI18n(): PolarisI18n {
-  const [polarisI18n, setPolarisI18n] = useState<PolarisI18n>(FALLBACK_I18N);
+  // Read from localStorage SYNCHRONOUSLY on first render so the
+  // very first paint is in the merchant's chosen language. This
+  // matters in Shopify's embedded iframe where the App Bridge
+  // session token can take ~1s to acquire — fetching settings
+  // first would race with that handshake and the merchant would
+  // see a flash of English.
+  const [polarisI18n, setPolarisI18n] = useState<PolarisI18n>(() => {
+    const cached = readCachedLocale();
+    if (cached) {
+      // Synchronous read of the static-imported pack — no fetch.
+      // loadPolarisLocale is async-shaped but resolves immediately.
+      // We use a sync helper to seed initial state.
+      return loadPolarisLocaleSync(cached);
+    }
+    return FALLBACK_I18N;
+  });
   useEffect(() => {
     let cancelled = false;
     async function applyLocale(locale: string): Promise<void> {
       const next = await loadPolarisLocale(locale);
-      if (!cancelled) setPolarisI18n(next);
+      if (!cancelled) {
+        setPolarisI18n(next);
+        writeCachedLocale(locale);
+      }
     }
-    // 1) Fetch the merchant's chosen locale on mount.
+    // Sync from server in the background — covers the case where
+    // the merchant changed the locale on a different device.
     fetch("/api/v1/settings")
       .then((r) =>
         r.ok
@@ -66,13 +101,16 @@ function usePolarisI18n(): PolarisI18n {
       )
       .then((j) => {
         const locale = j.localization?.fallbackLocale ?? "en";
-        return applyLocale(locale);
+        const cached = readCachedLocale();
+        // Only re-apply if it differs from what we already loaded
+        // from cache — avoids a needless re-render.
+        if (locale !== cached) return applyLocale(locale);
       })
       .catch(() => {
-        // Settings fetch failed (auth not ready, network blip).
-        // Stay on the English fallback — better than crashing.
+        // Auth not ready / network blip — keep cached locale.
       });
-    // 2) Listen for the dashboard's locale-change event.
+    // Live-swap path: dashboard event listener (defensive — the
+    // dashboard now reloads after save, so this is dead-code-safe).
     function onLocaleChanged(e: Event): void {
       const detail = (e as CustomEvent<LocaleChangedDetail>).detail;
       if (detail?.locale) void applyLocale(detail.locale);

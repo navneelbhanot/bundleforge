@@ -149,14 +149,19 @@ export function DashboardPage(): JSX.Element {
       await patchSettings({
         localization: { fallbackLocale: next },
       });
-      // The runtime React-state swap of AppProvider's i18n prop
-      // proved unreliable inside Shopify's embedded iframe — the
-      // event fires but Polaris's translation cache holds the old
-      // strings until the AppProvider re-mounts. A short timeout
-      // gives the merchant a beat to see the toast, then we
-      // reload so the new locale is loaded fresh on App.tsx
-      // mount. This is the standard pattern most embedded
-      // Shopify apps use for locale changes.
+      // Cache the chosen locale in localStorage so App.tsx can
+      // read it SYNCHRONOUSLY on the next render — no fetch
+      // race with App Bridge's session-token handshake. Then
+      // reload to remount Polaris's AppProvider with the new
+      // i18n bundle.
+      try {
+        window.localStorage.setItem(
+          "bundleforge:polaris-locale",
+          next,
+        );
+      } catch {
+        // private mode / disabled — silently continue.
+      }
       showToast("Language saved — refreshing…");
       window.setTimeout(() => {
         window.location.reload();
