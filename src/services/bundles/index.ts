@@ -846,6 +846,17 @@ export class BundleService {
       }>;
     };
 
+    // Guardrail: refuse to publish an empty bundle. Without
+    // components, the cart-transform expand path has nothing to do
+    // and Shopify's productCreate often fails at validation in
+    // ways that surface as opaque 500s. Better to fail fast with
+    // an actionable message.
+    if (existing.items.length === 0) {
+      throw new ValidationError(
+        "Add at least one component to this bundle before publishing.",
+      );
+    }
+
     let shopifyProductGid = existing.shopifyProductGid;
     let shopifyProductId = existing.shopifyProductId;
 

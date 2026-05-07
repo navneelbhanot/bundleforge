@@ -680,11 +680,27 @@ describe("BundleService.publish (M-051)", () => {
   });
 
   it("verifies existence and updates status to active", async () => {
-    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
+    });
     mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
     const svc = new BundleService();
     await svc.publish("shop", "b-1");
     expect(mockedRepo.update.mock.calls[0][0].data.status).toBe("active");
+  });
+
+  it("rejects publish when the bundle has no items (M-187 polish)", async () => {
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-empty",
+      items: [],
+      pricingRules: [],
+    });
+    const svc = new BundleService();
+    await expect(svc.publish("shop", "b-empty")).rejects.toThrow(
+      /Add at least one component/i,
+    );
+    expect(mockedRepo.update).not.toHaveBeenCalled();
   });
 
   it("passes eligibility + inventoryRules to onCreateProduct (M-172b/M-173b)", async () => {
@@ -700,7 +716,7 @@ describe("BundleService.publish (M-051)", () => {
         requireLogin: true,
       },
       inventoryRules: { componentOnlyMode: true },
-      items: [],
+      items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
       pricingRules: [],
     });
     mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
@@ -729,7 +745,7 @@ describe("BundleService.publish (M-051)", () => {
       shopifyProductId: null,
       eligibility: null,
       inventoryRules: null,
-      items: [],
+      items: [{ shopifyProductGid: "gid://Product/2", quantity: 1 }],
       pricingRules: [],
     });
     mockedRepo.update.mockResolvedValueOnce({ id: "b-2" });
@@ -846,7 +862,10 @@ describe("BundleService — activity log writers (M-174)", () => {
   });
 
   it("publish() appends a 'published' activity entry", async () => {
-    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
+    });
     mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
     const svc = new BundleService();
     await svc.publish("shop", "b-1");
@@ -883,7 +902,10 @@ describe("BundleService — activity log writers (M-174)", () => {
   });
 
   it("logging failure does not propagate to the caller", async () => {
-    mockedRepo.findById.mockResolvedValueOnce({ id: "b-1" });
+    mockedRepo.findById.mockResolvedValueOnce({
+      id: "b-1",
+      items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
+    });
     mockedRepo.update.mockResolvedValueOnce({ id: "b-1", status: "active" });
     mockedActivity.append.mockRejectedValueOnce(new Error("DB down"));
     const svc = new BundleService();

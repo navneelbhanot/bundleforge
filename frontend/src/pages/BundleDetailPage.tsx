@@ -388,7 +388,22 @@ export function BundleDetailPage(): JSX.Element {
       const res = await fetch(`/api/v1/bundles/${id}/${path}`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        // Surface the server's error message instead of just the
+        // status code so the merchant gets actionable feedback
+        // (e.g. "Add at least one component before publishing.").
+        const text = await res.text();
+        let msg = `HTTP ${res.status}`;
+        try {
+          const body = JSON.parse(text) as {
+            error?: { message?: string };
+          };
+          if (body?.error?.message) msg = body.error.message;
+        } catch {
+          // Not JSON; keep the bare status code message.
+        }
+        throw new Error(msg);
+      }
       const fresh = (await res.json()) as BundleDetail;
       hydrate(fresh);
       showToast(path === "publish" ? "Bundle published" : "Bundle archived");

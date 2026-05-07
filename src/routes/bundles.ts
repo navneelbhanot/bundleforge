@@ -20,6 +20,7 @@ import {
   UnauthorizedError,
 } from "../middleware/errorHandler";
 import { shopifyGraphql } from "../shopify/graphql";
+import { logger } from "../config/logger";
 
 const BulkBody = z
   .object({
@@ -158,13 +159,24 @@ const defaultCreateShopifyProduct: NonNullable<
   );
   const userErrors = data.productCreate?.userErrors ?? [];
   if (userErrors.length > 0) {
+    // Log the full Shopify response for ops visibility — the
+    // merchant only sees the rolled-up message, but a Railway
+    // log dive needs the field paths too.
+    logger.warn(
+      {
+        module: "bundle.publish",
+        bundleId: bundle.id,
+        userErrors,
+      },
+      "productCreate returned userErrors",
+    );
     throw new Error(
-      `productCreate userErrors: ${userErrors.map((e) => e.message).join("; ")}`,
+      `Shopify rejected this bundle: ${userErrors.map((e) => e.message).join("; ")}`,
     );
   }
   const product = data.productCreate?.product;
   if (!product?.id || !product?.legacyResourceId) {
-    throw new Error("productCreate returned no product");
+    throw new Error("Shopify productCreate returned no product");
   }
   return {
     shopifyProductGid: product.id,
