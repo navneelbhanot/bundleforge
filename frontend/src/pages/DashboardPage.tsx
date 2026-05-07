@@ -23,7 +23,6 @@ import { useNavigate } from "react-router-dom";
 import { BlockStack, Frame, Grid, InlineStack, Page } from "@shopify/polaris";
 
 import { AppLanguageSelect } from "../components/dashboard/AppLanguageSelect";
-import { LOCALE_CHANGED_EVENT } from "../lib/polarisLocale";
 import { FreshShopDashboard } from "../components/dashboard/FreshShopDashboard";
 import {
   SetupChecklist,
@@ -147,22 +146,25 @@ export function DashboardPage(): JSX.Element {
   async function handleLanguageChange(next: string): Promise<void> {
     setSavingLanguage(true);
     try {
-      const merged = await patchSettings({
+      await patchSettings({
         localization: { fallbackLocale: next },
       });
-      if (merged) setSettings(merged);
-      // Tell App.tsx to swap Polaris's locale bundle so the
-      // language change is visible immediately (Save / Cancel
-      // labels, Polaris dialog text, etc.).
-      window.dispatchEvent(
-        new CustomEvent(LOCALE_CHANGED_EVENT, { detail: { locale: next } }),
-      );
-      showToast("Language saved");
+      // The runtime React-state swap of AppProvider's i18n prop
+      // proved unreliable inside Shopify's embedded iframe — the
+      // event fires but Polaris's translation cache holds the old
+      // strings until the AppProvider re-mounts. A short timeout
+      // gives the merchant a beat to see the toast, then we
+      // reload so the new locale is loaded fresh on App.tsx
+      // mount. This is the standard pattern most embedded
+      // Shopify apps use for locale changes.
+      showToast("Language saved — refreshing…");
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 600);
     } catch (e) {
       showToast(`Couldn't save language: ${(e as Error).message}`, {
         error: true,
       });
-    } finally {
       setSavingLanguage(false);
     }
   }
