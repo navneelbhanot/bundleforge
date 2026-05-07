@@ -13,6 +13,12 @@ import { CommandPalette } from "./components/CommandPalette";
 import { HelpDrawer } from "./components/HelpDrawer";
 import { NavMenu } from "./components/NavMenu";
 import { ToastsProvider } from "./components/shell/Toasts";
+import {
+  LOCALE_CHANGED_EVENT,
+  loadPolarisLocale,
+  type LocaleChangedDetail,
+  type PolarisI18n,
+} from "./lib/polarisLocale";
 import { BundlesListPage } from "./pages/BundlesListPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SupportPage } from "./pages/SupportPage";
@@ -28,7 +34,57 @@ import { AiSuggestionsPage } from "./pages/AiSuggestionsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { BillingPage } from "./pages/BillingPage";
 
-const i18n = { Polaris: { Common: { cancel: "Cancel", save: "Save" } } };
+/**
+ * Default Polaris i18n bundle (English) used while the merchant's
+ * preferred locale is being fetched. Replaced on mount once
+ * `/api/v1/settings` returns the chosen language. Also re-loaded
+ * whenever the dashboard's AppLanguageSelect dispatches a
+ * `bundleforge:locale-changed` window event.
+ */
+const FALLBACK_I18N: PolarisI18n = {
+  Polaris: { Common: { cancel: "Cancel", save: "Save" } },
+};
+
+interface SettingsLocaleResp {
+  localization?: { fallbackLocale?: string };
+}
+
+function usePolarisI18n(): PolarisI18n {
+  const [polarisI18n, setPolarisI18n] = useState<PolarisI18n>(FALLBACK_I18N);
+  useEffect(() => {
+    let cancelled = false;
+    async function applyLocale(locale: string): Promise<void> {
+      const next = await loadPolarisLocale(locale);
+      if (!cancelled) setPolarisI18n(next);
+    }
+    // 1) Fetch the merchant's chosen locale on mount.
+    fetch("/api/v1/settings")
+      .then((r) =>
+        r.ok
+          ? (r.json() as Promise<SettingsLocaleResp>)
+          : Promise.reject(new Error(`HTTP ${r.status}`)),
+      )
+      .then((j) => {
+        const locale = j.localization?.fallbackLocale ?? "en";
+        return applyLocale(locale);
+      })
+      .catch(() => {
+        // Settings fetch failed (auth not ready, network blip).
+        // Stay on the English fallback — better than crashing.
+      });
+    // 2) Listen for the dashboard's locale-change event.
+    function onLocaleChanged(e: Event): void {
+      const detail = (e as CustomEvent<LocaleChangedDetail>).detail;
+      if (detail?.locale) void applyLocale(detail.locale);
+    }
+    window.addEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged);
+    };
+  }, []);
+  return polarisI18n;
+}
 
 interface NavTab {
   id: string;
@@ -146,16 +202,23 @@ function Shell(): JSX.Element {
   );
 }
 
+function AppInner(): JSX.Element {
+  const polarisI18n = usePolarisI18n();
+  return (
+    <AppProvider i18n={polarisI18n as Record<string, never>}>
+      <ToastsProvider>
+        <BrowserRouter>
+          <Shell />
+        </BrowserRouter>
+      </ToastsProvider>
+    </AppProvider>
+  );
+}
+
 export function App() {
   return (
     <AppBridgeProvider>
-      <AppProvider i18n={i18n}>
-        <ToastsProvider>
-          <BrowserRouter>
-            <Shell />
-          </BrowserRouter>
-        </ToastsProvider>
-      </AppProvider>
+      <AppInner />
     </AppBridgeProvider>
   );
 }

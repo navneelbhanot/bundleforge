@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { BlockStack, Frame, Grid, InlineStack, Page } from "@shopify/polaris";
 
 import { AppLanguageSelect } from "../components/dashboard/AppLanguageSelect";
+import { LOCALE_CHANGED_EVENT } from "../lib/polarisLocale";
 import { FreshShopDashboard } from "../components/dashboard/FreshShopDashboard";
 import {
   SetupChecklist,
@@ -150,6 +151,12 @@ export function DashboardPage(): JSX.Element {
         localization: { fallbackLocale: next },
       });
       if (merged) setSettings(merged);
+      // Tell App.tsx to swap Polaris's locale bundle so the
+      // language change is visible immediately (Save / Cancel
+      // labels, Polaris dialog text, etc.).
+      window.dispatchEvent(
+        new CustomEvent(LOCALE_CHANGED_EVENT, { detail: { locale: next } }),
+      );
       showToast("Language saved");
     } catch (e) {
       showToast(`Couldn't save language: ${(e as Error).message}`, {
