@@ -5,6 +5,26 @@ file styled with Tailwind via CDN — no build step. Served in
 production by a 90-line zero-dependency Node http server (`server.cjs`)
 so it can run as a Railway service alongside the app + worker.
 
+## Visual design
+
+The page implements the Shopify-inspired design system in
+[`DESIGN.md`](../DESIGN.md) at the repo root: dark-first surface
+hierarchy (Void Black → Deep Teal → Dark Forest → Forest), ultra-light
+display typography (variable weight 330–400 at 96px), Neon Green
+`#36F4A4` reserved for focus rings + accent highlights only, full-pill
+(9999px) CTAs, and a multi-layered card shadow system.
+
+**Fonts.** NeueHaasGrotesk is a licensed face — listed first in the
+font stack so installs that own it pick it up. Everyone else falls
+through to Helvetica Neue (Apple system) and Inter Variable (loaded
+from Google Fonts). Inter Variable supports the variable-weight values
+the design calls for (330, 360, 400, 420, 450, 500, 550) and has its
+own `ss03` OpenType set, which is enabled globally.
+
+If/when NeueHaasGrotesk is licensed for production, drop the @font-face
+declaration into `index.html` — the rest of the typography system
+already resolves to it.
+
 ## Layout
 
 ```

@@ -1,338 +1,537 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>BundleForge — Pricing-parity bundles for Shopify</title>
-<meta name="description" content="A Shopify bundle app whose checkout price always matches the cart. Atomic inventory, immutable audit log, and a real A/B significance calculator." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="description" content="A Shopify bundle app whose checkout price always matches the cart, whose inventory adjustments cannot be silently rewritten, and whose A/B test results are backed by a published significance calculation." />
+<meta name="theme-color" content="#000000" />
+<meta property="og:title" content="BundleForge — Pricing-parity bundles for Shopify" />
+<meta property="og:description" content="Three guarantees, one Shopify install: cents-exact checkout, immutable inventory audit, and a real A/B significance calculator." />
+<meta property="og:type" content="website" />
+
+<!--
+  Typography per DESIGN.md §3.
+  NeueHaasGrotesk is a licensed font — listed first so installs that own
+  it pick it up; everyone else falls through to Helvetica Neue (Apple
+  system) and Inter Variable (free, served below). Inter is the closest
+  free analogue and supports the variable-weight values the design calls
+  for (330–550). The ss03 OpenType feature is enabled globally.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" />
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+  // Color + radius tokens from DESIGN.md §2 / §5.
   tailwind.config = {
     theme: {
       extend: {
-        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        fontFamily: {
+          display: ['NeueHaasGrotesk', '"Helvetica Neue"', 'Inter', 'system-ui', 'sans-serif'],
+          body: ['Inter', '"Helvetica Neue"', 'system-ui', 'sans-serif'],
+          mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],
+        },
         colors: {
-          ink: '#1e293b',
-          paper: '#fafafa',
-          accent: '#1f5fa6',
-          green: '#1f7a3f',
-          amber: '#a66200',
+          // Dark surface hierarchy
+          void: '#000000',
+          'deep-teal': '#02090A',
+          'dark-forest': '#061A1C',
+          forest: '#102620',
+          'card-border': '#1E2C31',
+          // Accents
+          neon: '#36F4A4',
+          aloe: '#C1FBD4',
+          pistachio: '#D4F9E0',
+          // Zinc-based neutrals
+          'shade-30': '#D4D4D8',
+          'shade-40': '#A1A1AA',
+          'shade-50': '#71717A',
+          'shade-60': '#52525B',
+          'shade-70': '#3F3F46',
+          'link-muted': '#9797A2',
+          'link-mint': '#99B3AD',
+        },
+        borderRadius: {
+          'pill': '9999px',
+          'card': '12px',
+        },
+        boxShadow: {
+          // Multi-layer card shadow per DESIGN.md §6.
+          'card': '0 0 0 1px rgba(0,0,0,0.10), 0 2px 2px rgba(0,0,0,0.10), 0 4px 4px rgba(0,0,0,0.10), 0 8px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.03)',
+          'card-hover': '0 0 0 1px rgba(54,244,164,0.20), 0 4px 6px rgba(0,0,0,0.20), 0 8px 12px rgba(0,0,0,0.20), 0 16px 24px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.05)',
+          'high': '0 25px 50px -12px rgba(0,0,0,0.25)',
+          'focus': '0 0 0 2px #36F4A4',
         },
       },
     },
   };
 </script>
+
 <style>
-  body { font-family: 'Inter', system-ui, sans-serif; }
-  .accent-stripe { background: linear-gradient(90deg, #1f7a3f 0%, #1f5fa6 50%, #a66200 100%); }
+  :root {
+    color-scheme: dark;
+  }
+  html { background: #000; }
+  body {
+    font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif;
+    font-feature-settings: 'ss03' on;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display typography: ultra-light variable weight per DESIGN.md §3. */
+  .font-display { font-family: 'NeueHaasGrotesk', 'Helvetica Neue', 'Inter', system-ui, sans-serif; }
+  .wt-330 { font-variation-settings: 'wght' 330; font-weight: 330; }
+  .wt-360 { font-variation-settings: 'wght' 360; font-weight: 360; }
+  .wt-400 { font-variation-settings: 'wght' 400; font-weight: 400; }
+  .wt-420 { font-variation-settings: 'wght' 420; font-weight: 420; }
+  .wt-450 { font-variation-settings: 'wght' 450; font-weight: 450; }
+  .wt-500 { font-variation-settings: 'wght' 500; font-weight: 500; }
+  .wt-550 { font-variation-settings: 'wght' 550; font-weight: 550; }
+  .wt-750 { font-variation-settings: 'wght' 750; font-weight: 750; }
+
+  /* Display XL: 96px/330 hero headlines, scales down per DESIGN.md §8. */
+  .display-xl   { font-size: clamp(48px, 7.2vw, 96px); line-height: 1.00; letter-spacing: -0.5px; }
+  .heading-1    { font-size: clamp(40px, 5.4vw, 70px); line-height: 1.00; }
+  .heading-2    { font-size: clamp(34px, 4.2vw, 55px); line-height: 1.10; }
+  .heading-3    { font-size: clamp(28px, 3.4vw, 48px); line-height: 1.14; }
+  .heading-4    { font-size: 32px; line-height: 1.14; letter-spacing: 0.32px; }
+  .heading-5    { font-size: 28px; line-height: 1.28; letter-spacing: 0.42px; }
+  .body-large   { font-size: 20px; line-height: 1.40; letter-spacing: 0.3px; }
+  .body-md      { font-size: 18px; line-height: 1.56; }
+  .body-sm      { font-size: 16px; line-height: 1.50; }
+  .caption      { font-size: 14px; line-height: 1.49; letter-spacing: 0.28px; }
+  .overline     { font-size: 15.36px; line-height: 1.50; letter-spacing: 1.54px; text-transform: uppercase; }
+  .label        { font-size: 12px; line-height: 1.20; letter-spacing: 0.72px; text-transform: uppercase; }
+  .nav-link     { font-size: 18px; line-height: 1.25; letter-spacing: 0.72px; }
+
+  /* Buttons: full pill, asymmetric padding per DESIGN.md §4. */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 12px 22px 12px 16px;
+    font-size: 16px; line-height: 1.50;
+    transition: all 200ms ease;
+    white-space: nowrap;
+    border: 2px solid transparent;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #36F4A4; }
+  .btn-primary { background: #FFFFFF; color: #000000; }
+  .btn-primary:hover { background: #D4F9E0; }
+  .btn-ghost { background: transparent; color: #FFFFFF; border-color: #FFFFFF; }
+  .btn-ghost:hover { background: #FFFFFF; color: #000000; }
+
+  /* Frosted-glass tag per DESIGN.md §4. */
+  .tag {
+    display: inline-flex; align-items: center;
+    background: rgba(255,255,255,0.10);
+    color: #FFFFFF;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px; letter-spacing: 0.72px; text-transform: uppercase;
+  }
+
+  /* Inputs: dark surface, neon focus ring. */
+  .input {
+    background: #061A1C;
+    color: #FFFFFF;
+    border: 1px solid #3F3F46;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 16px;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    width: 100%;
+  }
+  .input::placeholder { color: #71717A; }
+  .input:focus { outline: none; border-color: #36F4A4; box-shadow: 0 0 0 2px rgba(54,244,164,0.20); }
+
+  /* Atmospheric backgrounds. */
+  .gradient-spotlight {
+    background: radial-gradient(80% 60% at 50% 0%, rgba(54,244,164,0.06) 0%, rgba(16,38,32,0.30) 35%, #000 75%);
+  }
+  .gradient-section {
+    background: radial-gradient(60% 80% at 100% 0%, rgba(16,38,32,0.40), transparent 60%), #061A1C;
+  }
+  .accent-stripe {
+    background: linear-gradient(135deg, #36F4A4 0%, #99B3AD 50%, #102620 100%);
+  }
+  .neon-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #36F4A4, transparent);
+    opacity: 0.35;
+  }
+
+  /* Card hover lift */
+  .card { transition: box-shadow 300ms ease, transform 200ms ease, border-color 200ms ease; }
+  .card:hover { transform: translateY(-2px); }
 </style>
 </head>
-<body class="bg-paper text-ink antialiased">
 
-<!-- ─────────────────────────────────────────── Nav ── -->
-<header class="border-b border-slate-200">
-  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 font-semibold text-lg">
-      <span class="accent-stripe rounded-md w-6 h-6 inline-block"></span>
-      BundleForge
+<body class="bg-void text-white antialiased font-body">
+
+<!-- ─────────────────────────────────────────────────── Nav ── -->
+<header class="fixed top-0 inset-x-0 z-40 backdrop-blur-md bg-void/60 border-b border-card-border/60">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 font-display wt-500 text-white">
+      <span class="accent-stripe rounded-pill w-6 h-6 inline-block"></span>
+      <span class="nav-link">BundleForge</span>
     </a>
-    <nav class="flex items-center gap-6 text-sm text-slate-600">
-      <a href="#why" class="hover:text-ink">Why us</a>
-      <a href="#types" class="hover:text-ink">Bundle types</a>
-      <a href="#pricing" class="hover:text-ink">Pricing</a>
-      <a href="https://app.bundleforge.app/support" class="hover:text-ink">Help</a>
-      <a href="#install" class="bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700">
-        Get notified at launch
-      </a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a href="#why" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Why us</a>
+      <a href="#types" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Bundle types</a>
+      <a href="#pricing" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Pricing</a>
+      <a href="https://app.bundleforge.app/support" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Help</a>
     </nav>
+    <div class="flex items-center gap-3">
+      <a href="#install" class="btn btn-primary font-display wt-400">
+        Get notified at launch
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </header>
 
-<!-- ───────────────────────────────────────── Hero ── -->
-<section class="max-w-6xl mx-auto px-6 py-24">
-  <div class="max-w-3xl">
-    <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-      Pricing-parity bundles<br>for Shopify.
-    </h1>
-    <p class="text-xl text-slate-600 leading-relaxed mb-8">
-      A bundle app whose checkout price always matches the cart, whose inventory adjustments can't be silently rewritten, and whose A/B test results are backed by a published significance calculation. Three guarantees, one Shopify install.
-    </p>
-    <div class="flex flex-wrap gap-3">
-      <a href="#install" class="bg-ink text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700">
-        Get notified at launch
-      </a>
-      <a href="#why" class="bg-white border border-slate-300 text-ink px-6 py-3 rounded-lg font-medium hover:border-slate-400">
-        See how it works
-      </a>
+<!-- ─────────────────────────────────────────────── Hero ── -->
+<section class="relative pt-40 md:pt-48 pb-32 md:pb-40 gradient-spotlight overflow-hidden">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16 relative">
+    <div class="max-w-4xl">
+      <span class="tag mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-neon mr-2"></span>
+        Beta access opening soon
+      </span>
+      <h1 class="font-display wt-330 display-xl text-white mb-8">
+        Pricing-parity<br>
+        bundles for Shopify.
+      </h1>
+      <p class="font-display wt-400 body-large text-shade-40 max-w-2xl mb-10">
+        A bundle app whose checkout price always matches the cart, whose inventory adjustments can&rsquo;t be silently rewritten, and whose A/B test results are backed by a published significance calculation. Three guarantees, one Shopify install.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="#install" class="btn btn-primary font-display wt-400">
+          Get notified at launch
+          <span aria-hidden="true">→</span>
+        </a>
+        <a href="#why" class="btn btn-ghost font-display wt-400">
+          See how it works
+        </a>
+      </div>
+      <p class="caption text-shade-50 mt-8">
+        Free tier with the full pricing engine + audit log. No credit card to start.
+      </p>
     </div>
-    <p class="text-sm text-slate-500 mt-4">
-      Free tier with full pricing engine + audit log. Beta access opening soon.
-    </p>
   </div>
+  <div class="neon-rule mt-32 max-w-[1280px] mx-auto"></div>
 </section>
 
 <!-- ────────────────────────────────────── Three reasons ── -->
-<section id="why" class="max-w-6xl mx-auto px-6 py-20 border-t border-slate-200">
-  <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
-    Three things you can't copy-paste from a feature list
-  </p>
-  <h2 class="text-4xl font-bold mb-12 max-w-2xl">
-    Backed by tests in the repo. Not marketing copy.
-  </h2>
+<section id="why" class="py-24 md:py-32 bg-void">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">Three guarantees · backed by tests</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-16">
+      The differentiators you can&rsquo;t copy-paste from a feature list.
+    </h2>
 
-  <div class="grid md:grid-cols-3 gap-8">
-    <div>
-      <div class="w-10 h-10 rounded-lg bg-green/10 text-green flex items-center justify-center font-bold mb-4">1</div>
-      <h3 class="text-xl font-semibold mb-3">Checkout-parity tested pricing</h3>
-      <p class="text-slate-600 leading-relaxed mb-3">
-        Most bundle apps compute discounts in two places — the cart widget and the actual checkout. When those drift, the customer sees one price in the cart and a different one at checkout.
-      </p>
-      <p class="text-slate-600 leading-relaxed">
-        BundleForge runs <strong>the same pricing function</strong> on the server (admin + order processor) AND inside Shopify's Cart Transform Function (live cart + checkout). A test asserts they agree on every commit. Cents-exact, by construction.
-      </p>
+    <div class="grid md:grid-cols-3 gap-6">
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:shadow-card-hover hover:border-neon/30">
+        <div class="w-10 h-10 rounded-pill bg-neon/10 text-neon flex items-center justify-center font-display wt-500 mb-6 caption">01</div>
+        <h3 class="font-display wt-360 heading-4 text-white mb-4">Checkout-parity tested pricing</h3>
+        <p class="body-md wt-400 text-shade-40 mb-4">
+          Most bundle apps compute discounts in two places — the cart widget and the actual checkout. When those drift, the customer sees one price in the cart and a different one at checkout.
+        </p>
+        <p class="body-md wt-400 text-shade-40">
+          BundleForge runs <span class="text-white wt-500">the same pricing function</span> on the server (admin + order processor) and inside Shopify&rsquo;s Cart Transform Function (live cart + checkout). A test asserts they agree on every commit. Cents-exact, by construction.
+        </p>
+      </article>
+
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:shadow-card-hover hover:border-neon/30">
+        <div class="w-10 h-10 rounded-pill bg-neon/10 text-neon flex items-center justify-center font-display wt-500 mb-6 caption">02</div>
+        <h3 class="font-display wt-360 heading-4 text-white mb-4">Inventory audit, enforced at the database</h3>
+        <p class="body-md wt-400 text-shade-40 mb-4">
+          Most apps maintain inventory state in application code. A bug, a misconfigured admin user, or a CSV import can silently rewrite history.
+        </p>
+        <p class="body-md wt-400 text-shade-40">
+          BundleForge writes every adjustment to <code class="font-mono text-sm bg-forest text-pistachio px-1.5 py-0.5 rounded">inventory_audit_log</code>, then enforces immutability at the Postgres trigger level. There is no in-app code path that can rewrite history because <span class="text-white wt-500">the database refuses</span>.
+        </p>
+      </article>
+
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:shadow-card-hover hover:border-neon/30">
+        <div class="w-10 h-10 rounded-pill bg-neon/10 text-neon flex items-center justify-center font-display wt-500 mb-6 caption">03</div>
+        <h3 class="font-display wt-360 heading-4 text-white mb-4">A/B testing with real significance</h3>
+        <p class="body-md wt-400 text-shade-40 mb-4">
+          Three competing bundle apps in this category advertise A/B testing. None publish what test of significance is being computed.
+        </p>
+        <p class="body-md wt-400 text-shade-40">
+          BundleForge uses a <span class="text-white wt-500">two-proportion z-test</span> with normal CDF, p-value reported, winner declared only when significant. Property tests run 200 random inputs through each invariant on every commit.
+        </p>
+      </article>
     </div>
+  </div>
+</section>
 
+<!-- ────────────────────────────────────────── Stats ── -->
+<section class="py-20 md:py-24 gradient-section border-y border-card-border">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16 grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8">
     <div>
-      <div class="w-10 h-10 rounded-lg bg-amber/10 text-amber flex items-center justify-center font-bold mb-4">2</div>
-      <h3 class="text-xl font-semibold mb-3">Inventory audit, enforced at the database</h3>
-      <p class="text-slate-600 leading-relaxed mb-3">
-        Most apps maintain inventory state in application code. A bug, a misconfigured admin user, or a CSV import can silently rewrite history.
-      </p>
-      <p class="text-slate-600 leading-relaxed">
-        BundleForge writes every adjustment to <code class="text-xs bg-slate-100 px-1 py-0.5 rounded">inventory_audit_log</code>, then enforces immutability at the Postgres trigger level. There is no in-app code path that can rewrite history because <strong>the database refuses</strong>.
-      </p>
+      <div class="font-display wt-330 heading-1 text-white mb-2">13</div>
+      <div class="caption wt-500 text-shade-40">Bundle types out of the box</div>
     </div>
-
     <div>
-      <div class="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center font-bold mb-4">3</div>
-      <h3 class="text-xl font-semibold mb-3">A/B testing with real significance</h3>
-      <p class="text-slate-600 leading-relaxed mb-3">
-        Three bundle apps in this category advertise A/B testing. None publish what test of significance is being computed.
-      </p>
-      <p class="text-slate-600 leading-relaxed">
-        BundleForge uses a <strong>two-proportion z-test</strong> with normal CDF, p-value reported, winner declared only when significant. Property tests run 200 random inputs through each invariant on every commit.
-      </p>
+      <div class="font-display wt-330 heading-1 text-white mb-2">800<span class="text-neon">+</span></div>
+      <div class="caption wt-500 text-shade-40">Vitest cases on green</div>
+    </div>
+    <div>
+      <div class="font-display wt-330 heading-1 text-white mb-2">15</div>
+      <div class="caption wt-500 text-shade-40">Storefront locales shipped</div>
+    </div>
+    <div>
+      <div class="font-display wt-330 heading-1 text-white mb-2">1<span class="text-neon">.</span></div>
+      <div class="caption wt-500 text-shade-40">Source of pricing truth</div>
     </div>
   </div>
 </section>
 
 <!-- ────────────────────────────────────── Bundle types ── -->
-<section id="types" class="bg-white border-y border-slate-200 py-20">
-  <div class="max-w-6xl mx-auto px-6">
-    <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
-      13 bundle types · all editable in admin
-    </p>
-    <h2 class="text-4xl font-bold mb-12 max-w-2xl">
-      Pick the buying behavior. We'll handle the math.
+<section id="types" class="py-24 md:py-32 bg-void">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">13 types · all editable in admin</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-16">
+      Pick the buying behaviour. We&rsquo;ll handle the math.
     </h2>
 
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Fixed</h4>
-        <p class="text-sm text-slate-600">"Buy this 3-product set"</p>
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- 13 type cards -->
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Fixed</h4>
+        <p class="caption text-shade-40">"Buy this 3-product set"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Mix &amp; match</h4>
-        <p class="text-sm text-slate-600">"Pick any 3 from this list of 8"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Mix &amp; match</h4>
+        <p class="caption text-shade-40">"Pick any 3 from this list of 8"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">BOGO</h4>
-        <p class="text-sm text-slate-600">"Buy one, get one free"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">BOGO</h4>
+        <p class="caption text-shade-40">"Buy one, get one free"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Buy X get Y</h4>
-        <p class="text-sm text-slate-600">"Buy 2 shirts, get a hat for $5"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Buy X get Y</h4>
+        <p class="caption text-shade-40">"Buy 2 shirts, get a hat for $5"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Volume</h4>
-        <p class="text-sm text-slate-600">"5% off 3+, 10% off 6+"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Volume</h4>
+        <p class="caption text-shade-40">"5% off 3+, 10% off 6+"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Build a box</h4>
-        <p class="text-sm text-slate-600">"Choose 1 entree, 2 sides, 1 drink"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Build a box</h4>
+        <p class="caption text-shade-40">"Choose 1 entree, 2 sides, 1 drink"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Multipack</h4>
-        <p class="text-sm text-slate-600">"12-pack" — fixed multiplier</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Multipack</h4>
+        <p class="caption text-shade-40">"12-pack" — fixed multiplier</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Gift</h4>
-        <p class="text-sm text-slate-600">"Free gift with $50+ order"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Gift</h4>
+        <p class="caption text-shade-40">"Free gift with $50+ order"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Mystery</h4>
-        <p class="text-sm text-slate-600">"Surprise box, $35"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Mystery</h4>
+        <p class="caption text-shade-40">"Surprise box, $35"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Sample</h4>
-        <p class="text-sm text-slate-600">Try-before-you-buy trial set</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Sample</h4>
+        <p class="caption text-shade-40">Try-before-you-buy trial set</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Subscription</h4>
-        <p class="text-sm text-slate-600">"Monthly bundle, 15% off"</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Subscription</h4>
+        <p class="caption text-shade-40">"Monthly bundle, 15% off"</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Wholesale</h4>
-        <p class="text-sm text-slate-600">B2B tiered pricing on quantity</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Wholesale</h4>
+        <p class="caption text-shade-40">B2B tiered pricing on quantity</p>
       </div>
-      <div class="bg-paper rounded-lg p-5 border border-slate-200">
-        <h4 class="font-semibold mb-1">Custom</h4>
-        <p class="text-sm text-slate-600">Anything not above — explicit JSON</p>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Custom</h4>
+        <p class="caption text-shade-40">Anything not above — explicit JSON</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ────────────────────────────────────────── Pricing ── -->
-<section id="pricing" class="max-w-6xl mx-auto px-6 py-20">
-  <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
-    Pricing
-  </p>
-  <h2 class="text-4xl font-bold mb-4 max-w-2xl">
-    Free to start. Pay when you scale.
-  </h2>
-  <p class="text-slate-600 leading-relaxed mb-12 max-w-2xl">
-    Four tiers. All paid plans are unlimited on bundles and bundle orders, with a documented fair-use clause (<a href="https://github.com/navneel-bhanot/bundleforge/blob/main/legal/terms-of-service.md#31-fair-use-for-unlimited-paid-plans" class="text-accent hover:underline">ToS §3.1</a>). Annual billing saves 20%.
-  </p>
+<section id="pricing" class="py-24 md:py-32 gradient-section border-y border-card-border">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">Pricing</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-6">
+      Free to start. Pay when you scale.
+    </h2>
+    <p class="body-md wt-400 text-shade-40 max-w-2xl mb-16">
+      Four tiers. All paid plans are unlimited on bundles and bundle orders, with a documented fair-use clause (<a href="https://github.com/navneelbhanot/bundleforge/blob/main/legal/terms-of-service.md#31-fair-use-for-unlimited-paid-plans" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3.1</a>). Annual billing saves 20%.
+    </p>
 
-  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="border border-slate-200 rounded-xl p-7 bg-white">
-      <h3 class="text-xl font-semibold mb-1">Starter</h3>
-      <p class="text-slate-500 text-sm mb-6">Free forever</p>
-      <p class="text-4xl font-bold mb-1">$0<span class="text-base font-normal text-slate-500">/mo</span></p>
-      <p class="text-xs text-slate-400 mb-6">No annual option</p>
-      <ul class="space-y-3 text-sm text-slate-700">
-        <li>✓ Up to 5 active bundles</li>
-        <li>✓ 100 bundle orders / month</li>
-        <li>✓ All 13 bundle types + visual builder</li>
-        <li>✓ Cart-Transform pricing engine</li>
-        <li>✓ Atomic inventory enforcement</li>
-        <li>✓ 15 storefront locales</li>
-      </ul>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Starter -->
+      <div class="card bg-deep-teal border border-card-border rounded-card p-7 shadow-card hover:border-neon/30 flex flex-col">
+        <h3 class="font-display wt-500 heading-5 text-white mb-1">Starter</h3>
+        <p class="caption text-shade-50 mb-6">Free forever</p>
+        <p class="font-display wt-330 mb-1" style="font-size:56px;line-height:1.0">
+          $0<span class="body-sm wt-400 text-shade-50">/mo</span>
+        </p>
+        <p class="caption text-shade-60 mb-6">No annual option</p>
+        <ul class="space-y-3 body-sm text-shade-30 flex-1">
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Up to 5 active bundles</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> 100 bundle orders / month</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> All 13 bundle types + visual builder</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Cart-Transform pricing engine</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Atomic inventory enforcement</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> 15 storefront locales</li>
+        </ul>
+      </div>
+
+      <!-- Growth (highlighted) -->
+      <div class="card relative bg-deep-teal border-2 border-neon rounded-card p-7 shadow-card-hover flex flex-col">
+        <span class="absolute -top-3 left-7 tag bg-neon text-void wt-500" style="background:#36F4A4;color:#000;border-radius:9999px;padding:4px 12px;font-size:12px;letter-spacing:0.72px">
+          Most popular
+        </span>
+        <h3 class="font-display wt-500 heading-5 text-white mb-1">Growth</h3>
+        <p class="caption text-shade-50 mb-6">Real stores, real volume</p>
+        <p class="font-display wt-330 mb-1" style="font-size:56px;line-height:1.0">
+          $12<span class="body-sm wt-400 text-shade-50">/mo</span>
+        </p>
+        <p class="caption text-shade-60 mb-6">$115/yr · save $29</p>
+        <ul class="space-y-3 body-sm text-shade-30 flex-1">
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Unlimited bundles + orders</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Immutable inventory audit trail</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Live chat + basic analytics</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> POS (single location)</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> AI bundle suggestions</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> 14-day free trial</li>
+        </ul>
+      </div>
+
+      <!-- Pro -->
+      <div class="card bg-deep-teal border border-card-border rounded-card p-7 shadow-card hover:border-neon/30 flex flex-col">
+        <h3 class="font-display wt-500 heading-5 text-white mb-1">Pro</h3>
+        <p class="caption text-shade-50 mb-6">Scaling + 3PL</p>
+        <p class="font-display wt-330 mb-1" style="font-size:56px;line-height:1.0">
+          $35<span class="body-sm wt-400 text-shade-50">/mo</span>
+        </p>
+        <p class="caption text-shade-60 mb-6">$336/yr · save $84</p>
+        <ul class="space-y-3 body-sm text-shade-30 flex-1">
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Everything in Growth</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> A/B testing with z-test significance</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> ShipStation / Recharge / Klaviyo sync</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Shopify Flow triggers</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Custom metafields</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Priority support</li>
+        </ul>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="card bg-deep-teal border border-card-border rounded-card p-7 shadow-card hover:border-neon/30 flex flex-col">
+        <h3 class="font-display wt-500 heading-5 text-white mb-1">Enterprise</h3>
+        <p class="caption text-shade-50 mb-6">Headless + white-label</p>
+        <p class="font-display wt-330 mb-1" style="font-size:56px;line-height:1.0">
+          $129<span class="body-sm wt-400 text-shade-50">/mo</span>
+        </p>
+        <p class="caption text-shade-60 mb-6">$1,238/yr · save $310</p>
+        <ul class="space-y-3 body-sm text-shade-30 flex-1">
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Everything in Pro</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Hydrogen / headless storefront API</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Dedicated job queue</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> Custom API + webhook tokens</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> White-label option</li>
+          <li class="flex gap-2"><span class="text-neon" aria-hidden="true">✓</span> 24/7 support SLA</li>
+        </ul>
+      </div>
     </div>
 
-    <div class="border-2 border-accent rounded-xl p-7 bg-white relative">
-      <span class="absolute -top-3 left-7 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">Most popular</span>
-      <h3 class="text-xl font-semibold mb-1">Growth</h3>
-      <p class="text-slate-500 text-sm mb-6">Real stores, real volume</p>
-      <p class="text-4xl font-bold mb-1">$12<span class="text-base font-normal text-slate-500">/mo</span></p>
-      <p class="text-xs text-slate-400 mb-6">$115/yr (save $29)</p>
-      <ul class="space-y-3 text-sm text-slate-700">
-        <li>✓ Unlimited bundles + orders</li>
-        <li>✓ Immutable inventory audit trail</li>
-        <li>✓ Live chat + basic analytics</li>
-        <li>✓ POS (single location)</li>
-        <li>✓ AI bundle suggestions</li>
-        <li>✓ 14-day free trial</li>
-      </ul>
-    </div>
-
-    <div class="border border-slate-200 rounded-xl p-7 bg-white">
-      <h3 class="text-xl font-semibold mb-1">Pro</h3>
-      <p class="text-slate-500 text-sm mb-6">Scaling + 3PL</p>
-      <p class="text-4xl font-bold mb-1">$35<span class="text-base font-normal text-slate-500">/mo</span></p>
-      <p class="text-xs text-slate-400 mb-6">$336/yr (save $84)</p>
-      <ul class="space-y-3 text-sm text-slate-700">
-        <li>✓ Everything in Growth</li>
-        <li>✓ A/B testing with z-test significance</li>
-        <li>✓ ShipStation / Recharge / Klaviyo sync</li>
-        <li>✓ Shopify Flow triggers</li>
-        <li>✓ Custom metafields</li>
-        <li>✓ Priority support</li>
-      </ul>
-    </div>
-
-    <div class="border border-slate-200 rounded-xl p-7 bg-white">
-      <h3 class="text-xl font-semibold mb-1">Enterprise</h3>
-      <p class="text-slate-500 text-sm mb-6">Headless + white-label</p>
-      <p class="text-4xl font-bold mb-1">$129<span class="text-base font-normal text-slate-500">/mo</span></p>
-      <p class="text-xs text-slate-400 mb-6">$1,238/yr (save $310)</p>
-      <ul class="space-y-3 text-sm text-slate-700">
-        <li>✓ Everything in Pro</li>
-        <li>✓ Hydrogen / headless storefront API</li>
-        <li>✓ Dedicated job queue</li>
-        <li>✓ Custom API + webhook tokens</li>
-        <li>✓ White-label option</li>
-        <li>✓ 24/7 support SLA</li>
-      </ul>
-    </div>
+    <p class="caption text-shade-50 mt-10 text-center">
+      14-day free trial on every paid tier. No credit card to start. Cancel anytime — billing is pro-rated.
+    </p>
   </div>
-
-  <p class="text-sm text-slate-500 mt-8 text-center">
-    14-day free trial on every paid tier. No credit card to start. Cancel anytime — billing is pro-rated.
-  </p>
 </section>
 
-<!-- ────────────────────────────────────────── Trust ── -->
-<section class="bg-ink text-white py-20">
-  <div class="max-w-4xl mx-auto px-6 text-center">
-    <h2 class="text-4xl font-bold mb-6">
-      How to verify any claim above
+<!-- ──────────────────────────────────── How to verify ── -->
+<section class="py-24 md:py-32 bg-void">
+  <div class="max-w-3xl mx-auto px-4 md:px-8 text-center">
+    <p class="overline wt-400 text-neon mb-6">Trust, but verify</p>
+    <h2 class="font-display wt-330 heading-2 text-white mb-8">
+      Every claim above is reproducible.
     </h2>
-    <p class="text-lg text-slate-300 leading-relaxed mb-8">
-      Every code path on this page links into the BundleForge repo. <code class="text-sm bg-white/10 px-2 py-0.5 rounded">git clone</code>, run <code class="text-sm bg-white/10 px-2 py-0.5 rounded">npm test</code>, and the assertions either pass or they don't. Nothing here relies on you taking our word for it.
+    <p class="body-large wt-400 text-shade-40 mb-8">
+      Each guarantee on this page maps to a test in the BundleForge repo. <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">git clone</code>, run <code class="font-mono text-sm bg-forest text-pistachio px-2 py-0.5 rounded">npm test</code>, and the assertions either pass or they don&rsquo;t. Nothing here relies on you taking our word for it.
     </p>
-    <p class="text-sm text-slate-400">
+    <p class="caption text-shade-50">
       All vitest + Playwright suites green on the working branch. Pricing-parity, atomic inventory, and significance calculator each have dedicated test files.
     </p>
   </div>
 </section>
 
 <!-- ────────────────────────────────────────── Install ── -->
-<section id="install" class="max-w-3xl mx-auto px-6 py-24 text-center">
-  <h2 class="text-4xl font-bold mb-6">
-    Get notified when we open the App Store listing.
-  </h2>
-  <p class="text-lg text-slate-600 leading-relaxed mb-8">
-    BundleForge launches publicly soon. Drop an email and we'll send a one-time install link the day the listing goes live.
-  </p>
-  <form action="mailto:support@bundleforge.app?subject=Notify%20me%20at%20launch" method="get" class="flex flex-wrap gap-3 justify-center">
-    <input type="email" name="email" placeholder="you@store.com" required
-      class="px-4 py-3 border border-slate-300 rounded-lg w-full max-w-sm focus:outline-none focus:border-accent">
-    <button type="submit" class="bg-ink text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700">
-      Notify me
-    </button>
-  </form>
-  <p class="text-sm text-slate-500 mt-4">
-    Or email us directly at <a href="mailto:support@bundleforge.app" class="text-accent hover:underline">support@bundleforge.app</a>.
-  </p>
+<section id="install" class="py-24 md:py-32 gradient-section border-t border-card-border">
+  <div class="max-w-3xl mx-auto px-4 md:px-8 text-center">
+    <h2 class="font-display wt-330 heading-2 text-white mb-6">
+      Get notified when the App Store listing opens.
+    </h2>
+    <p class="body-md wt-400 text-shade-40 mb-10">
+      BundleForge launches publicly soon. Drop an email and we&rsquo;ll send a one-time install link the day the listing goes live.
+    </p>
+    <form action="mailto:support@bundleforge.app?subject=Notify%20me%20at%20launch" method="get" class="flex flex-col sm:flex-row gap-3 justify-center max-w-xl mx-auto">
+      <label class="sr-only" for="email">Email address</label>
+      <input id="email" type="email" name="email" placeholder="you@store.com" required class="input flex-1" />
+      <button type="submit" class="btn btn-primary font-display wt-400 justify-center">
+        Notify me
+        <span aria-hidden="true">→</span>
+      </button>
+    </form>
+    <p class="caption text-shade-50 mt-6">
+      Or email us directly at <a href="mailto:support@bundleforge.app" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">support@bundleforge.app</a>.
+    </p>
+  </div>
 </section>
 
 <!-- ────────────────────────────────────────── Footer ── -->
-<footer class="border-t border-slate-200 py-12">
-  <div class="max-w-6xl mx-auto px-6 flex flex-wrap justify-between gap-8 text-sm text-slate-600">
-    <div>
-      <a href="/" class="flex items-center gap-2 font-semibold text-ink mb-2">
-        <span class="accent-stripe rounded-md w-5 h-5 inline-block"></span>
-        BundleForge
-      </a>
-      <p class="text-slate-500">Pricing-parity bundles for Shopify.</p>
+<footer class="bg-forest border-t border-card-border py-16">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="flex items-center gap-3 font-display wt-500 text-white mb-3">
+          <span class="accent-stripe rounded-pill w-5 h-5 inline-block"></span>
+          <span>BundleForge</span>
+        </a>
+        <p class="caption text-shade-40 max-w-xs">
+          Pricing-parity bundles for Shopify. Built sequentially. Tested in the open.
+        </p>
+      </div>
+      <div>
+        <p class="label wt-500 text-shade-40 mb-3">Product</p>
+        <ul class="space-y-2">
+          <li><a href="#why" class="caption text-shade-30 hover:text-white">Why BundleForge</a></li>
+          <li><a href="#types" class="caption text-shade-30 hover:text-white">Bundle types</a></li>
+          <li><a href="#pricing" class="caption text-shade-30 hover:text-white">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="label wt-500 text-shade-40 mb-3">Resources</p>
+        <ul class="space-y-2">
+          <li><a href="https://app.bundleforge.app/support" class="caption text-shade-30 hover:text-white">Help centre</a></li>
+          <li><a href="mailto:support@bundleforge.app" class="caption text-shade-30 hover:text-white">Contact us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="label wt-500 text-shade-40 mb-3">Legal</p>
+        <ul class="space-y-2">
+          <li><a href="/privacy" class="caption text-shade-30 hover:text-white">Privacy policy</a></li>
+          <li><a href="/terms" class="caption text-shade-30 hover:text-white">Terms of service</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="flex gap-12">
-      <div>
-        <p class="font-semibold text-ink mb-2">Product</p>
-        <a href="#why" class="block hover:text-ink">Why BundleForge</a>
-        <a href="#types" class="block hover:text-ink">Bundle types</a>
-        <a href="#pricing" class="block hover:text-ink">Pricing</a>
-      </div>
-      <div>
-        <p class="font-semibold text-ink mb-2">Resources</p>
-        <a href="https://app.bundleforge.app/support" class="block hover:text-ink">Help center</a>
-        <a href="mailto:support@bundleforge.app" class="block hover:text-ink">Contact us</a>
-      </div>
-      <div>
-        <p class="font-semibold text-ink mb-2">Legal</p>
-        <a href="/privacy" class="block hover:text-ink">Privacy policy</a>
-        <a href="/terms" class="block hover:text-ink">Terms of service</a>
-      </div>
-    </div>
+    <div class="neon-rule"></div>
+    <p class="caption text-shade-50 mt-8">
+      © 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.
+    </p>
   </div>
-  <p class="max-w-6xl mx-auto px-6 mt-8 text-xs text-slate-400">
-    © 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.
-  </p>
 </footer>
 
 </body>
