@@ -10,7 +10,12 @@ export default defineConfig({
       "extensions/**/*.test.ts",
       "frontend/**/*.test.{ts,tsx}",
     ],
-    exclude: ["node_modules", "dist", "extensions/theme-extension"],
+    exclude: [
+      "node_modules",
+      "**/node_modules/**",
+      "dist",
+      "extensions/theme-extension",
+    ],
     environmentMatchGlobs: [
       ["frontend/**", "jsdom"],
     ],

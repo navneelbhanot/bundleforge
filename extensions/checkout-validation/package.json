@@ -5,9 +5,10 @@
   "description": "Checkout-Validation Function — enforces atomic bundle composition at checkout (Plus only).",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npm run build:bundle && npm run build:wasm",
-    "build:bundle": "esbuild src/run.js --bundle --platform=neutral --format=esm --target=es2022 --outfile=dist/bundled.js",
-    "build:wasm": "javy compile -d dist/bundled.js -o dist/function.wasm",
+    "build": "shopify app function build",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@shopify/shopify_function": "~1.0.0"
   }
 }

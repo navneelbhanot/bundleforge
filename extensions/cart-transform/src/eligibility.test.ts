@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { isEligible, inventoryAllowsExpand, run } from "./run.js";
+import { isEligible, inventoryAllowsExpand, run } from "./index.js";
 
 describe("isEligible (M-172b)", () => {
   const ctxAnon = { customerId: null, country: "US", language: "en" };

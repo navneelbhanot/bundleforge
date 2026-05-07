@@ -12,5 +12,9 @@ description = "Applies bundle pricing at checkout"
   export = "run"
 
   [extensions.build]
-  command = "npm run build"
+  command = ""
   path = "dist/function.wasm"
+  # JS function: GraphQL types not required (untyped src/index.js).
+  # Skip the default codegen step so we don't need a graphql-codegen
+  # config in package.json.
+  typegen_command = "echo"

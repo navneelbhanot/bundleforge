@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { run } from "./run.js";
+import { run } from "./index.js";
 
 const baseLine = (id: string, amount: string, qty: number, attrs: Record<string, string> = {}) => ({
   id,

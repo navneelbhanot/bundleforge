@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { run } from "./run.js";
+import { run } from "./index.js";
 
 const line = (
   id: string,
