@@ -114,7 +114,35 @@ type Block =
   | { kind: "heading"; level: 1 | 2 | 3; text: string }
   | { kind: "paragraph"; text: string }
   | { kind: "code"; text: string }
-  | { kind: "list"; ordered: boolean; items: string[] };
+  | { kind: "list"; ordered: boolean; items: string[] }
+  | { kind: "blockquote"; text: string }
+  | { kind: "hr" }
+  | { kind: "table"; header: string[]; rows: string[][] };
+
+/**
+ * GFM table separator row — `|---|---|---|` (with optional
+ * alignment colons that we ignore for v1). Returns the column
+ * count if the line is a valid separator, else null.
+ */
+function tableSeparatorCols(line: string): number | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return null;
+  const cells = trimmed.slice(1, -1).split("|");
+  if (cells.length === 0) return null;
+  for (const cell of cells) {
+    if (!/^\s*:?-{1,}:?\s*$/.test(cell)) return null;
+  }
+  return cells.length;
+}
+
+function splitTableRow(line: string): string[] {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return [];
+  return trimmed
+    .slice(1, -1)
+    .split("|")
+    .map((c) => c.trim());
+}
 
 function parseBlocks(body: string): Block[] {
   const lines = body.split("\n");
@@ -152,6 +180,54 @@ function parseBlocks(body: string): Block[] {
         text: heading[2].trim(),
       });
       i += 1;
+      continue;
+    }
+    // Horizontal rule (--- or *** or ___ on its own line).
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      flushParagraph();
+      blocks.push({ kind: "hr" });
+      i += 1;
+      continue;
+    }
+    // GFM table — header row, then a separator row of dashes,
+    // then zero or more body rows. We require at least one body
+    // row to avoid mistaking unrelated `| ... |` lines for tables.
+    if (
+      trimmed.startsWith("|") &&
+      trimmed.endsWith("|") &&
+      i + 1 < lines.length &&
+      tableSeparatorCols(lines[i + 1]) !== null
+    ) {
+      flushParagraph();
+      const header = splitTableRow(lines[i]);
+      const colCount = header.length;
+      i += 2; // skip the header + separator row
+      const rows: string[][] = [];
+      while (i < lines.length) {
+        const t = lines[i].trim();
+        if (!t.startsWith("|") || !t.endsWith("|")) break;
+        const cells = splitTableRow(lines[i]);
+        // Pad / truncate to header length so the row count is stable.
+        if (cells.length < colCount) {
+          while (cells.length < colCount) cells.push("");
+        } else if (cells.length > colCount) {
+          cells.length = colCount;
+        }
+        rows.push(cells);
+        i += 1;
+      }
+      blocks.push({ kind: "table", header, rows });
+      continue;
+    }
+    // Blockquote (consume contiguous `> ` lines).
+    if (/^>\s?/.test(trimmed)) {
+      flushParagraph();
+      const quoteLines: string[] = [];
+      while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
+        quoteLines.push(lines[i].trim().replace(/^>\s?/, ""));
+        i += 1;
+      }
+      blocks.push({ kind: "blockquote", text: quoteLines.join(" ").trim() });
       continue;
     }
     // Lists (consume contiguous list lines).
@@ -249,6 +325,91 @@ export function MarkdownView({ body }: MarkdownViewProps): JSX.Element {
             </ListTag>
           );
         }
+        if (b.kind === "hr") {
+          return (
+            <hr
+              key={i}
+              style={{
+                border: 0,
+                borderTop: "1px solid var(--p-color-border)",
+                margin: "8px 0",
+              }}
+            />
+          );
+        }
+        if (b.kind === "blockquote") {
+          return (
+            <blockquote
+              key={i}
+              style={{
+                margin: 0,
+                padding: "8px 12px",
+                borderLeft:
+                  "3px solid var(--p-color-border-emphasis)",
+                background: "var(--p-color-bg-surface-secondary)",
+                borderRadius: 4,
+              }}
+            >
+              <Text as="p" variant="bodyMd" tone="subdued">
+                {renderInline(tokenizeInline(b.text))}
+              </Text>
+            </blockquote>
+          );
+        }
+        if (b.kind === "table") {
+          return (
+            <div key={i} style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  borderCollapse: "collapse",
+                  width: "100%",
+                  fontSize: 14,
+                }}
+              >
+                <thead>
+                  <tr>
+                    {b.header.map((cell, j) => (
+                      <th
+                        key={j}
+                        style={{
+                          textAlign: "left",
+                          padding: "8px 10px",
+                          background:
+                            "var(--p-color-bg-surface-secondary)",
+                          borderBottom:
+                            "1px solid var(--p-color-border)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {renderInline(tokenizeInline(cell))}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {b.rows.map((row, ri) => (
+                    <tr key={ri}>
+                      {row.map((cell, ci) => (
+                        <td
+                          key={ci}
+                          style={{
+                            padding: "8px 10px",
+                            borderBottom:
+                              "1px solid var(--p-color-border)",
+                            verticalAlign: "top",
+                          }}
+                        >
+                          {renderInline(tokenizeInline(cell))}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+        // Paragraph fall-through.
         return (
           <Text as="p" key={i} variant="bodyMd">
             {renderInline(tokenizeInline(b.text))}

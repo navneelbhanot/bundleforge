@@ -126,3 +126,48 @@ describe("MarkdownView (security: javascript: URLs)", () => {
     expect(container.querySelector("code")?.textContent).toBe("code");
   });
 });
+
+describe("MarkdownView (M-187 polish: blockquote / hr / table)", () => {
+  it("renders a blockquote (> Tip:) as a styled <blockquote>", () => {
+    const { container } = render(
+      wrap(
+        <MarkdownView body="> **Tip:** start with **Fixed** if you're new." />,
+      ),
+    );
+    const bq = container.querySelector("blockquote");
+    expect(bq).toBeTruthy();
+    expect(bq?.textContent).toContain("Tip:");
+    expect(bq?.textContent).toContain("Fixed");
+    // The bold inside the quote should still render.
+    expect(container.querySelectorAll("strong").length).toBeGreaterThan(0);
+  });
+
+  it("renders --- as a horizontal rule", () => {
+    const { container } = render(
+      wrap(<MarkdownView body={"Above\n\n---\n\nBelow"} />),
+    );
+    expect(container.querySelector("hr")).toBeTruthy();
+    expect(container.textContent).toContain("Above");
+    expect(container.textContent).toContain("Below");
+  });
+
+  it("renders a GFM table with header + body rows", () => {
+    const md =
+      "| Type | When |\n|---|---|\n| **Fixed** | curated |\n| Mix & match | choice |\n";
+    const { container } = render(wrap(<MarkdownView body={md} />));
+    const table = container.querySelector("table");
+    expect(table).toBeTruthy();
+    expect(container.querySelectorAll("th")).toHaveLength(2);
+    // Two body rows × 2 cells = 4 td.
+    expect(container.querySelectorAll("td")).toHaveLength(4);
+    // Bold in the cell still renders.
+    expect(container.querySelector("td strong")?.textContent).toBe("Fixed");
+  });
+
+  it("does not mistake a single `| col |` line for a table without a separator row", () => {
+    const { container } = render(
+      wrap(<MarkdownView body="| Just a pipe line |" />),
+    );
+    expect(container.querySelector("table")).toBeNull();
+  });
+});
