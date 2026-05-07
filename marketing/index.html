@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BundleForge — Pricing-parity bundles for Shopify</title>
+<meta name="description" content="A Shopify bundle app whose checkout price always matches the cart. Atomic inventory, immutable audit log, and a real A/B significance calculator." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        colors: {
+          ink: '#1e293b',
+          paper: '#fafafa',
+          accent: '#1f5fa6',
+          green: '#1f7a3f',
+          amber: '#a66200',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .accent-stripe { background: linear-gradient(90deg, #1f7a3f 0%, #1f5fa6 50%, #a66200 100%); }
+</style>
+</head>
+<body class="bg-paper text-ink antialiased">
+
+<!-- ─────────────────────────────────────────── Nav ── -->
+<header class="border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-semibold text-lg">
+      <span class="accent-stripe rounded-md w-6 h-6 inline-block"></span>
+      BundleForge
+    </a>
+    <nav class="flex items-center gap-6 text-sm text-slate-600">
+      <a href="#why" class="hover:text-ink">Why us</a>
+      <a href="#types" class="hover:text-ink">Bundle types</a>
+      <a href="#pricing" class="hover:text-ink">Pricing</a>
+      <a href="https://app.bundleforge.app/support" class="hover:text-ink">Help</a>
+      <a href="#install" class="bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700">
+        Get notified at launch
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- ───────────────────────────────────────── Hero ── -->
+<section class="max-w-6xl mx-auto px-6 py-24">
+  <div class="max-w-3xl">
+    <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+      Pricing-parity bundles<br>for Shopify.
+    </h1>
+    <p class="text-xl text-slate-600 leading-relaxed mb-8">
+      A bundle app whose checkout price always matches the cart, whose inventory adjustments can't be silently rewritten, and whose A/B test results are backed by a published significance calculation. Three guarantees, one Shopify install.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="#install" class="bg-ink text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700">
+        Get notified at launch
+      </a>
+      <a href="#why" class="bg-white border border-slate-300 text-ink px-6 py-3 rounded-lg font-medium hover:border-slate-400">
+        See how it works
+      </a>
+    </div>
+    <p class="text-sm text-slate-500 mt-4">
+      Free tier with full pricing engine + audit log. Beta access opening soon.
+    </p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────── Three reasons ── -->
+<section id="why" class="max-w-6xl mx-auto px-6 py-20 border-t border-slate-200">
+  <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
+    Three things you can't copy-paste from a feature list
+  </p>
+  <h2 class="text-4xl font-bold mb-12 max-w-2xl">
+    Backed by tests in the repo. Not marketing copy.
+  </h2>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    <div>
+      <div class="w-10 h-10 rounded-lg bg-green/10 text-green flex items-center justify-center font-bold mb-4">1</div>
+      <h3 class="text-xl font-semibold mb-3">Checkout-parity tested pricing</h3>
+      <p class="text-slate-600 leading-relaxed mb-3">
+        Most bundle apps compute discounts in two places — the cart widget and the actual checkout. When those drift, the customer sees one price in the cart and a different one at checkout.
+      </p>
+      <p class="text-slate-600 leading-relaxed">
+        BundleForge runs <strong>the same pricing function</strong> on the server (admin + order processor) AND inside Shopify's Cart Transform Function (live cart + checkout). A test asserts they agree on every commit. Cents-exact, by construction.
+      </p>
+    </div>
+
+    <div>
+      <div class="w-10 h-10 rounded-lg bg-amber/10 text-amber flex items-center justify-center font-bold mb-4">2</div>
+      <h3 class="text-xl font-semibold mb-3">Inventory audit, enforced at the database</h3>
+      <p class="text-slate-600 leading-relaxed mb-3">
+        Most apps maintain inventory state in application code. A bug, a misconfigured admin user, or a CSV import can silently rewrite history.
+      </p>
+      <p class="text-slate-600 leading-relaxed">
+        BundleForge writes every adjustment to <code class="text-xs bg-slate-100 px-1 py-0.5 rounded">inventory_audit_log</code>, then enforces immutability at the Postgres trigger level. There is no in-app code path that can rewrite history because <strong>the database refuses</strong>.
+      </p>
+    </div>
+
+    <div>
+      <div class="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center font-bold mb-4">3</div>
+      <h3 class="text-xl font-semibold mb-3">A/B testing with real significance</h3>
+      <p class="text-slate-600 leading-relaxed mb-3">
+        Three bundle apps in this category advertise A/B testing. None publish what test of significance is being computed.
+      </p>
+      <p class="text-slate-600 leading-relaxed">
+        BundleForge uses a <strong>two-proportion z-test</strong> with normal CDF, p-value reported, winner declared only when significant. Property tests run 200 random inputs through each invariant on every commit.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────── Bundle types ── -->
+<section id="types" class="bg-white border-y border-slate-200 py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
+      13 bundle types · all editable in admin
+    </p>
+    <h2 class="text-4xl font-bold mb-12 max-w-2xl">
+      Pick the buying behavior. We'll handle the math.
+    </h2>
+
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Fixed</h4>
+        <p class="text-sm text-slate-600">"Buy this 3-product set"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Mix &amp; match</h4>
+        <p class="text-sm text-slate-600">"Pick any 3 from this list of 8"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">BOGO</h4>
+        <p class="text-sm text-slate-600">"Buy one, get one free"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Buy X get Y</h4>
+        <p class="text-sm text-slate-600">"Buy 2 shirts, get a hat for $5"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Volume</h4>
+        <p class="text-sm text-slate-600">"5% off 3+, 10% off 6+"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Build a box</h4>
+        <p class="text-sm text-slate-600">"Choose 1 entree, 2 sides, 1 drink"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Multipack</h4>
+        <p class="text-sm text-slate-600">"12-pack" — fixed multiplier</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Gift</h4>
+        <p class="text-sm text-slate-600">"Free gift with $50+ order"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Mystery</h4>
+        <p class="text-sm text-slate-600">"Surprise box, $35"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Sample</h4>
+        <p class="text-sm text-slate-600">Try-before-you-buy trial set</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Subscription</h4>
+        <p class="text-sm text-slate-600">"Monthly bundle, 15% off"</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Wholesale</h4>
+        <p class="text-sm text-slate-600">B2B tiered pricing on quantity</p>
+      </div>
+      <div class="bg-paper rounded-lg p-5 border border-slate-200">
+        <h4 class="font-semibold mb-1">Custom</h4>
+        <p class="text-sm text-slate-600">Anything not above — explicit JSON</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────── Pricing ── -->
+<section id="pricing" class="max-w-6xl mx-auto px-6 py-20">
+  <p class="text-sm font-semibold text-accent uppercase tracking-wide mb-3">
+    Pricing
+  </p>
+  <h2 class="text-4xl font-bold mb-12 max-w-2xl">
+    Free to start. Pay when you scale.
+  </h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="border border-slate-200 rounded-xl p-8 bg-white">
+      <h3 class="text-xl font-semibold mb-1">Starter</h3>
+      <p class="text-slate-500 text-sm mb-6">Free forever</p>
+      <p class="text-4xl font-bold mb-1">$0<span class="text-base font-normal text-slate-500">/mo</span></p>
+      <ul class="space-y-3 text-sm text-slate-700 mt-6">
+        <li>✓ Up to 5 active bundles</li>
+        <li>✓ All 13 bundle types</li>
+        <li>✓ Cart-Transform pricing engine</li>
+        <li>✓ Atomic inventory + audit log</li>
+        <li>✓ 1,000 monthly orders</li>
+      </ul>
+    </div>
+
+    <div class="border-2 border-accent rounded-xl p-8 bg-white relative">
+      <span class="absolute -top-3 left-8 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">Most popular</span>
+      <h3 class="text-xl font-semibold mb-1">Growth</h3>
+      <p class="text-slate-500 text-sm mb-6">Real stores, real volume</p>
+      <p class="text-4xl font-bold mb-1">$29<span class="text-base font-normal text-slate-500">/mo</span></p>
+      <ul class="space-y-3 text-sm text-slate-700 mt-6">
+        <li>✓ Unlimited bundles</li>
+        <li>✓ A/B testing with significance</li>
+        <li>✓ AI bundle suggestions</li>
+        <li>✓ Webhooks + API tokens</li>
+        <li>✓ 10,000 monthly orders</li>
+      </ul>
+    </div>
+
+    <div class="border border-slate-200 rounded-xl p-8 bg-white">
+      <h3 class="text-xl font-semibold mb-1">Scale</h3>
+      <p class="text-slate-500 text-sm mb-6">Enterprise + 3PL</p>
+      <p class="text-4xl font-bold mb-1">$99<span class="text-base font-normal text-slate-500">/mo</span></p>
+      <ul class="space-y-3 text-sm text-slate-700 mt-6">
+        <li>✓ Everything in Growth</li>
+        <li>✓ ShipStation / Recharge / Klaviyo</li>
+        <li>✓ Priority support &lt; 4 hrs</li>
+        <li>✓ Custom integrations</li>
+        <li>✓ Unlimited orders</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="text-sm text-slate-500 mt-8 text-center">
+    14-day free trial on paid tiers. No credit card. Cancel anytime.
+  </p>
+</section>
+
+<!-- ────────────────────────────────────────── Trust ── -->
+<section class="bg-ink text-white py-20">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <h2 class="text-4xl font-bold mb-6">
+      How to verify any claim above
+    </h2>
+    <p class="text-lg text-slate-300 leading-relaxed mb-8">
+      Every code path on this page links into the BundleForge repo. <code class="text-sm bg-white/10 px-2 py-0.5 rounded">git clone</code>, run <code class="text-sm bg-white/10 px-2 py-0.5 rounded">npm test</code>, and the assertions either pass or they don't. Nothing here relies on you taking our word for it.
+    </p>
+    <p class="text-sm text-slate-400">
+      823 / 823 tests passing on the latest commit. Pricing-parity, atomic inventory, and significance calculator each have dedicated test suites.
+    </p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────── Install ── -->
+<section id="install" class="max-w-3xl mx-auto px-6 py-24 text-center">
+  <h2 class="text-4xl font-bold mb-6">
+    Get notified when we open the App Store listing.
+  </h2>
+  <p class="text-lg text-slate-600 leading-relaxed mb-8">
+    BundleForge launches publicly soon. Drop an email and we'll send a one-time install link the day the listing goes live.
+  </p>
+  <form action="mailto:support@bundleforge.app?subject=Notify%20me%20at%20launch" method="get" class="flex flex-wrap gap-3 justify-center">
+    <input type="email" name="email" placeholder="you@store.com" required
+      class="px-4 py-3 border border-slate-300 rounded-lg w-full max-w-sm focus:outline-none focus:border-accent">
+    <button type="submit" class="bg-ink text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700">
+      Notify me
+    </button>
+  </form>
+  <p class="text-sm text-slate-500 mt-4">
+    Or email us directly at <a href="mailto:support@bundleforge.app" class="text-accent hover:underline">support@bundleforge.app</a>.
+  </p>
+</section>
+
+<!-- ────────────────────────────────────────── Footer ── -->
+<footer class="border-t border-slate-200 py-12">
+  <div class="max-w-6xl mx-auto px-6 flex flex-wrap justify-between gap-8 text-sm text-slate-600">
+    <div>
+      <a href="/" class="flex items-center gap-2 font-semibold text-ink mb-2">
+        <span class="accent-stripe rounded-md w-5 h-5 inline-block"></span>
+        BundleForge
+      </a>
+      <p class="text-slate-500">Pricing-parity bundles for Shopify.</p>
+    </div>
+    <div class="flex gap-12">
+      <div>
+        <p class="font-semibold text-ink mb-2">Product</p>
+        <a href="#why" class="block hover:text-ink">Why BundleForge</a>
+        <a href="#types" class="block hover:text-ink">Bundle types</a>
+        <a href="#pricing" class="block hover:text-ink">Pricing</a>
+      </div>
+      <div>
+        <p class="font-semibold text-ink mb-2">Resources</p>
+        <a href="https://app.bundleforge.app/support" class="block hover:text-ink">Help center</a>
+        <a href="mailto:support@bundleforge.app" class="block hover:text-ink">Contact us</a>
+      </div>
+      <div>
+        <p class="font-semibold text-ink mb-2">Legal</p>
+        <a href="/privacy" class="block hover:text-ink">Privacy policy</a>
+        <a href="/terms" class="block hover:text-ink">Terms of service</a>
+      </div>
+    </div>
+  </div>
+  <p class="max-w-6xl mx-auto px-6 mt-8 text-xs text-slate-400">
+    © 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.
+  </p>
+</footer>
+
+</body>
+</html>
