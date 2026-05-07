@@ -12,5 +12,5 @@ description = "Applies bundle pricing at checkout"
   export = "run"
 
   [extensions.build]
-  command = "sh build.sh"
+  command = "npm run build"
   path = "dist/function.wasm"

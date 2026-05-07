@@ -1,0 +1,13 @@
+{
+  "name": "@bundleforge/cart-transform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cart-Transform Function — applies BundleForge bundle pricing at checkout.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "npm run build:bundle && npm run build:wasm",
+    "build:bundle": "esbuild src/run.js --bundle --platform=neutral --format=esm --target=es2022 --outfile=dist/bundled.js",
+    "build:wasm": "javy compile dist/bundled.js -o dist/function.wasm",
+    "clean": "rm -rf dist"
+  }
+}
