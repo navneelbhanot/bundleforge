@@ -30,6 +30,9 @@ already resolves to it.
 ```
 marketing/
 ├── index.html         # the landing page (Tailwind via CDN, edit freely)
+├── privacy.html       # generated from legal/privacy-policy.md
+├── terms.html         # generated from legal/terms-of-service.md
+├── build-legal.cjs    # one-shot script that regenerates the two above
 ├── server.cjs         # tiny static file server (zero deps)
 ├── package.json       # `npm start` → node server.cjs
 ├── Dockerfile         # node:20-alpine, ~50 MB image
@@ -131,16 +134,47 @@ file too** (and `legal/terms-of-service.md` §3 and
 | Pro        | $35     | $336    | unlimited (fair-use ToS §3.1)|
 | Enterprise | $129    | $1,238  | unlimited (fair-use ToS §3.1)|
 
+## Privacy + Terms pages
+
+Source of truth lives in [`legal/privacy-policy.md`](../legal/privacy-policy.md)
+and [`legal/terms-of-service.md`](../legal/terms-of-service.md). The HTML
+versions on the marketing site are **generated** by `build-legal.cjs` and
+should never be hand-edited:
+
+```bash
+# from repo root
+node marketing/build-legal.cjs
+# wrote marketing/privacy.html (~11 KB)
+# wrote marketing/terms.html (~12 KB)
+```
+
+The script substitutes a small set of placeholders that we already know
+(`effective_date`, contact emails, hosting vendor). Anything still
+user-specific renders as a styled `[pending: name]` badge so it's
+obvious to readers what's awaiting counsel review:
+
+| Placeholder | Filled? | Source |
+| --- | --- | --- |
+| `effective_date` | ✓ | today's date when script runs |
+| `privacy_email` / `support_email` / `legal_email` | ✓ | `*@bundleforge.app` |
+| `hosting_vendor` / `db_vendor` / `redis_vendor` | ✓ | Railway |
+| `operating_entity` | pending | Legal entity once incorporated |
+| `governing_jurisdiction` / `venue` | pending | Counsel decision |
+| `region` | pending | Railway region of the deployed service |
+| `eu_representative` | pending | GDPR Art. 27 representative |
+| `security_url` | pending | Once `SECURITY.md` lands |
+
+Each rendered page also carries a prominent **Draft** banner pointing at
+this same fact. When counsel approves the final values, edit
+`build-legal.cjs` (top of file: `FILLED` + `PENDING` sets), re-run the
+script, commit the regenerated HTML, and remove the draft banner block
+from `pageTemplate()`.
+
+Routes: `/privacy` and `/terms` (clean URLs, served by `server.cjs`).
+Both `/privacy.html` and `/privacy/` also resolve.
+
 ## What's NOT here yet
 
-- `/privacy` and `/terms` static pages — currently the footer links
-  point at `/privacy` and `/terms` and will 404 in production until
-  legal counsel signs off on `legal/privacy-policy.md` and
-  `legal/terms-of-service.md`. When ready, drop the rendered HTML into
-  `marketing/privacy.html` and `marketing/terms.html` and add them to
-  the Dockerfile's `COPY` line. The static server already serves
-  arbitrary `*.html` files at their unsuffixed path is **not**
-  rewritten — link the footer to `/privacy.html` and `/terms.html`.
 - A blog or changelog. Could add a `blog/` directory and serve from
   the same service, or split it off when content grows.
 - Web analytics — wire in once a privacy posture is decided

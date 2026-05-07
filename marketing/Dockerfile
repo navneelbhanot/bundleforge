@@ -16,9 +16,10 @@ WORKDIR /app
 
 # Copy only what the runtime needs. No npm install — the server has zero
 # runtime dependencies, and `npm ci` would error on a missing lockfile.
-# When future static assets land (favicon, og:image, /privacy.html, etc.),
-# add them to this COPY line.
-COPY package.json server.cjs index.html ./
+# build-legal.cjs is intentionally NOT shipped to the runtime image —
+# it's a one-shot script used to regenerate privacy.html / terms.html
+# from legal/*.md, run from a developer machine.
+COPY package.json server.cjs index.html privacy.html terms.html ./
 
 ENV NODE_ENV=production
 EXPOSE 8080

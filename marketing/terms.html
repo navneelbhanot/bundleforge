@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terms of Service · BundleForge</title>
+<meta name="description" content="Terms of Service for the BundleForge Shopify app." />
+<meta name="theme-color" content="#000000" />
+<meta name="robots" content="index,follow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" />
+<style>
+  :root { color-scheme: dark; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { background: #000; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif;
+    font-feature-settings: 'ss03' on;
+    color: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.56;
+  }
+  a { color: #99B3AD; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #3F3F46; transition: color 200ms ease; }
+  a:hover { color: #FFFFFF; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; font-size: 0.92em; background: #102620; color: #D4F9E0; padding: 1px 6px; border-radius: 3px; }
+
+  /* Page chrome */
+  header.site {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    background: rgba(0,0,0,0.60); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(30,44,49,0.60);
+    height: 64px; display: flex; align-items: center;
+  }
+  header.site .inner {
+    max-width: 1280px; margin: 0 auto; padding: 0 16px;
+    display: flex; justify-content: space-between; align-items: center; width: 100%;
+  }
+  header.site a.brand {
+    display: inline-flex; align-items: center; gap: 12px;
+    color: #FFFFFF; text-decoration: none;
+    font-size: 18px; letter-spacing: 0.72px;
+    font-variation-settings: 'wght' 500;
+  }
+  header.site .stripe {
+    width: 24px; height: 24px; border-radius: 9999px;
+    background: linear-gradient(135deg, #36F4A4 0%, #99B3AD 50%, #102620 100%);
+    display: inline-block;
+  }
+  header.site .nav-back {
+    color: #A1A1AA; font-size: 16px; text-decoration: none;
+    transition: color 200ms ease;
+  }
+  header.site .nav-back:hover { color: #FFFFFF; }
+
+  main { padding-top: 96px; max-width: 760px; margin: 0 auto; padding-left: 24px; padding-right: 24px; padding-bottom: 96px; }
+
+  .draft-banner {
+    margin: 24px 0 48px;
+    padding: 16px 20px;
+    border: 1px solid rgba(54,244,164,0.30);
+    background: rgba(54,244,164,0.05);
+    border-radius: 12px;
+    color: #D4F9E0;
+    font-size: 14px;
+    line-height: 1.50;
+  }
+  .draft-banner strong { color: #36F4A4; font-variation-settings: 'wght' 550; }
+
+  .placeholder {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px dashed rgba(54,244,164,0.40);
+    border-radius: 4px;
+    color: #36F4A4;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88em;
+    letter-spacing: 0.02em;
+  }
+
+  /* Typography */
+  h1 {
+    font-family: 'NeueHaasGrotesk', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: clamp(40px, 5.4vw, 64px);
+    line-height: 1.05;
+    font-variation-settings: 'wght' 330;
+    margin: 0 0 16px;
+    letter-spacing: -0.5px;
+  }
+  h2 {
+    font-family: 'NeueHaasGrotesk', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 28px;
+    line-height: 1.20;
+    font-variation-settings: 'wght' 500;
+    margin: 56px 0 16px;
+    letter-spacing: 0.3px;
+  }
+  h3 {
+    font-family: 'NeueHaasGrotesk', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 20px;
+    line-height: 1.30;
+    font-variation-settings: 'wght' 550;
+    margin: 32px 0 12px;
+  }
+  p { margin: 0 0 16px; color: #D4D4D8; font-size: 16px; }
+  ul, ol { padding-left: 24px; margin: 0 0 20px; color: #D4D4D8; }
+  li { margin: 6px 0; }
+  strong { color: #FFFFFF; font-variation-settings: 'wght' 550; }
+  blockquote {
+    margin: 20px 0; padding: 12px 16px;
+    border-left: 2px solid #36F4A4;
+    background: #02090A; color: #D4D4D8;
+    border-radius: 0 8px 8px 0;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #1E2C31; }
+  thead th { color: #FFFFFF; font-variation-settings: 'wght' 550; background: #061A1C; }
+  tbody td { color: #D4D4D8; }
+  tbody tr:hover td { background: #02090A; }
+
+  .meta { color: #71717A; font-size: 14px; margin: 8px 0 24px; }
+
+  /* Footer */
+  footer.site {
+    background: #102620; border-top: 1px solid #1E2C31;
+    padding: 48px 16px; margin-top: 96px;
+    color: #A1A1AA; font-size: 14px;
+  }
+  footer.site .inner { max-width: 1280px; margin: 0 auto; }
+  footer.site a { color: #D4D4D8; text-decoration: none; margin-right: 20px; }
+  footer.site a:hover { color: #FFFFFF; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="inner">
+    <a href="/" class="brand">
+      <span class="stripe"></span>
+      <span>BundleForge</span>
+    </a>
+    <a href="/" class="nav-back">← Back to home</a>
+  </div>
+</header>
+
+<main>
+  <div class="draft-banner">
+    <strong>Draft.</strong> This document is published in good faith as a working draft pending counsel review and entity formation. Items shown as <span class="placeholder">[pending: name]</span> are awaiting confirmed values. The effective date below is provisional. The substantive commitments — fair-use clause, GDPR data-export endpoints, immutable audit log, pro-rata refunds — are real and shipped.
+  </div>
+  <h1>BundleForge — Terms of Service</h1>
+<p><strong>Effective date:</strong> 2026-05-07 <strong>Operator:</strong> &lt;span class=&quot;placeholder&quot; title=&quot;Pending counsel review&quot;&gt;[pending: operating_entity]&lt;/span&gt; (&quot;we&quot;, &quot;us&quot;, &quot;BundleForge&quot;)</p>
+<h2>1. Service</h2>
+<p>BundleForge is a Shopify app providing product bundling, dynamic pricing, inventory synchronization, analytics, and integration with third-party fulfillment, marketing, and subscription services. The service is offered on a SaaS basis, billed monthly or annually via Shopify's billing platform.</p>
+<h2>2. Account</h2>
+<ul>
+<li>Eligibility: any merchant with an active Shopify store may install the</li>
+</ul>
+<p>  App.</p>
+<ul>
+<li>Authentication: handled by Shopify OAuth. We never receive merchant</li>
+</ul>
+<p>  passwords.</p>
+<ul>
+<li>One installation per Shopify store.</li>
+</ul>
+<h2>3. Plans + billing</h2>
+<table>
+<thead><tr><th>Plan</th><th>Bundles</th><th>Orders / month</th><th>Monthly</th><th>Annual (–20%)</th></tr></thead>
+<tbody>
+<tr><td>Starter</td><td>5</td><td>100</td><td>$0</td><td>$0</td></tr>
+<tr><td>Growth</td><td>unlimited</td><td>unlimited (fair use)</td><td>$12</td><td>$115</td></tr>
+<tr><td>Pro</td><td>unlimited</td><td>unlimited (fair use)</td><td>$35</td><td>$336</td></tr>
+<tr><td>Enterprise</td><td>unlimited</td><td>unlimited (fair use)</td><td>$129</td><td>$1,238</td></tr>
+</tbody></table>
+<ul>
+<li>Paid plans (Growth, Pro, Enterprise) include a 14-day free trial.</li>
+</ul>
+<p>  Starter is free with no trial.</p>
+<ul>
+<li>Annual billing is the monthly price × 12 with a 20% discount.</li>
+<li>Billing runs through Shopify's recurring application charge API; the</li>
+</ul>
+<p>  merchant's existing Shopify payment method is the source of funds.</p>
+<ul>
+<li>Plan changes take effect immediately; proration follows Shopify's</li>
+</ul>
+<p>  standard rules.</p>
+<h3>3.1 Fair use for &quot;unlimited&quot; paid plans</h3>
+<p>The &quot;unlimited orders&quot; benefit on paid plans is offered in good faith to support normal commerce growth, including seasonal peaks, flash sales, and large catalogues.</p>
+<p>It is not intended to subsidise patterns of use that are abusive, automated, or that materially degrade service for other merchants — for example: traffic from non-storefront sources, scripted generation of bundle orders that are not real customer purchases, or sustained volume that consumes a disproportionate share of shared infrastructure (Shopify Admin API quotas, queue throughput, database write capacity).</p>
+<p>If we observe such a pattern on your shop we will:</p>
+<ol>
+<li><strong>Contact you first.</strong> We will reach out via your account email</li>
+</ol>
+<p>   to explain what we are seeing, share the underlying numbers, and    give you a reasonable opportunity (no less than 7 days) to    adjust the workload, move to a more appropriate plan, or    contest our reading of the data.</p>
+<ol>
+<li>**Never silently throttle or rate-limit your real customer</li>
+</ol>
+<p>   traffic.** Any action we take to protect shared infrastructure    will be communicated to you in writing first, with the specific    technical reason and a date by which it would take effect.</p>
+<ol>
+<li><strong>Refund unused fees</strong> on a pro-rata basis if you choose to</li>
+</ol>
+<p>   uninstall in response.</p>
+<p>We will not invoke this clause to extract additional fees from a shop whose growth is the result of legitimate, customer-driven order volume on existing bundles. The clause exists to address a narrow set of adversarial or automated workloads, and to give us a clear path to talk to a merchant before any technical change ever affects their store.</p>
+<h2>4. Acceptable use</h2>
+<p>You agree <strong>not</strong> to:</p>
+<ul>
+<li>Use the App to facilitate illegal product sales.</li>
+<li>Reverse-engineer, redistribute, or resell the App.</li>
+<li>Use automated tools to circumvent rate limits.</li>
+<li>Install the App on stores you do not own or control.</li>
+</ul>
+<h2>5. Service-level commitment</h2>
+<p>We target <strong>99.9% monthly uptime</strong>, measured against the <code>/health</code> endpoint. Outages caused by Shopify, our managed-infrastructure providers, or scheduled maintenance windows (announced ≥72h in advance) are excluded.</p>
+<p>If we miss the SLA in any given month, eligible merchants on Pro+ may request a service credit equal to 10% of that month's fee per 0.1% below target, capped at 50%.</p>
+<h2>6. Data + ownership</h2>
+<ul>
+<li><strong>Your data is yours.</strong> You retain all rights to product, order,</li>
+</ul>
+<p>  inventory, and analytics data.</p>
+<ul>
+<li>We hold a limited license solely to operate the App on your behalf.</li>
+<li>See the <a href="privacy-policy.md">Privacy Policy</a> for data handling.</li>
+</ul>
+<h2>7. Termination</h2>
+<ul>
+<li>You may uninstall the App at any time from Shopify Admin. Uninstall</li>
+</ul>
+<p>  triggers the data-retention rules in the Privacy Policy.</p>
+<ul>
+<li>We may terminate for material breach with 30 days' notice (immediate</li>
+</ul>
+<p>  for fraud, abuse, or chargeback).</p>
+<h2>8. Warranty + liability</h2>
+<p>THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY. EXCEPT AS REQUIRED BY LAW, OUR AGGREGATE LIABILITY FOR ANY CLAIM IS LIMITED TO THE FEES PAID BY THE MERCHANT IN THE 12 MONTHS PRECEDING THE CLAIM.</p>
+<p>We are not liable for: lost profits, lost revenue, lost data beyond what is recoverable from the most recent backup, or any indirect or consequential damages.</p>
+<h2>9. Indemnification</h2>
+<p>You agree to defend us against third-party claims arising from your products, your store, your use of the App contrary to these Terms, or your violation of applicable law.</p>
+<h2>10. Governing law</h2>
+<p>These Terms are governed by the laws of &lt;span class=&quot;placeholder&quot; title=&quot;Pending counsel review&quot;&gt;[pending: governing_jurisdiction]&lt;/span&gt;; disputes shall be resolved in the courts of &lt;span class=&quot;placeholder&quot; title=&quot;Pending counsel review&quot;&gt;[pending: venue]&lt;/span&gt;.</p>
+<h2>11. Changes</h2>
+<p>Material changes will be communicated by email and in-app banner ≥30 days before they take effect. Continued use of the App after the change constitutes acceptance.</p>
+<h2>12. Contact</h2>
+<p>Support: support@bundleforge.app. Legal: legal@bundleforge.app.</p>
+</main>
+
+<footer class="site">
+  <div class="inner">
+    <a href="/">Home</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="mailto:support@bundleforge.app">Contact</a>
+    <p class="meta" style="margin-top:24px">© 2026 BundleForge. Not affiliated with Shopify Inc. Shopify is a registered trademark of Shopify Inc.</p>
+  </div>
+</footer>
+
+</body>
+</html>

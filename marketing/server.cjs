@@ -78,8 +78,20 @@ const server = http.createServer((req, res) => {
     return send(res, 200, "ok", { "Content-Type": "text/plain" });
   }
 
-  // Default route → index.html
-  const targetPath = urlPath === "/" ? "/index.html" : urlPath;
+  // Clean-URL routing for the marketing site:
+  //   /          → index.html
+  //   /privacy   → privacy.html  (also /privacy/, /privacy.html)
+  //   /terms     → terms.html    (also /terms/,   /terms.html)
+  // Anything else falls through to a literal filename lookup so future
+  // assets (favicon.ico, og-image.png, etc.) just work.
+  const cleanRoutes = {
+    "/": "/index.html",
+    "/privacy": "/privacy.html",
+    "/privacy/": "/privacy.html",
+    "/terms": "/terms.html",
+    "/terms/": "/terms.html",
+  };
+  const targetPath = cleanRoutes[urlPath] || urlPath;
   const filePath = safeJoin(ROOT, targetPath);
   if (!filePath) return notFound(res);
 
