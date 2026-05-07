@@ -180,8 +180,9 @@
     </a>
     <nav class="hidden md:flex items-center gap-8">
       <a href="#why" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Why us</a>
-      <a href="#types" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Bundle types</a>
+      <a href="#how" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">How it works</a>
       <a href="#pricing" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Pricing</a>
+      <a href="#faq" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">FAQ</a>
       <a href="https://app.bundleforge.app/support" class="nav-link wt-500 text-shade-40 hover:text-white transition-colors">Help</a>
     </nav>
     <div class="flex items-center gap-3">
@@ -223,6 +224,42 @@
     </div>
   </div>
   <div class="neon-rule mt-32 max-w-[1280px] mx-auto"></div>
+</section>
+
+<!-- ────────────────────────────────────── How it works ── -->
+<section id="how" class="py-24 md:py-32 gradient-section border-y border-card-border">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">From install to live bundle</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-16">
+      Three steps. Roughly twenty minutes.
+    </h2>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:border-neon/30">
+        <div class="font-display wt-330 text-neon mb-6" style="font-size:64px;line-height:1.0">01</div>
+        <h3 class="font-display wt-500 heading-5 text-white mb-3">Install from the App Store</h3>
+        <p class="body-md wt-400 text-shade-40">
+          One-click OAuth, scoped to bundles + read-only inventory. No payment to start. The Starter tier is genuinely free — no time-limited trial, no credit card.
+        </p>
+      </article>
+
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:border-neon/30">
+        <div class="font-display wt-330 text-neon mb-6" style="font-size:64px;line-height:1.0">02</div>
+        <h3 class="font-display wt-500 heading-5 text-white mb-3">Build your first bundle</h3>
+        <p class="body-md wt-400 text-shade-40">
+          Pick a type, choose products via the native Shopify resource picker, set discount rules. The live preview shows exactly what your customer will see in the cart, and the editor saves drafts so you can iterate without publishing.
+        </p>
+      </article>
+
+      <article class="card bg-deep-teal border border-card-border rounded-card p-8 shadow-card hover:border-neon/30">
+        <div class="font-display wt-330 text-neon mb-6" style="font-size:64px;line-height:1.0">03</div>
+        <h3 class="font-display wt-500 heading-5 text-white mb-3">Publish to your storefront</h3>
+        <p class="body-md wt-400 text-shade-40">
+          Hit publish — BundleForge writes a Shopify product + components metafield, and the Cart Transform Function picks the bundle up at checkout. Cents-exact between cart, checkout, and the order webhook. Done.
+        </p>
+      </article>
+    </div>
+  </div>
 </section>
 
 <!-- ────────────────────────────────────── Three reasons ── -->
@@ -358,6 +395,58 @@
   </div>
 </section>
 
+<!-- ────────────────────────────────────── Integrations ── -->
+<section id="integrations" class="py-24 md:py-32 bg-void">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">Integrations</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-6">
+      Already in your stack.
+    </h2>
+    <p class="body-md wt-400 text-shade-40 max-w-2xl mb-16">
+      Adapters ship in the box on Pro and Enterprise. Each one is configured from a single Settings tab — paste the credentials, click Test, save. No middleware, no Zapier glue.
+    </p>
+
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">ShipStation</h4>
+        <p class="caption text-shade-40">Bundle orders flow to your 3PL with components, not just the parent SKU.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Recharge</h4>
+        <p class="caption text-shade-40">Subscription bundles sync to Recharge with the right cadence + discount.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Klaviyo</h4>
+        <p class="caption text-shade-40">Bundle events fire as Klaviyo metrics — segment, flow, and report on bundle revenue.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Shopify Flow</h4>
+        <p class="caption text-shade-40">Triggers for bundle published, low stock, and force inventory sync — wire any Flow.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Shopify POS</h4>
+        <p class="caption text-shade-40">Single-location POS publication on Growth; multi-location on Pro.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Hydrogen / Headless</h4>
+        <p class="caption text-shade-40">Read-only Storefront API endpoint serves bundle data to any custom storefront.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Bold Subscriptions</h4>
+        <p class="caption text-shade-40">Alternate subscription path when Recharge isn&rsquo;t the chosen vendor.</p>
+      </div>
+      <div class="card bg-deep-teal border border-card-border rounded-card p-5 shadow-card hover:border-neon/30">
+        <h4 class="font-display wt-500 body-md text-white mb-1">Google Merchant</h4>
+        <p class="caption text-shade-40">Per-shop feed URL exposes bundles as merchant-feed products.</p>
+      </div>
+    </div>
+
+    <p class="caption text-shade-50 mt-10">
+      Need something else? Pro and Enterprise include API tokens + outbound webhooks — wire BundleForge into anything else you run. Adapter source under <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">src/services/integrations/</code>.
+    </p>
+  </div>
+</section>
+
 <!-- ────────────────────────────────────────── Pricing ── -->
 <section id="pricing" class="py-24 md:py-32 gradient-section border-y border-card-border">
   <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
@@ -449,6 +538,98 @@
     <p class="caption text-shade-50 mt-10 text-center">
       14-day free trial on every paid tier. No credit card to start. Cancel anytime — billing is pro-rated.
     </p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────── FAQ ── -->
+<section id="faq" class="py-24 md:py-32 bg-void">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-8 lg:px-16">
+    <p class="overline wt-400 text-neon mb-6">FAQ</p>
+    <h2 class="font-display wt-330 heading-2 text-white max-w-3xl mb-16">
+      Answers we&rsquo;d want before installing.
+    </h2>
+
+    <div class="grid md:grid-cols-2 gap-4 max-w-5xl">
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>Will the cart price ever differ from the checkout price?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          No. The same TypeScript pricing function runs on the server (admin + order webhook) and inside Shopify&rsquo;s Cart Transform Function (live cart + checkout). A test asserts they agree to the cent on every commit. If they ever disagree the build fails — meaning a drift can&rsquo;t reach production.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>What happens when I hit the Starter plan&rsquo;s 100-order cap?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          You see a soft warning at 80% of cap and a critical banner at 100%. Bundles already on the storefront keep working; new bundle orders bypass discount logic until you upgrade or the calendar month ticks over. Nothing is silently throttled. The Growth plan ($12/mo) removes the cap entirely.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>Can I cancel? Will I be refunded?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          Cancel any time from the Billing tab. Monthly plans stop billing at the next cycle. Annual plans are refunded pro-rata for the unused months — see <a href="https://github.com/navneelbhanot/bundleforge/blob/main/legal/terms-of-service.md" class="text-link-mint underline decoration-shade-70 underline-offset-4 hover:text-white">ToS §3</a>. Your bundle data stays exportable for 30 days after uninstall.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>Where does my bundle data live? Can I export it?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          Postgres in eu-west (Railway), encrypted at rest. A single GET endpoint returns every bundle, pricing rule, and audit-log row for your shop as JSON — exportable on demand, not hostage to a CSV button. GDPR data-export and shop-redact webhooks are wired and tested.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>Does BundleForge work with Shopify Plus?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          Yes. The Cart Transform Function approach is the modern Plus-friendly path — it doesn&rsquo;t edit checkout.liquid and doesn&rsquo;t fight Functions-based discount apps. Multi-currency and B2B markups are first-class on Pro and Enterprise.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>POS, Hydrogen, headless — supported?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          POS single-location on Growth, multi-location on Pro. Headless storefronts hit the public Storefront API endpoint with a token; bundle data and current pricing come back as JSON. Hydrogen example components live under <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">extensions/</code>.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>How do you guarantee inventory consistency?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          Every adjustment writes to <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">inventory_audit_log</code> inside a single Postgres transaction. The table has <code class="font-mono text-xs bg-forest text-pistachio px-1.5 py-0.5 rounded">REVOKE UPDATE, DELETE</code> applied at the database level — even a future bug or a wayward admin can&rsquo;t silently rewrite history. The order webhook reconciles bundle-order components to Shopify&rsquo;s authoritative inventory at fulfilment time.
+        </p>
+      </details>
+
+      <details class="card group bg-deep-teal border border-card-border rounded-card p-6 shadow-card hover:border-neon/30">
+        <summary class="font-display wt-500 body-md text-white cursor-pointer flex items-start justify-between gap-4">
+          <span>Is BundleForge GDPR-compliant?</span>
+          <span class="text-shade-40 group-open:text-neon transition-colors flex-shrink-0" aria-hidden="true">+</span>
+        </summary>
+        <p class="body-sm wt-400 text-shade-40 mt-4">
+          The three Shopify-mandated GDPR webhooks (customers/data_request, customers/redact, shop/redact) are implemented, tested, and idempotent. We don&rsquo;t collect customer PII beyond what&rsquo;s in the Shopify order payload, and we don&rsquo;t resell or share data with third parties.
+        </p>
+      </details>
+    </div>
   </div>
 </section>
 
