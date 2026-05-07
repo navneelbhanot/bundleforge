@@ -54,6 +54,7 @@ import { initSentry } from "../config/sentry";
 import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
+import { recoverableAuth } from "../middleware/recoverableAuth";
 import { rateLimiter, ipRateLimiter } from "../middleware/rateLimiter";
 import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
@@ -219,6 +220,11 @@ export function createApp(): Express {
   // res.locals.shopify.session; requireShopSession reads it and attaches
   // req.shopId/req.shopDomain for the route handlers.
   app.use("/api/v1", shopify.validateAuthenticatedSession());
+  // M-208: catch HttpResponseError 401/403 from the SDK auth
+  // middleware and signal App Bridge to re-authorize, instead of
+  // returning a generic 500 that leaves the embedded admin in a
+  // dead state until someone manually clears the session table.
+  app.use("/api/v1", recoverableAuth);
   app.use("/api/v1", requireShopSession());
 
   // Mount routers. Stubs return 501 until their respective milestones.
