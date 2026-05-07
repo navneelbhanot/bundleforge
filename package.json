@@ -31,7 +31,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "worker": "tsx src/jobs/worker.ts",
-    "shopify": "shopify"
+    "shopify": "shopify",
+    "postinstall": "node scripts/install-extensions.cjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "~6.18.0",
