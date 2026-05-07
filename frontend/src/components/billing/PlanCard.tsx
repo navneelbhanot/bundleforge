@@ -175,6 +175,29 @@ export function PlanCard({
           ) : null}
         </BlockStack>
 
+        {/*
+          Action button placed directly below the price so the CTA
+          is above the fold on every breakpoint — merchants can
+          decide and click without scrolling past the feature list.
+        */}
+        <Box>
+          <Button
+            variant={action.variant}
+            disabled={action.disabled || busy}
+            onClick={() => onSubscribe(plan.name, interval)}
+            fullWidth
+          >
+            {action.label}
+          </Button>
+          {action.tooltip ? (
+            <Box paddingBlockStart="100">
+              <Text as="p" tone="subdued" variant="bodySm">
+                {action.tooltip}
+              </Text>
+            </Box>
+          ) : null}
+        </Box>
+
         <BlockStack gap="100">
           <Text as="p" fontWeight="medium">
             {capSummary.bundles}
@@ -211,24 +234,6 @@ export function PlanCard({
             ))}
           </BlockStack>
         )}
-
-        <Box paddingBlockStart="200">
-          <Button
-            variant={action.variant}
-            disabled={action.disabled || busy}
-            onClick={() => onSubscribe(plan.name, interval)}
-            fullWidth
-          >
-            {action.label}
-          </Button>
-          {action.tooltip ? (
-            <Box paddingBlockStart="100">
-              <Text as="p" tone="subdued" variant="bodySm">
-                {action.tooltip}
-              </Text>
-            </Box>
-          ) : null}
-        </Box>
       </BlockStack>
     </Card>
   );
