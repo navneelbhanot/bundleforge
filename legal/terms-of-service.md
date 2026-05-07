@@ -23,18 +23,55 @@ platform.
 
 ## 3. Plans + billing
 
-| Plan | Bundles | Orders / month | Monthly | Annual |
+| Plan | Bundles | Orders / month | Monthly | Annual (–20%) |
 | --- | --- | --- | --- | --- |
 | Starter | 5 | 100 | $0 | $0 |
-| Growth | 50 | 2,000 | $19 | $190 |
-| Pro | unlimited | 20,000 | $49 | $490 |
-| Enterprise | unlimited | unlimited | $199 | $1,990 |
+| Growth | unlimited | unlimited (fair use) | $12 | $115 |
+| Pro | unlimited | unlimited (fair use) | $35 | $336 |
+| Enterprise | unlimited | unlimited (fair use) | $129 | $1,238 |
 
-- All plans include a 14-day free trial of paid features.
+- Paid plans (Growth, Pro, Enterprise) include a 14-day free trial.
+  Starter is free with no trial.
+- Annual billing is the monthly price × 12 with a 20% discount.
 - Billing runs through Shopify's recurring application charge API; the
   merchant's existing Shopify payment method is the source of funds.
 - Plan changes take effect immediately; proration follows Shopify's
   standard rules.
+
+### 3.1 Fair use for "unlimited" paid plans
+
+The "unlimited orders" benefit on paid plans is offered in good faith
+to support normal commerce growth, including seasonal peaks, flash
+sales, and large catalogues.
+
+It is not intended to subsidise patterns of use that are abusive,
+automated, or that materially degrade service for other merchants —
+for example: traffic from non-storefront sources, scripted
+generation of bundle orders that are not real customer purchases,
+or sustained volume that consumes a disproportionate share of
+shared infrastructure (Shopify Admin API quotas, queue throughput,
+database write capacity).
+
+If we observe such a pattern on your shop we will:
+
+1. **Contact you first.** We will reach out via your account email
+   to explain what we are seeing, share the underlying numbers, and
+   give you a reasonable opportunity (no less than 7 days) to
+   adjust the workload, move to a more appropriate plan, or
+   contest our reading of the data.
+2. **Never silently throttle or rate-limit your real customer
+   traffic.** Any action we take to protect shared infrastructure
+   will be communicated to you in writing first, with the specific
+   technical reason and a date by which it would take effect.
+3. **Refund unused fees** on a pro-rata basis if you choose to
+   uninstall in response.
+
+We will not invoke this clause to extract additional fees from a
+shop whose growth is the result of legitimate, customer-driven
+order volume on existing bundles. The clause exists to address a
+narrow set of adversarial or automated workloads, and to give us a
+clear path to talk to a merchant before any technical change ever
+affects their store.
 
 ## 4. Acceptable use
 

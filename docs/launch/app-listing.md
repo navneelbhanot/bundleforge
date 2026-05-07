@@ -68,11 +68,13 @@ price they pay. Every time.
 ### Plans
 
 - **Starter** — 5 bundles, 100 orders / mo. Free.
-- **Growth** — 50 bundles, 2,000 orders / mo. $19/mo.
-- **Pro** — unlimited bundles, 20,000 orders / mo. $49/mo.
-- **Enterprise** — custom limits + SLA. $199/mo.
+- **Growth** — unlimited bundles, unlimited orders. $12/mo.
+- **Pro** — unlimited + 3PL sync, A/B testing, Shopify Flow. $35/mo.
+- **Enterprise** — unlimited + headless storefront, white-label. $129/mo.
 
-All plans include a 14-day trial. Annual billing saves 17%.
+Paid plans include a 14-day trial. Annual billing saves 20%.
+"Unlimited" is subject to a fair-use clause for paid plans —
+[see Terms of Service §3.1](../../legal/terms-of-service.md#31-fair-use-for-unlimited-paid-plans).
 
 ### Support
 
