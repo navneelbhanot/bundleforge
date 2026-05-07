@@ -3,9 +3,13 @@ import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
 
 import { errorHandler, requestId } from "../middleware/errorHandler";
-import { installProxyRoutes, type BundleLookup } from "./proxy";
+import { installProxyRoutes, type BundleLookup, type ProxyDeps } from "./proxy";
 
-function buildApp(source: BundleLookup, withShop = true): Express {
+function buildApp(
+  source: BundleLookup,
+  withShop = true,
+  extra: Partial<ProxyDeps> = {},
+): Express {
   const app = express();
   app.use(requestId);
   app.use(express.json());
@@ -13,7 +17,18 @@ function buildApp(source: BundleLookup, withShop = true): Express {
     if (withShop) req.shopifyShopDomain = "demo.myshopify.com";
     next();
   });
-  app.use("/proxy", installProxyRoutes({ source }));
+  // Default to a passthrough orderCap stub so existing tests don't
+  // hit Prisma. M-200 cap-reject behaviour is exercised by tests that
+  // pass their own `orderCap` resolver.
+  const orderCap =
+    extra.orderCap ??
+    vi.fn().mockResolvedValue({
+      over: false,
+      cap: null,
+      count: 0,
+      plan: "growth" as const,
+    });
+  app.use("/proxy", installProxyRoutes({ source, ...extra, orderCap }));
   app.use(errorHandler);
   return app;
 }
@@ -112,5 +127,123 @@ describe("POST /proxy/validate-cart (M-086)", () => {
       .post("/proxy/validate-cart")
       .send({ slug: "x" });
     expect(res.status).toBe(400);
+  });
+});
+
+describe("POST /proxy/validate-cart — plan order cap (M-200)", () => {
+  it("rejects with order_cap_reached when Starter shop is over cap", async () => {
+    const source: BundleLookup = {
+      bundle: {
+        findFirst: vi.fn().mockResolvedValue({
+          type: "multipack",
+          config: { packQuantity: 6 },
+          items: [],
+        }),
+      },
+    };
+    const orderCap = vi.fn().mockResolvedValue({
+      over: true,
+      cap: 100,
+      count: 100,
+      plan: "starter",
+    });
+    const app = buildApp(source, true, { orderCap });
+    const res = await request(app)
+      .post("/proxy/validate-cart")
+      .send({
+        slug: "six-pack",
+        lines: [{ shopifyProductGid: "gid://x", quantity: 6 }],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      valid: false,
+      errors: [
+        "This shop has reached its monthly bundle order limit. Upgrade to Growth for unlimited orders.",
+      ],
+      code: "order_cap_reached",
+    });
+    // Bundle lookup must be skipped — the cap rejection short-circuits.
+    expect(source.bundle.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("allows the request through when Starter shop is under cap", async () => {
+    const source: BundleLookup = {
+      bundle: {
+        findFirst: vi.fn().mockResolvedValue({
+          type: "multipack",
+          config: { packQuantity: 6 },
+          items: [],
+        }),
+      },
+    };
+    const orderCap = vi.fn().mockResolvedValue({
+      over: false,
+      cap: 100,
+      count: 47,
+      plan: "starter",
+    });
+    const app = buildApp(source, true, { orderCap });
+    const res = await request(app)
+      .post("/proxy/validate-cart")
+      .send({
+        slug: "six-pack",
+        lines: [{ shopifyProductGid: "gid://x", quantity: 6 }],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+    expect(res.body.code).toBeUndefined();
+  });
+
+  it("ignores the cap on paid plans (Growth: cap=null)", async () => {
+    const source: BundleLookup = {
+      bundle: {
+        findFirst: vi.fn().mockResolvedValue({
+          type: "multipack",
+          config: { packQuantity: 6 },
+          items: [],
+        }),
+      },
+    };
+    const orderCap = vi.fn().mockResolvedValue({
+      over: false,
+      cap: null,
+      count: 0,
+      plan: "growth",
+    });
+    const app = buildApp(source, true, { orderCap });
+    const res = await request(app)
+      .post("/proxy/validate-cart")
+      .send({
+        slug: "six-pack",
+        lines: [{ shopifyProductGid: "gid://x", quantity: 6 }],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+  });
+
+  it("treats orderCap=null (shop not found) as no cap", async () => {
+    const source: BundleLookup = {
+      bundle: {
+        findFirst: vi.fn().mockResolvedValue({
+          type: "multipack",
+          config: { packQuantity: 6 },
+          items: [],
+        }),
+      },
+    };
+    // Defensive: the storefront proxy is HMAC-verified upstream, but if
+    // somehow the shop row is missing we should fail open (let the
+    // request continue) so we don't break checkout for an
+    // installed-but-mid-migration shop.
+    const orderCap = vi.fn().mockResolvedValue(null);
+    const app = buildApp(source, true, { orderCap });
+    const res = await request(app)
+      .post("/proxy/validate-cart")
+      .send({
+        slug: "six-pack",
+        lines: [{ shopifyProductGid: "gid://x", quantity: 6 }],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
   });
 });

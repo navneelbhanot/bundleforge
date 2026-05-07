@@ -302,6 +302,12 @@
 | M-187 | Support page (`/support`) | done (2026-05-07) — `docs/specs/M-187-support-page.md` |
 | M-188 | Frontend admin i18n (real translations) | done (2026-05-07) — `docs/specs/M-188-frontend-i18n.md` |
 
+### Post-R follow-ups
+
+| ID | Title | Status |
+|----|-------|--------|
+| M-200 | Enforce Starter `maxOrdersPerMonth` | done (2026-05-07) — `docs/specs/M-200-starter-order-cap.md` |
+
 ---
 
 ## Phase O — Beta + Launch (M-151 to M-155)

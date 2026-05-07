@@ -16,6 +16,10 @@ import { prisma } from "../config/database";
 import { logger } from "../config/logger";
 import { NotFoundError, UnauthorizedError } from "../middleware/errorHandler";
 import {
+  isOverOrderCap,
+  type OrderCapStatus,
+} from "../services/billing/orderCap";
+import {
   validateCart,
   type BundleSnapshot,
   type CartLine,
@@ -120,6 +124,14 @@ export interface ProxyDeps {
     inventoryRules: unknown;
     items: Array<{ shopifyVariantGid: string | null }>;
   }) => Promise<boolean>;
+  /**
+   * Plan order-cap check (M-200). Used by `/validate-cart` to
+   * gate Starter shops that have hit `maxOrdersPerMonth`. The
+   * default wiring resolves the shop by `shopifyDomain`, then
+   * delegates to `services/billing/orderCap.isOverOrderCap`.
+   * Tests stub this to avoid touching Prisma.
+   */
+  orderCap?: (shopDomain: string, now: Date) => Promise<OrderCapStatus | null>;
 }
 
 async function defaultComputePaused(input: {
@@ -164,10 +176,23 @@ async function defaultComputePaused(input: {
   }
 }
 
+async function defaultOrderCap(
+  shopDomain: string,
+  now: Date,
+): Promise<OrderCapStatus | null> {
+  const shop = await prisma.shop.findUnique({
+    where: { shopifyDomain: shopDomain },
+    select: { id: true, planName: true },
+  });
+  if (!shop) return null;
+  return isOverOrderCap(prisma, shop, now);
+}
+
 export function installProxyRoutes(deps: ProxyDeps = {}): Router {
   const router = Router();
   const source = deps.source ?? (prisma as unknown as BundleLookup);
   const computePausedImpl = deps.computePaused ?? defaultComputePaused;
+  const orderCapImpl = deps.orderCap ?? defaultOrderCap;
 
   router.get(
     "/bundle/:slug",
@@ -262,6 +287,30 @@ export function installProxyRoutes(deps: ProxyDeps = {}): Router {
         };
         if (!body.slug || !Array.isArray(body.lines)) {
           res.status(400).json({ error: { code: "validation_error", message: "slug and lines required" } });
+          return;
+        }
+        // Plan order-cap gate (M-200). Rejects Starter shops that
+        // hit maxOrdersPerMonth before we even look up the bundle —
+        // saves a DB hit on the hot path and lets the storefront
+        // block render a clear "limit reached" message.
+        const cap = await orderCapImpl(req.shopifyShopDomain, new Date());
+        if (cap?.over) {
+          proxyLog.info(
+            {
+              shopDomain: req.shopifyShopDomain,
+              plan: cap.plan,
+              count: cap.count,
+              cap: cap.cap,
+            },
+            "validate-cart rejected: monthly bundle order cap reached",
+          );
+          res.json({
+            valid: false,
+            errors: [
+              "This shop has reached its monthly bundle order limit. Upgrade to Growth for unlimited orders.",
+            ],
+            code: "order_cap_reached",
+          });
           return;
         }
         const bundle = (await source.bundle.findFirst({

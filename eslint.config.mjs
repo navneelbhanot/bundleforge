@@ -42,6 +42,13 @@ export default tseslint.config(
     },
   },
   {
+    // CommonJS scripts: `require()` is the only available import syntax.
+    files: ["**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
     files: ["frontend/**/*.{tsx,jsx}"],
     plugins: { "jsx-a11y": jsxA11y },
     rules: {

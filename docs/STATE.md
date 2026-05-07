@@ -27,6 +27,15 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
 
+**M-200 closed (2026-05-07, session 0200):** Starter
+`maxOrdersPerMonth` (100) is now enforced via
+`/api/proxy/validate-cart`. New service
+`src/services/billing/orderCap.ts` counts distinct Shopify
+bundle orders per shop per calendar month (UTC). Paid plans
+(Growth/Pro/Enterprise) keep `null` and short-circuit
+without a DB hit. 853 vitest cases pass; 2 pre-existing
+lint errors unchanged.
+
 **Deploy plumbing (2026-05-07, session 0199):** `npx shopify
 app deploy` now succeeds end-to-end — `bundleforge-3` was
 released to users. Shopify Functions migrated to the official
