@@ -27,6 +27,18 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
 
+**M-202 closed (2026-05-07, session 0202):** Resend wired
+for outbound transactional email. New
+`src/services/email/{client,index,notifications,templates/*}`
+with two templates (cap-warning at 80%, cap-reached at 100%).
+`ordersCreate` webhook calls `maybeNotifyCapStatus` once per
+order; idempotent at per-shop-per-calendar-month via
+`Shop.settings.capNotifications`. `RESEND_API_KEY` is optional
+(absent → no-op + warn-log; the app runs fine). Setup guide
+for the user at `docs/ops/email-setup.md`. **Next user
+action:** run that guide (Resend signup → DNS records →
+Railway env var → smoke test).
+
 **M-201 closed (2026-05-07, session 0201):** Dashboard now
 renders an upgrade banner above the widgets when a Starter
 shop crosses 80% of its monthly bundle-order cap (warning),

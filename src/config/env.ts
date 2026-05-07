@@ -56,6 +56,19 @@ export const envSchema = z
     // -> Website ID. Free tier is fine for the smoke-test stage.
     CRISP_WEBSITE_ID: z.string().min(1).optional(),
 
+    // Optional Resend API key for outbound transactional email
+    // (cap warnings, future trial-ending notices). Absent → all
+    // sends are no-ops + warn-log; the app runs fine without it.
+    // Provision at https://resend.com (free tier: 3K emails/mo).
+    // See docs/ops/email-setup.md for the DNS records the
+    // sending subdomain needs.
+    RESEND_API_KEY: z.string().min(1).optional(),
+    // Optional override for the From: header on transactional
+    // email. Defaults to a `notifications@mail.bundleforge.app`
+    // sender — separate from the human Workspace inbox at
+    // support@bundleforge.app to isolate sender reputation.
+    EMAIL_FROM: z.string().min(1).optional(),
+
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),

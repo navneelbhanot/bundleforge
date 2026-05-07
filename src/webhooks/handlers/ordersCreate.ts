@@ -12,6 +12,7 @@
  */
 import { prisma } from "../../config/database";
 import { logger } from "../../config/logger";
+import { maybeNotifyCapStatus } from "../../services/email/notifications";
 import {
   applyAdjustment,
   type ApplyAdjustmentResult,
@@ -86,6 +87,17 @@ export interface OrdersCreateDeps {
     skuBreakdown: unknown;
   }) => Promise<{ id: string }>;
   applyAdjust?: typeof applyAdjustment;
+  /**
+   * M-202: cap-notification hook. Called once per order after all
+   * BundleOrder rows are written. Default implementation fetches
+   * the shop record and delegates to
+   * `services/email/notifications.maybeNotifyCapStatus`. Tests
+   * stub this to avoid touching Prisma + Resend.
+   *
+   * Failure is logged and swallowed — email problems must NEVER
+   * fail an order webhook.
+   */
+  notifyCapStatus?: (shopId: string) => Promise<void>;
 }
 
 export function ordersCreateHandler(
@@ -193,6 +205,25 @@ export function ordersCreateHandler(
         select: { id: true },
       }));
   const adjust = deps.applyAdjust ?? applyAdjustment;
+  const notifyCapStatus =
+    deps.notifyCapStatus ??
+    (async (shopId: string) => {
+      // Reload the shop with the fields the cap-notification email
+      // needs (name, email, planName, settings). Cheap point-read
+      // on the primary key — fine to run after every order.
+      const full = await prisma.shop.findUnique({
+        where: { id: shopId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          planName: true,
+          settings: true,
+        },
+      });
+      if (!full) return;
+      await maybeNotifyCapStatus(prisma, full);
+    });
 
   return async ({ shopDomain, payload, webhookId }) => {
     const order = (payload ?? {}) as ShopifyOrderPayload;
@@ -285,6 +316,21 @@ export function ordersCreateHandler(
           "Failed to process bundle line item",
         );
       }
+    }
+
+    // M-202: cap-status email notifications. Runs once per webhook
+    // (not per bundle line) since notifications are per-shop. A
+    // failure here MUST NEVER fail the webhook — the BundleOrder
+    // rows are already persisted; a missed email is recoverable
+    // (we'll either notify on the next order, or at the next
+    // monthly boundary the state resets).
+    try {
+      await notifyCapStatus(shop.id);
+    } catch (err) {
+      handlerLogger.warn(
+        { err, shopId: shop.id, webhookId },
+        "cap-status notification failed — order persisted regardless",
+      );
     }
   };
 }

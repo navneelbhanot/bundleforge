@@ -35,6 +35,7 @@ describe("ordersCreateHandler", () => {
       }),
       createBundleOrder,
       applyAdjust: adjust,
+      notifyCapStatus: vi.fn(),
     });
     await handler({
       shopDomain: "demo.myshopify.com",
@@ -75,6 +76,7 @@ describe("ordersCreateHandler", () => {
       }),
       createBundleOrder: vi.fn().mockResolvedValue({ id: "bo" }),
       applyAdjust: adjust,
+      notifyCapStatus: vi.fn(),
     });
     await handler({
       shopDomain: "demo.myshopify.com",
@@ -106,6 +108,7 @@ describe("ordersCreateHandler", () => {
       }),
       createBundleOrder: vi.fn().mockResolvedValue({ id: "bo" }),
       markOrderInShopify,
+      notifyCapStatus: vi.fn(),
     });
     await handler({
       shopDomain: "demo.myshopify.com",
@@ -148,6 +151,7 @@ describe("ordersCreateHandler", () => {
       }),
       createBundleOrder,
       markOrderInShopify,
+      notifyCapStatus: vi.fn(),
     });
     // Must not throw — webhook stays green even when tagging fails.
     await expect(
@@ -180,6 +184,7 @@ describe("ordersCreateHandler", () => {
       }),
       createBundleOrder: vi.fn().mockResolvedValue({ id: "bo" }),
       markOrderInShopify,
+      notifyCapStatus: vi.fn(),
     });
     await handler({
       shopDomain: "demo.myshopify.com",
@@ -209,5 +214,83 @@ describe("ordersCreateHandler", () => {
       },
     });
     expect(createBundleOrder).not.toHaveBeenCalled();
+  });
+
+  it("calls notifyCapStatus once per webhook (not per bundle line)", async () => {
+    const notifyCapStatus = vi.fn().mockResolvedValue(undefined);
+    const handler = ordersCreateHandler({
+      loadShop: async () => ({ id: "shop-uuid", settings: {} }),
+      loadBundle: async (bundleId) => ({
+        id: bundleId,
+        title: `Bundle ${bundleId}`,
+        items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
+        inventoryItemGid: null,
+        locationGid: null,
+      }),
+      createBundleOrder: vi.fn().mockResolvedValue({ id: "bo" }),
+      notifyCapStatus,
+    });
+    // Order with two distinct bundle lines.
+    await handler({
+      shopDomain: "demo.myshopify.com",
+      webhookId: "wh-cap-1",
+      payload: {
+        id: 500,
+        line_items: [
+          { quantity: 1, properties: [{ name: BUNDLE_PROP, value: "b-A" }] },
+          { quantity: 1, properties: [{ name: BUNDLE_PROP, value: "b-B" }] },
+        ],
+      },
+    });
+    expect(notifyCapStatus).toHaveBeenCalledTimes(1);
+    expect(notifyCapStatus).toHaveBeenCalledWith("shop-uuid");
+  });
+
+  it("does not fail the webhook when notifyCapStatus throws", async () => {
+    const notifyCapStatus = vi
+      .fn()
+      .mockRejectedValue(new Error("Resend down"));
+    const handler = ordersCreateHandler({
+      loadShop: async () => ({ id: "shop-uuid", settings: {} }),
+      loadBundle: async (bundleId) => ({
+        id: bundleId,
+        title: "B",
+        items: [{ shopifyProductGid: "gid://Product/1", quantity: 1 }],
+        inventoryItemGid: null,
+        locationGid: null,
+      }),
+      createBundleOrder: vi.fn().mockResolvedValue({ id: "bo" }),
+      notifyCapStatus,
+    });
+    await expect(
+      handler({
+        shopDomain: "demo.myshopify.com",
+        webhookId: "wh-cap-2",
+        payload: {
+          id: 600,
+          line_items: [
+            { quantity: 1, properties: [{ name: BUNDLE_PROP, value: "b-1" }] },
+          ],
+        },
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it("skips notifyCapStatus when the order has no bundle lines", async () => {
+    const notifyCapStatus = vi.fn();
+    const handler = ordersCreateHandler({
+      loadShop: async () => ({ id: "shop-uuid", settings: {} }),
+      createBundleOrder: vi.fn(),
+      notifyCapStatus,
+    });
+    await handler({
+      shopDomain: "demo.myshopify.com",
+      webhookId: "wh-cap-3",
+      payload: {
+        line_items: [{ quantity: 1, title: "Plain" }],
+      },
+    });
+    // Returns early before notifyCapStatus would fire.
+    expect(notifyCapStatus).not.toHaveBeenCalled();
   });
 });

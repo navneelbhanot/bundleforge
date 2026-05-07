@@ -308,6 +308,7 @@
 |----|-------|--------|
 | M-200 | Enforce Starter `maxOrdersPerMonth` | done (2026-05-07) — `docs/specs/M-200-starter-order-cap.md` |
 | M-201 | 80%-of-cap admin banner on Dashboard | done (2026-05-07) — `docs/specs/M-201-cap-warning-banner.md` |
+| M-202 | Resend transactional email + cap notifications | done (2026-05-07) — `docs/specs/M-202-transactional-email.md` |
 
 ---
 
