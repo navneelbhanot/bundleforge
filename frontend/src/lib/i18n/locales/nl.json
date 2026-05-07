@@ -141,5 +141,28 @@
   "common": {
     "loading": "Laden…",
     "noResults": "Geen resultaten"
+  },
+  "settingsPage": {
+    "saved": "Instellingen opgeslagen",
+    "saveError": "Kan niet opslaan",
+    "shop": "Winkel",
+    "brand": "Merk",
+    "brandSaveError": "Kan merk niet opslaan",
+    "defaults": "Standaardwaarden",
+    "layoutCard": "Lay-out en stijl",
+    "imageryCard": "Afbeeldingen en tekst",
+    "cssCard": "Aangepaste CSS",
+    "bracesMismatch": "Niet-overeenkomende accolades",
+    "stockGuards": "Voorraadbeveiliging",
+    "auditSnapshots": "Audit en momentopnamen",
+    "rounding": "Afronding en opmaak",
+    "newBundleDefaults": "Standaardwaarden voor nieuwe bundels",
+    "cartMode": "Winkelmandjesmodus",
+    "checkoutProtections": "Checkout-beveiligingen",
+    "channels": "Kanalen",
+    "channelsSaveError": "Kan kanalen niet opslaan",
+    "emailChannel": "E-mailkanaal",
+    "alertRules": "Waarschuwingsregels",
+    "localization": "Lokalisatie"
   }
 }

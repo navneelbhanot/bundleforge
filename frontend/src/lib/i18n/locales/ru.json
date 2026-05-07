@@ -141,5 +141,28 @@
   "common": {
     "loading": "Загрузка…",
     "noResults": "Нет результатов"
+  },
+  "settingsPage": {
+    "saved": "Настройки сохранены",
+    "saveError": "Не удалось сохранить",
+    "shop": "Магазин",
+    "brand": "Бренд",
+    "brandSaveError": "Не удалось сохранить бренд",
+    "defaults": "Значения по умолчанию",
+    "layoutCard": "Макет и визуальный стиль",
+    "imageryCard": "Изображения и тексты",
+    "cssCard": "Пользовательский CSS",
+    "bracesMismatch": "Несовпадающие скобки",
+    "stockGuards": "Защита склада",
+    "auditSnapshots": "Аудит и снимки",
+    "rounding": "Округление и формат",
+    "newBundleDefaults": "Значения по умолчанию для новых наборов",
+    "cartMode": "Режим корзины",
+    "checkoutProtections": "Защита оформления заказа",
+    "channels": "Каналы",
+    "channelsSaveError": "Не удалось сохранить каналы",
+    "emailChannel": "E-mail канал",
+    "alertRules": "Правила оповещений",
+    "localization": "Локализация"
   }
 }

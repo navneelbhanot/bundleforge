@@ -141,5 +141,28 @@
   "common": {
     "loading": "加载中…",
     "noResults": "没有结果"
+  },
+  "settingsPage": {
+    "saved": "设置已保存",
+    "saveError": "保存失败",
+    "shop": "店铺",
+    "brand": "品牌",
+    "brandSaveError": "无法保存品牌",
+    "defaults": "默认值",
+    "layoutCard": "布局与视觉样式",
+    "imageryCard": "图像与文案",
+    "cssCard": "自定义 CSS",
+    "bracesMismatch": "大括号不匹配",
+    "stockGuards": "库存保护",
+    "auditSnapshots": "审计与快照",
+    "rounding": "舍入与格式",
+    "newBundleDefaults": "新套装默认值",
+    "cartMode": "购物车模式",
+    "checkoutProtections": "结账保护",
+    "channels": "渠道",
+    "channelsSaveError": "无法保存渠道",
+    "emailChannel": "邮件渠道",
+    "alertRules": "提醒规则",
+    "localization": "本地化"
   }
 }

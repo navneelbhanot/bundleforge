@@ -141,5 +141,28 @@
   "common": {
     "loading": "読み込み中…",
     "noResults": "結果なし"
+  },
+  "settingsPage": {
+    "saved": "設定を保存しました",
+    "saveError": "保存できませんでした",
+    "shop": "ストア",
+    "brand": "ブランド",
+    "brandSaveError": "ブランドを保存できませんでした",
+    "defaults": "デフォルト",
+    "layoutCard": "レイアウトとビジュアルスタイル",
+    "imageryCard": "画像とコピー",
+    "cssCard": "カスタム CSS",
+    "bracesMismatch": "波括弧が一致していません",
+    "stockGuards": "在庫の保護",
+    "auditSnapshots": "監査とスナップショット",
+    "rounding": "丸めとフォーマット",
+    "newBundleDefaults": "新規バンドルのデフォルト",
+    "cartMode": "カートモード",
+    "checkoutProtections": "チェックアウトの保護",
+    "channels": "チャンネル",
+    "channelsSaveError": "チャンネルを保存できませんでした",
+    "emailChannel": "メールチャンネル",
+    "alertRules": "アラートルール",
+    "localization": "ローカライゼーション"
   }
 }

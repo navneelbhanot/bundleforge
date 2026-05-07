@@ -141,5 +141,28 @@
   "common": {
     "loading": "Indlæser…",
     "noResults": "Ingen resultater"
+  },
+  "settingsPage": {
+    "saved": "Indstillinger gemt",
+    "saveError": "Kunne ikke gemme",
+    "shop": "Butik",
+    "brand": "Brand",
+    "brandSaveError": "Kunne ikke gemme brand",
+    "defaults": "Standardværdier",
+    "layoutCard": "Layout og visuel stil",
+    "imageryCard": "Billeder og tekst",
+    "cssCard": "Brugerdefineret CSS",
+    "bracesMismatch": "Tuborgklammer matcher ikke",
+    "stockGuards": "Lagerbeskyttelse",
+    "auditSnapshots": "Revision og snapshots",
+    "rounding": "Afrunding og formatering",
+    "newBundleDefaults": "Standardværdier for nye pakker",
+    "cartMode": "Kurv-tilstand",
+    "checkoutProtections": "Betalingsbeskyttelse",
+    "channels": "Kanaler",
+    "channelsSaveError": "Kunne ikke gemme kanaler",
+    "emailChannel": "E-mail-kanal",
+    "alertRules": "Advarselsregler",
+    "localization": "Lokalisering"
   }
 }

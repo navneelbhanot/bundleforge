@@ -11,6 +11,7 @@
  * URL is shareable / bookmarkable.
  */
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Badge,
   Banner,
@@ -301,11 +302,12 @@ interface ShopCardProps {
 }
 
 function ShopCard({ general }: ShopCardProps): JSX.Element {
+  const { t } = useTranslation();
   return (
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Shop
+          {t("settingsPage.shop")}
         </Text>
         <Text as="p" tone="subdued">
           These come from Shopify and update automatically when the
@@ -337,6 +339,7 @@ interface BrandCardProps {
 }
 
 function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [color, setColor] = useState(initial.brandColor ?? "#1f5fa6");
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -405,14 +408,14 @@ function BrandCard({ initial, busy, onSave }: BrandCardProps): JSX.Element {
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Brand
+          {t("settingsPage.brand")}
         </Text>
         <Text as="p" tone="subdued">
           Used as the accent color for badges and buttons rendered by
           BundleForge in the storefront and admin emails.
         </Text>
         {error && (
-          <Banner tone="critical" title="Couldn't save brand">
+          <Banner tone="critical" title={t("settingsPage.brandSaveError")}>
             {error}
           </Banner>
         )}
@@ -505,6 +508,7 @@ interface DefaultsCardProps {
 }
 
 function DefaultsCard({ initial, busy, onSave }: DefaultsCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [currency, setCurrency] = useState(initial.currency);
   const [locale, setLocale] = useState(initial.locale);
   const [timezone, setTimezone] = useState(initial.timezone);
@@ -518,7 +522,7 @@ function DefaultsCard({ initial, busy, onSave }: DefaultsCardProps): JSX.Element
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Defaults
+          {t("settingsPage.defaults")}
         </Text>
         <Text as="p" tone="subdued">
           Fallbacks for when a bundle doesn't pin its own currency,
@@ -587,6 +591,7 @@ interface LayoutCardProps {
 }
 
 function LayoutCard({ initial, busy, onSave }: LayoutCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [layout, setLayout] = useState<DisplayBlock["layout"]>(
     initial.layout ?? DISPLAY_DEFAULTS.layout,
   );
@@ -602,7 +607,7 @@ function LayoutCard({ initial, busy, onSave }: LayoutCardProps): JSX.Element {
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Layout &amp; visual style
+          {t("settingsPage.layoutCard")}
         </Text>
         <Text as="p" tone="subdued">
           Default appearance for bundles rendered on the storefront.
@@ -642,6 +647,7 @@ interface ImageryCardProps {
 }
 
 function ImageryCard({ initial, busy, onSave }: ImageryCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [imagePreference, setImagePreference] = useState<
     DisplayBlock["imagePreference"]
   >(initial.imagePreference ?? DISPLAY_DEFAULTS.imagePreference);
@@ -663,7 +669,7 @@ function ImageryCard({ initial, busy, onSave }: ImageryCardProps): JSX.Element {
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Imagery &amp; copy
+          {t("settingsPage.imageryCard")}
         </Text>
         <Select
           label="Image preference"
@@ -715,6 +721,7 @@ interface CssCardProps {
 }
 
 function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [css, setCss] = useState<string>(
     initial.cssOverride ?? DISPLAY_DEFAULTS.cssOverride,
   );
@@ -728,7 +735,7 @@ function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Custom CSS
+          {t("settingsPage.cssCard")}
         </Text>
         <Text as="p" tone="subdued">
           Scoped under <code>#bundleforge-storefront *</code>. Bad
@@ -746,7 +753,7 @@ function CssCard({ initial, busy, onSave }: CssCardProps): JSX.Element {
           monospaced
         />
         {braceWarn && (
-          <Banner tone="warning" title="Mismatched braces">
+          <Banner tone="warning" title={t("settingsPage.bracesMismatch")}>
             <p>
               Found {open} opening and {close} closing braces. CSS
               with mismatched braces won&apos;t apply.
@@ -797,6 +804,7 @@ function StockGuardsCard({
   onSaveInventory,
   onSaveSafetyLock,
 }: StockGuardsCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [safetyLock, setSafetyLock] = useState<boolean>(initialSafetyLock);
   const [threshold, setThreshold] = useState<string>(
     String(initial.lowStockThreshold ?? INVENTORY_DEFAULTS.lowStockThreshold),
@@ -820,7 +828,7 @@ function StockGuardsCard({
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Stock guards
+          {t("settingsPage.stockGuards")}
         </Text>
         <Checkbox
           label="Safety lock — require manual approval before pushing changes to Shopify"
@@ -878,6 +886,7 @@ interface AuditCardProps {
 }
 
 function AuditCard({ initial, busy, onSave }: AuditCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [days, setDays] = useState<string>(
     String(initial.auditRetentionDays ?? INVENTORY_DEFAULTS.auditRetentionDays),
   );
@@ -895,7 +904,7 @@ function AuditCard({ initial, busy, onSave }: AuditCardProps): JSX.Element {
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Audit &amp; snapshots
+          {t("settingsPage.auditSnapshots")}
         </Text>
         <TextField
           label="Audit log retention (days)"
@@ -955,6 +964,7 @@ interface RoundingCardProps {
 }
 
 function RoundingCard({ initial, busy, onSave }: RoundingCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [rule, setRule] = useState<PricingBlock["roundingRule"]>(
     initial.roundingRule ?? PRICING_DEFAULTS.roundingRule,
   );
@@ -970,7 +980,7 @@ function RoundingCard({ initial, busy, onSave }: RoundingCardProps): JSX.Element
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Rounding &amp; formatting
+          {t("settingsPage.rounding")}
         </Text>
         <Select
           label="Rounding rule"
@@ -1011,6 +1021,7 @@ function PricingDefaultsCard({
   busy,
   onSave,
 }: PricingDefaultsCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [type, setType] = useState<PricingBlock["defaultDiscountType"]>(
     initial.defaultDiscountType ?? PRICING_DEFAULTS.defaultDiscountType,
   );
@@ -1027,7 +1038,7 @@ function PricingDefaultsCard({
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Defaults for new bundles
+          {t("settingsPage.newBundleDefaults")}
         </Text>
         <Select
           label="Default discount type"
@@ -1093,6 +1104,7 @@ interface CartModeCardProps {
 }
 
 function CartModeCard({ initial, busy, onSave }: CartModeCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<CartBlock["defaultMode"]>(
     initial.defaultMode ?? CART_DEFAULTS.defaultMode,
   );
@@ -1101,7 +1113,7 @@ function CartModeCard({ initial, busy, onSave }: CartModeCardProps): JSX.Element
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Cart mode
+          {t("settingsPage.cartMode")}
         </Text>
         <Text as="p" tone="subdued">
           Picks which Cart Transform path runs at checkout.
@@ -1147,6 +1159,7 @@ function CheckoutProtectionsCard({
   busy,
   onSave,
 }: CheckoutProtectionsCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [enforcement, setEnforcement] = useState<
     CartBlock["atomicCheckoutEnforcement"]
   >(initial.atomicCheckoutEnforcement ?? CART_DEFAULTS.atomicCheckoutEnforcement);
@@ -1167,7 +1180,7 @@ function CheckoutProtectionsCard({
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Checkout protections
+          {t("settingsPage.checkoutProtections")}
         </Text>
         <Select
           label="Atomic checkout enforcement"
@@ -1270,6 +1283,7 @@ interface ChannelsCardProps {
 }
 
 function ChannelsCard({ initial, busy, onSave }: ChannelsCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [recipients, setRecipients] = useState<string[]>(initial.recipients ?? []);
   const [pending, setPending] = useState<string>("");
   const [slack, setSlack] = useState<string>(initial.slackWebhookUrl ?? "");
@@ -1334,7 +1348,7 @@ function ChannelsCard({ initial, busy, onSave }: ChannelsCardProps): JSX.Element
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Channels
+          {t("settingsPage.channels")}
         </Text>
         <Text as="p" tone="subdued">
           Where alerts are sent. The Email channel uses these
@@ -1342,7 +1356,7 @@ function ChannelsCard({ initial, busy, onSave }: ChannelsCardProps): JSX.Element
           BundleForge admin.
         </Text>
         {error && (
-          <Banner tone="critical" title="Couldn't save channels">
+          <Banner tone="critical" title={t("settingsPage.channelsSaveError")}>
             {error}
           </Banner>
         )}
@@ -1417,13 +1431,14 @@ function EmailEnableCard({
   busy,
   onSave,
 }: EmailEnableCardProps): JSX.Element {
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState<boolean>(initial.email !== false);
   const dirty = (initial.email !== false) !== enabled;
   return (
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Email channel
+          {t("settingsPage.emailChannel")}
         </Text>
         <Checkbox
           label="Send alerts via email"
@@ -1456,6 +1471,7 @@ function AlertRulesCard({
   busy,
   onSave,
 }: AlertRulesCardProps): JSX.Element {
+  const { t } = useTranslation();
   // Local mutable state mirrors the persisted shape; one ChoiceList per rule.
   const [rules, setRules] = useState<NonNullable<NotificationsBlock["rules"]>>(initial);
 
@@ -1472,7 +1488,7 @@ function AlertRulesCard({
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Alert rules
+          {t("settingsPage.alertRules")}
         </Text>
         <Text as="p" tone="subdued">
           Pick which events trigger an alert and which channels each
@@ -1546,6 +1562,7 @@ interface LocalizationCardProps {
 }
 
 function LocalizationCard({ initial, busy, onSave }: LocalizationCardProps): JSX.Element {
+  const { t } = useTranslation();
   const initEnabled = initial.enabledLocales ?? LOCALIZATION_DEFAULTS.enabledLocales;
   const initFallback = initial.fallbackLocale ?? LOCALIZATION_DEFAULTS.fallbackLocale;
   const initMt =
@@ -1568,7 +1585,7 @@ function LocalizationCard({ initial, busy, onSave }: LocalizationCardProps): JSX
     <Card>
       <BlockStack gap="300">
         <Text as="h2" variant="headingMd">
-          Localization
+          {t("settingsPage.localization")}
         </Text>
         <Text as="p" tone="subdued">
           Choose which of the 15 supported locales the storefront and
@@ -1643,6 +1660,7 @@ function PlaceholderTab({ tab }: PlaceholderTabProps): JSX.Element {
 }
 
 export function SettingsPage(): JSX.Element {
+  const { t } = useTranslation();
   const [state, setState] = useState<SettingsPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -1759,10 +1777,10 @@ export function SettingsPage(): JSX.Element {
     <Page title="Settings">
       <BlockStack gap="400">
         {savedFlash && (
-          <Banner tone="success" title="Settings saved" />
+          <Banner tone="success" title={t("settingsPage.saved")} />
         )}
         {error && state && (
-          <Banner tone="critical" title="Couldn't save" onDismiss={() => setError(null)}>
+          <Banner tone="critical" title={t("settingsPage.saveError")} onDismiss={() => setError(null)}>
             {error}
           </Banner>
         )}

@@ -141,5 +141,28 @@
   "common": {
     "loading": "Wird geladen…",
     "noResults": "Keine Ergebnisse"
+  },
+  "settingsPage": {
+    "saved": "Einstellungen gespeichert",
+    "saveError": "Speichern fehlgeschlagen",
+    "shop": "Shop",
+    "brand": "Marke",
+    "brandSaveError": "Speichern der Marke fehlgeschlagen",
+    "defaults": "Standardwerte",
+    "layoutCard": "Layout und Stil",
+    "imageryCard": "Bilder und Texte",
+    "cssCard": "Eigenes CSS",
+    "bracesMismatch": "Nicht passende Klammern",
+    "stockGuards": "Bestandsschutz",
+    "auditSnapshots": "Audit und Snapshots",
+    "rounding": "Rundung und Formatierung",
+    "newBundleDefaults": "Standardwerte für neue Bundles",
+    "cartMode": "Warenkorb-Modus",
+    "checkoutProtections": "Checkout-Schutz",
+    "channels": "Kanäle",
+    "channelsSaveError": "Speichern der Kanäle fehlgeschlagen",
+    "emailChannel": "E-Mail-Kanal",
+    "alertRules": "Alarmregeln",
+    "localization": "Lokalisierung"
   }
 }

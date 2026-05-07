@@ -141,5 +141,28 @@
   "common": {
     "loading": "불러오는 중…",
     "noResults": "결과 없음"
+  },
+  "settingsPage": {
+    "saved": "설정이 저장되었습니다",
+    "saveError": "저장하지 못했습니다",
+    "shop": "스토어",
+    "brand": "브랜드",
+    "brandSaveError": "브랜드를 저장하지 못했습니다",
+    "defaults": "기본값",
+    "layoutCard": "레이아웃과 시각 스타일",
+    "imageryCard": "이미지와 문구",
+    "cssCard": "사용자 지정 CSS",
+    "bracesMismatch": "중괄호가 일치하지 않습니다",
+    "stockGuards": "재고 보호",
+    "auditSnapshots": "감사와 스냅샷",
+    "rounding": "반올림과 형식",
+    "newBundleDefaults": "새 번들 기본값",
+    "cartMode": "장바구니 모드",
+    "checkoutProtections": "결제 보호",
+    "channels": "채널",
+    "channelsSaveError": "채널을 저장하지 못했습니다",
+    "emailChannel": "이메일 채널",
+    "alertRules": "알림 규칙",
+    "localization": "현지화"
   }
 }

@@ -141,5 +141,28 @@
   "common": {
     "loading": "Cargando…",
     "noResults": "Sin resultados"
+  },
+  "settingsPage": {
+    "saved": "Configuración guardada",
+    "saveError": "No se pudo guardar",
+    "shop": "Tienda",
+    "brand": "Marca",
+    "brandSaveError": "No se pudo guardar la marca",
+    "defaults": "Predeterminados",
+    "layoutCard": "Diseño y estilo visual",
+    "imageryCard": "Imágenes y textos",
+    "cssCard": "CSS personalizado",
+    "bracesMismatch": "Llaves desemparejadas",
+    "stockGuards": "Protecciones de inventario",
+    "auditSnapshots": "Auditoría e instantáneas",
+    "rounding": "Redondeo y formato",
+    "newBundleDefaults": "Valores por defecto para nuevos paquetes",
+    "cartMode": "Modo de carrito",
+    "checkoutProtections": "Protecciones de pago",
+    "channels": "Canales",
+    "channelsSaveError": "No se pudieron guardar los canales",
+    "emailChannel": "Canal de correo",
+    "alertRules": "Reglas de alerta",
+    "localization": "Localización"
   }
 }

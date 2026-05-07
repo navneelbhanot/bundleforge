@@ -141,5 +141,28 @@
   "common": {
     "loading": "Läser in…",
     "noResults": "Inga resultat"
+  },
+  "settingsPage": {
+    "saved": "Inställningar sparade",
+    "saveError": "Det gick inte att spara",
+    "shop": "Butik",
+    "brand": "Varumärke",
+    "brandSaveError": "Det gick inte att spara varumärket",
+    "defaults": "Standardvärden",
+    "layoutCard": "Layout och visuell stil",
+    "imageryCard": "Bilder och text",
+    "cssCard": "Anpassad CSS",
+    "bracesMismatch": "Måsvingar matchar inte",
+    "stockGuards": "Lagerskydd",
+    "auditSnapshots": "Granskning och ögonblicksbilder",
+    "rounding": "Avrundning och format",
+    "newBundleDefaults": "Standardvärden för nya paket",
+    "cartMode": "Kundvagnsläge",
+    "checkoutProtections": "Kassaskydd",
+    "channels": "Kanaler",
+    "channelsSaveError": "Det gick inte att spara kanaler",
+    "emailChannel": "E-postkanal",
+    "alertRules": "Varningsregler",
+    "localization": "Lokalisering"
   }
 }
