@@ -23,17 +23,70 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 
 ## Exact next action
 
-**User (Railway dashboard, next session):** Create a new
-Railway service for the marketing site. Root Directory:
-`marketing`; Watch Paths: `marketing/**` (so backend
-commits don't redeploy marketing). The service uses
-`marketing/Dockerfile` and `marketing/railway.json` —
-no env vars required. Once green, add `mintbundle.app`
-as a custom domain. Step-by-step in `marketing/README.md`.
+**User (next 24 hours):** Execute the 12-step rebrand handoff
+in `docs/ops/rebrand-handoff.md`. In priority order:
 
-**Code (next session):** No queued roadmap milestone.
-Phase R5 closed; the rich-admin-ui work that started at
-M-161 is now complete. Open backlog items below.
+1. Register `mintbundle.app` and `mintbundle.com` (verified
+   unregistered as of 2026-05-07; squatters move fast).
+2. Cloudflare DNS for the new domain (mirror current
+   bundleforge.app setup pointing at Railway).
+3. Partner Dashboard → create new "MintBundle" app
+   (don't rename the BundleForge draft). Copy the new
+   client_id + client_secret.
+4. Update `shopify.app.toml`'s `client_id` field with the new
+   value, commit, push.
+5. Railway → Variables → swap `SHOPIFY_API_KEY`,
+   `SHOPIFY_API_SECRET`, `SHOPIFY_APP_URL`.
+6. Resend → new sending domain `mail.mintbundle.app` (mirror
+   current `mail.bundleforge.app` records).
+7. Workspace → `support@mintbundle.app` alias.
+8. `npx shopify app deploy` to push Functions + Theme
+   Extensions under the new app's client_id.
+9. Optional: sell `bundleforge.app` to JRL Software for
+   ₹15k recovery, OR 301-redirect.
+10. Cloudflare Pages → swap marketing site custom domain.
+11. App Store submission via Partner Dashboard.
+
+**Code (next session):** Wait for the user-side steps to
+complete. Once the new MintBundle app is installed cleanly
+on a fresh dev store and Functions are redeployed, validate
+end-to-end: install → admin loads → Settings → Billing →
+Subscribe → Shopify charge confirmation → returns to admin
+with active subscription.
+
+After that's verified, M-203 (trial-warning email + cron) is
+the natural next milestone.
+
+**M-210 closed (2026-05-07, session 0210):** Rebrand
+BundleForge → MintBundle. Trigger: JRL Software launched a
+Shopify app named "BundleForge" on 2026-05-01 in the same
+category. Submitting under the same name guarantees Shopify
+rejection. 175+ files mechanically renamed; 0 remaining
+references. ADR `docs/decisions/0006-rebrand-mintbundle.md`
+documents the decision tree (PackForge / Bundlecraft /
+Stackr / etc. all ruled out for collision or domain
+unavailability). User-action playbook at
+`docs/ops/rebrand-handoff.md` — 12 steps, ~2.5 hours of
+active work spread over a day.
+
+**M-209 closed (2026-05-07, session 0210):** Webhook body
+parser fix. Single root cause for every billing/auth failure
+today: global `app.use(express.json())` was consuming the
+request body for all routes including `/api/webhooks`,
+leaving the HMAC verifier reading an empty Buffer. Every
+webhook (including app/uninstalled) returned 401 → stale
+tokens accumulated → 403s on every admin route. Fix is a
+path-aware skip on the global parser. Regression test in
+`tests/integration/webhook-json-parser.test.ts`.
+
+**M-208 closed (2026-05-07, session 0210):** Self-healing
+auth. New `src/middleware/recoverableAuth.ts` catches
+HttpResponseError 401/403 from Shopify SDK's
+`validateAuthenticatedSession` middleware and sends App
+Bridge re-authorize header instead of returning 500. Embedded
+admin transparently redirects to OAuth re-install, fresh
+tokens get written, app loads cleanly. Future-proofs against
+token-revocation cascades.
 
 **M-204 closed (2026-05-07, session 0204):** Billing page
 redesigned as a 4-card plan-comparison grid. Each card shows

@@ -310,6 +310,11 @@
 | M-201 | 80%-of-cap admin banner on Dashboard | done (2026-05-07) — `docs/specs/M-201-cap-warning-banner.md` |
 | M-202 | Resend transactional email + cap notifications | done (2026-05-07) — `docs/specs/M-202-transactional-email.md` |
 | M-204 | Billing page redesign (plan-comparison grid) | done (2026-05-07) — `docs/specs/M-204-billing-page-redesign.md` |
+| M-205 | Subscribe + cancel use offline session | done (2026-05-07) — in `src/routes/billing.ts` |
+| M-206 | BILLING_TEST_MODE env override | done (2026-05-07) — in `src/services/billing/createSubscription.ts` |
+| M-208 | Self-healing auth — recover from revoked Shopify tokens | done (2026-05-07) — `src/middleware/recoverableAuth.ts` |
+| M-209 | Webhook body parser fix (root-cause of cascading 403s) | done (2026-05-07) — `src/server/index.ts` + `tests/integration/webhook-json-parser.test.ts` |
+| M-210 | Rebrand BundleForge → MintBundle | done (2026-05-07) — `docs/decisions/0006-rebrand-mintbundle.md` + `docs/ops/rebrand-handoff.md` |
 
 ---
 
