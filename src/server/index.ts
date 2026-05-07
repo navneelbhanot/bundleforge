@@ -168,7 +168,18 @@ export function createApp(): Express {
     next();
   });
   app.use(compression());
-  app.use(express.json({ limit: "10mb" }));
+  // Skip JSON parsing on /api/webhooks — Shopify webhooks need
+  // the raw body bytes for HMAC verification, and a global
+  // express.json() consumer would steal the stream before the
+  // webhook route's `express.raw()` parser sees it. Without this
+  // skip, every webhook delivery returned 401 (HMAC mismatch on
+  // an empty buffer), Shopify never received our `app/uninstalled`
+  // ack, stale offline tokens accumulated in the DB, and every
+  // admin route eventually 403'd at the auth middleware. M-209.
+  app.use((req, _res, next) => {
+    if (req.path === "/api/webhooks") return next();
+    return express.json({ limit: "10mb" })(req, _res, next);
+  });
 
   // M-148: per-IP secondary limiter on the unauthenticated surface
   // (OAuth, webhook ingest, /health). The shop-scoped limiter still runs
