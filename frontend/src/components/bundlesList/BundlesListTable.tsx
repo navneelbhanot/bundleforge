@@ -29,11 +29,13 @@ import {
   Pagination,
   TextField,
   Text,
+  Tooltip,
   useIndexResourceState,
   useSetIndexFiltersMode,
 } from "@shopify/polaris";
 
 import { ConfirmDialog } from "../shell/ConfirmDialog";
+import { BundleCompactList } from "./BundleCompactList";
 
 export type BundleStatusFilter = "draft" | "active" | "archived";
 
@@ -470,30 +472,41 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
         mode={mode}
         setMode={setMode}
       />
-      {/* View-mode toggle. Polaris doesn't ship a built-in
-          IndexFilters slot for view modes, so we render our own
-          ButtonGroup above the table body. */}
+      {/* Saved-views hint + view-mode toggle. Polaris's IndexFilters
+          renders the `+` "Create new view" tab without a visible
+          label, so the caption on the left explains it. The
+          ButtonGroup on the right drives Table / Compact / Cards. */}
       <Box paddingBlockStart="200" paddingBlockEnd="200">
-        <InlineStack align="end">
+        <InlineStack align="space-between" blockAlign="center" wrap={false}>
+          <Text as="p" tone="subdued" variant="bodySm">
+            Tip: filter or search, then click <strong>+</strong> next to
+            the tabs above to save it as a view.
+          </Text>
           <ButtonGroup variant="segmented">
-            <Button
-              pressed={viewMode === "table"}
-              onClick={() => onViewModeChange("table")}
-            >
-              Table
-            </Button>
-            <Button
-              pressed={viewMode === "compact"}
-              onClick={() => onViewModeChange("compact")}
-            >
-              Compact
-            </Button>
-            <Button
-              pressed={viewMode === "card"}
-              onClick={() => onViewModeChange("card")}
-            >
-              Cards
-            </Button>
+            <Tooltip content="Standard table with sortable columns">
+              <Button
+                pressed={viewMode === "table"}
+                onClick={() => onViewModeChange("table")}
+              >
+                Table
+              </Button>
+            </Tooltip>
+            <Tooltip content="Dense list — title, type, status, edit on one line">
+              <Button
+                pressed={viewMode === "compact"}
+                onClick={() => onViewModeChange("compact")}
+              >
+                Compact
+              </Button>
+            </Tooltip>
+            <Tooltip content="Card grid — best for browsing visually">
+              <Button
+                pressed={viewMode === "card"}
+                onClick={() => onViewModeChange("card")}
+              >
+                Cards
+              </Button>
+            </Tooltip>
           </ButtonGroup>
         </InlineStack>
       </Box>
@@ -508,10 +521,20 @@ export function BundlesListTable(props: BundlesListTableProps): JSX.Element {
           onBulkDelete={() => setBulkConfirm("delete")}
           bulkBusy={bulkBusy}
         />
+      ) : viewMode === "compact" ? (
+        <BundleCompactList
+          rows={rows}
+          selectedResources={selectedResources}
+          onSelectionChange={handleSelectionChange}
+          onRowClick={onRowClick}
+          onBulkPublish={onBulkPublish}
+          onBulkArchive={() => setBulkConfirm("archive")}
+          onBulkDelete={() => setBulkConfirm("delete")}
+          bulkBusy={bulkBusy}
+        />
       ) : (
         <IndexTable
           itemCount={rows.length}
-          condensed={viewMode === "compact"}
           headings={[
             { title: "Title" },
             { title: "Type" },
