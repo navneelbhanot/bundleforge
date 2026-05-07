@@ -8,6 +8,8 @@
   },
   "scripts": {
     "start": "node server.cjs",
-    "preview": "node server.cjs"
+    "preview": "node server.cjs",
+    "//start:web": "Alias for Railway. The marketing service's stored config carries a stale startCommand of `npm run start:web` (a copy-paste from the main app) that the Railway API serviceInstanceUpdate didn't seem to clear. This alias makes the wrong command resolve to the right binary so the static site boots regardless of which entrypoint Railway picks.",
+    "start:web": "node server.cjs"
   }
 }
