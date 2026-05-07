@@ -5,7 +5,7 @@ type = "flow_action"
 name = "Force inventory sync"
 handle = "bundleforge-force-inventory-sync"
 description = "Recompute bundle stock from component inventory"
-runtime_url = "https://your-app-url.com/api/v1/inventory/sync"
+runtime_url = "https://app.bundleforge.app/api/v1/inventory/sync"
 schema = "src/force_sync_schema.json"
 return_type_ref = "FlowActionResult"
 
