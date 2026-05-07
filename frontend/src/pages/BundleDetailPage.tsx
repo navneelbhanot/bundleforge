@@ -432,6 +432,13 @@ export function BundleDetailPage(): JSX.Element {
   const detailsDirty =
     title !== bundle.title || description !== (bundle.description ?? "");
 
+  // Publish is disabled when the bundle has zero components — the
+  // server would reject it (M-187 polish), so save the merchant
+  // the round-trip and explain why via helpText.
+  const cannotPublishReason =
+    items.length === 0
+      ? "Add at least one component before publishing."
+      : null;
   // Choose the right primary action based on current status.
   const primary =
     bundle.status === "active"
@@ -454,7 +461,8 @@ export function BundleDetailPage(): JSX.Element {
             content: "Publish",
             onAction: () => statusAction("publish"),
             loading: busy,
-            disabled: busy,
+            disabled: busy || cannotPublishReason !== null,
+            helpText: cannotPublishReason ?? undefined,
           };
 
   return (
