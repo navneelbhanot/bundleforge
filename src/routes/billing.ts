@@ -39,6 +39,7 @@ import {
   isOverOrderCap,
   type OrderCapStatus,
 } from "../services/billing/orderCap";
+import { loadOfflineSessionFromShop } from "../shopify/sessionFromShop";
 
 /**
  * 80% threshold for the "approaching cap" admin banner (M-201).
@@ -53,7 +54,7 @@ const subscribeSchema = z.object({
   returnUrl: z.string().url().optional(),
 });
 
-interface BillingDeps {
+export interface BillingDeps {
   create?: (args: CreateSubscriptionArgs) => Promise<{
     confirmationUrl: string;
     chargeId: string;
@@ -79,6 +80,13 @@ interface BillingDeps {
     shop: { id: string; planName: string },
     now: Date,
   ) => Promise<OrderCapStatus>;
+  /**
+   * M-205: offline-session loader injected so /subscribe and
+   * /cancel can swap the user-scoped online token for the shop-
+   * wide offline token before calling Shopify Admin. Tests stub
+   * to avoid touching Prisma.
+   */
+  loadOfflineSession?: (shopDomain: string) => Promise<Session | null>;
 }
 
 function getSession(res: Response): Session | undefined {
@@ -107,6 +115,7 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
   const loadOrderCap =
     deps.loadOrderCap ??
     ((shop, now) => isOverOrderCap(prisma, shop, now));
+  const loadOffline = deps.loadOfflineSession ?? loadOfflineSessionFromShop;
 
   router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -167,17 +176,35 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
             .json({ error: { code: "unauthorized", message: "No shop context" } });
           return;
         }
-        const session = getSession(res);
-        if (!session) {
+        const onlineSession = getSession(res);
+        if (!onlineSession) {
           res.status(401).json({
             error: { code: "unauthorized", message: "No Shopify session" },
+          });
+          return;
+        }
+        // appSubscriptionCreate is a shop-level mutation — Shopify
+        // expects an OFFLINE access token (the long-lived shop-wide
+        // one persisted at OAuth install). Embedded apps' online
+        // session token is user-scoped and Shopify can reject the
+        // mutation at the gateway with a 400 + empty body. Load the
+        // offline session from the shop record before issuing the
+        // mutation.
+        const offlineSession = await loadOffline(onlineSession.shop);
+        if (!offlineSession) {
+          res.status(401).json({
+            error: {
+              code: "no_offline_session",
+              message:
+                "No offline session for this shop. Reinstall the app to refresh credentials.",
+            },
           });
           return;
         }
         const parsed = subscribeSchema.parse(req.body);
         try {
           const result = await create({
-            session,
+            session: offlineSession,
             shopId: req.shopId,
             plan: parsed.plan as PlanName,
             interval: parsed.interval,
@@ -224,10 +251,24 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
             .json({ error: { code: "unauthorized", message: "No shop context" } });
           return;
         }
-        const session = getSession(res);
-        if (!session) {
+        const onlineSession = getSession(res);
+        if (!onlineSession) {
           res.status(401).json({
             error: { code: "unauthorized", message: "No Shopify session" },
+          });
+          return;
+        }
+        // Same as /subscribe: cancel is a shop-level mutation and
+        // wants the offline access token, not the user-scoped
+        // online one (M-205).
+        const offlineSession = await loadOffline(onlineSession.shop);
+        if (!offlineSession) {
+          res.status(401).json({
+            error: {
+              code: "no_offline_session",
+              message:
+                "No offline session for this shop. Reinstall the app to refresh credentials.",
+            },
           });
           return;
         }
@@ -239,7 +280,7 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
           return;
         }
         const result = await cancel({
-          session,
+          session: offlineSession,
           chargeId: sub.shopifyChargeId,
         });
         res.json(result);

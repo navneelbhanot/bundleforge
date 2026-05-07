@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
 
 import { errorHandler, requestId } from "../middleware/errorHandler";
-import { installBillingRoutes } from "./billing";
+import { installBillingRoutes, type BillingDeps } from "./billing";
 
 function buildApp(deps: Parameters<typeof installBillingRoutes>[0]): Express {
   const app = express();
@@ -17,8 +17,11 @@ function buildApp(deps: Parameters<typeof installBillingRoutes>[0]): Express {
     };
     next();
   });
-  // Default loadOrderCap stub so existing tests don't hit Prisma.
-  // M-201's banner-state cases pass their own loadOrderCap.
+  // Default stubs so existing tests don't hit Prisma.
+  // - loadOrderCap: M-201's banner-state cases pass their own.
+  // - loadOfflineSession: M-205's offline-session swap is what
+  //   actually calls Shopify; stub returns a fake offline Session
+  //   so /subscribe and /cancel reach the create/cancel mocks.
   const withDefaults = {
     ...deps,
     loadOrderCap:
@@ -29,6 +32,13 @@ function buildApp(deps: Parameters<typeof installBillingRoutes>[0]): Express {
         count: 0,
         over: false,
       })),
+    loadOfflineSession:
+      deps?.loadOfflineSession ??
+      (async (shopDomain: string) => ({
+        shop: shopDomain,
+        accessToken: "offline-test-token",
+        isOnline: false,
+      } as unknown as import("@shopify/shopify-api").Session)),
   };
   app.use("/billing", installBillingRoutes(withDefaults));
   app.use(errorHandler);
@@ -175,6 +185,46 @@ describe("POST /billing/subscribe", () => {
     expect(args.shopId).toBe("shop-uuid");
     expect(args.plan).toBe("growth");
     expect(args.interval).toBe("monthly");
+  });
+
+  it("passes the OFFLINE session to createSubscription, not the online one (M-205)", async () => {
+    // appSubscriptionCreate is shop-level — Shopify rejects the
+    // user-scoped online token at the gateway with a 400 + empty
+    // body. The route must swap to the offline session.
+    const create = vi.fn().mockResolvedValue({
+      confirmationUrl: "https://x",
+      chargeId: "gid://A/1",
+    });
+    const offlineSession = {
+      shop: "demo.myshopify.com",
+      accessToken: "offline-token-X",
+      isOnline: false,
+    };
+    const loadOfflineSession = vi.fn().mockResolvedValue(offlineSession);
+    const app = buildApp({
+      create,
+      loadOfflineSession: loadOfflineSession as unknown as BillingDeps["loadOfflineSession"],
+    });
+    await request(app)
+      .post("/billing/subscribe")
+      .send({ plan: "growth", interval: "annual" });
+    expect(loadOfflineSession).toHaveBeenCalledWith("demo.myshopify.com");
+    expect(create.mock.calls[0][0].session).toBe(offlineSession);
+    expect(create.mock.calls[0][0].session.isOnline).toBe(false);
+  });
+
+  it("returns 401 when no offline session exists for the shop", async () => {
+    const create = vi.fn();
+    const app = buildApp({
+      create,
+      loadOfflineSession: (async () => null) as unknown as BillingDeps["loadOfflineSession"],
+    });
+    const res = await request(app)
+      .post("/billing/subscribe")
+      .send({ plan: "growth", interval: "annual" });
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe("no_offline_session");
+    expect(create).not.toHaveBeenCalled();
   });
 
   it("rejects invalid plan", async () => {
