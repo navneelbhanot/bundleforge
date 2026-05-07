@@ -1,0 +1,17 @@
+[[extensions]]
+type = "flow_action"
+handle = "bundleforge-force-inventory-sync"
+name = "Force inventory sync"
+description = "Recompute bundle stock from component inventory"
+runtime_url = "https://app.bundleforge.app/api/v1/inventory/sync"
+schema = "schema.graphql"
+return_type_ref = "FlowActionResult"
+
+[settings]
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "bundle_id"
+  name = "Bundle ID"
+  description = "BundleForge bundle id (UUID) to recompute stock for. Leave blank to sync every bundle in the shop."
+  required = false

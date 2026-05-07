@@ -1,0 +1,31 @@
+[[extensions]]
+type = "flow_trigger"
+handle = "bundleforge-bundle-low-stock"
+name = "Bundle low stock"
+description = "Fires when a bundle's available quantity falls below the configured threshold"
+
+[settings]
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "bundle_id"
+  name = "Bundle ID"
+  description = "Internal BundleForge bundle id (UUID)."
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "title"
+  name = "Bundle title"
+  description = "Merchant-facing title of the bundle."
+
+  [[settings.fields]]
+  type = "number_integer"
+  key = "available_quantity"
+  name = "Available quantity"
+  description = "Current bundles available, derived from component stock."
+
+  [[settings.fields]]
+  type = "number_integer"
+  key = "threshold"
+  name = "Threshold"
+  description = "Configured low-stock threshold that just tripped."

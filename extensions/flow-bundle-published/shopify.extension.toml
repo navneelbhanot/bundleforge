@@ -1,0 +1,31 @@
+[[extensions]]
+type = "flow_trigger"
+handle = "bundleforge-bundle-published"
+name = "Bundle published"
+description = "Fires when a merchant publishes a bundle"
+
+[settings]
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "bundle_id"
+  name = "Bundle ID"
+  description = "Internal BundleForge bundle id (UUID)."
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "title"
+  name = "Bundle title"
+  description = "Merchant-facing title of the bundle."
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "bundle_type"
+  name = "Bundle type"
+  description = "Engine type — e.g. mix_and_match, fixed, build_a_box."
+
+  [[settings.fields]]
+  type = "single_line_text_field"
+  key = "slug"
+  name = "Bundle slug"
+  description = "URL slug of the bundle product."

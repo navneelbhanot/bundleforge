@@ -1,0 +1,13 @@
+"""
+Result of a Force Inventory Sync Flow action.
+
+Returned to Flow so downstream steps can branch on success/failure
+and surface the message in run logs.
+"""
+type FlowActionResult {
+  "Whether the sync completed without error."
+  success: Boolean!
+
+  "Human-readable status message (e.g. 'Synced 12 bundles' or an error reason)."
+  message: String!
+}
