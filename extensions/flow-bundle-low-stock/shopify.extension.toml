@@ -19,13 +19,13 @@ description = "Fires when a bundle's available quantity falls below the configur
   description = "Merchant-facing title of the bundle."
 
   [[settings.fields]]
-  type = "number_integer"
+  type = "number_decimal"
   key = "availableQuantity"
   name = "Available quantity"
   description = "Current bundles available, derived from component stock."
 
   [[settings.fields]]
-  type = "number_integer"
+  type = "number_decimal"
   key = "threshold"
   name = "Threshold"
   description = "Configured low-stock threshold that just tripped."
