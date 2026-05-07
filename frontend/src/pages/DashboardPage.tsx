@@ -26,6 +26,10 @@ import { BlockStack, Frame, Grid, InlineStack, Page } from "@shopify/polaris";
 import { AppLanguageSelect } from "../components/dashboard/AppLanguageSelect";
 import { FreshShopDashboard } from "../components/dashboard/FreshShopDashboard";
 import {
+  OrderCapBanner,
+  type OrderCapBannerStatus,
+} from "../components/dashboard/OrderCapBanner";
+import {
   SetupChecklist,
   type ChecklistStep,
 } from "../components/dashboard/SetupChecklist";
@@ -99,6 +103,7 @@ export function DashboardPage(): JSX.Element {
   const [bundleTotal, setBundleTotal] = useState<number | null>(null);
   const [activeTotal, setActiveTotal] = useState<number | null>(null);
   const [settings, setSettings] = useState<SettingsResp | null>(null);
+  const [orderCap, setOrderCap] = useState<OrderCapBannerStatus | null>(null);
   const [showWizard, setShowWizard] = useState(false);
   const [freshShopDismissed, setFreshShopDismissed] = useState<boolean>(() =>
     readFreshShopDismissed(),
@@ -129,6 +134,18 @@ export function DashboardPage(): JSX.Element {
       })
       .catch((e: Error) => {
         if (!cancelled) setError(e.message);
+      });
+    // M-201: order-cap banner. Fire-and-forget — failure is silent
+    // (worst case the banner just doesn't appear; the storefront-side
+    // M-200 enforcement still protects us).
+    fetch("/api/v1/billing")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { orderCap?: OrderCapBannerStatus } | null) => {
+        if (cancelled || !data?.orderCap) return;
+        setOrderCap(data.orderCap);
+      })
+      .catch(() => {
+        // silent — banner is a soft prompt, not a critical surface.
       });
     return () => {
       cancelled = true;
@@ -316,6 +333,8 @@ export function DashboardPage(): JSX.Element {
               onChange={(next) => void handleLanguageChange(next)}
             />
           </InlineStack>
+
+          <OrderCapBanner status={orderCap} />
 
           <SetupChecklist
             steps={checklistSteps}

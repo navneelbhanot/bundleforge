@@ -17,7 +17,20 @@ function buildApp(deps: Parameters<typeof installBillingRoutes>[0]): Express {
     };
     next();
   });
-  app.use("/billing", installBillingRoutes(deps));
+  // Default loadOrderCap stub so existing tests don't hit Prisma.
+  // M-201's banner-state cases pass their own loadOrderCap.
+  const withDefaults = {
+    ...deps,
+    loadOrderCap:
+      deps?.loadOrderCap ??
+      (async (shop: { id: string; planName: string }) => ({
+        plan: shop.planName as "starter",
+        cap: null as number | null,
+        count: 0,
+        over: false,
+      })),
+  };
+  app.use("/billing", installBillingRoutes(withDefaults));
   app.use(errorHandler);
   return app;
 }
@@ -60,6 +73,88 @@ describe("GET /billing", () => {
     const res = await request(app).get("/billing");
     expect(res.body.plan).toBe("pro");
     expect(res.body.features.threePlSync).toBe(true);
+  });
+
+  describe("orderCap field (M-201)", () => {
+    it("approaching=false on Starter at 79 of 100", async () => {
+      const app = buildApp({
+        loadSubscription: async () => null,
+        loadOrderCap: async () => ({
+          plan: "starter",
+          cap: 100,
+          count: 79,
+          over: false,
+        }),
+      });
+      const res = await request(app).get("/billing");
+      expect(res.body.orderCap).toEqual({
+        plan: "starter",
+        cap: 100,
+        count: 79,
+        over: false,
+        approaching: false,
+      });
+    });
+
+    it("approaching=true on Starter at 80 of 100 (exact threshold)", async () => {
+      const app = buildApp({
+        loadSubscription: async () => null,
+        loadOrderCap: async () => ({
+          plan: "starter",
+          cap: 100,
+          count: 80,
+          over: false,
+        }),
+      });
+      const res = await request(app).get("/billing");
+      expect(res.body.orderCap.approaching).toBe(true);
+      expect(res.body.orderCap.over).toBe(false);
+    });
+
+    it("approaching=false but over=true at exactly the cap", async () => {
+      const app = buildApp({
+        loadSubscription: async () => null,
+        loadOrderCap: async () => ({
+          plan: "starter",
+          cap: 100,
+          count: 100,
+          over: true,
+        }),
+      });
+      const res = await request(app).get("/billing");
+      expect(res.body.orderCap.over).toBe(true);
+      // approaching MUST be false once over is true — banner UX
+      // chooses one or the other, not both.
+      expect(res.body.orderCap.approaching).toBe(false);
+    });
+
+    it("approaching/over both false on paid plan (cap=null)", async () => {
+      const app = buildApp({
+        loadSubscription: async () => ({
+          planName: "growth",
+          status: "active",
+          shopifyChargeId: "gid://A/1",
+          billingInterval: "monthly",
+          trialEndsAt: null,
+          activatedAt: new Date(),
+          cancelledAt: null,
+        }),
+        loadOrderCap: async () => ({
+          plan: "growth",
+          cap: null,
+          count: 5_000,
+          over: false,
+        }),
+      });
+      const res = await request(app).get("/billing");
+      expect(res.body.orderCap).toEqual({
+        plan: "growth",
+        cap: null,
+        count: 5_000,
+        over: false,
+        approaching: false,
+      });
+    });
   });
 });
 

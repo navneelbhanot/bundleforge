@@ -27,6 +27,16 @@ Roadmap: `docs/plans/rich-admin-ui-roadmap.md`.
 Phase R5 closed; the rich-admin-ui work that started at
 M-161 is now complete. Open backlog items below.
 
+**M-201 closed (2026-05-07, session 0201):** Dashboard now
+renders an upgrade banner above the widgets when a Starter
+shop crosses 80% of its monthly bundle-order cap (warning),
+or hits 100% (critical). Backend `GET /api/v1/billing` now
+returns an `orderCap` field with `approaching` derived at
+the API boundary. Pure presentational `OrderCapBanner`
+component lives next to the SetupChecklist; clicking the
+CTA navigates to `/settings#billing`. Soft prompt — paid
+plans never see it.
+
 **M-200 closed (2026-05-07, session 0200):** Starter
 `maxOrdersPerMonth` (100) is now enforced via
 `/api/proxy/validate-cart`. New service

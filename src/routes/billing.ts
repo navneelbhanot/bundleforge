@@ -35,6 +35,17 @@ import {
   cancelSubscription as defaultCancel,
   type CancelSubscriptionArgs,
 } from "../services/billing/cancelSubscription";
+import {
+  isOverOrderCap,
+  type OrderCapStatus,
+} from "../services/billing/orderCap";
+
+/**
+ * 80% threshold for the "approaching cap" admin banner (M-201).
+ * Lives at the API boundary so the M-200 storefront-side gate
+ * stays a clean binary.
+ */
+const APPROACHING_CAP_THRESHOLD = 0.8;
 
 const subscribeSchema = z.object({
   plan: z.enum(["growth", "pro", "enterprise"]),
@@ -59,6 +70,15 @@ interface BillingDeps {
     activatedAt: Date | null;
     cancelledAt: Date | null;
   } | null>;
+  /**
+   * M-201: order-cap status injected so the GET / response can
+   * carry an `orderCap` field for the dashboard banner without
+   * tests needing to satisfy Prisma.
+   */
+  loadOrderCap?: (
+    shop: { id: string; planName: string },
+    now: Date,
+  ) => Promise<OrderCapStatus>;
 }
 
 function getSession(res: Response): Session | undefined {
@@ -84,6 +104,9 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
           cancelledAt: true,
         },
       }));
+  const loadOrderCap =
+    deps.loadOrderCap ??
+    ((shop, now) => isOverOrderCap(prisma, shop, now));
 
   router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -93,12 +116,30 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
       }
       const sub = await loadSubscription(req.shopId);
       const plan = planFor(sub?.planName);
+      // M-201: order-cap status for the dashboard "approaching cap"
+      // banner. `approaching` is derived at the API boundary so the
+      // M-200 storefront gate (`isOverOrderCap`) stays purely binary.
+      const cap = await loadOrderCap(
+        { id: req.shopId, planName: plan },
+        new Date(),
+      );
+      const approaching =
+        cap.cap !== null &&
+        !cap.over &&
+        cap.count / cap.cap >= APPROACHING_CAP_THRESHOLD;
       res.json({
         plan,
         caps: PLAN_CAPS[plan],
         features: PLAN_FEATURES[plan],
         rateLimit: PLAN_RATE_LIMITS[plan],
         subscription: sub,
+        orderCap: {
+          plan: cap.plan,
+          cap: cap.cap,
+          count: cap.count,
+          over: cap.over,
+          approaching,
+        },
       });
     } catch (err) {
       next(err);
