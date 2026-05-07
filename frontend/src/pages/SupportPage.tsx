@@ -24,7 +24,6 @@ import {
   Card,
   Frame,
   Grid,
-  InlineStack,
   Page,
   Text,
   TextField,
@@ -211,63 +210,135 @@ export function SupportPage(props: SupportPageProps = {}): JSX.Element {
           />
 
           <Grid>
-            {/* Left pane — article list */}
+            {/* Left pane — Talk-to-us, Resources, and the article list */}
             <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 2, lg: 4, xl: 4 }}>
-              <Card>
-                <BlockStack gap="300">
-                  <Text as="h2" variant="headingSm">
-                    {filter
-                      ? `${filtered.length} article${filtered.length === 1 ? "" : "s"}`
-                      : `${articles.length} article${articles.length === 1 ? "" : "s"}`}
-                  </Text>
-                  {listError ? (
-                    <Text as="p" tone="critical">
-                      Couldn&apos;t load: {listError}
+              <BlockStack gap="400">
+                {/* Talk to us — persistent CTA, always visible */}
+                <Card>
+                  <BlockStack gap="300">
+                    <Text as="h2" variant="headingSm">
+                      Talk to us
                     </Text>
-                  ) : grouped.length === 0 ? (
-                    <Text as="p" tone="subdued">
-                      {articles.length === 0 ? "Loading…" : "No matches."}
+                    <Text as="p" tone="subdued" variant="bodySm">
+                      Average response under one business day. If your
+                      issue is on a live order, mention the order
+                      number so we can find it fast.
                     </Text>
-                  ) : (
-                    grouped.map(([category, list]) => (
-                      <BlockStack key={category} gap="100">
-                        <Text as="h3" variant="bodySm" tone="subdued">
-                          {category}
-                        </Text>
-                        <BlockStack gap="050">
-                          {list.map((a) => (
-                            <button
-                              key={a.id}
-                              type="button"
-                              onClick={() => selectArticle(a.id)}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                padding: "6px 8px",
-                                border: "none",
-                                borderRadius: 6,
-                                cursor: "pointer",
-                                textAlign: "left",
-                                background:
-                                  active?.id === a.id
-                                    ? "var(--p-color-bg-surface-selected)"
-                                    : "transparent",
-                                color:
-                                  active?.id === a.id
-                                    ? "var(--p-color-text-emphasis)"
-                                    : "var(--p-color-text)",
-                                fontWeight: active?.id === a.id ? 600 : 400,
-                              }}
-                            >
-                              {a.title}
-                            </button>
-                          ))}
-                        </BlockStack>
+                    <BlockStack gap="200">
+                      {crispReady ? (
+                        <Button
+                          variant="primary"
+                          fullWidth
+                          onClick={openCrispChat}
+                        >
+                          Open live chat
+                        </Button>
+                      ) : null}
+                      <Button
+                        variant={crispReady ? "secondary" : "primary"}
+                        fullWidth
+                        url={`mailto:${SUPPORT_EMAIL}?subject=BundleForge%20support%20request`}
+                        external
+                      >
+                        Email support
+                      </Button>
+                    </BlockStack>
+                  </BlockStack>
+                </Card>
+
+                {/* Resources — only renders the rows whose env vars are set */}
+                {CHANGELOG_URL || STATUS_URL || GITHUB_REPO_URL ? (
+                  <Card>
+                    <BlockStack gap="200">
+                      <Text as="h2" variant="headingSm">
+                        Resources
+                      </Text>
+                      <BlockStack gap="100">
+                        {CHANGELOG_URL ? (
+                          <Button
+                            url={CHANGELOG_URL}
+                            external
+                            variant="plain"
+                          >
+                            Changelog →
+                          </Button>
+                        ) : null}
+                        {STATUS_URL ? (
+                          <Button url={STATUS_URL} external variant="plain">
+                            System status →
+                          </Button>
+                        ) : null}
+                        {GITHUB_REPO_URL ? (
+                          <Button
+                            url={GITHUB_REPO_URL}
+                            external
+                            variant="plain"
+                          >
+                            Report an issue on GitHub →
+                          </Button>
+                        ) : null}
                       </BlockStack>
-                    ))
-                  )}
-                </BlockStack>
-              </Card>
+                    </BlockStack>
+                  </Card>
+                ) : null}
+
+                {/* Article list */}
+                <Card>
+                  <BlockStack gap="300">
+                    <Text as="h2" variant="headingSm">
+                      {filter
+                        ? `${filtered.length} article${filtered.length === 1 ? "" : "s"}`
+                        : `${articles.length} article${articles.length === 1 ? "" : "s"}`}
+                    </Text>
+                    {listError ? (
+                      <Text as="p" tone="critical">
+                        Couldn&apos;t load: {listError}
+                      </Text>
+                    ) : grouped.length === 0 ? (
+                      <Text as="p" tone="subdued">
+                        {articles.length === 0 ? "Loading…" : "No matches."}
+                      </Text>
+                    ) : (
+                      grouped.map(([category, list]) => (
+                        <BlockStack key={category} gap="100">
+                          <Text as="h3" variant="bodySm" tone="subdued">
+                            {category}
+                          </Text>
+                          <BlockStack gap="050">
+                            {list.map((a) => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                onClick={() => selectArticle(a.id)}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  padding: "6px 8px",
+                                  border: "none",
+                                  borderRadius: 6,
+                                  cursor: "pointer",
+                                  textAlign: "left",
+                                  background:
+                                    active?.id === a.id
+                                      ? "var(--p-color-bg-surface-selected)"
+                                      : "transparent",
+                                  color:
+                                    active?.id === a.id
+                                      ? "var(--p-color-text-emphasis)"
+                                      : "var(--p-color-text)",
+                                  fontWeight: active?.id === a.id ? 600 : 400,
+                                }}
+                              >
+                                {a.title}
+                              </button>
+                            ))}
+                          </BlockStack>
+                        </BlockStack>
+                      ))
+                    )}
+                  </BlockStack>
+                </Card>
+              </BlockStack>
             </Grid.Cell>
 
             {/* Right pane — selected article */}
@@ -286,71 +357,6 @@ export function SupportPage(props: SupportPageProps = {}): JSX.Element {
                     <MarkdownView body={active.body} />
                   )}
                 </Box>
-              </Card>
-            </Grid.Cell>
-          </Grid>
-
-          {/* Contact + resources row */}
-          <Grid>
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 3, lg: 6, xl: 6 }}>
-              <Card>
-                <BlockStack gap="300">
-                  <Text as="h2" variant="headingMd">
-                    Talk to us
-                  </Text>
-                  <Text as="p" tone="subdued" variant="bodyMd">
-                    Average response under one business day. If your issue is
-                    on a live order, mention the order number so we can find
-                    it fast.
-                  </Text>
-                  <InlineStack gap="200">
-                    {crispReady ? (
-                      <Button variant="primary" onClick={openCrispChat}>
-                        Open live chat
-                      </Button>
-                    ) : null}
-                    <Button
-                      variant={crispReady ? "secondary" : "primary"}
-                      url={`mailto:${SUPPORT_EMAIL}?subject=BundleForge%20support%20request`}
-                      external
-                    >
-                      Email {SUPPORT_EMAIL}
-                    </Button>
-                  </InlineStack>
-                </BlockStack>
-              </Card>
-            </Grid.Cell>
-
-            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 3, lg: 6, xl: 6 }}>
-              <Card>
-                <BlockStack gap="300">
-                  <Text as="h2" variant="headingMd">
-                    Resources
-                  </Text>
-                  <BlockStack gap="100">
-                    {CHANGELOG_URL ? (
-                      <Button url={CHANGELOG_URL} external variant="plain">
-                        Changelog →
-                      </Button>
-                    ) : null}
-                    {STATUS_URL ? (
-                      <Button url={STATUS_URL} external variant="plain">
-                        System status →
-                      </Button>
-                    ) : null}
-                    {GITHUB_REPO_URL ? (
-                      <Button url={GITHUB_REPO_URL} external variant="plain">
-                        Report an issue on GitHub →
-                      </Button>
-                    ) : null}
-                    {!CHANGELOG_URL && !STATUS_URL && !GITHUB_REPO_URL ? (
-                      <Text as="p" tone="subdued" variant="bodySm">
-                        More resources will appear here as we publish a
-                        changelog and status page.
-                      </Text>
-                    ) : null}
-                  </BlockStack>
-                </BlockStack>
               </Card>
             </Grid.Cell>
           </Grid>

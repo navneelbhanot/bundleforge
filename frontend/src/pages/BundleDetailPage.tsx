@@ -6,7 +6,7 @@
  * live storefront preview side-by-side. Title + description are
  * editable inline; saving any of those fires PUT /api/v1/bundles/:id.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Badge,
@@ -165,6 +165,33 @@ export function BundleDetailPage(): JSX.Element {
   const [pickerBusy, setPickerBusy] = useState(false);
   const { show: showToast } = useToasts();
   const [tabIndex, setTabIndex] = useState<number>(readHashTab());
+  // Track which tabs the merchant has visited so we can keep them
+  // mounted (display:none when inactive). First visit pays the
+  // mount + fetch cost; every subsequent switch is instant. The
+  // Setup tab is always mounted so its in-flight form edits never
+  // get discarded.
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(
+    () => new Set(["setup", TABS[readHashTab()].id]),
+  );
+  useEffect(() => {
+    const id = TABS[tabIndex].id;
+    setVisitedTabs((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, [tabIndex]);
+  const isMounted = useCallback(
+    (id: string): boolean => visitedTabs.has(id),
+    [visitedTabs],
+  );
+  const tabStyle = useCallback(
+    (id: string): React.CSSProperties => ({
+      display: TABS[tabIndex].id === id ? "block" : "none",
+    }),
+    [tabIndex],
+  );
   const [shopDisplayDefaults, setShopDisplayDefaults] =
     useState<ShopDisplayDefaults | null>(null);
   const [shopInventoryDefaults, setShopInventoryDefaults] =
@@ -440,82 +467,98 @@ export function BundleDetailPage(): JSX.Element {
 
           <Layout>
             <Layout.Section>
-              {/* Setup-tab form is always mounted (just hidden when
-                  another tab is active) so that switching tabs never
-                  discards in-flight title/description/items/rules
-                  edits. Other tabs render their content above the
-                  hidden Setup form so the form's React state stays
-                  alive in the DOM. */}
-              {TABS[tabIndex].id === "schedule" && (
-                <Box paddingBlockEnd="400">
-                  <ScheduleTab
-                    startsAt={bundle.startsAt ?? null}
-                    endsAt={bundle.endsAt ?? null}
-                    scheduleSettings={bundle.scheduleSettings ?? {}}
-                    shopTimezone={bundle.shopTimezone ?? "UTC"}
-                    busy={busy}
-                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
-                  />
-                </Box>
+              {/* Each tab uses a mount-once-stay-mounted pattern:
+                  the first time the merchant visits, the tab's
+                  component mounts (and any data fetch fires); on
+                  subsequent switches the tab is just toggled with
+                  display:none so the React state + fetched data
+                  are preserved. Setup is in the visited set from
+                  the start so its in-flight form edits never get
+                  discarded. */}
+              {isMounted("schedule") && (
+                <div style={tabStyle("schedule")}>
+                  <Box paddingBlockEnd="400">
+                    <ScheduleTab
+                      startsAt={bundle.startsAt ?? null}
+                      endsAt={bundle.endsAt ?? null}
+                      scheduleSettings={bundle.scheduleSettings ?? {}}
+                      shopTimezone={bundle.shopTimezone ?? "UTC"}
+                      busy={busy}
+                      onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                    />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "display" && (
-                <Box paddingBlockEnd="400">
-                  <DisplayTab
-                    bundleDisplay={bundle.displaySettings ?? {}}
-                    shopDefaults={shopDisplayDefaults ?? {}}
-                    busy={busy}
-                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
-                  />
-                </Box>
+              {isMounted("display") && (
+                <div style={tabStyle("display")}>
+                  <Box paddingBlockEnd="400">
+                    <DisplayTab
+                      bundleDisplay={bundle.displaySettings ?? {}}
+                      shopDefaults={shopDisplayDefaults ?? {}}
+                      busy={busy}
+                      onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                    />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "customers" && (
-                <Box paddingBlockEnd="400">
-                  <CustomersTab
-                    eligibility={bundle.eligibility ?? {}}
-                    busy={busy}
-                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
-                  />
-                </Box>
+              {isMounted("customers") && (
+                <div style={tabStyle("customers")}>
+                  <Box paddingBlockEnd="400">
+                    <CustomersTab
+                      eligibility={bundle.eligibility ?? {}}
+                      busy={busy}
+                      onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                    />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "inventory" && (
-                <Box paddingBlockEnd="400">
-                  <InventoryTab
-                    inventoryRules={bundle.inventoryRules ?? {}}
-                    shopDefaults={shopInventoryDefaults ?? {}}
-                    busy={busy}
-                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
-                  />
-                </Box>
+              {isMounted("inventory") && (
+                <div style={tabStyle("inventory")}>
+                  <Box paddingBlockEnd="400">
+                    <InventoryTab
+                      inventoryRules={bundle.inventoryRules ?? {}}
+                      shopDefaults={shopInventoryDefaults ?? {}}
+                      busy={busy}
+                      onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                    />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "performance" && (
-                <Box paddingBlockEnd="400">
-                  <PerformanceTab bundleId={bundle.id} />
-                </Box>
+              {isMounted("performance") && (
+                <div style={tabStyle("performance")}>
+                  <Box paddingBlockEnd="400">
+                    <PerformanceTab bundleId={bundle.id} />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "activity" && (
-                <Box paddingBlockEnd="400">
-                  <ActivityTab bundleId={bundle.id} />
-                </Box>
+              {isMounted("activity") && (
+                <div style={tabStyle("activity")}>
+                  <Box paddingBlockEnd="400">
+                    <ActivityTab bundleId={bundle.id} />
+                  </Box>
+                </div>
               )}
-              {TABS[tabIndex].id === "advanced" && (
-                <Box paddingBlockEnd="400">
-                  <AdvancedTab
-                    bundleId={bundle.id}
-                    initialSeoTitle={bundle.seoTitle ?? null}
-                    initialSeoDescription={bundle.seoDescription ?? null}
-                    rawConfig={{
-                      config: bundle.config,
-                      displaySettings: bundle.displaySettings ?? {},
-                      scheduleSettings: bundle.scheduleSettings ?? {},
-                      eligibility: bundle.eligibility ?? {},
-                      inventoryRules: bundle.inventoryRules ?? {},
-                    }}
-                    busy={busy}
-                    onSave={(patch) => save(patch as Partial<BundleDetail>)}
-                    onDuplicate={duplicate}
-                    onDelete={deleteBundle}
-                  />
-                </Box>
+              {isMounted("advanced") && (
+                <div style={tabStyle("advanced")}>
+                  <Box paddingBlockEnd="400">
+                    <AdvancedTab
+                      bundleId={bundle.id}
+                      initialSeoTitle={bundle.seoTitle ?? null}
+                      initialSeoDescription={bundle.seoDescription ?? null}
+                      rawConfig={{
+                        config: bundle.config,
+                        displaySettings: bundle.displaySettings ?? {},
+                        scheduleSettings: bundle.scheduleSettings ?? {},
+                        eligibility: bundle.eligibility ?? {},
+                        inventoryRules: bundle.inventoryRules ?? {},
+                      }}
+                      busy={busy}
+                      onSave={(patch) => save(patch as Partial<BundleDetail>)}
+                      onDuplicate={duplicate}
+                      onDelete={deleteBundle}
+                    />
+                  </Box>
+                </div>
               )}
               <div
                 style={{

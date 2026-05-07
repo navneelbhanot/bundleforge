@@ -87,13 +87,15 @@ describe("SupportPage (M-187)", () => {
     expect(email.getAttribute("href")).toMatch(/^mailto:/);
   });
 
-  it("renders the resources card placeholder when no env links are set", async () => {
+  it("hides the Resources card when no env links are set", async () => {
     renderPage();
-    // No env vars in jsdom test → "More resources will appear here…"
+    // Wait for the page to fully render (Talk-to-us card is in the
+    // sidebar so it's a reliable signal).
     await waitFor(() => {
-      expect(
-        screen.getByText(/More resources will appear here/i),
-      ).toBeTruthy();
+      expect(screen.getByText(/Talk to us/i)).toBeTruthy();
     });
+    // No env vars in jsdom → the Resources card never mounts, so
+    // its heading isn't in the document.
+    expect(screen.queryByText(/^Resources$/i)).toBeNull();
   });
 });
