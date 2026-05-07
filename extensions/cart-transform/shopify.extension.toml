@@ -12,5 +12,5 @@ description = "Applies bundle pricing at checkout"
   export = "run"
 
   [extensions.build]
-  command = "echo 'no build step (plain JS)'"
-  path = "src/run.js"
+  command = "sh build.sh"
+  path = "dist/function.wasm"
