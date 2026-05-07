@@ -8,7 +8,7 @@ description = "Fires when a bundle's available quantity falls below the configur
 
   [[settings.fields]]
   type = "single_line_text_field"
-  key = "bundle_id"
+  key = "bundleId"
   name = "Bundle ID"
   description = "Internal BundleForge bundle id (UUID)."
 
@@ -20,7 +20,7 @@ description = "Fires when a bundle's available quantity falls below the configur
 
   [[settings.fields]]
   type = "number_integer"
-  key = "available_quantity"
+  key = "availableQuantity"
   name = "Available quantity"
   description = "Current bundles available, derived from component stock."
 

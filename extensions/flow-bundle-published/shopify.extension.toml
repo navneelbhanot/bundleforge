@@ -8,7 +8,7 @@ description = "Fires when a merchant publishes a bundle"
 
   [[settings.fields]]
   type = "single_line_text_field"
-  key = "bundle_id"
+  key = "bundleId"
   name = "Bundle ID"
   description = "Internal BundleForge bundle id (UUID)."
 
@@ -20,7 +20,7 @@ description = "Fires when a merchant publishes a bundle"
 
   [[settings.fields]]
   type = "single_line_text_field"
-  key = "bundle_type"
+  key = "bundleType"
   name = "Bundle type"
   description = "Engine type — e.g. mix_and_match, fixed, build_a_box."
 

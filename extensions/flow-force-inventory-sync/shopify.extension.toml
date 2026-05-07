@@ -11,7 +11,7 @@ return_type_ref = "FlowActionResult"
 
   [[settings.fields]]
   type = "single_line_text_field"
-  key = "bundle_id"
+  key = "bundleId"
   name = "Bundle ID"
   description = "BundleForge bundle id (UUID) to recompute stock for. Leave blank to sync every bundle in the shop."
   required = false
