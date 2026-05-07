@@ -84,8 +84,13 @@ export async function createSubscription(
   }
 
   const isTest = args.test ?? env.NODE_ENV !== "production";
-  const amount =
+  const amountNumber =
     args.interval === "annual" ? annualUsd(args.plan) : caps.monthlyPriceUsd;
+  // Shopify's MoneyInput.amount is a Decimal scalar — it must be
+  // serialized as a STRING (e.g. "12.00"), not a JSON number.
+  // Sending a number triggers a 400 Bad Request with an empty body
+  // at the GraphQL layer (no userErrors, just a wire-level reject).
+  const amount = amountNumber.toFixed(2);
 
   const variables = {
     name: `BundleForge ${args.plan} (${args.interval})`,
@@ -131,7 +136,7 @@ export async function createSubscription(
       shopId: args.shopId,
       shopifyChargeId: chargeId,
       planName: args.plan,
-      price: amount,
+      price: amountNumber,
       billingInterval: args.interval,
       status: "pending",
       trialDays: caps.trialDays,
@@ -140,7 +145,7 @@ export async function createSubscription(
     update: {
       shopifyChargeId: chargeId,
       planName: args.plan,
-      price: amount,
+      price: amountNumber,
       billingInterval: args.interval,
       status: "pending",
       trialDays: caps.trialDays,

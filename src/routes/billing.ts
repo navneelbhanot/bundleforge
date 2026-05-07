@@ -175,15 +175,39 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
           return;
         }
         const parsed = subscribeSchema.parse(req.body);
-        const result = await create({
-          session,
-          shopId: req.shopId,
-          plan: parsed.plan as PlanName,
-          interval: parsed.interval,
-          returnUrl:
-            parsed.returnUrl ?? `${req.protocol}://${req.get("host")}/`,
-        });
-        res.json(result);
+        try {
+          const result = await create({
+            session,
+            shopId: req.shopId,
+            plan: parsed.plan as PlanName,
+            interval: parsed.interval,
+            returnUrl:
+              parsed.returnUrl ?? `${req.protocol}://${req.get("host")}/`,
+          });
+          res.json(result);
+        } catch (createErr) {
+          // Surface Shopify-side reasons to the merchant instead of
+          // letting them swallow into the generic 500. Anything we
+          // recognise as a billing-config / wire-format problem maps
+          // to 422 with a useful message; everything else still
+          // bubbles to the unhandled-error path.
+          const message =
+            createErr instanceof Error ? createErr.message : String(createErr);
+          if (
+            message.includes("appSubscriptionCreate") ||
+            message.includes("Shopify GraphQL") ||
+            message.includes("Bad Request")
+          ) {
+            res.status(422).json({
+              error: {
+                code: "billing_create_failed",
+                message,
+              },
+            });
+            return;
+          }
+          throw createErr;
+        }
       } catch (err) {
         next(err);
       }

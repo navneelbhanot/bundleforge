@@ -15,6 +15,20 @@ function fakeGraphql(response: unknown): typeof import("../../shopify/graphql").
   return (async () => response) as unknown as typeof import("../../shopify/graphql").shopifyGraphql;
 }
 
+interface CapturedCall {
+  variables: Record<string, unknown>;
+}
+
+function capturingGraphql(
+  response: unknown,
+  captured: CapturedCall,
+): typeof import("../../shopify/graphql").shopifyGraphql {
+  return (async (_session, _query, variables) => {
+    captured.variables = variables ?? {};
+    return response;
+  }) as unknown as typeof import("../../shopify/graphql").shopifyGraphql;
+}
+
 describe("createSubscription", () => {
   it("issues mutation and persists pending subscription with monthly interval", async () => {
     const upsert = vi.fn().mockResolvedValue({});
@@ -42,6 +56,43 @@ describe("createSubscription", () => {
     expect(call.create.billingInterval).toBe("monthly");
     expect(call.create.status).toBe("pending");
     expect(call.create.price).toBe(12); // growth monthly
+  });
+
+  it("serializes price.amount as a string Decimal (Shopify rejects numbers with HTTP 400)", async () => {
+    // Regression: Shopify's MoneyInput.amount is a Decimal scalar
+    // and must be sent as "12.00" / "115.00" / etc. — not 12 / 115.
+    // Sending a JSON number triggers HTTP 400 with an empty body
+    // at Shopify's GraphQL endpoint.
+    const captured: CapturedCall = { variables: {} };
+    await createSubscription({
+      session,
+      shopId: "shop-uuid",
+      plan: "growth",
+      interval: "monthly",
+      returnUrl: "https://app.example.com/billing/return",
+      graphql: capturingGraphql(
+        {
+          appSubscriptionCreate: {
+            appSubscription: { id: "gid://A/1", status: "PENDING" },
+            confirmationUrl: "https://x",
+            userErrors: [],
+          },
+        },
+        captured,
+      ),
+      client: { upsert: vi.fn().mockResolvedValue({}) },
+    });
+    const lineItems = captured.variables.lineItems as Array<{
+      plan: {
+        appRecurringPricingDetails: {
+          price: { amount: unknown; currencyCode: string };
+        };
+      };
+    }>;
+    const price = lineItems[0].plan.appRecurringPricingDetails.price;
+    expect(typeof price.amount).toBe("string");
+    expect(price.amount).toBe("12.00");
+    expect(price.currencyCode).toBe("USD");
   });
 
   it("uses annual price for annual interval", async () => {

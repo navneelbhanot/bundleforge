@@ -144,13 +144,14 @@ export function BillingPanel({ data }: BillingPanelProps = {}): JSX.Element {
       // Shopify's confirmation page is outside the embedded admin —
       // top-level navigation is required (App Bridge will not embed
       // an external charge page in an iframe).
-      window.top
-        ? (window.top.location.href = body.confirmationUrl)
-        : (window.location.href = body.confirmationUrl);
+      if (window.top) {
+        window.top.location.href = body.confirmationUrl;
+      } else {
+        window.location.href = body.confirmationUrl;
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       // Console for power users; banner for everyone else.
-      // eslint-disable-next-line no-console
       console.error("[BillingPanel.subscribe]", e);
       setActionError(msg);
     } finally {
