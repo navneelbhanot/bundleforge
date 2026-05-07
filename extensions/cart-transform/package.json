@@ -9,6 +9,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@shopify/shopify_function": "~1.0.0"
+    "@shopify/shopify_function": "~2.0.0"
   }
 }
