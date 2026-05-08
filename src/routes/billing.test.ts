@@ -213,8 +213,15 @@ describe("POST /billing/subscribe", () => {
     expect(create.mock.calls[0][0].session.isOnline).toBe(false);
   });
 
-  it("returns 401 when no offline session exists for the shop", async () => {
-    const create = vi.fn();
+  it("falls back to the online session when no offline session is persisted (M-212)", async () => {
+    // Pre-M-212 we 401'd. Post-M-212 we use the online session
+    // because Shopify accepts both for billing on embedded apps;
+    // 401-on-missing-offline was a self-inflicted dead-end when
+    // Token Exchange flows mint only online tokens.
+    const create = vi.fn().mockResolvedValue({
+      confirmationUrl: "https://x",
+      chargeId: "gid://A/1",
+    });
     const app = buildApp({
       create,
       loadOfflineSession: (async () => null) as unknown as BillingDeps["loadOfflineSession"],
@@ -222,9 +229,13 @@ describe("POST /billing/subscribe", () => {
     const res = await request(app)
       .post("/billing/subscribe")
       .send({ plan: "growth", interval: "annual" });
-    expect(res.status).toBe(401);
-    expect(res.body.error.code).toBe("no_offline_session");
-    expect(create).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(create).toHaveBeenCalledTimes(1);
+    // The session passed to create was the online session from
+    // res.locals.shopify.session (set up in buildApp).
+    expect(create.mock.calls[0][0].session.shop).toBe(
+      "demo.myshopify.com",
+    );
   });
 
   it("rejects invalid plan", async () => {

@@ -19,6 +19,9 @@ import type { Session } from "@shopify/shopify-api";
 import { z } from "zod";
 
 import { prisma } from "../config/database";
+import { logger } from "../config/logger";
+
+const billingLog = logger.child({ module: "billing-route" });
 import {
   PLAN_CAPS,
   PLAN_FEATURES,
@@ -215,28 +218,27 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
           });
           return;
         }
-        // appSubscriptionCreate is a shop-level mutation — Shopify
-        // expects an OFFLINE access token (the long-lived shop-wide
-        // one persisted at OAuth install). Embedded apps' online
-        // session token is user-scoped and Shopify can reject the
-        // mutation at the gateway with a 400 + empty body. Load the
-        // offline session from the shop record before issuing the
-        // mutation.
+        // M-212: try the offline session first (canonical for
+        // shop-level mutations). If we don't have one persisted
+        // yet (Token Exchange flow only mints online by default),
+        // fall through to the online session — Shopify accepts it
+        // for billing in current API versions for embedded apps.
+        // Log which session type we're sending so we can verify
+        // from Railway logs which path actually worked.
         const offlineSession = await loadOffline(onlineSession.shop);
-        if (!offlineSession) {
-          res.status(401).json({
-            error: {
-              code: "no_offline_session",
-              message:
-                "No offline session for this shop. Reinstall the app to refresh credentials.",
-            },
-          });
-          return;
-        }
+        const sessionToUse = offlineSession ?? onlineSession;
+        billingLog.info(
+          {
+            shop: onlineSession.shop,
+            sessionType: offlineSession ? "offline" : "online",
+            hasAccessToken: Boolean(sessionToUse.accessToken),
+          },
+          "Subscribe: dispatching with session",
+        );
         const parsed = subscribeSchema.parse(req.body);
         try {
           const result = await create({
-            session: offlineSession,
+            session: sessionToUse,
             shopId: req.shopId,
             plan: parsed.plan as PlanName,
             interval: parsed.interval,
