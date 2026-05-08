@@ -39,6 +39,7 @@ import {
   isOverOrderCap,
   type OrderCapStatus,
 } from "../services/billing/orderCap";
+import { shopify } from "../shopify";
 import { loadOfflineSessionFromShop } from "../shopify/sessionFromShop";
 
 /**
@@ -115,7 +116,38 @@ export function installBillingRoutes(deps: BillingDeps = {}): Router {
   const loadOrderCap =
     deps.loadOrderCap ??
     ((shop, now) => isOverOrderCap(prisma, shop, now));
-  const loadOffline = deps.loadOfflineSession ?? loadOfflineSessionFromShop;
+  /**
+   * Default offline-session loader — prefers the SDK's canonical
+   * `PrismaSessionStorage` (the `Session` table the SDK actively
+   * manages on every install/reauth). Falls back to our
+   * `Shop.accessToken`-based loader when the storage doesn't have
+   * an offline session for this shop yet (e.g. shop installed via
+   * an older code path that never wrote to PrismaSessionStorage).
+   *
+   * Why this order: the SDK rewrites session storage on every
+   * OAuth callback, so it's always fresh. `Shop.accessToken` is
+   * updated by our `afterAuth` hook — if that hook ever errors
+   * silently or the rebrand changes the Partner Dashboard app
+   * entry, `Shop.accessToken` can drift to a stale token while
+   * the SDK's session storage stays current. The 400-empty-body
+   * symptom on `appSubscriptionCreate` after the M-210 rebrand
+   * was caused by exactly this drift.
+   */
+  const loadOffline =
+    deps.loadOfflineSession ??
+    (async (shopDomain: string) => {
+      try {
+        const storage = shopify.config.sessionStorage;
+        if (storage) {
+          const sessions = await storage.findSessionsByShop(shopDomain);
+          const offline = sessions.find((s) => s.isOnline === false);
+          if (offline && offline.accessToken) return offline;
+        }
+      } catch {
+        // Storage failure — fall through to legacy loader.
+      }
+      return loadOfflineSessionFromShop(shopDomain);
+    });
 
   router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
