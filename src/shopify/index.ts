@@ -37,7 +37,7 @@ export function buildShopify(opts: BuildShopifyOptions = {}): ShopifyApp {
       // is empty, triggering an infinite reauth loop. shopify.app.toml
       // (already pushed) carries the canonical scope list.
       hostName,
-      apiVersion: ApiVersion.April26,
+      apiVersion: ApiVersion.January26,
       isEmbeddedApp: true,
       logger: {
         level:
