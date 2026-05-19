@@ -28,14 +28,26 @@ export function buildShopify(opts: BuildShopifyOptions = {}): ShopifyApp {
     api: {
       apiKey: env.SHOPIFY_API_KEY,
       apiSecretKey: env.SHOPIFY_API_SECRET,
-      // Scopes intentionally omitted from the API config. shopify-api
-      // v13 stores Sessions without a populated `scope` field (Managed
-      // Installation moves scopes to shopify.app.toml / Partners
-      // dashboard). validateAuthenticatedSession then calls
-      // session.isActive(api.config.scopes) -> isScopeChanged(scopes),
-      // which returns true for every v13-created session whose scope
-      // is empty, triggering an infinite reauth loop. shopify.app.toml
-      // (already pushed) carries the canonical scope list.
+      // Must mirror shopify.app.toml's [access_scopes].scopes. Managed
+      // Installation was supposed to let us omit these and have Shopify
+      // pull them from Partner Dashboard config at OAuth time, but that
+      // path broke around 2026-05-10: OAuth started redirecting with
+      // `scope=` empty in the URL, Shopify granted a zero-scope access
+      // token, and the SDK's webhookSubscriptions reconcile query 403'd
+      // immediately, killing every install. Passing them explicitly
+      // forces the legacy OAuth URL to include the scope list, which
+      // works whether managed install is healthy or not.
+      scopes: [
+        "read_products",
+        "write_products",
+        "read_orders",
+        "write_orders",
+        "read_inventory",
+        "write_inventory",
+        "read_themes",
+        "write_cart_transforms",
+        "read_locations",
+      ],
       hostName,
       apiVersion: ApiVersion.January26,
       isEmbeddedApp: true,
