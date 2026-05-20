@@ -43,12 +43,29 @@ function isOurApi(url: string): boolean {
   }
 }
 
+/**
+ * Wait up to ~5s for App Bridge to attach window.shopify. The CDN
+ * script in index.html loads synchronously but the runtime needs a
+ * tick to populate the global, and any /api/* fetch that beats it
+ * to the punch otherwise goes out unauthenticated and 401s.
+ */
+async function waitForAppBridge(timeoutMs = 5000): Promise<void> {
+  if (typeof window.shopify?.idToken === "function") return;
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (typeof window.shopify?.idToken === "function") return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}
+
 window.fetch = async (
   input: RequestInfo | URL,
   init: RequestInit = {},
 ): Promise<Response> => {
   const url = getUrl(input);
   if (!isOurApi(url)) return originalFetch(input, init);
+
+  await waitForAppBridge();
 
   let token = "";
   try {
