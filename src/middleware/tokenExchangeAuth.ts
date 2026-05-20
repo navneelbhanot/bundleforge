@@ -90,14 +90,25 @@ export function tokenExchangeAuth(
       let session: Session | undefined =
         (await sessionStorage.loadSession(offlineId)) ?? undefined;
 
+      // Force re-exchange when the cached session is a deprecated
+      // permanent offline token (signature: no `expires` field).
+      // Shopify now refuses those on every API call, so reusing one
+      // just guarantees the next 403.
+      const isDeprecatedPermanentToken =
+        session !== undefined && session.expires === undefined;
+
       const needsExchange =
         !session ||
         !session.accessToken ||
+        isDeprecatedPermanentToken ||
         (session.expires !== undefined &&
           session.expires.getTime() - Date.now() < refreshSkewMs);
 
       if (needsExchange) {
-        log.debug({ shop, hadSession: Boolean(session) }, "Exchanging session token for offline access token");
+        log.debug(
+          { shop, hadSession: Boolean(session), isDeprecatedPermanentToken },
+          "Exchanging session token for offline access token",
+        );
         const { session: fresh } = await shopify.api.auth.tokenExchange({
           shop,
           sessionToken,
@@ -107,13 +118,20 @@ export function tokenExchangeAuth(
             >[0]["requestedTokenType"],
         });
         await sessionStorage.storeSession(fresh);
-        // Best-effort: upsert the Shop row so requireShopSession can find it.
-        try {
-          await persistShop(fresh);
-        } catch (err) {
-          log.warn({ shop, err }, "persistShop failed after token exchange");
-        }
         session = fresh;
+      }
+
+      // Always upsert the Shop row when we have a valid session.
+      // Idempotent — costs one DB roundtrip per request but ensures
+      // requireShopSession can always find the merchant downstream,
+      // even when Session storage is hot but Shop got deleted
+      // (e.g. app/uninstalled webhook fired between requests).
+      if (session?.shop && session.accessToken) {
+        try {
+          await persistShop(session);
+        } catch (err) {
+          log.warn({ shop, err }, "persistShop failed");
+        }
       }
 
       res.locals.shopify = {
