@@ -55,6 +55,7 @@ import { prisma } from "../config/database";
 import { redis } from "../config/redis";
 import { errorHandler, requestId } from "../middleware/errorHandler";
 import { recoverableAuth } from "../middleware/recoverableAuth";
+import { tokenExchangeAuth } from "../middleware/tokenExchangeAuth";
 import { rateLimiter, ipRateLimiter } from "../middleware/rateLimiter";
 import { requireShopSession } from "../middleware/shopSession";
 import { shopify } from "../shopify";
@@ -226,15 +227,17 @@ export function createApp(): Express {
   // Per-shop rate limit (M-008 will tighten + tie to shop session).
   app.use("/api", rateLimiter);
 
-  // App Bridge token verification (M-021) + shop session loader (M-019).
-  // Both run before any /api/v1 route. The SDK populates
-  // res.locals.shopify.session; requireShopSession reads it and attaches
-  // req.shopId/req.shopDomain for the route handlers.
-  app.use("/api/v1", shopify.validateAuthenticatedSession());
-  // M-208: catch HttpResponseError 401/403 from the SDK auth
-  // middleware and signal App Bridge to re-authorize, instead of
-  // returning a generic 500 that leaves the embedded admin in a
-  // dead state until someone manually clears the session table.
+  // M-214: token-exchange auth. Replaces the SDK's
+  // validateAuthenticatedSession() because the legacy authorization-code
+  // OAuth path now mints offline tokens Shopify rejects on every call
+  // ("Deprecated offline token use detected" Partner Dashboard banner).
+  // tokenExchangeAuth pulls the App Bridge session-token JWT off the
+  // request, swaps it for a fresh expiring offline token via
+  // shopify.api.auth.tokenExchange, persists it, and attaches
+  // res.locals.shopify.session for requireShopSession to read.
+  app.use("/api/v1", tokenExchangeAuth());
+  // recoverableAuth still mounted as an error-middleware safety net for
+  // edge HttpResponseError 401/403 from downstream Shopify calls.
   app.use("/api/v1", recoverableAuth);
   app.use("/api/v1", requireShopSession());
 
